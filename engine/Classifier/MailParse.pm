@@ -27,10 +27,19 @@ package Classifier::MailParse;
 use strict;
 use locale;
 
+use threads;
+use Thread::Semaphore;
+
 use MIME::Base64;
 use MIME::QuotedPrint;
 
 use HTML::Tagset;
+
+# This semaphore is used be parse_line_with_kakasi to prevent
+# multiple access to the Kakasi library since it is not thread
+# safe.
+
+my $kakasi_semaphore = new Thread::Semaphore;
 
 # Korean characters definition
 
@@ -2488,10 +2497,29 @@ sub parse_line_with_kakasi
     # Split Japanese line into words using Kakasi Wakachigaki
     # mode(-w is passed to Kakasi as argument). Both input and ouput
     # encoding are EUC-JP.
+    #
+    # Since Text::Kakasi is not thread-safe, we use it under the
+    # control of a semaphore to avoid a crash if we are running on
+    # Windows in a forked process.  
+    #
+    # Note that this requires us to detect a sub-process by looking at
+    # the value of $$.  In ActivePerl a negative PID is in a
+    # sub-process If this were to change then this code would not
+    # work.
+
+    my $need_semaphore = ( ( $^O eq 'MSWin32' ) && ( $$ < 0 ) );
+
+    if ( $need_semaphore ) {
+        $kakasi_semaphore->down;
+    }
 
     Text::Kakasi::getopt_argv("kakasi", "-w -ieuc -oeuc");
     $line = Text::Kakasi::do_kakasi($line);
     Text::Kakasi::close_kanwadict();
+
+    if ( $need_semaphore ) {
+        $kakasi_semaphore->up;
+    }
 
     return $line;
 }
