@@ -433,15 +433,15 @@ sub child__
             my $count = $1;
             my $class;
 
-            # The 1 here indicates that we need the path to the history file
+            # With a path
 
             my $file = $self->{classifier__}->history_filename($download_count, $count, undef, 1);
 
-            my $short_file = $file;
-            $file =~ /^.*\/([^\/]*)$/;
-            $short_file = $1;
+            # without a path
 
-            $self->log_( "Class file $file shortens to $short_file" );
+            my $short_file = $self->{classifier__}->history_filename($download_count, $count, undef, 0);
+
+            #$self->log_( "Class file $file shortens to $short_file" );
 
             if (defined($downloaded{$count}) && open( RETRFILE, "<$file" ) ) {
 
@@ -461,31 +461,24 @@ sub child__
 
                 my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class($short_file);
 
-                if ($bucket ne 'unknown class') {
+                if ( $bucket ne 'unknown class' ) {
 
                     # echo file, inserting known classification, without saving
 
-                    $self->log_( "known class, printing");
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, $bucket );
 
-                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, $bucket );
-
-                    $self->log_( "done printing" );
                 } else {
-
-                    $self->log_( "unknown class, classifying");
 
                     # If the class wasn't saved properly, classify from disk normally
 
-                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, '' );
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, '' );
 
                     print $pipe "CLASS:$class$eol";
                     flush $pipe;
                     $self->yield_( $ppipe, $pid );
-                    $self->log_( "done printing and classifying" );
                 }
 
                 close RETRFILE;
-                $self->log_( "message complete" );
             } else {
 
                 # Retrieve file directly from the server
@@ -509,7 +502,6 @@ sub child__
                     # Note locally that file has been retrieved
 
                     $downloaded{$count} = 1;
-                    $self->log_( "message retrieve complete" );
                 }
             }
 
@@ -539,6 +531,7 @@ sub child__
             $self->tee_(  $client, "-ERR unknown command or bad syntax$eol" );
             next;
         }
+
     }
 
     if ( defined( $mail ) ) {
