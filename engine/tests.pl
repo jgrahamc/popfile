@@ -104,7 +104,7 @@ sub test_assert_equal
                 $result = ( $test eq $expected );
         }
 
-        test_report( $result, "expecting $expected and got $test", $file, $line, $context );
+        test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ sub test_assert_regexp
     my ( $file, $line, $test, $expected, $context ) = @_;
     my $result = ( $test =~ /$expected/ );
 
-    test_report( $result, "expecting to match $expected and got $test", $file, $line, $context );
+    test_report( $result, "expecting to match [$expected] and got [$test]", $file, $line, $context );
 }
 
 # MAIN
