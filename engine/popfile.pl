@@ -18,7 +18,7 @@ use Classifier::Bayes;
 # This version number
 my $major_version = 0;
 my $minor_version = 17;
-my $build_version = 1;
+my $build_version = 2;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
