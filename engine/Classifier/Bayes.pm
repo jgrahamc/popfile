@@ -205,6 +205,7 @@ sub load_word_matrix
         $bucket =~ /([A-Za-z0-9-_]+)$/;
         $bucket =  $1;
         my $color = <COLOR>;
+        $color =~ s/[\r\n]//g;
         close COLOR;
 
         if ( $color eq '' ) 
