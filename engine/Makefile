@@ -115,7 +115,7 @@ manual: manual/*.gif manual/en/*.html languages/*.msg
 skins: skins_css skins_gif skins_thtml
 skins_css: skins/*/*.css
 	$(BUILD_ZIP)
-skins_gif: skins/*/*.gif  skins/*/*.gif
+skins_gif: skins/*/*.gif  skins/*/*.gif skins/*/*.png
 	$(BUILD_ZIP)
 skins_thtml: skins/*/*.thtml
 	$(BUILD_ZIP)
