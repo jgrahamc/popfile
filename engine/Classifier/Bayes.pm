@@ -1723,7 +1723,7 @@ sub echo_to_dot_
 {
     my ( $self, $mail, $client, $file, $before ) = @_;
 
-    my $isopen = (open FILE, "$file" if ( defined( $file ) ));
+    my $isopen = open FILE, "$file" if ( defined( $file ) );
 
     while ( <$mail> ) {
 
