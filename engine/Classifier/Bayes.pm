@@ -293,9 +293,10 @@ sub close_database__
     my ( $self ) = @_;
 
     for my $bucket (keys %{$self->{matrix__}})  {
+        undef $self->{db__}{$bucket};
+        delete $self->{db__}{$bucket};
         untie %{$self->{matrix__}{$bucket}};
         delete $self->{matrix__}{$bucket};
-        delete $self->{db__}{$bucket};
     }
 }
 
@@ -632,7 +633,7 @@ sub load_bucket_
 
 	    print "\nUpgrading bucket $bucket...";
             flush STDOUT;
-            my $wc = 1;
+            my $wc = 0;
 
             my $first = <WORDS>;
             if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
@@ -1446,7 +1447,7 @@ sub get_bucket_word_list
 {
     my ( $self, $bucket, $prefix ) = @_;
 
-    return grep {/^$prefix/} keys %{$self->{matrix__}{$bucket}};
+    return grep {/^$prefix/} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1463,7 +1464,7 @@ sub get_bucket_word_prefixes
     my ( $self, $bucket ) = @_;
 
     my $prev = '';
-    return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} keys %{$self->{matrix__}{$bucket}};
+    return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1882,6 +1883,7 @@ sub clear_bucket
 
     my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
 
+    undef $self->{db__}{$bucket};
     untie %{$self->{matrix__}{$bucket}};
     unlink( "$bucket_directory/table.db" );
 
