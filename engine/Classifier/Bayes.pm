@@ -916,7 +916,7 @@ sub upgrade_bucket__
 
     $self->create_bucket( $session, $bucket );
 
-    $self->set_bucket_parameter( $session, $bucket, 'subject',    1 );
+    $self->set_bucket_parameter( $session, $bucket, 'subject',    0 );
     $self->set_bucket_parameter( $session, $bucket, 'count',      0 );
     $self->set_bucket_parameter( $session, $bucket, 'quarantine', 0 );
 
