@@ -111,7 +111,7 @@ foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
              print HTML " ";
              $length -= 1;
         }
-        print HTML "$line </font>";
+        print HTML "<a style=\"color:$color\" name=\"$line\" href=\"#$line\">$line</a> </font>";
         print HTML "<span style=\"background: $block\">&nbsp;</span><font color=$color>$_</font>";
     }
 
