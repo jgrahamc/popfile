@@ -141,11 +141,14 @@ sub http_ok
 
     # Check to see if we've checked for updates today.  If we have not then insert a reference to an image
     # that is generated through a CGI on UseTheSource.
-    if ( $today ne $configuration{last_update_check} )
+    if ( $configuration{update_check} )
     {
-        calculate_today();
-        $update_check = "<a href=http://sourceforge.net/project/showfiles.php?group_id=63137><img border=0 src=http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=$major_version&mi=$minor_version&bu=$build_version></a>";
-        $configuration{last_update_check} = $today;
+        if ( $today ne $configuration{last_update_check} )
+        {
+            calculate_today();
+            $update_check = "<a href=http://sourceforge.net/project/showfiles.php?group_id=63137><img border=0 src=http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=$major_version&mi=$minor_version&bu=$build_version></a>";
+            $configuration{last_update_check} = $today;
+        }
     }
     
     $text = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$configuration{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?session=$session_key&setfilter=Filter&filter=>History</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$session_key>Buckets</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$session_key>Magnets</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$session_key>Configuration</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$session_key>Security</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$session_key>Advanced</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $major_version.$minor_version.$build_version - <a href=http://popfile.sourceforge.net/manual/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
@@ -443,6 +446,11 @@ sub security_page
         $configuration{localui} = $form{localui} - 1;
     }
 
+    if ( defined($form{update_check}) )
+    {
+        $configuration{update_check} = $form{update_check} - 1;
+    }
+
     $body .= "<p><h2>Stealth Mode/Server Operation</h2><p><b>Accept POP3 connections from remote machines:</b><br>";
     if ( $configuration{localpop} == 1 )
     {
@@ -462,6 +470,16 @@ sub security_page
     {
         $body .= "<b>Yes</b> <a href=/security?localui=2&session=$session_key><font color=blue>[Change to No (Stealth Mode)]</font></a> ";
     } 
+    $body .= "<p><hr><h2>Automatic Update Checking</h2><p><b>Check daily for updates to POPFile:</b><br>";
+    if ( $configuration{update_check} == 1 )
+    {
+        $body .= "<b>Yes</b> <a href=/security?update_check=1&session=$session_key><font color=blue>[Change to No]</font></a> ";
+    } 
+    else
+    {
+        $body .= "<b>No</b> <a href=/security?update_check=2&session=$session_key><font color=blue>[Change to Yes]</font></a> ";
+    } 
+    
     $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/security><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply><input type=hidden name=session value=$session_key></form>";    
     $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( defined($form{server}) );
     $body .= "<p><form action=/security><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
@@ -2947,6 +2965,7 @@ $configuration{ui_port}      = 8080;
 $configuration{subject}      = 1;
 $configuration{xtc}          = 1;
 $configuration{xpl}          = 1;
+$configuration{update_check} = 1;
 $configuration{server}       = '';
 $configuration{sport}        = 110;
 $configuration{page_size}    = 20;
