@@ -2363,7 +2363,7 @@ $configuration{localpop}  = 1;
 $configuration{localui}   = 1;
 $configuration{mcount}    = 0;
 $configuration{ecount}    = 0;
-$configuration{reinforce} = 0;
+$configuration{reinforce} = 1;
 
 # Calculate a session key
 $session_key = '';
