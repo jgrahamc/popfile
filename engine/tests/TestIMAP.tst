@@ -46,7 +46,7 @@ test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 mkdir 'messages';
 
-# This test will fork itself. The child will do nothing but run
+# This test will fork itself. The child will run
 # the test server, the parent will run the tests.
 
 my $pid = fork();
@@ -105,13 +105,18 @@ else {
     $h->initialize();
 
     $b->module_config_( 'html', 'language', 'English' );
+    $b->module_config_( 'html', 'port', '8080' );
+    
     $b->{parser__}->mangle( $w );
     $b->initialize();
 
     test_assert( $b->start() );
     test_assert( $h->start() );
 
-    $l->config_( 'level', 2 );
+    my $session = $b->get_session_key( 'admin', '' );
+
+    #$l->config_( 'level', 2 );
+    $l->service();
 
     # Configure the IMAP module so it will
     # talk to the server.
@@ -136,6 +141,7 @@ else {
     $im->folder_for_bucket__( 'spam', 'spam' );
     $im->folder_for_bucket__( 'personal', 'personal' );
     $im->folder_for_bucket__( 'other', 'other' );
+    $im->folder_for_bucket__( 'unclassified', 'unclassified' );
 
     test_assert( $im->start() );
 
@@ -156,16 +162,66 @@ else {
 
     $im->disconnect_folders__();
 
+    # Let the INBOX have one new message, make sure it is classified correctly
+    # and moved to the according folder.
+    
+    $im->config_( 'login', 'new_INBOX_003' );
+    $im->{last_update__} = 0;
+    $im->service();
+    $mq->service();
+    $h->service();
+    
+    # The message must have ended up as spam and must have been
+    # moved to the spam folder
+    
+    test_assert( -e 'imap.spool/spam/1' );
+    
+    # This is a good opportunity to test reclassify-on-move:
+    # we move the message from the spam folder to the
+    # personal folder. The IMAP module should see this and
+    # reclassify the message to that bucket. We test whether 
+    # history returns the changed classification and if
+    # bayes comes up with the same classification
+    
+    # move to folder presonal
+    copy 'imap.spool/spam/1', 'imap.spool/personal/1';
+    unlink 'imap.spool/spam/1';
+    
+    # let the IMAP module have a look
+    $im->{last_update__} = 0;
+    $im->service();
+    $mq->service();
+    $h->service();
+    
+    # check classification stored in history
+    test_assert_equal( ($h->get_slot_fields( 1 ))[8], 'personal' );
+    
+    # check that a fresh classification confirms the reclassification
+    test_assert_equal( $b->classify( $session, 'TestMailParse003.msg' ), 'personal' );
+    
+    $im->disconnect_folders__();
+    
+    # test magnet match
+    
+    
+    # Make the server drop the connection and make sure we don't crash
+    
+    $im->config_( 'login', 'dropConnection3' );
+    $im->service();
 
     # close the server process by logging in as user "shutdown"
     $im->config_( 'login', 'shutdown' );
     $im->{last_update__} = 0;
     $im->service();
 
+    foreach ( $b->get_buckets( $session ) ) { print "$_\n"; }
+
     $mq->stop();
     $h->stop();
     $im->stop();
     $b->stop();
+    
+    rmtree( 'imap.spool' );
 }
 
 1;

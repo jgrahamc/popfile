@@ -759,7 +759,7 @@ sub reclassify_message
     };
 
     foreach ( @lines ) {
-        print TMP "$_\n";
+        print TMP $_;
     }
     close TMP;
 
