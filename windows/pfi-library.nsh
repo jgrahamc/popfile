@@ -682,7 +682,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: CheckIfLocked
     #
@@ -796,7 +796,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: FindLockedPFE
     #
