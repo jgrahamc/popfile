@@ -704,9 +704,9 @@ sub configuration_page
     $self->config_( 'xtc', $self->{form__}{xtc}-1 )     if ( ( defined($self->{form__}{xtc}) ) && ( ( $self->{form__}{xtc} >= 1 ) && ( $self->{form__}{xtc} <= 2 ) ) );
     $self->config_( 'xpl', $self->{form__}{xpl}-1 )     if ( ( defined($self->{form__}{xpl}) ) && ( ( $self->{form__}{xpl} >= 1 ) && ( $self->{form__}{xpl} <= 2 ) ) );
 
-    if ( defined($self->{form__}{language__}) ) {
-        if ( $self->config_( 'language' ) ne $self->{form__}{language__} ) {
-            $self->config_( 'language', $self->{form__}{language__} );
+    if ( defined($self->{form__}{language}) ) {
+        if ( $self->config_( 'language' ) ne $self->{form__}{language} ) {
+            $self->config_( 'language', $self->{form__}{language} );
             load_language( $self,  $self->config_( 'language' ) );
         }
     }
@@ -2145,7 +2145,7 @@ sub load_history_cache__
     # through them looking for existing entries in the history which must be marked
     # for non-culling and new entries that need to be added to the end
 
-    my @history_files = sort compare_mf glob $self->global_config_( 'msgdir' ) . "popfile*=*.msg";
+    my @history_files = sort compare_mf glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
 
     foreach my $i ( 0 .. $#history_files ) {
 
@@ -3362,7 +3362,7 @@ sub remove_mail_files
     $self->calculate_today();
 
     if ( $self->{today} > $yesterday ) {
-        my @mail_files = glob $self->global_config_( 'msgdir' ) . "popfile*=*.msg";
+        my @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
 
         foreach my $mail_file (@mail_files) {
             my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
@@ -3374,7 +3374,7 @@ sub remove_mail_files
 
          # Clean up old style msg/cls files
 
-        @mail_files = glob $self->global_config_( 'msgdir' ) . "popfile*_*.???";
+        @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*_*.???" );
 
         foreach my $mail_file (@mail_files) {
             unlink($mail_file);

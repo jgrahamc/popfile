@@ -93,7 +93,7 @@ sub remove_debug_files
     calculate_today__( $self );
 
     if ( $self->{today__} > $yesterday ) {
-        my @debug_files = glob $self->config_( 'logdir' ) . 'popfile*.log';
+        my @debug_files = glob( $self->config_( 'logdir' ) . 'popfile*.log' );
 
         foreach my $debug_file (@debug_files) {
             # Extract the epoch information from the popfile log file name
