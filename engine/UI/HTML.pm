@@ -1609,7 +1609,8 @@ sub magnet_page
                 my @buckets = $self->{classifier__}->get_buckets();
                 foreach my $mbucket (@buckets) {
                     my $selected = ( $bucket eq $mbucket )?"selected":"";
-                    $body .= "<option value=\"$mbucket\" $selected>$mbucket</option>\n";
+                    my $bcolor   = $self->{classifier__}->get_bucket_color( $mbucket );
+                    $body .= "<option value=\"$mbucket\" $selected style=\"color: $bcolor\">$mbucket</option>\n";
                 }
                 $body .= "</select></td>\n";
 
@@ -1670,7 +1671,8 @@ sub magnet_page
 
     my @buckets = $self->{classifier__}->get_buckets();
     foreach my $bucket (@buckets) {
-        $body .= "<option value=\"$bucket\">$bucket</option>\n";
+        my $bcolor = $self->{classifier__}->get_bucket_color( $bucket );
+        $body .= "<option value=\"$bucket\" style=\"color: $bcolor\">$bucket</option>\n";
     }
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"create\" value=\"$self->{language__}{Create}\" />\n";
     $body .= "<input type=\"hidden\" name=\"start_magnet\" value=\"$start_magnet\" />\n";
@@ -2156,7 +2158,8 @@ sub corpus_page
     $body .= "<select name=\"name\" id=\"bucketsDeleteBucket\">\n<option value=\"\"></option>\n";
 
     foreach my $bucket (@buckets) {
-        $body .= "<option value=\"$bucket\">$bucket</option>\n";
+        my $bcolor = $self->{classifier__}->get_bucket_color( $bucket );
+        $body .= "<option value=\"$bucket\" style=\"color: $bcolor\">$bucket</option>\n";
     }
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"delete\" value=\"$self->{language__}{Delete}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$deletemessage\n";
@@ -2166,7 +2169,8 @@ sub corpus_page
     $body .= "<select name=\"oname\" id=\"bucketsRenameBucketFrom\">\n<option value=\"\"></option>\n";
 
     foreach my $bucket (@buckets) {
-        $body .= "<option value=\"$bucket\">$bucket</option>\n";
+        my $bcolor = $self->{classifier__}->get_bucket_color( $bucket );
+        $body .= "<option value=\"$bucket\" style=\"color: $bcolor\">$bucket</option>\n";
     }
     $body .= "</select>\n<label class=\"bucketsLabel\" for=\"bucketsRenameBucketTo\">$self->{language__}{Bucket_To}</label>\n";
     $body .= "<input type=\"text\" id=\"bucketsRenameBucketTo\" name=\"newname\" /> \n";
@@ -3002,9 +3006,10 @@ sub get_search_filter_widget
     $body .= "<select name=\"filter\" id=\"historyFilter\">\n<option value=\"\"></option>";
     my @buckets = $self->{classifier__}->get_buckets();
     foreach my $abucket (@buckets) {
+        my $bcolor = $self->{classifier__}->get_bucket_color( $abucket );
         $body .= "<option value=\"$abucket\"";
         $body .= " selected" if ( ( defined($self->{form_}{filter}) ) && ( $self->{form_}{filter} eq $abucket ) );
-        $body .= ">$abucket</option>\n";
+        $body .= " style=\"color: $bcolor\">$abucket</option>\n";
     }
     $body .= "<option value=\"__filter__magnet\"" . ($self->{form_}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language__}{History_ShowMagnet}&gt;</option>\n";
     $body .= "<option value=\"__filter__no__magnet\"" . ($self->{form_}{filter} eq '__filter__no__magnet'?' selected':'') . ">&lt;$self->{language__}{History_ShowNoMagnet}&gt;</option>\n";
@@ -3278,7 +3283,8 @@ sub history_page
                     $body .= "<option selected=\"selected\"></option>\n";
 
                     foreach my $abucket (@buckets) {
-                        $body .= "<option value=\"$abucket\">$abucket</option>\n";
+                        my $bcolor = $self->{classifier__}->get_bucket_color( $abucket );
+                        $body .= "<option value=\"$abucket\" style=\"color: $bcolor\">$abucket</option>\n";
                     }
                     $body .= "</select>\n";
                 } else {
@@ -3451,7 +3457,8 @@ sub view_page
                 $body .= "<option selected=\"selected\"></option>\n";
 
                 foreach my $abucket ($self->{classifier__}->get_buckets()) {
-                    $body .= "<option value=\"$abucket\">$abucket</option>\n";
+                    my $bcolor = $self->{classifier__}->get_bucket_color( $abucket );
+                    $body .= "<option value=\"$abucket\" style=\"color: $bcolor\">$abucket</option>\n";
                 }
                 $body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
         } else {
