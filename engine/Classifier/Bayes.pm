@@ -37,7 +37,6 @@ use locale;
 use Classifier::MailParse;
 use IO::Handle;
 use DBI;
-use String::Interpolate qw(interpolate);
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -2399,7 +2398,8 @@ sub db_connect__
     # Now perform the connect, note that this is database independent at this point, the
     # actual database that we connect to is defined by the dbconnect parameter.
 
-    my $dbconnect = interpolate( $self->config_( 'dbconnect' ) );
+    my $dbconnect = $self->config_( 'dbconnect' );
+    $dbconnect =~ s/\$dbname/$dbname/g;
 
     $self->log_( "Attempting to connect to $dbconnect ($dbpresent)" );
 
@@ -2535,8 +2535,10 @@ sub db_disconnect__
     $self->{db_get_bucket_parameter_default__}->finish;
     $self->{db_get_buckets_with_magnets__}->finish;
 
-    $self->{db__}->disconnect;
-    undef $self->{db__};
+    if ( defined( $self->{db__} ) ) {
+        $self->{db__}->disconnect;
+        undef $self->{db__};
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
