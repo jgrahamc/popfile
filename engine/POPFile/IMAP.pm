@@ -726,24 +726,12 @@ sub reclassify_message
     }
     close TMP;
 
-    # This is copied from html.pm
-    # It (hopefully) keeps our statistics up to date.
-    my $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $new_bucket, 'count' );
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $new_bucket, 'count', $count+1 );
-
-    $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_bucket, 'count' );
-    $count -= 1;
-    $count = 0 if ( $count < 0 ) ;
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_bucket, 'count', $count );
-
-    my $fncount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $new_bucket, 'fncount' );
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $new_bucket, 'fncount', $fncount+1 );
-
-    my $fpcount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_bucket, 'fpcount' );
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_bucket, 'fpcount', $fpcount+1 );
+    my $slot = $self->{history__}->get_slot_from_hash( $hash );
 
     $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $new_bucket, "imap.tmp" );
-    $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $old_bucket, "imap.tmp" );
+
+    $self->{classifier__}->reclassified( $self->{api_session__}, $old_bucket, $new_bucket, 0 );
+    $self->{history__}->change_slot_classification( $slot, $new_bucket, $self->{api_session__}, 0);
 
     $self->log_( 0, "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." );
 
