@@ -1556,7 +1556,7 @@ sub history_page
     my $search_message = "<blockquote><font color=red>Search term not found in History</font></blockquote>";
     my $highlight_message = '';
 
-    if ( $form{search} ne '' ) 
+    if ( ( defined($form{search}) ) && ( $form{search} ne '' ) )
     {
         for my $i ( 0..$#mail_files )
         {
@@ -2229,7 +2229,7 @@ sub run_popfile
                 {
                     if ( echo_response( $mail, $client, $command ) )
                     {
-                        echo_to_dot();
+                        echo_to_dot( $mail, $client );
                     }
 
                     flush_extra( $mail, $client );
