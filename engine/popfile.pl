@@ -1256,7 +1256,7 @@ sub corpus_page
     
     if ( ( defined($form{color}) ) && ( defined($form{bucket}) ) )
     {
-        open COLOR, ">corpus/$form{bucket}/color";
+        open COLOR, ">$configuration{corpus}/$form{bucket}/color";
         print COLOR "$form{color}\n";
         close COLOR;
         $classifier->{colors}{$form{bucket}} = $form{color};
@@ -1282,9 +1282,9 @@ sub corpus_page
             } 
             else 
             {
-                mkdir( 'corpus' );
-                mkdir( "corpus/$form{cname}" );
-                open NEW, ">corpus/$form{cname}/table";
+                mkdir( $configuration{corpus} );
+                mkdir( "$configuration{corpus}/$form{cname}" );
+                open NEW, ">$configuration{corpus}/$form{cname}/table";
                 print NEW "\n";
                 close NEW;
                 $classifier->load_word_matrix();
@@ -1297,8 +1297,8 @@ sub corpus_page
     if ( ( defined($form{delete}) ) && ( $form{name} ne '' ) )
     {
         $form{name} = lc($form{name});
-        unlink( "corpus/$form{name}/table" );
-        rmdir( "corpus/$form{name}" );
+        unlink( "$configuration{corpus}/$form{name}/table" );
+        rmdir( "$configuration{corpus}/$form{name}" );
 
         $delete_message = "<blockquote><b>Deleted bucket $form{name}</b></blockquote>";
         $classifier->load_word_matrix();
@@ -1314,7 +1314,7 @@ sub corpus_page
         {
             $form{oname} = lc($form{oname});
             $form{newname} = lc($form{newname});
-            rename("corpus/$form{oname}" , "corpus/$form{newname}");
+            rename("$configuration{corpus}/$form{oname}" , "$configuration{corpus}/$form{newname}");
             $rename_message = "<blockquote><b>Rename bucket $form{oname} to $form{newname}</b></blockquote>";
             $classifier->load_word_matrix();
         }
@@ -1543,7 +1543,7 @@ sub history_page
     {
         my %temp_words;
         
-        open WORDS, "<corpus/$form{badbucket}/table";
+        open WORDS, "<$configuration{corpus}/$form{badbucket}/table";
         while (<WORDS>)
         {
             if ( /__CORPUS__ __VERSION__ (\d+)/ )
@@ -1577,7 +1577,7 @@ sub history_page
             }
         }
         
-        open WORDS, ">corpus/$form{badbucket}/table";
+        open WORDS, ">$configuration{corpus}/$form{badbucket}/table";
         print WORDS "__CORPUS__ __VERSION__ 1\n";
         foreach my $word (keys %temp_words)
         {
@@ -1587,7 +1587,7 @@ sub history_page
             }
         }
         close WORDS;
-        $classifier->load_bucket("corpus/$form{badbucket}");
+        $classifier->load_bucket("$configuration{corpus}/$form{badbucket}");
         $classifier->update_constants();        
         my $classification = $classifier->classify_file("messages/$form{undo}");
         my $class_file = "messages/$form{undo}";
@@ -1652,7 +1652,7 @@ sub history_page
     {
         my %temp_words;
         
-        open WORDS, "<corpus/$form{shouldbe}/table";
+        open WORDS, "<$configuration{corpus}/$form{shouldbe}/table";
         while (<WORDS>)
         {
             if ( /__CORPUS__ __VERSION__ (\d+)/ )
@@ -1681,7 +1681,7 @@ sub history_page
             $temp_words{$word}        += $classifier->{parser}->{words}{$word};
         }
         
-        open WORDS, ">corpus/$form{shouldbe}/table";
+        open WORDS, ">$configuration{corpus}/$form{shouldbe}/table";
         print WORDS "__CORPUS__ __VERSION__ 1\n";
         foreach my $word (keys %temp_words)
         {
@@ -1703,7 +1703,7 @@ sub history_page
             $configuration{ecount} += 1;
         }
 
-        $classifier->load_bucket("corpus/$form{shouldbe}");
+        $classifier->load_bucket("$configuration{corpus}/$form{shouldbe}");
         $classifier->update_constants();        
     }
 
@@ -2750,6 +2750,7 @@ $configuration{ecount}       = 0;
 $configuration{separator}    = ':';
 $configuration{skin}         = 'default';
 $configuration{history_days} = 2;
+$configuration{corpus}       = 'corpus';
 
 # Load skins
 load_skins();

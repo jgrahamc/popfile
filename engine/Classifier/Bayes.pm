@@ -69,6 +69,9 @@ sub new
     # The magnets that cause attraction to certain buckets
     $self->{magnets}           = {};
     
+    # Where the corpus is stored
+    $self->{corpus}            = 'corpus';
+    
     return bless $self, $type;
 }
 
@@ -86,7 +89,7 @@ sub write_parameters
     
     for my $bucket (keys %{$self->{total}}) 
     {
-        open PARAMS, ">corpus/$bucket/params";
+        open PARAMS, ">$self->{corpus}/$bucket/params";
         for my $param (keys %{$self->{parameters}{$bucket}})
         {
             print PARAMS "$param $self->{parameters}{$bucket}{$param}\n";
@@ -229,7 +232,7 @@ sub load_word_matrix
     
     print "Loading the corpus...\n" if $self->{debug};
     
-    my @buckets = glob "corpus/*";
+    my @buckets = glob "$self->{corpus}/*";
     
     foreach my $bucket (@buckets)
     {
@@ -295,7 +298,7 @@ sub load_bucket
     $self->{magnets}{$bucket} = {};
 
     # See if there's a color file specified
-    if ( open PARAMS, "<corpus/$bucket/params" )
+    if ( open PARAMS, "<$self->{corpus}/$bucket/params" )
     {
         while ( <PARAMS> ) 
         {
@@ -309,7 +312,7 @@ sub load_bucket
     }
 
     # See if there are magnets defined
-    if ( open MAGNETS, "<corpus/$bucket/magnets" )
+    if ( open MAGNETS, "<$self->{corpus}/$bucket/magnets" )
     {
         while ( <MAGNETS> ) 
         {
@@ -332,7 +335,7 @@ sub load_bucket
     # Each line in the word table is a word and a count
     $self->{total}{$bucket} = 0;
 
-    if ( open WORDS, "<corpus/$bucket/table" ) 
+    if ( open WORDS, "<$self->{corpus}/$bucket/table" ) 
     {
         while (<WORDS>)
         {
@@ -381,7 +384,7 @@ sub save_magnets
     
     for my $bucket (keys %{$self->{total}})
     {
-        open MAGNET, ">corpus/$bucket/magnets";
+        open MAGNET, ">$self->{corpus}/$bucket/magnets";
         
         for my $from (keys %{$self->{magnets}{$bucket}{from}}) 
         {
