@@ -50,6 +50,9 @@ my $cr = "\015";
 my $lf = "\012";
 my $eol = "$cr$lf";
 my $debug = 0;
+if ( $ARGV[0] && $ARGV[0] eq 'debug' ) {
+    $debug = 1;
+}
 my $spool = "imap.spool";
 
 my @mailboxes = qw/INBOX spam personal other unclassified/;
