@@ -36,18 +36,25 @@ my $test_count    = 0;
 my $test_failures = 0;
 my $fail_messages = '';
 my $last_spin     = '';
+my $last_symbol   = 0;
 
 sub spin
 {
     my ( $msg ) = @_;
 
+    $msg = '' unless ( defined($msg) );
+
+    my @symbols = ('-','/','|','\\');
+
     for my $i (1..length($last_spin)) {
         print "\b";
     }
 
-    print $msg;
+    print $symbols[$last_symbol % 4] . " " . $msg;
 
-    $last_spin = $msg;
+    $last_symbol++;
+
+    $last_spin = "  " . $msg;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -118,7 +125,7 @@ sub test_assert
 # Example: test_assert_equal( function(parameter), 'result' )
 # Example: test_assert_equal( function(parameter), 3, 'Banana wumpus subsystem' )
 #
-# YOU DO NOT NEED TO GIVE THE $file and $line parameters as this script supplies them 
+# YOU DO NOT NEED TO GIVE THE $file and $line parameters as this script supplies them
 # automatically
 # ---------------------------------------------------------------------------------------------
 
@@ -127,7 +134,10 @@ sub test_assert_equal
     my ( $file, $line, $test, $expected, $context ) = @_;
     my $result;
 
-    if ( !( $expected =~ /[^0-9]/ ) ) {
+    $test = '' unless (defined($test));
+    $expected = '' unless (defined($expected));
+
+    if ( !( $expected =~ /[^0-9]/ ) && !( $test =~ /[^0-9]/ )) {
 
         # This int() and is so that we don't get bitten by odd
         # floating point problems
