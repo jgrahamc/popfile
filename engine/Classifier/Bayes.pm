@@ -93,9 +93,16 @@ sub get_value
     my ($self, $bucket, $word) = @_;
     $word =~ /^(.)/;
     my $i = ord($1);
-    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|$word (\d+)\|/ ) != 0 ) 
+    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|$word L([\-\.\d]+)\|/ ) != 0 ) 
     {
         return $1;
+    } 
+
+    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|$word (\d+)\|/ ) != 0 ) 
+    {
+        my $newvalue = log($1 / $self->{total}{$bucket});
+        set_value( $self, $bucket, $word, "L$newvalue" );
+        return $newvalue;
     } 
     else
     {
@@ -108,7 +115,7 @@ sub set_value
     my ($self, $bucket, $word, $value) = @_;
     $word =~ /^(.)/;
     my $i = ord($1);
-    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|$word (\d+)\|/\|$word $value\|/ ) == 0 ) 
+    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|$word (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 ) 
     {
         $self->{matrix}{$bucket}[$i] .= "|$word $value|";
     }
@@ -290,7 +297,7 @@ sub classify_file
 
     # The probability used for words that are not present in the corpus
 
-    my $not_likely   = 1 / ( 10 * $self->{full_total} );
+    my $not_likely   = log( 1 / ( 10 * $self->{full_total} ) );
     
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
@@ -315,7 +322,7 @@ sub classify_file
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
-            $score{$bucket} += ( log( $probability ) * $self->{parser}{words}{$word} );
+            $score{$bucket} += ( $probability * $self->{parser}{words}{$word} );
         }
     }
 
