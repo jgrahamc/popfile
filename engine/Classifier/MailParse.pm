@@ -418,7 +418,7 @@ sub update_tag
                 
             } else {
 
-                my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );
+                my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );                
 
                 # If the host name is not blank (i.e. there was a hostname in the url
                 # and it was an image, then if the host was not this host then report
@@ -585,17 +585,15 @@ sub add_url
 
     # Strip the protocol part of a URL (e.g. http://)
 
-    $protocol = $1 if ( $url =~ s/^(.*)\:\/\/// );
+    $protocol = $1 if ( $url =~ s/^([^:]*)\:\/\/// );
 
     # Remove any URL encoding (protocol may not be URL encoded)
 
-    while ( $url =~ /(\%([0-9A-Fa-f][0-9A-Fa-f]))/g ) {
-        my $from = "$1";
-        my $to   = chr(hex("0x$2"));
-        $url =~ s/$from/$to/g;
-        $self->{ut__} =~ s/$from/$to/g;
-        print "$from -> $to\n" if $self->{debug};
+    if ( $url =~ s/(\%([0-9A-Fa-f][0-9A-Fa-f]))/chr(hex("0x$2"))/eg ) {
         increment_word( $self, "html:encodedurl" );
+        my $new_url = (defined $protocol?"$protocol://":'') . $url;
+        print "$temp_url -> " . $new_url . "\n" if $self->{debug};
+        $self->{ut__} =~ s/$temp_url/$new_url/e if $self->{color__};
     }
 
     # Extract authorization information from the URL (e.g. http://foo@bar.com)
