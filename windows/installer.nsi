@@ -1616,12 +1616,16 @@ SectionEnd
 ;;  DetailPrint "Installing IMAP module..."
 ;;  SetDetailsPrint listonly
 ;;
-;;  ; Early versions of the IMAP.pm module were found in the 'POPFile' sub-folder but as part
-;;  ; of the preparation for the 0.22.0 release it was moved to the new 'Server' sub-folder
+;;  ; At present (30 July 2004) the IMAP.pm module resides in the 'Services' sub-folder.
+;;  ; Before the 0.22.0 release, the IMAP.pm module was stored in the 'POPFile' sub-folder
+;;  ; then it was moved (briefly) to the 'Server' sub-folder before finally ending up in
+;;  ; the 'Services' sub-folder for the 0.22.0 release.
 ;;
-;;  SetOutpath "$G_ROOTDIR\Server"
-;;  File "..\engine\Server\IMAP.pm"
+;;  SetOutpath "$G_ROOTDIR\Services"
+;;  File "..\engine\Services\IMAP.pm"
+;;
 ;;  Delete "$G_ROOTDIR\POPFile\IMAP.pm"
+;;  Delete "$G_ROOTDIR\Server\IMAP.pm"
 ;;
 ;;  SetDetailsPrint textonly
 ;;  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
@@ -2000,8 +2004,8 @@ check_exe:
   StrCmp ${L_EXE} "" unlocked_now
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   StrCpy $G_PLS_FIELD_1 "POPFile"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -2686,8 +2690,8 @@ ui_port_done:
   StrCmp ${L_TEMP} "success" check_pfi_utils
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   StrCpy $G_PLS_FIELD_1 "POPFile"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -2857,6 +2861,9 @@ continue:
 
   Delete "$G_ROOTDIR\Server\*.pm"
   RMDir "$G_ROOTDIR\Server"
+
+  Delete "$G_ROOTDIR\Services\*.pm"
+  RMDir "$G_ROOTDIR\Services"
 
   Delete "$G_ROOTDIR\UI\*.pm"
   RMDir "$G_ROOTDIR\UI"
