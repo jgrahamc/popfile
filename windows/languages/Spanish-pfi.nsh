@@ -82,7 +82,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3     "Elija el nº de puerto por defecto para conexiones POP3 (recomendado el 110)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "Elija el puerto por defecto para conectar al 'Interface de Usuario' (recomendado el 8080)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "Cargar automaticamente POPFile en cada inicio de Windows (funciona en 2º plano)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "Cargar automaticamente POPFile en cada inicio de Windows"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING  "ADVERTENCIA IMPORTANTE"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "SI ESTÁ ACTUALIZANDO POPFILE --- EL INSTALADOR CERRARÁ LA VERSION EXISTENTE"
 
