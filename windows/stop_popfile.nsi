@@ -71,7 +71,7 @@
 # with the UI password set to 'Let_Me_In':
 #
 #           @ECHO OFF
-#           START /W STOP_PF 9090 Let_Me_In
+#           START /WAIT STOP_PF 9090 Let_Me_In
 #           IF ERRORLEVEL 1 GOTO FAILED
 #           ECHO Shutdown succeeded
 #           GOTO DONE
@@ -79,7 +79,7 @@
 #           ECHO **** Shutdown failed ****
 #           :DONE
 #
-# The '/W' parameter is important, otherwise the 'failed' case will not be detected.
+# The '/WAIT' parameter is important, otherwise the 'failed' case will not be detected.
 #-------------------------------------------------------------------------------------------
 #  This version was tested using "NSIS 2 Release Candidate 2" released 5 January 2004
 #-------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.0"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.1"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -183,7 +183,7 @@ usage:
     A success/fail error code is always returned which can be checked in a batch file:\
     $\r$\n\
     $\r$\n          @ECHO OFF\
-    $\r$\n          START /W STOP_PF 8080 Let_Me_In\
+    $\r$\n          START /WAIT STOP_PF 8080 Let_Me_In\
     $\r$\n          IF ERRORLEVEL 1 GOTO FAILED\
     $\r$\n          ECHO Shutdown succeeded\
     $\r$\n          GOTO DONE\
