@@ -407,7 +407,18 @@ sub update_tag
         if ( ( $attribute =~ /^src$/i ) &&
              ( ( $tag =~ /^img|frame|iframe$/i )
                || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) {
-            add_url( $self, $value, $encoded, $quote, $end_quote, '' );
+            my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );
+
+	    # If the host name is not blank (i.e. there was a hostname in the url
+	    # and it was an image, then if the host was not this host then report
+	    # an off machine image
+
+            if ( ( $host ne '' ) && ( $tag =~ /^img$/i ) ) {
+	        if ( $host ne 'localhost' ) {
+                    $self->update_pseudoword( 'html', 'imgremotesrc' );
+	        }
+	    }
+
             next;
         }
 
@@ -538,6 +549,8 @@ sub update_tag
 # $prefix       A string to prefix any words with in the corpus, used for the special
 #               identification of values found in for example the subject line
 #
+# Returns the hostname
+#
 # ---------------------------------------------------------------------------------------------
 sub add_url
 {
@@ -641,9 +654,9 @@ sub add_url
         }
     }
 
-    if ( !defined $host || $host eq '' ) {
+    if ( !defined( $host ) || ( $host eq '' ) ) {
         print "no hostname found: [$temp_url]\n" if ($self->{debug});
-        return 0;
+        return '';
     }
 
     $port = $1 if ( $url =~ s/^\:(\d+)//);
@@ -651,7 +664,7 @@ sub add_url
     $query = $1 if ( $url =~ s/^[\?]([^\#\n]*|$)?// );
     $hash = $1 if ( $url =~ s/^[\#](.*)$// );
 
-    if ( !defined $protocol || $protocol =~ /^(http|https)$/ ) {
+    if ( !defined( $protocol ) || ( $protocol =~ /^(http|https)$/ ) ) {
         $temp_before = $before;
         $temp_before = "\:\/\/" if (defined $protocol);
         $temp_before = "[\@]" if (defined $authinfo);
@@ -677,7 +690,7 @@ sub add_url
     }
 
     # $protocol $authinfo $host $port $query $hash may be processed below if desired
-    return 1;
+    return $host;
 }
 
 # ---------------------------------------------------------------------------------------------
