@@ -68,13 +68,13 @@
 
             <TMPL_LOOP NAME="History_Loop_Headers">
 
-            <th class="historyLabel" scope="col">
+            <th scope="col">
                 <table width="100%" cellspacing="0">
                 <tr>
-                <td width="10px" align="left" style="white-space:nowrap; vertical-align: top;">
-                    <a style="display: block; width:100%; height: 1em;" class="columnRemove" href="/history?removecolumn=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt=""></a>
+                <td class="columnControls">
+                    <a class="columnRemove" href="/history?removecolumn=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt="x"></a>
                 </td>
-                <th style="text-align: left;">
+                <th class="historyLabel">
               <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_History_Click_To_Sort">">
 
               <TMPL_IF NAME="History_If_Sorted">
@@ -104,13 +104,13 @@
                     </th>
 
                 <TMPL_IF NAME="History_If_MoveLeft">
-                   <td width="10px" style="vertical-align: top;">
-                    <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a>
+                   <td class="columnControls">
+                    <a class="columnMove" href="/history?moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt="&lt;"></a>
                    </td>
                 </TMPL_IF>
                 <TMPL_IF NAME="History_If_MoveRight">
-                   <td width="10px" style="vertical-align: top;">
-                    <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
+                   <td class="columnControls">
+                    <a class="columnMove" href="/history?moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt="&gt;"></a>
                    </td>
                 </TMPL_IF>
 
@@ -121,7 +121,7 @@
 
             </TMPL_LOOP>
 
-            <th scope="col" align="center">
+            <th scope="col" class="historyLabel">
                 <input type="submit" class="submit reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </th>
 
@@ -238,7 +238,7 @@
                 <input type="submit" class="submit removeButton" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
                 <input type="submit" class="submit removeButton" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" />
             </td>
-            <td align="center">
+            <td>
                 <input type="submit" class="submit reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </td>
         </tr>

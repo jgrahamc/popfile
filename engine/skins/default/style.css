@@ -126,15 +126,11 @@ tr.rowHighlighted {
 
 tr.rowBoundary { 
   color: #000000;
-  background-color: #AFAF7F;
+  background-color: #CCCC99;
 }
 
 .lookupResultsTable {
   border: 3px solid #CCCC99;
-}
-
-tr.rowBoundary {
-  background-color: #CCCC99;
 }
 
 /*********************************************************/
@@ -170,6 +166,10 @@ div.helpMessage {
 
 .historyLabel {
   font-weight: bold;
+}
+
+th.historyLabel {
+  text-align: left;
 }
 
 .historyLabelSort {
@@ -282,4 +282,19 @@ table.historyWidgetsBottom {
 
 .configBar label.configurationLabel {
   display: block;
+}
+
+/*********************************************************/
+/* History Column Controls */
+
+.columnControls {
+  white-space:nowrap;
+  vertical-align: top;
+  width: 10px;
+}
+
+.columnRemove, .columnMove {
+  display: block;
+  width:100%;
+  height: 1em;
 }
