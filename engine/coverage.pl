@@ -105,6 +105,13 @@ foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
         s/&/&amp;/g;
         s/</&lt;/g;
         s/>/&gt;/g;
+        print HTML "<font color=$color>";
+        my $length = 5 - length("$line");
+        while ( $length > 0 ) {
+             print HTML " ";
+             $length -= 1;
+	}
+        print HTML "$line </font>";
         print HTML "<span style=\"background: $block\">&nbsp;</span><font color=$color>$_</font>";
     }
 
