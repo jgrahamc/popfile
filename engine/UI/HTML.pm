@@ -2009,18 +2009,31 @@ sub sort_filter_history
     # in the order the messages were received.  Note that when sorting on a alphanumeric
     # field we ignore all punctuation characters so that "John and 'John and John
     # all sort next to each other
+    
+    # Ascending or Descending? Ascending is noted by /-field/
+
+    my $descending = 0;
+    if ($sort =~ s/^\-//) {
+        $descending = 1;
+    }
 
     if ( $sort ne '' 
          # If the filter had no messages, this will be undefined
          # and there are no ways to sort nothing
          && defined @{$self->{history_keys__}}) {
-        @{$self->{history_keys__}} = sort {
-                                            my ($a1,$b1) = ($self->{history__}{$a}{$sort},
-                                              $self->{history__}{$b}{$sort});
-                                              $a1 =~ s/[^A-Z0-9]//ig;
-                                              $b1 =~ s/[^A-Z0-9]//ig;
-                                              return ( $a1 cmp $b1 );
-                                          } @{$self->{history_keys__}};
+    
+
+        
+        if ($sort ne '') {
+            @{$self->{history_keys__}} = sort {
+                                                my ($a1,$b1) = ($self->{history__}{$a}{$sort},
+                                                  $self->{history__}{$b}{$sort});
+                                                  $a1 =~ s/[^A-Z0-9]//ig;
+                                                  $b1 =~ s/[^A-Z0-9]//ig;
+                                                  return ( $a1 cmp $b1 );
+                                              } @{$self->{history_keys__}};
+        }                                            
+
     } else {
         # Here's a quick shortcut so that we don't have to iterate
         # if there's no work for us to do
@@ -2029,6 +2042,8 @@ sub sort_filter_history
             @{$self->{history_keys__}} = sort compare_mf @{$self->{history_keys__}};
         }
     }
+    
+    @{$self->{history_keys__}} = reverse @{$self->{history_keys__}} if ($descending);
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2681,45 +2696,36 @@ sub history_page
         # History messages
         $body .= "<table class=\"historyTable\" width=\"100%\" summary=\"$self->{language__}{History_MainTableSummary}\">\n";
         # column headers
+        
+        my %headers_table = (   '', 'ID',
+                                'from', 'From',
+                                'subject', 'Subject',
+                                'bucket', 'Classification');
+        
+        
         $body .= "<tr valign=\"bottom\">\n";
-        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=\">";
-        if ( $self->{form_}{sort} eq '' ) {
-            $body .= "<em class=\"historyLabelSort\">ID</em>";
-        } else {
-            $body .= "ID";
-        }
-        $body .= "</a>\n</th>\n";
-        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=from\">";
+        
+        foreach my $header (keys %headers_table) {
+            $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
+            $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=" . ($self->{form_}{sort} eq "$header"?"-":"");
+            $body .= "$header\">";
+            
+            my $label = '';
+            if ( defined $self->{language__}{ $headers_table{$header} }) {
+                $label = $self->{language__}{ $headers_table{$header} };
+            } else {
+                $label = $headers_table{$header};
+            }
 
-        if ( $self->{form_}{sort} eq 'from' ) {
-            $body .= "<em class=\"historyLabelSort\">$self->{language__}{From}</em>";
-        } else {
-            $body .= "$self->{language__}{From}";
-        }
-
-        $body .= "</a>\n</th>\n";
-        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=subject\">";
-
-        if ( $self->{form_}{sort} eq 'subject' ) {
-            $body .= "<em class=\"historyLabelSort\">$self->{language__}{Subject}</em>";
-        } else {
-            $body .= "$self->{language__}{Subject}";
+            if ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ ) {
+                $body .= "<em class=\"historyLabelSort\">$label" . ($self->{form_}{sort} =~ /^-/ ? "-" : "+") . "</em>";
+            } else {
+                $body .= "$label";
+            }
+            $body .= "</a>\n</th>\n";
         }
 
-        $body .= "</a>\n</th>\n";
-        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=bucket\">";
 
-        if ( $self->{form_}{sort} eq 'bucket' ) {
-            $body .= "<em class=\"historyLabelSort\">$self->{language__}{Classification}</em>";
-        } else {
-            $body .= "$self->{language__}{Classification}";
-        }
-
-        $body .= "</a>\n</th>\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\">$self->{language__}{History_ShouldBe}</th>\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\">$self->{language__}{Remove}</th>\n</tr>\n";
 
