@@ -587,6 +587,8 @@ sub verify_connected
 {
     my ($client, $hostname, $port) = @_;
     
+    calculate_today();
+    
     # Check to see if we are already connected
     if ( $mail)
     {
