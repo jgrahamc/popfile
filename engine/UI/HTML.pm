@@ -444,6 +444,9 @@ sub url_handler__
     if ( $url eq '/jump_to_message' )  {
         my $found = 0;
         my $file = $self->{form_}{view};
+
+        $self->copy_pre_cache__() if ($self->{need_resort__});
+
         foreach my $akey ( keys %{ $self->{history__} } ) {
             if ($akey eq $file) {
                 $found = 1;
@@ -3324,6 +3327,14 @@ sub view_page
 
     $self->load_history_cache__() if ( $self->{history_invalid__} == 1 );
 
+    if ( $self->{need_resort__} == 1 ) {
+
+        $self->copy_pre_cache__();
+        $self->sort_filter_history( (defined($self->{form_}{filter})?$self->{form_}{filter}:''),
+                                    (defined($self->{form_}{search})?$self->{form_}{search}:''),
+                                    (defined($self->{form_}{sort})?$self->{form_}{sort}:'') );
+    }
+
     my $mail_file     = $self->{form_}{view};
     my $start_message = $self->{form_}{start_message} || 0;
     my $reclassified  = $self->{history__}{$mail_file}{reclassified};
@@ -3361,6 +3372,7 @@ sub view_page
     # If we still can't find the message then return to the history page
 
     if ( $index == -1 ) {
+        $self->log_("view page cache miss");
         return $self->http_redirect_( $client, '/history' );
     }
 
