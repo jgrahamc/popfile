@@ -804,12 +804,12 @@ sub classify_and_modify
         if ( $self->{configuration}->{configuration}{subject} ) {
             # Don't add the classification unless it is not present
             if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{parameters}{$classification}{subject} == 1 ) )  {
-                $msg_subject = "[$classification]$msg_subject";
+                $msg_subject = " [$classification]$msg_subject";
             }
         }
     }
         
-    $msg_head_before .= 'Subject: ' . $msg_subject;
+    $msg_head_before .= 'Subject:' . $msg_subject;
     $msg_head_before .= $eol;
 
     if ( $nosave ) {
@@ -846,7 +846,7 @@ sub classify_and_modify
                 print $client "From: $self->{parser}->{from}$eol";
                 print $client "To: $self->{parser}->{to}$eol";
                 print $client "Date: " . localtime() . $eol;
-                print $client "Subject: $msg_subject$eol";
+                print $client "Subject:$msg_subject$eol";
                 print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );            
                 print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );
                 print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
