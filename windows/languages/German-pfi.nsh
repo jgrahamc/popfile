@@ -59,7 +59,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_1        "Hinweise zu dieser POPFile-Version anzeigen?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2        "'Ja' wird empfohlen, wenn Sie von einer älteren Version updaten (Sie müssen evtl. Backups VOR dem Update anlegen)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2        "Falls Sie von einer älteren Version updaten, sollten Sie 'Ja' wählen. (Sie sollten evtl. Backups VOR dem Update anlegen)"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
@@ -67,7 +67,7 @@
 
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile              "Installiert die Kernkomponenten inklusive einer Minimalversion des Perl-Interpreters."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                "Installiert POPFile Skins, mit denen Sie die Benutzeroberfläche von POPFile anpassen können."
-!insertmacro PFI_LANG_STRING DESC_SecLangs                "Installiert weitere (nicht-englische) Sprachen für die Benutzeroberfläche."
+!insertmacro PFI_LANG_STRING DESC_SecLangs                "Installiert Unterstützung für weitere (nicht-englische) Sprachen."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -84,13 +84,13 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "Wählen Sie den Standard-Port für Verbindungen zur Benutzeroberfläche (8080 empfohlen)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "POPFile mit Windows starten (läuft unsichtbar im Hintergrund)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING  "WICHTIGER HINWEIS"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "WENN SIE POPFILE UPDATEN: SETUP WIRD DIE EXISTIERENDE VERSION BEENDEN"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "WENN SIE POPFILE UPDATEN: SETUP WIRD DIE VORHANDENE VERSION BEENDEN, FALLS DIESE IM HINTERGRUND LÄUFT"
 
 ; Message Boxes used when validating user's selections
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_1    "Previous installation found at"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_2    "Do you want to uninstall it ?"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_3    "'Yes' recommended"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_1    "Vorhandene Installation gefunden:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_2    "Wollen Sie diese Deinstallieren?"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_3    "Es wird empfohlen, dies zu tun."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_1    "Der POP3-Port kann nicht übernommen werden."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2    "Der Port muß eine Zahl zwischen 1 und 65535 sein."
@@ -105,7 +105,7 @@
 
 ; Banner message displayed whilst uninstalling old version
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Please be patient."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Bitte haben Sie einen Moment Geduld."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "Dies kann einige Sekunden dauern..."
 
 #--------------------------------------------------------------------------
@@ -151,7 +151,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO        "Nach der Installation können Sie die Anzahl der Kategorien (und deren Name) ohne Probleme an ihre Bedürfnisse anpassen.\r\n\r\nKategorienamen bestehen aus Kleinbuchstaben, Ziffern von 0 bis 9, Bindestrich oder Unterstrich."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE       "Erstellen Sie eine neue Kategorie, indem Sie entweder einen Namen aus der Liste wählen oder einen Namen ihrer Wahl eingeben."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE       "Um eine oder mehr Kategorien von der Liste zu löschen, markieren Sie entsprechende(n) 'Entfernen' Box(en) und klicken Sie auf 'Weiter'."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE       "Um eine oder mehr Kategorien von der Liste zu löschen, markieren Sie die entsprechenden 'Entfernen' Kästchen und klicken Sie auf 'Weiter'."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_LISTHDR      "Bereits eingerichtete Kategorien"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_REMOVE       "Entfernen"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CONTINUE     "Weiter"
@@ -183,7 +183,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2     "Bitte geben Sie den Namen einer zu erstellenden Kategorie ein,$\r$\n$\r$\nindem Sie entweder einen der Vorschläge aus der Liste auswählen$\r$\n$\r$\noder indem Sie einen Namen Ihrer Wahl eingeben."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3     "Sie müssen MINDESTENS ZWEI Kategorien anlegen, bevor Sie die Installation fortsetzen können."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1        "Kategeforien zur Nutzung durch POPFile wurden angelegt."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1        "Kategorien zur Nutzung durch POPFile wurden angelegt."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_2        "Sollen diese Kategorien für POPFile eingerichtet werden?"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_3        "Wählen Sie 'Nein', wenn Sie Ihre Auswahl korrigieren möchten."
 
