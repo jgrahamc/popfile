@@ -230,13 +230,13 @@ sub load_word_matrix
         # See if there's a color file specified
         if ( open COLOR, "<$bucket/color" )
         {
-            $bucket =~ /([A-Za-z0-9-_]+)$/;
-            $bucket =  $1;
             $color = <COLOR>;
             $color =~ s/[\r\n]//g;
             close COLOR;
         }
-        
+
+        $bucket =~ /([A-Za-z0-9-_]+)$/;
+        $bucket =  $1;
         $self->{parameters}{$bucket}{subject} = 1;
 
         # See if there's a color file specified
