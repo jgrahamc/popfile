@@ -7,7 +7,7 @@
 #
 # These strings are grouped according to the page/window where they are used
 #
-# Copyright (c) 2003-2004 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
