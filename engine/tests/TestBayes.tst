@@ -94,7 +94,7 @@ test_assert_equal( $b->{unclassified__}, log(5) );
 
 my $session = $b->get_session_key();
 test_assert( $session ne '' );
-$b->release_session_key();
+$b->release_session_key( $session );
 
 # get_buckets
 

@@ -1253,7 +1253,7 @@ sub generate_unique_session_key__
 
     do {
         $session = '';
-        my $length = int( 6 + rand(4) );
+        my $length = int( 16 + rand(4) );
 
         for my $i (0 .. $length) {
             my $random = $chars[int( rand(36) )];
@@ -1269,6 +1269,29 @@ sub generate_unique_session_key__
     } while ( defined( $self->{api_sessions__}{$session} ) );
 
     return $session;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# valid_session_key__
+#
+# $session                Session key returned by call to get_session_key
+#
+# Returns undef is the session key is not valid, or returns the user ID associated
+# with the session key which can be used in database accesses
+#
+# ---------------------------------------------------------------------------------------------
+sub valid_session_key__
+{
+    my ( $self, $session ) = @_;
+
+    # This provides protection against someone using the XML-RPC interface and calling
+    # this API directly to fish for session keys, this must be called from within this
+    # module
+
+    return undef if ( caller ne 'Classifier::Bayes' );
+
+    return $self->{api_sessions__}{$session};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1323,8 +1346,10 @@ sub get_session_key
 sub release_session_key
 {
     my ( $self, $session ) = @_;
-
-    delete $self->{api_sessions__}{$session};
+   
+    if ( defined( $self->{api_sessions__}{$session} ) ) {
+        delete $self->{api_sessions__}{$session};
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
