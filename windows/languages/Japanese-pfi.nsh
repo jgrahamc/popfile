@@ -106,6 +106,9 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus の変換は完了しました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "続行するには「閉じる」をクリックして下さい。"
 
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus Conversion Failed"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Please click Cancel to continue"
+
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ; Used by 'Add POPFile User' wizard (main script: adduser.nsi)
@@ -499,6 +502,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "エラー: 環境変数をセットすることができません。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "エラー: Kakasi のパスが見つかりません。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "corpus 変換のプロセスを起動中にエラーが発生しました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "A fatal error occurred during the corpus conversion process !"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "予想残り時間: "
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "分"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(最初のファイルが変換されるのを待っています。)"

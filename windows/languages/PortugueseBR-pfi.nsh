@@ -106,6 +106,9 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "Completada a Conversão do Corpus do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Clique em Fechar para continuar"
 
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus Conversion Failed"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Please click Cancel to continue"
+
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ; Used by 'Add POPFile User' wizard (main script: adduser.nsi)
@@ -499,6 +502,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Erro: Impossível setar uma variável de ambiente"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Erro: falta o caminho do Kakasi"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "Ocorreu um erro ao iniciar o processo de conversão do corpus"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "A fatal error occurred during the corpus conversion process !"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "Tempo restante estimado: "
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "minutos"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(esperando pelo primeiro arquivo a ser convertido)"
