@@ -542,7 +542,7 @@ Function MakeItSafe
   Pop ${L_OLD_GUI}
   StrCmp ${L_OLD_GUI} "" try_other_port
 
-  DetailPrint "Shutting down previous version of POPFile..."
+  DetailPrint "Shutting down previous version of POPFile using port ${L_OLD_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_OLD_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" exit_now
@@ -553,7 +553,7 @@ try_other_port:
   Pop ${L_NEW_GUI}
   StrCmp ${L_NEW_GUI} "" exit_now
 
-  DetailPrint "Shutting down previous version of POPFile..."
+  DetailPrint "Shutting down previous version of POPFile using port ${L_NEW_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_NEW_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT} ; Ignore the result
 
@@ -1557,7 +1557,7 @@ done:
   Call un.StrCheckDecimal
   Pop ${GUI}
   StrCmp ${GUI} "" skip_shutdown
-  DetailPrint "Shutting down POPFile..."
+  DetailPrint "Shutting down POPFile using port ${GUI}"
   NSISdl::download_quiet http://127.0.0.1:${GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
 
@@ -1580,12 +1580,15 @@ skip_shutdown:
   Delete $INSTDIR\license
   Delete $INSTDIR\popfile.cfg
 
+  IfFileExists "$INSTDIR\popfile.reg" 0 no_reg_file
+  
   ; Read the registry settings found in popfile.reg and restore them
   ; it there are any.   All are assumed to be in HKCU
   
   ClearErrors
   FileOpen ${CFG} $INSTDIR\popfile.reg r
   IfErrors skip_registry_restore
+  DetailPrint "Opened: popfile.reg"
   
 restore_loop:
   FileRead ${CFG} ${L_REG_KEY}
@@ -1609,8 +1612,10 @@ restore_loop:
 
 skip_registry_restore:
   FileClose ${CFG}
+  DetailPrint "Closed: popfile.reg"
   Delete $INSTDIR\popfile.reg
 
+no_reg_file:
   Delete $INSTDIR\Platform\*.pm
   Delete $INSTDIR\Platform\*.dll
   RMDir $INSTDIR\Platform
