@@ -104,6 +104,7 @@ sub forker
         }
         
         close READER;
+        WRITER->blocking(0);
         return (0, \*WRITER);
     }
     
@@ -112,6 +113,7 @@ sub forker
     # process
     
     close WRITER;
+    READER->blocking(0);
     return ($pid, \*READER);
 }
 

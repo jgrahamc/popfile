@@ -181,7 +181,6 @@ sub service
 
                 # If we are in the parent process then push the pipe handle onto the children list
                 if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
-                    $pipe->blocking( 0 );
                     push @{$self->{children}}, ($pipe);
                 }
 
