@@ -27,10 +27,16 @@
 #--------------------------------------------------------------------------
 
 ; As of 27 June 2003, the NSIS MUI language file is not compatible with MUI 1.65
-; (this is temporary (and crude) patch to allow installer to support the Finnish language)
+; (this is a temporary (and crude) patch to allow installer to support the Finnish language)
+
+; English text for MUI_INNERTEXT_LICENSE_BOTTOM_CHECKBOX:
+;"If you accept the terms of the agreement, click the check box below. You must accept the agreement to install POPFile."
 
 !insertmacro MUI_LANGUAGEFILE_STRING MUI_INNERTEXT_LICENSE_BOTTOM_CHECKBOX \
 "Jos hyv‰ksyt kaikki ehdot, valitse Hyv‰ksyn jatkaaksesi. Sinun pit‰‰ hyv‰ksy‰ ehdot asentaaksesi ohjelman POPFile."
+
+; English text for MUI_INNERTEXT_LICENSE_BOTTOM_RADIOBUTTONS:
+;"If you accept the terms of the agreement, select the first option below. You must accept the agreement to install POPFile."
 
 !insertmacro MUI_LANGUAGEFILE_STRING MUI_INNERTEXT_LICENSE_BOTTOM_RADIOBUTTONS \
 "Jos hyv‰ksyt kaikki ehdot, valitse Hyv‰ksyn jatkaaksesi. Sinun pit‰‰ hyv‰ksy‰ ehdot asentaaksesi ohjelman POPFile."

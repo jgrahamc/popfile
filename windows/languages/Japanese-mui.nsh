@@ -24,6 +24,11 @@
 ;!insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT \
 ;"This wizard will guide you through the installation of POPFile.\r\n\r\n\It is recommended that you close all other applications before starting Setup.\r\n\r\n"
 
+; Default NSIS message:
+
+;!insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT \
+;"このウィザードは、POPFile のインストールをガイドしていきます。\r\n\r\nセットアップを開始する前に、他のすべてのアプリケーションを終了することを推奨します。これによって、セットアップがこのコンピュータを再起動せずに、確実にシステム ファイルをアップデートすることが出来るようになります。\r\n\r\n"
+
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
 #

@@ -27,10 +27,16 @@
 #--------------------------------------------------------------------------
 
 ; As of 27 June2003, the NSIS MUI language file is not compatible with MUI 1.65
-; (this is temporary (and crude) patch to allow installer to support the Danish language)
+; (this is a temporary (and crude) patch to allow installer to support the Danish language)
+
+; English text for MUI_INNERTEXT_LICENSE_BOTTOM_CHECKBOX:
+;"If you accept the terms of the agreement, click the check box below. You must accept the agreement to install POPFile."
 
 !insertmacro MUI_LANGUAGEFILE_STRING MUI_INNERTEXT_LICENSE_BOTTOM_CHECKBOX \
 "hvis du accepterer alle reglerne, klik Jeg accepterer for at komme videre. Du skal acceptere reglerne for at komme videre POPFile."
+
+; English text for MUI_INNERTEXT_LICENSE_BOTTOM_RADIOBUTTONS:
+;"If you accept the terms of the agreement, select the first option below. You must accept the agreement to install POPFile."
 
 !insertmacro MUI_LANGUAGEFILE_STRING MUI_INNERTEXT_LICENSE_BOTTOM_RADIOBUTTONS \
 "hvis du accepterer alle reglerne, klik Jeg accepterer for at komme videre. Du skal acceptere reglerne for at komme videre POPFile."
