@@ -16,7 +16,7 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# Translation Jan Pavloviè (xpavlov@fi.muni.cz)
+# Translation Jan Pavloviè (xpavlov@fi.muni.cz) version 1.1
 
 # Identify the language and character set used for the interface
 LanguageCode                            cz
@@ -35,7 +35,7 @@ Add                                     Pøidat
 Remove                                  Odstranit
 Previous                                Pøedcházející
 Next                                    Nasledující
-From                                    Odesilatel
+From                                    Odesílatel
 Subject                                 Subjekt
 Classification                          Klasifikace
 Reclassify                              Rekrasifikovat
@@ -112,7 +112,7 @@ Configuration_SubjectLine               Zmìna textu subjektu
 Configuration_XTCInsertion              Pøidání hlavièky X-Text-Classification
 Configuration_XPLInsertion              Pøidání hlavièky X-POPFile-Link
 Configuration_Logging                   Protokol zpracování
-Configuration_None                      Žádná
+Configuration_None                      Žádný
 Configuration_ToScreen                  Na obrazovku
 Configuration_ToFile                    Do souboru
 Configuration_ToScreenFile              Na obrazovku a do souboru
@@ -129,7 +129,7 @@ Advanced_Error5                         '%s' odstranìné ze seznamu Ignorovaná sl
 Advanced_StopWords                      Ignorovaná slova
 Advanced_Message1                       POPFile ignoruje nasledující, èasto používaná slova:
 Advanced_AddWord                        Pøidat slovo
-Advanced_RemoveWord                     Odstránit slovo
+Advanced_RemoveWord                     Odstranit slovo
 
 History_Filter                          &nbsp;(zobrazuje se jen koš <font color="%s">%s</font>)
 History_FilterBy                        Filtrovat podle
@@ -162,8 +162,8 @@ Security_Error1                         Bezpeènostní port musí být v rozpìtí èís
 Security_Stealth                        Utajený mód/Èinnost serveru
 Security_NoStealthMode                  Ne (Utajený mód)
 Security_ExplainStats                   (Pokud je toto zapnuté, POPFile pošle jednou za den následující tøi hodnoty na stránku www.usethesource.com: bc (celkový poèet košù, které máš), mc (celkový poèet zpráv, které POPFile klasifikoval) a ec (celkový poèet chybných klasifikací).  Tyto hodnoty se ukladají do souboru a budou použité na vyhodnocení nìkterých statistik o tom jak lidé používají POPFile a jak dobøe funguje.  Mùj web server uchováva tyto informacie pøibližne 5 dní a poté je smaže; Neuchovávam informace propojující statistické údaje s konkrétnímy IP adresamy.)
-Security_ExplainUpdate                  (pokud je toto zapnuté, POPFile pošle jedno jednou za den následující tøi hodnoty na stránku www.usethesource.com: ma (hlavní èíslo verze používaného POPFile), mi (vedlejší èíslo verze používaného POPFile) a bn (èíslo kompilace používaného POPFile).  POPFile dostane odpoveï ve formì obrázku, který se zobrazí na vrchu stránky, pokud je k dispozici nová verze.  Mùj web server uchováva tyto informacie pøibližne 5 dní a poté je smaže; Neuchovávam informace propojující statistické údaje s konkrétnímy IP adresamy.)
-Security_PasswordTitle                  Heslo užívatelského rozhraní
+Security_ExplainUpdate                  (pokud je toto zapnuté, POPFile pošle jednou za den následující tøi hodnoty na stránku www.usethesource.com: ma (hlavní èíslo verze používaného POPFile), mi (vedlejší èíslo verze používaného POPFile) a bn (èíslo kompilace používaného POPFile).  POPFile dostane odpoveï ve formì obrázku, který se zobrazí na vrchu stránky, pokud je k dispozici nová verze.  Mùj web server uchováva tyto informacie pøibližne 5 dní a poté je smaže; Neuchovávam informace propojující statistické údaje s konkrétnímy IP adresamy.)
+Security_PasswordTitle                  Heslo uživatelského rozhraní
 Security_Password                       Heslo
 Security_PasswordUpdate                 Heslo zmìnìné na %s
 Security_AUTHTitle                      Bezpeèné ovìøování hesla/AUTH
@@ -176,7 +176,7 @@ Security_UI                             Povol HTTP (užívatelské rozhraní) pøipoj
 Security_UpdateTitle                    Automatická kontrola nových verzí
 Security_Update                         Kontroluj dennì nové verze programu POPFile
 Security_StatsTitle                     Oznamovat statistiky
-Security_Stats                          Posilat statistiky dennì
+Security_Stats                          Posílat statistiky dennì
 
 Magnet_Error1                           Magnet '%s' už existuje v koši '%s'
 Magnet_Error2                           Nový magnet '%s' by se bil s existujícim magnetem '%s' v koši '%s' a mohl by zpùsobit dvojsmyslné výsledky.  Nový magnet nebyl pøidaný.
@@ -195,7 +195,7 @@ Bucket_Error3                           Vytvoøený koš s názvem %s
 Bucket_Error4                           Prosím, nezadávej prázdné názvy
 Bucket_Error5                           Koš je pøejmenovaný z %s na %s
 Bucket_Error6                           Zmazaný koš %s
-Bucket_Title                            Prehlad
+Bucket_Title                            Pøehled
 Bucket_BucketName                       Název koše
 Bucket_WordCount                        Poèet slov
 Bucket_WordCounts                       Poèty slov
