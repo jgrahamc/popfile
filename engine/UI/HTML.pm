@@ -1613,8 +1613,6 @@ sub load_history_cache
     $self->{history_invalid} = 0;
     my $j = 0;
 
-    print "Reloading history cache...\n";
-
     foreach my $i ( 0 .. $#history_files ) {
         $history_files[$i] =~ /(popfile.*\.msg)/;
         $history_files[$i] = $1;
@@ -1697,7 +1695,7 @@ sub load_history_cache
     }
     
     if ( $sort ne '' ) {
-        @{$self->{history_keys}} = sort { $self->{history}{$a}{$sort} cmp $self->{history}{$b}{$sort} } keys %{$self->{history}};
+        @{$self->{history_keys}} = sort { my ($a1,$b1) = ($self->{history}{$a}{$sort}, $self->{history}{$b}{$sort}); $a1 =~ s/[^A-Z]//ig; $b1 =~ s/[^A-Z]//ig; return ( $a1 cmp $b1 ); } keys %{$self->{history}};
     } else {
         @{$self->{history_keys}} = sort { $a <=> $b } keys %{$self->{history}};
     }
