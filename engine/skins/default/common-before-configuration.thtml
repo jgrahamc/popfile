@@ -1,9 +1,7 @@
             </td>
             <td class="shellRight"></td>
         </tr>
-        <tr class="shellBottomRow">
-            <td class="shellBottomLeft"></td>
-            <td class="shellBottomCenter"></td>
-            <td class="shellBottomRight"></td>
-        </tr>
-    </table>
+        <tr>
+            <td class="shellLeft"></td>
+	    <td>
+	         <table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0">
