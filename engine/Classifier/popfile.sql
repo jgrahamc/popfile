@@ -266,6 +266,30 @@ create table history( id integer primary key, -- unique ID for this entry
 -- TODO create table bucket_action_types
 -- TODO create table bucket_actions
 
+-- MySQL SPECIFIC 
+
+-- ---------------------------------------------------------------------------------------------
+--
+-- NOTE: The following alter table statements are required by MySQL in order
+--       to get the ID fields to auto_increment on inserts. These statements
+--       will all generate error messages when fed to SQLite, simply ignore
+--       the errors.
+--
+-- ---------------------------------------------------------------------------------------------
+
+alter table buckets modify id int(11) auto_increment;
+alter table bucket_param modify id int(11) auto_increment;
+alter table bucket_template modify id int(11) auto_increment;
+alter table history modify id int(11) auto_increment;
+alter table magnets modify id int(11) auto_increment;
+alter table magnet_types modify id int(11) auto_increment;
+alter table matrix modify id int(11) auto_increment;
+alter table user_params modify id int(11) auto_increment;
+alter table user_template modify id int(11) auto_increment;
+alter table users modify id int(11) auto_increment;
+alter table words modify id int(11) auto_increment;
+
+
 -- TRIGGERS
 
 -- ---------------------------------------------------------------------------------------------
@@ -354,7 +378,7 @@ create trigger delete_bucket_template delete on bucket_template
 
 -- There's always a user called 'admin'
 
-insert into users ( 'name', 'password' ) values ( 'admin', 'e11f180f4a31d8caface8e62994abfaf' );
+insert into users ( name, password ) values ( 'admin', 'e11f180f4a31d8caface8e62994abfaf' );
 
 -- These are the possible parameters for a bucket
 --
@@ -368,26 +392,26 @@ insert into users ( 'name', 'password' ) values ( 'admin', 'e11f180f4a31d8caface
 -- count        Total number of messages classified into this bucket
 -- color        The color used for this bucket in the UI
 
-insert into bucket_template ( 'name', 'def' ) values ( 'subject',    '1' ); 
-insert into bucket_template ( 'name', 'def' ) values ( 'xtc',        '1' );
-insert into bucket_template ( 'name', 'def' ) values ( 'xpl',        '1' );
-insert into bucket_template ( 'name', 'def' ) values ( 'fncount',    '0' );
-insert into bucket_template ( 'name', 'def' ) values ( 'fpcount',    '0' );
-insert into bucket_template ( 'name', 'def' ) values ( 'quarantine', '0' );
-insert into bucket_template ( 'name', 'def' ) values ( 'count',      '0' );
-insert into bucket_template ( 'name', 'def' ) values ( 'color',      'black' );
+insert into bucket_template ( name, def ) values ( 'subject',    '1' ); 
+insert into bucket_template ( name, def ) values ( 'xtc',        '1' );
+insert into bucket_template ( name, def ) values ( 'xpl',        '1' );
+insert into bucket_template ( name, def ) values ( 'fncount',    '0' );
+insert into bucket_template ( name, def ) values ( 'fpcount',    '0' );
+insert into bucket_template ( name, def ) values ( 'quarantine', '0' );
+insert into bucket_template ( name, def ) values ( 'count',      '0' );
+insert into bucket_template ( name, def ) values ( 'color',      'black' );
 
 -- The possible magnet types
 
-insert into magnet_types ( 'mtype', 'header' ) values ( 'from',    'From'    );
-insert into magnet_types ( 'mtype', 'header' ) values ( 'to',      'To'      );
-insert into magnet_types ( 'mtype', 'header' ) values ( 'subject', 'Subject' );
-insert into magnet_types ( 'mtype', 'header' ) values ( 'cc',      'Cc'      );
+insert into magnet_types ( mtype, header ) values ( 'from',    'From'    );
+insert into magnet_types ( mtype, header ) values ( 'to',      'To'      );
+insert into magnet_types ( mtype, header ) values ( 'subject', 'Subject' );
+insert into magnet_types ( mtype, header ) values ( 'cc',      'Cc'      );
 
 -- There's always a bucket called 'unclassified' which is where POPFile puts
 -- messages that it isn't sure about.
 
-insert into buckets ( 'name', 'pseudo', 'userid' ) values ( 'unclassified', 1, 1 );
+insert into buckets ( name, pseudo, userid ) values ( 'unclassified', 1, 1 );
 
 -- END
 
