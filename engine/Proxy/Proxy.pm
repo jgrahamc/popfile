@@ -93,7 +93,7 @@ sub start
     if ( !defined( $self->{server__} ) ) {
         my $port = $self->config_( 'port' );
         my $name = $self->name();
-        print STDERR <<EOM;
+        print STDERR <<EOM; # PROFILE BLOCK START
 
 \nCouldn't start the $name proxy because POPFile could not bind to the
 listen port $port. This could be because there is another service
@@ -102,7 +102,7 @@ your system (On Unix systems this can happen if you are not root
 and the port you specified is less than 1024).
 
 EOM
-
+# PROFILE BLOCK STOP
         return 0;
     }
 
@@ -431,7 +431,6 @@ sub flush_extra_
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
 # $client   The local mail client (created with IO::) that needs the response
 # $command  The text of the command to send (we add an EOL)
-# $error    The error string if the response fails
 # $null_resp Allow a null response
 #
 # Send $command to $mail, receives the response and echoes it to the $client and the debug
@@ -439,14 +438,13 @@ sub flush_extra_
 #
 # ---------------------------------------------------------------------------------------------
 
-#TODO: Implement or remove $error as defined in interface above
 sub get_response_
 {
-    my ( $self, $mail, $client, $command, $error, $null_resp ) = @_;
+    my ( $self, $mail, $client, $command, $null_resp ) = @_;
 
     $null_resp = 0 if (!defined $null_resp);
 
-    unless ( $mail ) {
+    unless ( defined($mail) && $mail->connected ) {
        # $mail is undefined - return an error intead of crashing
        $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
        return $self->{connection_timeout_error_};
@@ -458,31 +456,29 @@ sub get_response_
     my $response;
 
     # Retrieve a single string containing the response
-    if ( $mail->connected ) {
-        my $selector = new IO::Select( $mail );
-        my ($ready) = $selector->can_read( (!$null_resp?$self->global_config_( 'timeout' ):.5) );
 
-        if ( ( defined( $ready ) ) && ( $ready == $mail ) ) {
-            $response = <$mail>;
+    my $selector = new IO::Select( $mail );
+    my ($ready) = $selector->can_read( (!$null_resp?$self->global_config_( 'timeout' ):.5) );
 
-            if ( $response ) {
-                # Echo the response up to the mail client
-                $self->tee_(  $client, $response );
-                return $response;
-            }
-        }
+    if ( ( defined( $ready ) ) && ( $ready == $mail ) ) {
+        $response = <$mail>;
 
-        if (!$null_resp) {
-            # An error has occurred reading from the mail server
-            $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
-            return $self->{connection_timeout_error_};
-        } else {
-            $self->tee_($client, "");
-            return "";
+        if ( $response ) {
+            # Echo the response up to the mail client
+            $self->tee_( $client, $response );
+            return $response;
         }
     }
 
-    return $response;
+    if ( !$null_resp ) {
+        # An error has occurred reading from the mail server
+
+        $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
+        return $self->{connection_timeout_error_};
+    } else {
+        $self->tee_($client, "");
+        return "";
+    }
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -266,6 +266,78 @@ $line = <TEMP>;
 test_assert( !defined( $line ) );
 close TEMP;
 
+# Test get_response_ with undefined mail server
+
+$sp->{connection_timeout_error_} = 'timeout error';
+open TEMP, ">temp.tmp";
+test_assert_regexp( $sp->get_response_( undef, \*TEMP, "HELLO" ), 'timeout error' );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'timeout error' );
+close TEMP;
+
+# Test get_response_ with timeout
+
+$sp->global_config_( 'timeout', 1 );
+open TEMP, ">temp.tmp";
+test_assert_regexp( $sp->get_response_( $client, \*TEMP, "HELLO" ), 'timeout error' );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'timeout error' );
+close TEMP;
+
+# Test get_response_ with null response not allowed
+
+open TEMP, ">temp.tmp";
+test_assert_equal( $sp->get_response_( $client, \*TEMP, "HELLO", 1 ), '' );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert( !defined( $line ) );
+close TEMP;
+
+# Test get_response_ with valid response
+
+$sp->send( 'HELLO response');
+$sp->service_server();
+
+open TEMP, ">temp.tmp";
+test_assert_regexp( $sp->get_response_( $client, \*TEMP, "HELLO" ), 'HELLO response' );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'HELLO response' );
+close TEMP;
+
+# Test echo_response_ with good response
+
+$sp->send( 'GOOD');
+$sp->service_server();
+
+$sp->{good_response_} = 'GOOD';
+open TEMP, ">temp.tmp";
+test_assert( $sp->echo_response_( $client, \*TEMP, "HOWRU?" ) );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'GOOD' );
+close TEMP;
+
+# Test echo_response_ with bad response
+
+$sp->send( 'BAD');
+$sp->service_server();
+
+open TEMP, ">temp.tmp";
+test_assert( !$sp->echo_response_( $client, \*TEMP, "HOWRU?" ) );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'BAD' );
+close TEMP;
+
 # Check that we receive the messages sent up the pipe
 
 use Test::MQReceiver;
@@ -399,3 +471,57 @@ while ( $#kids >= 0 ) {
     select( undef, undef, undef, 0.25 );
     @kids = keys %{$sp->{children__}};
 }
+
+# Test that verify_connected_ does what we expect
+
+$sp = new Test::SimpleProxy;
+
+$sp->configuration( $c );
+$sp->mq( $mq );
+$sp->logger( $l );
+
+$sp->forker( \&forker );
+$sp->pipeready( \&pipeready );
+
+$sp->initialize();
+$sp->config_( 'port', $port );
+
+$sp->{connection_failed_error_} = 'failed error';
+
+undef $client;
+open TEMP, ">temp.tmp";
+test_assert( !defined( $sp->verify_connected_( $client, \*TEMP, 'localhost', $port ) ) );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'failed error' );
+test_assert_regexp( $line, 'localhost' );
+test_assert_regexp( $line, "$port" );
+close TEMP;
+
+test_assert( $sp->start() );
+
+my $sp2 = new Test::SimpleProxy;
+
+$sp2->configuration( $c );
+$sp2->mq( $mq );
+$sp2->logger( $l );
+
+$sp2->forker( \&forker );
+$sp2->pipeready( \&pipeready );
+
+$sp2->initialize();
+$sp2->config_( 'port', 0 );
+
+open (STDERR, ">stdout.tmp");
+test_assert( !$sp2->start() );
+close STDERR;
+open TEMP, "<stdout.tmp";
+$line = <TEMP>;
+$line = <TEMP>;
+$line = <TEMP>;
+test_assert_regexp( $line, "Couldn't start the simple proxy" );
+close TEMP;
+
+$sp->stop();
+$sp2->stop();

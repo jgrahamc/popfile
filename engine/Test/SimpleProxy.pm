@@ -127,7 +127,9 @@ sub service_server
             $self->{remote_client_selector__} = new IO::Select( $self->{remote_client__} );
             my $handle = $self->{remote_client__};
             if ( defined( $handle ) ) {
-                $self->tee_( $handle, "Welcome$eol" );
+                $self->tee_( $handle, "Welcome" );
+                $self->tee_( $handle, "To The Jungle$eol" );
+
 	    }
 	}
     }

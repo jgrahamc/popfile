@@ -289,7 +289,7 @@ sub child__
 
         if ( $ command =~ /^ *$/ ) {
             if ( $news && $news->connected ) {
-                $self->get_response_($news, $client, $command, '',1);
+                $self->get_response_($news, $client, $command, 1);
                 $self->flush_extra_( $news, $client, 0 );
                 next;
             }
