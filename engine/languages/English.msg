@@ -381,6 +381,7 @@ Advanced_MainTableSummary               This table provides a list of words that
 
 Imap_Bucket2Folder                      Mail for bucket <b>%s</b> goes to folder
 Imap_MapError                           You cannot map more than one bucket to a single folder!
+Imap_MapUpdated                         Mapped bucket %s to folder %s.
 Imap_Server                             IMAP server hostname:
 Imap_ServerNameError                    Please enter the server's hostname!
 Imap_Port                               IMAP Server port:
@@ -389,9 +390,11 @@ Imap_Login                              IMAP account login:
 Imap_LoginError                         Please enter a user/login name!
 Imap_Password                           Password for IMAP account:
 Imap_PasswordError                      Please enter a password for the server!
+Imap_ConnectionDetailsUpdated           The IMAP connection details were updated. Please refresh the list of folders next.
 Imap_Expunge                            Expunge deleted messages from watched folders.
 Imap_Interval                           Update interval in seconds:
 Imap_IntervalError                      Please enter an interval between 10 and 3600 seconds.
+Imap_OptionsUpdated                     IMAP options were successfully updated.
 Imap_Bytelimit                          Bytes per message to use for classification. Enter 0 (Null) for the complete message:
 Imap_BytelimitError                     Please enter a number.
 Imap_RefreshFolders                     Refresh list of folders
@@ -399,9 +402,13 @@ Imap_Now                                now!
 Imap_UpdateError1                       Could not login. Verify your login name and password, please.
 Imap_UpdateError2                       Failed to connect to server. Please check the host name and port and make sure you are online.
 Imap_UpdateError3                       Please configure the connection details first.
+Imap_UpdateOK                           Successfully read the list of mailboxes/folders on the server.
 Imap_NoConnectionMessage                Please configure the connection details first. After you have done that, more options will be available on this page.
 Imap_WatchMore                          a folder to list of watched folders
+Imap_WatchedFolderAdded                 Another folder was added to the list of watched folders. Please choose the desired folder now.
 Imap_WatchedFolder                      Watched folder no
+Imap_WatchedFoldersUpdated              Updated the list of watched folders
+Imap_WatchedFolderRemoved               Removed folder %s from list of watched folders
 
 Shutdown_Message                        POPFile has shut down
 

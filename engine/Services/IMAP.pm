@@ -2076,42 +2076,49 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
+    my ( $status_message, $error_message );
+    
     # connection details
     if ( $name eq 'imap_0_connection_details' ) {
         if ( defined $$form{update_imap_0_connection_details} ) {
+            my $something_happened = 0;
+            
             if ( $$form{imap_hostname} ne '' ) {
-                $templ->param( IMAP_connection_if_hostname_error => 0 );
                 $self->user_config_( 1, 'hostname', $$form{imap_hostname} );
+                $something_happened++;
             }
             else {
-                $templ->param( IMAP_connection_if_hostname_error => 1 );
+                $error_message = $$language{Imap_ServerNameError};
             }
 
             if ( $$form{imap_port} >= 1 && $$form{imap_port} < 65536 ) {
                 $self->user_config_( 1, 'port', $$form{imap_port} );
-                $templ->param( IMAP_connection_if_port_error => 0 );
+                $something_happened++;
             }
             else {
-                $templ->param( IMAP_connection_if_port_error => 1 );
+                $error_message = $$language{Imap_PortError};
             }
 
             if ( $$form{imap_login} ne '' ) {
                 $self->user_config_( 1, 'login', $$form{imap_login} );
-                $templ->param( IMAP_connection_if_login_error => 0 );
+                $something_happened++;
             }
             else {
-                $templ->param( IMAP_connection_if_login_error => 1 );
+                $error_message = $$language{Imap_LoginError};
             }
 
             if ( $$form{imap_password} ne '' ) {
                 $self->user_config_( 1, 'password', $$form{imap_password} );
-                $templ->param( IMAP_connection_if_password_error => 0 );
+                $something_happened++;
             }
             else {
-                $templ->param( IMAP_connection_if_password_error => 1 );
+                $error_message = $$language{Imap_PasswordError};
             }
+            
+            $status_message = $$language{Imap_ConnectionDetailsUpdated} if $something_happened;
         }
-        return;
+        
+        return ( $status_message, $error_message );
     }
 
     # watched folders
@@ -2129,6 +2136,7 @@ sub validate_item
 
             $self->watched_folders__( sort keys %folders );
             $self->{folder_change_flag__} = 1;
+            $status_message = $$language{Imap_WatchedFoldersUpdated};
         }
 
         # Remove a watched folder from the list
@@ -2136,15 +2144,15 @@ sub validate_item
         for my $i ( 1 .. $count ) {
             if ( defined $$form{"remove_imap_watched_folder_$i"} ) {
                 my @watched = $self->watched_folders__();
-                splice @watched, $i - 1, 1;
+                my $removed = splice @watched, $i - 1, 1;
                 $self->watched_folders__( @watched );
                 $self->{folder_change_flag__} = 1;
+                $status_message = sprintf $$language{Imap_WatchedFolderRemoved}, $removed;
                 last;
             }
         }
 
-
-        return;
+        return ( $status_message, $error_message );
     }
 
     # Add a watched folder
@@ -2153,8 +2161,9 @@ sub validate_item
             my @current = $self->watched_folders__();
             push @current, 'INBOX';
             $self->watched_folders__( @current );
+            $status_message = $$language{Imap_WatchedFolderAdded};
         }
-        return;
+        return ( $status_message, $error_message );
     }
 
     # map buckets to folders
@@ -2184,21 +2193,22 @@ sub validate_item
                 }
             }
 
-            my $bad = 0;
             while ( my ( $bucket, $folder ) = each %bucket2folder ) {
 
+                # If a folder is supposed to be mapped to more than one bucket
                 if ( exists $folders{$folder} && $folders{ $folder } > 1 ) {
-                    $bad = 1;
+                    $error_message = $$language{Imap_MapError}
                 }
                 else {
-                    $self->folder_for_bucket__( $bucket, $folder );
-
-                    $self->{folder_change_flag__} = 1;
+                    if ( $self->folder_for_bucket__( $bucket ) ne $folder ) {
+                        $self->folder_for_bucket__( $bucket, $folder );
+                        $self->{folder_change_flag__} = 1;
+                        $status_message = sprintf $$language{Imap_MapUpdated}, $bucket, $folder;
+                    }
                 }
             }
-            $templ->param( IMAP_buckets_to_folders_if_error => $bad );
         }
-        return;
+        return ( $status_message, $error_message );
     }
 
     # update the list of mailboxes
@@ -2219,21 +2229,22 @@ sub validate_item
                             $templ->param( IMAP_update_list_failed => '' );
                         }
                         else {
-                            $templ->param( IMAP_update_list_failed => 'Could not login. Verify your login name and password, please.' );
-                            # should be language__{Imap_UpdateError1}
+                            $error_message = $$language{Imap_UpdateError1};
                         }
                     }
                     else {
-                        $templ->param( IMAP_update_list_failed => 'Failed to connect to server. Please check the host name and port and make sure you are online.' );
-                        # should be language__{Imap_UpdateError2}
+                        $error_message = $$language{Imap_UpdateError2};
                     }
             }
             else {
-                $templ->param( IMAP_update_list_failed => 'Please configure the connection details first.' );
-                # should be language__{Imap_UpdateError3}
+                $error_message = $$language{Imap_UpdateError3};
+            }
+            
+            unless ( defined $error_message ) {
+                $status_message = $$language{Imap_UpdateOK};
             }
         }
-        return;
+        return ( $status_message, $error_message );
     }
 
 
@@ -2252,20 +2263,19 @@ sub validate_item
 
             # update interval
             my $form_interval = $$form{imap_options_update_interval};
-            if ( defined $form_interval ) {
-                if ( $form_interval > 10 && $form_interval < 60*60 ) {
+            if ( $form_interval =~ /^\d+$/ && $form_interval > 10 && $form_interval < 60*60 ) {
                     $self->user_config_( 1, 'update_interval', $form_interval );
-                    $templ->param( IMAP_if_interval_error => 0 );
-                }
-                else {
-                    $templ->param( IMAP_if_interval_error => 1 );
-                }
             }
             else {
-                $templ->param( IMAP_if_interval_error => 1 );
+                $error_message = $$language{Imap_IntervalError};
             }
+            
+            unless ( defined $error_message ) {
+                $status_message = $$language{Imap_OptionsUpdated};
+            }
+            
         }
-        return;
+        return ( $status_message, $error_message );
     }
 
 

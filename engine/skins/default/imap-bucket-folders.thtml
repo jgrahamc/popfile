@@ -2,15 +2,16 @@
 
 <TMPL_IF NAME="IMAP_if_mailboxes">
 
+<hr width="60%" align="center" />
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
 
     <TMPL_LOOP NAME="IMAP_loop_buckets">
 
-    <label class="configurationLabel">
+    <label for="folder_for_<TMPL_VAR NAME="IMAP_bucket">" class="configurationLabel">
         <TMPL_VAR NAME="IMAP_Bucket_Header">
     </label>
     <br />
-    <select name="imap_folder_for_<TMPL_VAR NAME="IMAP_bucket">">
+    <select id="folder_for_<TMPL_VAR NAME="IMAP_bucket">" name="imap_folder_for_<TMPL_VAR NAME="IMAP_bucket">">
 
     <TMPL_UNLESS NAME="IMAP_mailbox_defined">
         <option selected="selected"></option>
@@ -24,24 +25,15 @@
 
     </TMPL_LOOP>
 
-    </select><br />
+    </select>
+    <br />
 
     </TMPL_LOOP>
 
-    <TMPL_IF NAME="IMAP_buckets_to_folders_if_error">
-       <blockquote>
-        <div class="error01">
-            <TMPL_VAR NAME="Localize_Imap_MapError">
-        </div>
-    </blockquote>
-    </TMPL_IF>
-
+    <br />
     <input type="submit" class="submit" name="imap_3_bucket_folders" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
-
-<TMPL_ELSE>
-
-    <!-- Nothing to do for imap-bucket-folders.thtml -->
+<hr width="60%" align="center" />
 
 </TMPL_IF>
 

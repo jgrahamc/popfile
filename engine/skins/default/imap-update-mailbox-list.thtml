@@ -3,28 +3,12 @@
 <TMPL_IF NAME="IMAP_if_connection_configured">
 
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel">
+    <label for="update_mailbox_list" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_RefreshFolders">
     </label>
-    
-    <TMPL_IF NAME="IMAP_update_list_failed">
-    
-    <blockquote>
-        <div class="error01">
-            <TMPL_VAR NAME="IMAP_update_list_failed">
-        </div>
-    </blockquote>
-    
-    </TMPL_IF>
-    
-    <input type="submit" class="submit" name="do_imap_4_update_mailbox_list" value="<TMPL_VAR NAME="Localize_Imap_Now">" />
+    <input id="update_mailbox_list" type="submit" class="submit" name="do_imap_4_update_mailbox_list" value="<TMPL_VAR NAME="Localize_Imap_Now">" />
 </form>
-
-<TMPL_ELSE>
-
-    <p>
-        <TMPL_VAR NAME="Localize_Imap_NoConnectionMessage">
-    </p>
+<hr width="60%" align="center" />
 
 </TMPL_IF>
 

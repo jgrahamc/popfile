@@ -1,63 +1,30 @@
 <!--  This is the output of template imap-connection-details.thtml -->
 
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel">
+    <label for="imap_hostname" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Server">
     </label>
     <br />
-    <input name="imap_hostname" type="text" value="<TMPL_VAR NAME="IMAP_hostname">" /> <br />
-
-    <TMPL_IF NAME="IMAP_connection_if_hostname_error">
-    <blockquote>
-      <div class="error01">
-        <TMPL_VAR NAME="Localize_Imap_ServerNameError">
-      </div>
-    </blockquote>
-    </TMPL_IF>
-
-    <label class="configurationLabel">
+    <input id="imap_hostname" name="imap_hostname" type="text" value="<TMPL_VAR NAME="IMAP_hostname">" />
+    <br />
+    <label for="imap_port" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Port">
     </label>
     <br />
-    <input name="imap_port" type="text" value="<TMPL_VAR NAME="IMAP_port">" /><br />
-
-    <TMPL_IF NAME="IMAP_connection_if_port_error">
-    <blockquote>
-      <div class="error01">
-        <TMPL_VAR NAME="Localize_Imap_PortError">
-      </div>
-    </blockquote>
-    </TMPL_IF>
-    
-    <label class="configurationLabel">
+    <input id="imap_port" name="imap_port" type="text" value="<TMPL_VAR NAME="IMAP_port">" />
+    <br />
+    <label for="imap_login" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Login">
     </label>
     <br />
-    <input name="imap_login" type="text" value="<TMPL_VAR NAME="IMAP_login">" /><br />
-
-    <TMPL_IF NAME="IMAP_connection_if_login_error">
-    <blockquote>
-      <div class="error01">
-        <TMPL_VAR NAME="Localize_Imap_LoginError">
-      </div>
-    </blockquote>
-    </TMPL_IF>
-
-    <label class="configurationLabel">
+    <input id="imap_login" name="imap_login" type="text" value="<TMPL_VAR NAME="IMAP_login">" />
+    <br />
+    <label for="imap_password" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Password">
     </label>
     <br />
-    <input type="password" name="imap_password" value="<TMPL_VAR NAME="IMAP_password">" /><br />
-
-    <TMPL_IF NAME="IMAP_connection_if_password_error">
-    <blockquote>
-      <div class="error01">
-        <TMPL_VAR NAME="Localize_Imap_PasswordError">
-      </div>
-    </blockquote>
-    </TMPL_IF>
-
-    <p />
+    <input id="imap_password" type="password" name="imap_password" value="<TMPL_VAR NAME="IMAP_password">" />
+    <br />
     <input type="submit" class="submit" name="update_imap_0_connection_details" value="<TMPL_VAR NAME="Localize_Apply">" />
     <hr width="60%" align="center" />
 </form>

@@ -2,32 +2,20 @@
 
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
 
-    <input type="checkbox" class="checkbox" name="imap_options_expunge" value="1" <TMPL_VAR NAME="IMAP_expunge_is_checked"> />
-    <label class="configurationLabel">
+    <input id="imap_expunge" type="checkbox" class="checkbox" name="imap_options_expunge" value="1" <TMPL_VAR NAME="IMAP_expunge_is_checked"> />
+    <label for="imap_expunge" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Expunge">
     </label>
     <p />
 
-    <label class="configurationLabel">
+    <label for="imap_update_interval" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Interval">
     </label>
-
-    <TMPL_IF NAME="IMAP_if_interval_error">
-
-    <blockquote>
-        <div class="error01">
-            <TMPL_VAR NAME="Localize_Imap_IntervalError">
-        </div>
-    </blockquote>
-
-    </TMPL_IF>
-
     <br />
-    <input type="text" name="imap_options_update_interval" value="<TMPL_VAR NAME="IMAP_interval">" />
+    <input id="imap_update_interval" type="text" name="imap_options_update_interval" value="<TMPL_VAR NAME="IMAP_interval">" />
     <p />
 
     <input type="submit" class="submit" name="update_imap_5_options" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <hr width="60%" align="center" />
 </form>
 
 <!-- End of template imap-options.thtml -->

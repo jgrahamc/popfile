@@ -3,16 +3,12 @@
 <TMPL_IF NAME="IMAP_if_mailboxes">
 
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <input type="submit" class="submit" name="imap_2_watch_more_folders" value="<TMPL_VAR NAME="Localize_Add">" />
-    <label class="configurationLabel">
+    <input id="imap_watch_more" type="submit" class="submit" name="imap_2_watch_more_folders" value="<TMPL_VAR NAME="Localize_Add">" />
+    <label for="imap_watch_more" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_WatchMore">
     </label>
     <br />
 </form>
-
-<TMPL_ELSE>
-
-    <!-- Nothing to do for imap-watch-more-folders.thtml -->
 
 </TMPL_IF>
 

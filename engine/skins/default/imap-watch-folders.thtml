@@ -6,11 +6,11 @@
 
     <TMPL_LOOP NAME="IMAP_loop_watched_folders">
 
-    <label class="configurationLabel">
+    <label for="imap_folder_<TMPL_VAR NAME="IMAP_loop_counter">" class="configurationLabel">
         <TMPL_VAR NAME="IMAP_WatchedFolder_Msg"><TMPL_VAR NAME="IMAP_loop_counter">
     </label>
     <br />
-    <select name="imap_folder_<TMPL_VAR NAME="IMAP_loop_counter">">
+    <select id="imap_folder_<TMPL_VAR NAME="IMAP_loop_counter">" name="imap_folder_<TMPL_VAR NAME="IMAP_loop_counter">">
 
     <TMPL_LOOP NAME="IMAP_loop_mailboxes">
 
