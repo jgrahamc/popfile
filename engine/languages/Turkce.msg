@@ -17,8 +17,8 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 # Translated by / Çeviri:
-# Zeynel Abidin Öztürk <zeynelo@e-kolay.net>
-# POPFile 0.20.0 Turkish Translation
+# Zeynel Abidin Öztürk <ozturk@gmx.net>
+# POPFile 0.22.0 Turkish Translation
 
 # Identify the language and character set used for the interface
 LanguageCode                            tr
@@ -27,6 +27,9 @@ LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          en
+
+# This is where to find the FAQ on the Wiki
+FAQLink                                 FrequentlyAskedQuestions
 
 # Common words that are used on their own all over the interface
 Apply                                   Uygula
@@ -69,6 +72,28 @@ Word                                    Sözcük
 Count                                   Miktar
 Update                                  Güncelle
 Refresh                                 Yenile
+FAQ                                     Sýk Sorulan Sorular
+ID                                      Kimlik
+Date                                    Tarih
+Arrived                                 Alýnma
+Size                                    Boyut 
+
+# This is a regular expression pattern that is used to convert
+# a number into a friendly looking number (for the US and UK this
+# means comma separated at the thousands)
+
+Locale_Thousands                       ,
+Locale_Decimal                         .
+
+# The Locale_Date uses the format strings in Perl's Date::Format
+# module to set the date format for the UI.  There are two possible
+# ways to specify it.
+#
+# <format>            Just one simple format used for all dates
+# <<format> | <format> The first format is used for dates less than
+#                     7 days from now, the second for all other dates
+
+Locale_Date                            %a %R | %D %R
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Denetim Merkezi
@@ -86,6 +111,7 @@ Footer_Forums                           Forumlar
 Footer_FeedMe                           Baðýþ Yap
 Footer_RequestFeature                   Özellik Ýsteðinde Bulun
 Footer_MailingList                      Posta Listesi
+Footer_Wiki                             Belgeler
 
 Configuration_Error1                    Ayýrýcý karakter tek bir karakter olmalýdýr
 Configuration_Error2                    Kullanýcý arayüzü portu 1 ile 65535 arasýnda bir sayý olmalýdýr
@@ -94,6 +120,7 @@ Configuration_Error4                    Sayfa boyutu 1 ile 1000 arasýnda bir say
 Configuration_Error5                    Geçmiþteki gün sayýsý 1 ile 366 arasýnda bir sayý olmalýdýr
 Configuration_Error6                    TCP zaman aþýmý 10 ile 300 arasýnda bir sayý olmalýdýr
 Configuration_Error7                    XML RPC dinleme portu 1 ile 65535 arasýnda bir numara olmalýdýr
+Configuration_Error8                    SOCKS V proxy port sayýsý 1 ve 65535 arasýnda bir sayý olmalýdýr
 Configuration_POP3Port                  POP3 dinleme portu
 Configuration_POP3Update                POP3 portu %s olarak güncellendi; bu deðiþiklik siz POPFile'ý yeniden baþlatana kadar etkili olmayacaktýr
 Configuration_XMLRPCUpdate              XML-RPC portu %s olarak güncellendi; bu deðiþiklik siz POPFile'ý yeniden baþlatana kadar etkili olmayacaktýr
@@ -139,6 +166,11 @@ Configuration_GeneralSkins              Dýþ görünümler
 Configuration_SmallSkins                Küçük Dýþ Görünümler
 Configuration_TinySkins                 Daha Küçük Dýþ Görünümler
 Configuration_CurrentLogFile            &lt;þimdiki günlük dosyasý&gt;
+Configuration_SOCKSServer               SOCKS V proxy sunucusu
+Configuration_SOCKSPort                 SOCKS V proxy port
+Configuration_SOCKSPortUpdate           SOCKS V proxy port %s olarak güncellendi
+Configuration_SOCKSServerUpdate         SOCKS V proxy sunucusu to %s olarak güncellendi
+Configuration_Fields                    Geçmiþ sütunlarý
 
 Advanced_Error1                         '%s' zaten Yoksayýlan Sözcükler listesinde
 Advanced_Error2                         Yoksayýlan kelimeler sadece harfleri, sayýlarý, ., _, -, veya @ karakterlerini içerebilir
@@ -153,6 +185,7 @@ Advanced_AllParameters                  Tüm POPFile Parametreleri
 Advanced_Parameter                      Parametre
 Advanced_Value                          Deðer
 Advanced_Warning                        Bu POPFile parametrelerinin tam bir listesidir. Sadece ileri seviye kullanýcýlar içindir: herhangi bir þeyi deðiþtirebilir ve güncelleyebilirsiniz; geçerlilik kontrolü yapýlmaz.
+Advanced_ConfigFile                     Yapýlandýrma dosyasý:
 
 History_Filter                          &nbsp;(þu an <font color="%s">%s</font> kategorisi görüntüleniyor)
 History_FilterBy                        Filtreleme
@@ -170,6 +203,7 @@ History_ChangedTo                       <font color="%s">%s</font> olarak deðiþt
 History_Already                         <font color="%s">%s</font> olarak tekrar sýnýflandýrýldý
 History_RemoveAll                       Tümünü Kaldýr
 History_RemovePage                      Sayfayý Kaldýr
+History_RemoveChecked                   Seçileni Kaldýr
 History_Remove                          Geçmiþteki girdileri kaldýrmak için týklayýn:
 History_SearchMessage                   Kimden/Konu Ara
 History_NoMessages                      Mesaj yok
@@ -178,6 +212,16 @@ History_ShowNoMagnet                    mýknatýslanmamýþ
 History_Magnet                          &nbsp;(þu an mýknatýs ile sýnýflandýrýlmýþ mesajlar görüntüleniyor)
 History_NoMagnet                        &nbsp;(þu an mýknatýs ile sýnýflandýrýlmamýþ mesajlar görüntüleniyor)
 History_ResetSearch                     Aramayý Sýfýrla
+History_ChangedClass                    Böyle sýnýflandýrýlabilir
+History_Purge                           Þimdi Sil
+History_Increase                        Arttýr
+History_Decrease                        Azalt
+History_Column_Characters               Kimden, Kime, Bilgi ve Konu sütunlarýnýn geniþliðini deðiþtir
+History_Automatic                       Otomatik
+History_Reclassified                    Tekrar sýnýflandýrýlmýþ
+History_Size_Bytes                      %d&nbsp;B
+History_Size_KiloBytes                  %.1f&nbsp;KB
+History_Size_MegaBytes                  %.1f&nbsp;MB 
 
 Password_Title                          Parola
 Password_Enter                          Parolayý girin
@@ -187,6 +231,7 @@ Password_Error1                         Yanlýþ parola
 Security_Error1                         Port 1 ile 65535 arasýnda bir numara olmalýdýr
 Security_Stealth                        Gizli Mod/Sunucu Çalýþmasý
 Security_NoStealthMode                  Hayýr (Gizli Mod)
+Security_StealthMode                    (Gizli Mod)
 Security_ExplainStats                   (Bu ayar açýk olduðunda, POPFile günde bir kez olmak üzere þu deðerleri www.usethesource.com içindeki bir koda gönderir; bc (sahip olduðunuz toplam kategori sayýsý), mc (POPFile'ýn sýnýflandýrdýðý toplam mesaj sayýsý) ve ec (toplam sýnýflandýrma hatasý sayýsý). Bu bilgiler bir dosyada saklanýr, bunlarý kullanýcýlarýn POPFile'ý nasýl kullandýðýný ve ne kadar iyi çalýþtýðý hakkýnda istatistikler yayýnlamak amacýyla kullanacaðým.  Web sunucum günlük dosyalarýný yaklaþýk 5 gün saklar ve siler; istatistikler ve IP adresleri arasýnda herhangi bir baðlantý biriktirmemekteyim.)
 Security_ExplainUpdate                  (Bu ayar açýk olduðunda, POPFile günde bir kez olmak üzere þu üç deðeri www.usethesource.com içindeki bir koda gönderir; ma (yüklediðiniz POPFile'ýn büyük sürüm numarasý), mi (yüklediðiniz POPFile'ýn küçük sürüm numarasý) ve bn (yüklediðiniz POPFile'ýn yapý [build] numarasý).  Yeni bir sürüm bulunduðunda POPFile, sayfanýn üstünde gösterilen, grafik biçiminde bir cevap alýr.  Web sunucum günlük dosyalarýný yaklaþýk 5 gün saklar ve siler; güncelleme kontrolleri ve IP adresleri arasýnda herhangi bir baðlantý biriktirmemekteyim.)
 Security_PasswordTitle                  Kullanýcý Arayüzü Parolasý
@@ -206,10 +251,9 @@ Security_SMTP                           Uzak bilgisayarlardan SMTP baðlantýlarýn
 Security_NNTP                           Uzak bilgisayarlardan NNTP baðlantýlarýný kabul et (POPFile'ý yeniden baþlatmak gerekir)
 Security_UI                             Uzak bilgisayarlardan HTTP (Kullanýcý Arayüzü) baðlantýlarýný kabul et (POPFile'ý yeniden baþlatmak gerekir)
 Security_XMLRPC                         Uzak bilgisayarlardan XML-RPC baðlantýlarýný kabul et (POPFile'ý yeniden baþlatmak gerekir)
-
 Security_UpdateTitle                    Otomatik Güncelleme Kontrolü
-Security_Update                         Her gün POPFile güncellemesi için kontrol et
-Security_StatsTitle                     Ýstatistik Bildirme
+Security_Update                         POPFile güncellemesi için her gün kontrol et
+Security_StatsTitle                     Ýstatistik Raporlama
 Security_Stats                          Her gün istatistik gönder
 
 Magnet_Error1                           Mýknatýs '%s', kategori '%s' içersinde zaten var
@@ -283,6 +327,7 @@ View_WordMatrix                         Sözcük matrisi
 View_WordProbabilities                  sözcük olasýlýklarý görüntüleniyor
 View_WordFrequencies                    sözcük frekanslarý görüntüleniyor
 View_WordScores                         sözcük puanlarý görüntüleniyor
+View_Chart                              Karar grafiði
 
 Windows_TrayIcon                        POPFile simgesi Windows sistem çubuðunda gösterilsin mi?
 Windows_Console                         POPFile konsol penceresinde mi çalýþtýrýlsýn?
@@ -304,4 +349,32 @@ Configuration_InsertionTableSummary     Bu tablo, mesajýn posta programýna (clie
 Security_MainTableSummary               Bu tablo, otomatik olarak program güncellemelerinin kontrol edilip edilmeyeceði, POPFile'ýn performansý hakkýndaki istatistiklerin genel bilgi için program yapýmcýsýnýn veri deposu merkezine gönderilip gönderilmeyeceði hakkýnda POPFile'ýn tüm yapýlandýrmasýnýn güvenliðini etkileyecek denetim gruplarý saðlar.
 Advanced_MainTableSummary               Bu tablo, POPFile'ýn genelde mesajdaki göreceli frekanslarý nedeniyle yoksaydýðý sözcüklerin listesini sunar.  Bunlar her satýrda sözcüðün ilk harfine göre düzenlenmiþtir.
 
+Imap_Bucket2Folder                      %s kategorisindeki posta %s klasörüne gider
+Imap_MapError                           Bir klasöre birden fazla kategori atayamazsýnýz!
+Imap_Server                             IMAP sunucusu:
+Imap_ServerNameError                    Lütfen sunucunun adýný girin!
+Imap_Port                               IMAP Sunucu portu:
+Imap_PortError                          Lütfen geçerli bir port numarasý girin!
+Imap_Login                              IMAP hesabý oturum açma adý:
+Imap_LoginError                         Lütfen bir kullanýcý/oturum açma adý girin!
+Imap_Password                           IMAP hesabý parolasý:
+Imap_PasswordError                      Lütfen sunucu için bir parola girin!
+Imap_Expunge                            Silinen mesajlarý izlenen klasörlerden kaldýr.
+Imap_Interval                           Güncelleme aralýðý, saniye:
+Imap_IntervalError                      Lütfen 10 ile 3600 saniye arasýnda bir sayý girin.
+Imap_Bytelimit                          Her mesajýn sýnýflandýrýlmasýnda kullanýlacak bayt. Tüm mesaj için 0 girin:
+Imap_BytelimitError                     Lütfen bir sayý girin.
+Imap_RefreshFolders                     Klasör listesini yenile
+Imap_Now                                þimdi!
+Imap_UpdateError1                       Oturum açýlamýyor. Lütfen oturum açma adýný ve parolayý kontrol edin.
+Imap_UpdateError2                       Sunucuyla baðlantý kurulamýyor. Lütfen sunucu adýný ve port numarasýný kontrol edin ve aða baðlý olduðunuzdan emin olun.
+Imap_UpdateError3                       Lütfen önce baðlantý detaylarýný ayarlayýn.
+Imap_NoConnectionMessage                Lütfen önce baðlantý detaylarýný ayarlayýn. Bunu yaptýktan sonra, bu sayfada daha fazla seçenek belirecektir.
+Imap_WatchMore                          a folder to list of watched folders
+Imap_WatchedFolder                      Ýzlenilen klasör numarasý
 
+Shutdown_Message                        POPFile kapatýldý
+
+Help_Training                           POPFile'ý ilk kullandýðýnýzda o hiçbir bilgiye sahip deðildir ve eðitime ihtiyacý vardýr. POPFile her kategori için mesajlar ile eðitilmelidir. Eðitim, POPFile bir mesajý yanlýþ sýnýflandýrdýðýnda bunu doðru kategori ile tekrar sýnýflandýrarak gerçekleþtirilir. Bunun dýþýnda, posta programýnýzýn mesajlarý POPFile'ýn sýnýflandýrmasýna göre filtrelemesi için ayarlamalýsýnýz. Posta programýnýzýn filtelerini ayarlamak hakkýnda bilgi <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Dökümantasyon Projesi</a> adresinde bulunabilir.
+Help_Bucket_Setup                       POPFile, sýnýflandýrýlmamýþ pseudo-kategorisi dýþýnda en az iki kategori gerektirir. POPFile'ý eþsiz yapan, ikiden fazla, istediðiniz sayýda kategoriye sahip olabilmenizdir. Basit bir kurulum, "spam", "kiþisel", ve "iþ" kategorileri gibi olabilir.
+Help_No_More                            Bunu bir daha gösterme 
