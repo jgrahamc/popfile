@@ -537,7 +537,7 @@ sub url_handler__
 
     if ( $url =~ /(popfile.*\.log)/ ) {
         $self->http_file_( $client, $self->get_user_path_( $self->module_config_( 'logger', 'logdir' ) . $1 ), 'text/plain' );
-        $self->{classifier__}->{classifier__}->release_session_key( $self->{api_session__} );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 

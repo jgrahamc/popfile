@@ -188,7 +188,7 @@ sub debug
     if ( $self->global_config_( 'debug' ) > 0 ) {
         # Check to see if we are handling the USER/PASS command and if we are then obscure the
         # account information
-        $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
+        $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/i );
         chomp $message;
         $message .= "\n";
 
