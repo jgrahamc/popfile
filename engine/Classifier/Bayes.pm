@@ -860,7 +860,7 @@ sub upgrade_predatabase_data__
 
         # A bucket directory must be lowercase
 
-        next if ( lc($bucket) ne $bucket );
+        next if ( lc(basename($bucket)) ne basename($bucket) );
 
         # A bucket directory must be a directory
 
