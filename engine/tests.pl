@@ -144,3 +144,9 @@ for my $parse_test (@parse_tests) {
     
     print "\n";
 }
+
+# Check that from, to and subject get set correctly when parsing a message
+$cl->parse_stream( 'tests/TestMailParse013.tst' );
+ok( $cl->{from},    'RN <rrr@nnnnnnnnn.com>'                        );
+ok( $cl->{to},      '"Armlet Forum" <armlet-forum@news.palmos.com>' );
+ok( $cl->{subject}, '(Archive Copy) RE: CW v9 and armlets...'       );

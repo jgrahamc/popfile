@@ -376,7 +376,7 @@ sub update_tag
         my $parse_script_uri = 0;
 
 		# Count the number of TD elements
-		increment_word( $self, 'html:td' );
+		increment_word( $self, 'html:td' ) if ( $tag =~ /^td$/i );
         
         # Tags with src attributes
 
@@ -654,12 +654,13 @@ sub parse_html
 	$line =~ s/[\r\n]+/ /g;
     $line =~ s/[\t ]+$//;
 
-    print "parse_html: [$line]\n" if $self->{debug};
+    print "parse_html: [$line] $self->{in_html_tag}\n" if $self->{debug};
    
     # Remove HTML comments and other tags that begin !
 
     while ( $line =~ s/<!.*?>// ) {
         increment_word( $self, 'html:comment' );
+        print "$line\n" if $self->{debug};
     }
 
     while ( $found && ( $line ne '' ) ) {
