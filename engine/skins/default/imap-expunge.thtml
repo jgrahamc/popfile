@@ -1,0 +1,14 @@
+<!--  This is the output of template imap-expunge.thtml -->
+
+<form action="/configuration" method="post">
+
+    <input type="checkbox" name="imap_expunge" value="1" <TMPL_VAR NAME="IMAP_expunge_is_checked"> />
+
+    <label class="configurationLabel"><!-- localize -->Expunge deleted messages from watched folders.</label><br />
+
+    <input type="submit" class="submit" name="update_imap_8_expunge" value="<TMPL_VAR NAME="Localize_Apply">" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+
+<!-- End of template imap-expunge.thtml -->
