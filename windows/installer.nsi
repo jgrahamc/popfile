@@ -298,7 +298,7 @@
   VIProductVersion "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.0"
 
   VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Automatic email classification"
@@ -1225,7 +1225,7 @@ create_shortcuts:
 
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
-              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
+              "http://getpopfile.org/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
 
   !ifndef ENGLISH_MODE
       Goto support
@@ -1233,7 +1233,7 @@ create_shortcuts:
     japanese_faq:
       WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
                   "InternetShortcut" "URL" \
-                  "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions"
+                  "http://getpopfile.org/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions"
 
     support:
   !endif
@@ -1242,7 +1242,7 @@ create_shortcuts:
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
-              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+              "InternetShortcut" "URL" "http://getpopfile.org/"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" NORMAL
 
@@ -1252,7 +1252,7 @@ create_shortcuts:
 
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
               "InternetShortcut" "URL" \
-              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?POPFileDocumentationProject"
+              "http://getpopfile.org/cgi-bin/wiki.pl?POPFileDocumentationProject"
 
   !ifndef ENGLISH_MODE
       Goto pfidiagnostic
@@ -1260,7 +1260,7 @@ create_shortcuts:
     japanese_wiki:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
                   "InternetShortcut" "URL" \
-                  "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_POPFileDocumentationProject"
+                  "http://getpopfile.org/cgi-bin/wiki.pl?JP_POPFileDocumentationProject"
 
     pfidiagnostic:
   !endif
@@ -1609,7 +1609,10 @@ Section /o "XMLRPC" SecXMLRPC
   File /r "${C_PERL_DIR}\site\lib\LWP\*"
 
   SetOutPath "$G_MPLIBDIR\Net"
-  File /r "${C_PERL_DIR}\site\lib\Net\*"
+  File "${C_PERL_DIR}\site\lib\Net\HTT*"
+
+  SetOutPath "$G_MPLIBDIR\Net\HTTP"
+  File "${C_PERL_DIR}\site\lib\Net\HTTP\*"
 
   SetOutPath "$G_MPLIBDIR\SOAP"
   File /r "${C_PERL_DIR}\site\lib\SOAP\*"
