@@ -27,19 +27,12 @@ package Classifier::MailParse;
 use strict;
 use locale;
 
-use threads;
-use Thread::Semaphore;
+use POPFile::Mutex;
 
 use MIME::Base64;
 use MIME::QuotedPrint;
 
 use HTML::Tagset;
-
-# This semaphore is used be parse_line_with_kakasi to prevent
-# multiple access to the Kakasi library since it is not thread
-# safe.
-
-my $kakasi_semaphore = new Thread::Semaphore;
 
 # Korean characters definition
 
@@ -2510,7 +2503,10 @@ sub parse_line_with_kakasi
     my $need_semaphore = ( ( $^O eq 'MSWin32' ) && ( $$ < 0 ) );
 
     if ( $need_semaphore ) {
-        $kakasi_semaphore->down;
+        if ( !defined( $self->{mutex__} ) ) {
+  	    $self->{mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
+        }
+        $self->{mutex__}->acquire();
     }
 
     Text::Kakasi::getopt_argv("kakasi", "-w -ieuc -oeuc");
@@ -2518,7 +2514,7 @@ sub parse_line_with_kakasi
     Text::Kakasi::close_kanwadict();
 
     if ( $need_semaphore ) {
-        $kakasi_semaphore->up;
+        $self->{mutex__}->release();
     }
 
     return $line;
