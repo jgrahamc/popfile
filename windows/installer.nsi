@@ -106,6 +106,7 @@
 # This build of the installer is unable to detect every case where short file name support has
 # been disabled, so this command-line switch is provided to force the installer to insist upon
 # paths which do not contain spaces.  The switch can use uppercase or lowercase.
+#
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
@@ -158,19 +159,19 @@
   ;--------------------------------------------------------------------------
 
   !ifndef C_POPFILE_MAJOR_VERSION
-    !error "$\r$\n$\r$\nFatal error: POPFile Major Version parameter not supplied$\r$\n"
+    !error "$\r$\n$\r$\nFatal error: 'POPFile Major Version' parameter not supplied$\r$\n"
   !endif
 
   !ifndef C_POPFILE_MINOR_VERSION
-    !error "$\r$\n$\r$\nFatal error: POPFile Minor Version parameter not supplied$\r$\n"
+    !error "$\r$\n$\r$\nFatal error: 'POPFile Minor Version' parameter not supplied$\r$\n"
   !endif
 
   !ifndef C_POPFILE_REVISION
-    !error "$\r$\n$\r$\nFatal error: POPFile Revision parameter not supplied$\r$\n"
+    !error "$\r$\n$\r$\nFatal error: 'POPFile Revision' parameter not supplied$\r$\n"
   !endif
 
   !ifndef C_POPFILE_RC
-    !error "$\r$\n$\r$\nFatal error: POPFile RC parameter not supplied$\r$\n"
+    !error "$\r$\n$\r$\nFatal error: 'POPFile RC' parameter not supplied$\r$\n"
   !endif
 
   !define C_PFI_PRODUCT  "POPFile"
@@ -713,7 +714,14 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Installer Section: POPFile component
+# Installer Section: POPFile component (always installed)
+#
+# (a) If upgrading, shutdown existing version and rearrange minimal Perl files
+# (b) Create registry entries (HKLM and/or HKCU) for POPFile program files
+# (c) Install POPFile core program files and release notes
+# (d) Install minimal Perl system
+# (e) Write the uninstaller program and create/update the Start Menu shortcuts
+# (f) Create 'Add/Remove Program' entry
 #--------------------------------------------------------------------------
 
 Section "POPFile" SecPOPFile
@@ -741,7 +749,7 @@ Section "POPFile" SecPOPFile
   ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure
   ; and there was only one set of user data (stored in the same folder as POPFile).
 
-  ; Phase 1 of the multi-user support introduced in 0.21.0 requires some slight changes
+  ; Phase 1 of the multi-user support introduced in 0.21.0 required some slight changes
   ; to the folder structure (to permit POPFile to be run from any folder after setting the
   ; POPFILE_ROOT and POPFILE_USER environment variables to appropriate values).
 
@@ -848,6 +856,8 @@ save_HKCU_root_sfn:
   File "stop_pf.exe"
   File "sqlite.exe"
   File "adduser.exe"
+
+  ; Add 'stop_pf.exe' to 'App Paths' to allow it to be run using Start -> Run -> stop.pf params
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\stop_pf.exe" \
       "" "$G_ROOTDIR\stop_pf.exe"
@@ -1022,6 +1032,9 @@ save_HKCU_root_sfn:
   File "${C_PERL_DIR}\lib\overload.pm"
   File "${C_PERL_DIR}\site\lib\DBI.pm"
 
+  SetOutPath $G_MPLIBDIR\DBD
+  File "${C_PERL_DIR}\site\lib\DBD\SQLite.pm"
+
   SetOutPath $G_MPLIBDIR\auto\DBD\SQLite
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.bs"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.dll"
@@ -1033,9 +1046,6 @@ save_HKCU_root_sfn:
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.dll"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.lib"
-
-  SetOutPath $G_MPLIBDIR\DBD
-  File "${C_PERL_DIR}\site\lib\DBD\SQLite.pm"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
@@ -1061,6 +1071,9 @@ save_HKCU_root_sfn:
   ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
+  ; 'CreateShortCut' fails to update existing shortcuts if they are read-only, so try to clear
+  ; the read-only attribute first. Similar handling is required for the Internet shortcuts.
+
   ; If the user has 'Admin' rights, create a 'POPFile' folder with a set of shortcuts in
   ; the 'All Users' Start Menu . If the user does not have 'Admin' rights, the shortcuts
   ; are created in the 'Current User' Start Menu.
@@ -1074,31 +1087,45 @@ save_HKCU_root_sfn:
 create_shortcuts:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
                  "$INSTDIR\runpopfile.exe"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
 
   SetOutPath $G_ROOTDIR
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
                  "$G_ROOTDIR\${C_README}.txt"
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" NORMAL
 
   !ifndef ENGLISH_MODE
       StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_faq
   !endif
-  
+
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
               "http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
-              
+
   !ifndef ENGLISH_MODE
       Goto support
 
@@ -1109,12 +1136,16 @@ create_shortcuts:
 
     support:
   !endif
-  
+
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
   SetOutPath $G_ROOTDIR
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
@@ -1698,6 +1729,7 @@ done:
 
   StrCmp ${L_NEW_GUI} "" try_old_style
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI} [new style port]"
+  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
   Push ${L_NEW_GUI}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -1707,6 +1739,7 @@ done:
 try_old_style:
   StrCmp ${L_OLD_GUI} "" manual_shutdown
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI} [old style port]"
+  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
   Push ${L_OLD_GUI}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -1767,17 +1800,6 @@ FunctionEnd
 # is required (to avoid Perl runtime errors when POPFile is started from a folder other than
 # the one where POPFile is installed).
 #--------------------------------------------------------------------------
-
-!macro MinPerlMove SUBFOLDER
-
-  !insertmacro PFI_UNIQUE_ID
-
-  IfFileExists "$INSTDIR\${SUBFOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
-  Rename "$INSTDIR\${SUBFOLDER}" "$G_MPLIBDIR\${SUBFOLDER}"
-
-skip_${PFI_UNIQUE_ID}:
-
-!macroend
 
 Function MinPerlRestructure
 
@@ -2007,6 +2029,16 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Section
+#
+# (a) Run uninstalluser.exe to remove 'User Data' from PROGRAM folder
+# (b) If 'User Data' was not uninstalled, preserve it for another attempt later
+# (c) Shutdown POPFile if necessary
+# (d) Remove Start Menu shortcuts
+# (e) Uninstall POPFile PROGRAM files, skins, UI languages and English manual
+# (f) Uninstall Kakasi package and remove its environment variables
+# (g) Uninstall minimal Perl, including the optional modules
+# (h) Remove the 'Add/Remove Program' data and other registry entries
+# (i) Offer to remove remaining files/folders (if 'User Data' not to be preserved)
 #--------------------------------------------------------------------------
 
 Section "Uninstall"
@@ -2125,6 +2157,7 @@ ui_port_done:
   Pop $G_GUI
   StrCmp $G_GUI "" manual_shutdown
   DetailPrint "$(PFI_LANG_UN_LOG_1) $G_GUI"
+  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
   Push $G_GUI
   Call un.ShutdownViaUI
   Pop ${L_TEMP}

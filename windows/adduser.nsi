@@ -151,7 +151,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.4"
+  !define C_PFI_VERSION  "0.2.5"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -617,8 +617,9 @@
 
 Function .onInit
 
-  ; The command-line switch '/install' is used to suppress this wizard's WELCOME page and
-  ; language selection dialog when the wizard is called from 'setup.exe' during installation.
+  ; The command-line switch '/install' (or '/installreboot') is used to suppress this wizard's
+  ; language selection dialog (and the WELCOME page) when the wizard is called from 'setup.exe'
+  ; during installation of POPFile.
 
   Call GetParameters
   Pop $G_PFISETUP
@@ -743,6 +744,13 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Section: POPFile component
+#
+# (a) If upgrading, shutdown existing version of POPFile
+# (b) Create registry entries for current user (HKCU)
+# (c) Create POPFILE_ROOT & POPFILE_USER environment variables (temporary ones if Win9x system)
+# (d) Install/update POPFile configuration files (popfile.cfg, stopwords, stopwords.default)
+# (e) Write the uninstaller (for the 'User Data') and create/update the Start Menu shortcuts
+# (f) Create 'Add/Remove Program' entry for the 'User Data'
 #--------------------------------------------------------------------------
 
 Section "POPFile" SecPOPFile
@@ -887,6 +895,7 @@ continue:
 
   ; Create a shortcut to make it easier to run the SQLite utility
 
+  SetFileAttributes "$G_USERDIR\Run SQLite utility.lnk" NORMAL
   CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
                  "$G_ROOTDIR\sqlite.exe" "popfile.db"
 
@@ -953,6 +962,9 @@ update_config:
   ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
+  ; 'CreateShortCut' fails to update existing shortcuts if they are read-only, so try to clear
+  ; the read-only attribute first. Similar handling is required for the Internet shortcuts.
+
   ; For this build the following simple scheme is used for the shortcuts:
   ; (a) a 'POPFile' folder with the standard set of shortcuts is created for the current user
   ; (b) if the user ticked the relevant checkbox then a 'Run POPFile' shortcut is placed in the
@@ -964,8 +976,12 @@ update_config:
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $G_ROOTDIR
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
                  "$G_ROOTDIR\runpopfile.exe"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk" \
                  "$G_USERDIR\uninstalluser.exe"
 
@@ -979,26 +995,35 @@ update_config:
   IfFileExists "$G_ROOTDIR\${L_TEMP}" 0 skip_rel_notes
 
   SetOutPath $G_ROOTDIR
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
                  "$G_ROOTDIR\${L_TEMP}"
 
 skip_rel_notes:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
+
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" NORMAL
 
   !ifndef ENGLISH_MODE
       StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_faq
   !endif
-  
+
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
               "http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
-              
+
   !ifndef ENGLISH_MODE
       Goto support
 
@@ -1009,12 +1034,14 @@ skip_rel_notes:
 
     support:
   !endif
-  
+
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
   SetOutPath $G_ROOTDIR
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
@@ -1025,6 +1052,7 @@ skip_rel_notes:
 set_autostart_set:
   SetOutPath $SMSTARTUP
   SetOutPath $G_ROOTDIR
+  SetFileAttributes "$SMSTARTUP\Run POPFile.lnk" NORMAL
   CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$G_ROOTDIR\runpopfile.exe" "/startup"
 
 end_autostart_set:
@@ -1233,6 +1261,8 @@ continue:
   WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Corpus" "${L_TEMP}"
   WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status" "new"
 
+  ; Extract the 'Monitor Corpus Conversion' utility (for use by the 'ConvertCorpus' function)
+
   File "/oname=$PLUGINSDIR\monitorcc.exe" "monitorcc.exe"
 
   SetDetailsPrint textonly
@@ -1378,8 +1408,8 @@ SectionEnd
 
 Function CheckStartMode
 
-  ; The command-line switch '/install' is used to suppress this wizard's
-  ; WELCOME page and language selection dialog when it is called from 'setup.exe'.
+  ; The command-line switch '/install' (or '/installreboot') is used to suppress this wizard's
+  ; language selection dialog and WELCOME page when it is called from 'setup.exe'.
 
   StrCmp $G_PFISETUP "/install" skip_WELCOME_page
   StrCmp $G_PFISETUP "/installreboot" 0 show_WELCOME_page
@@ -1482,8 +1512,8 @@ FunctionEnd
 #
 # POPFile currently does not support paths containing spaces in POPFILE_ROOT and POPFILE_USER
 # so we use the short file name format for these two environment variables. However some
-# NTFS-based systems have disabled the creation of short file names - so we have to reject any
-# path which contains spaces.
+# NTFS-based systems have disabled the creation of short file names and in these cases we reject
+# any path which contains spaces.
 #--------------------------------------------------------------------------
 
 Function CheckExistingDataDir
@@ -1525,10 +1555,7 @@ upgrade_check:
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
 
-  IfFileExists "$G_USERDIR\popfile.cfg" warning
-  Goto continue
-
-warning:
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 continue
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
       $\r$\n$\r$\n\
       $G_USERDIR\
@@ -1998,6 +2025,7 @@ Function MakeUserDirSafe
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "NewStyle"
   StrCmp ${L_GUI_PORT} "" try_old_style
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_GUI_PORT} [new style port]"
+  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
   Push ${L_GUI_PORT}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -2008,6 +2036,7 @@ try_old_style:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "OldStyle"
   StrCmp ${L_GUI_PORT} "" manual_shutdown
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_GUI_PORT} [old style port]"
+  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
   Push ${L_GUI_PORT}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -4604,6 +4633,14 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Section
+#
+# (a) Shutdown POPFile if necessary
+# (b) Remove current user's POPFile configuration files
+# (c) Restore current user's email client settings (Outlook Express, Outlook and Eudora)
+# (d) Remove current user's corpus folders and message history
+# (e) Remove current user's POPFILE_ROOT and POPFILE_USER environment variables
+# (f) Remove the 'Add/Remove Program' data and other registry entries for current user
+# (g) Offer to remove remaining files/folders in 'User Data' folder (if safe to do so)
 #--------------------------------------------------------------------------
 
 Section "Uninstall"
@@ -4625,7 +4662,7 @@ Section "Uninstall"
 
 skip_confirmation:
 
-  ; Shutdown POPFile is it is running, so we can remove the SQL database and other user data
+  ; Shutdown POPFile is it is running, so we can remove the SQLite database and other user data
 
   Push "$G_ROOTDIR\popfileb.exe"
   Call un.CheckIfLocked
@@ -4693,6 +4730,7 @@ ui_port_done:
   Pop $G_GUI
   StrCmp $G_GUI "" use_other_port
   DetailPrint "$(PFI_LANG_UN_LOG_1) $G_GUI"
+  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
   Push $G_GUI
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
@@ -4705,6 +4743,7 @@ use_other_port:
   Pop ${L_OLDUI}
   StrCmp ${L_OLDUI} "" remove_user_data
   DetailPrint "$(PFI_LANG_UN_LOG_1) ${L_OLDUI}"
+  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
   Push ${L_OLDUI}
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
@@ -4902,23 +4941,23 @@ cleanup_registry:
 
   IfFileExists "$G_USERDIR\*.*" 0 exit
 
-    ; Check if the user data was stored in same folder as the POPFile program files
+  ; Check if the user data was stored in same folder as the POPFile program files
 
-    IfFileExists "$G_USERDIR\popfile.pl" exit
-    IfFileExists "$G_USERDIR\perl.exe" exit
+  IfFileExists "$G_USERDIR\popfile.pl" exit
+  IfFileExists "$G_USERDIR\perl.exe" exit
 
-    ; Assume it is safe to offer to remove everything now
+  ; Assume it is safe to offer to remove everything now
 
-    MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO exit
-    DetailPrint "$(PFI_LANG_UN_LOG_8)"
-    Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
-    RMDir /r $G_USERDIR
-    StrCmp $APPDATA "" 0 appdata_valid_x
-    RMDir "${C_ALT_DEFAULT_USERDATA}"
-    Goto check_removal
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO exit
+  DetailPrint "$(PFI_LANG_UN_LOG_8)"
+  Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
+  RMDir /r $G_USERDIR
+  StrCmp $APPDATA "" 0 appdata_valid_x
+  RMDir "${C_ALT_DEFAULT_USERDATA}"
+  Goto check_removal
 
-  appdata_valid_x:
-    RMDir "${C_STD_DEFAULT_USERDATA}"
+appdata_valid_x:
+  RMDir "${C_STD_DEFAULT_USERDATA}"
 
   check_removal:
     IfFileExists $G_USERDIR 0 exit
