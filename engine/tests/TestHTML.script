@@ -653,6 +653,10 @@ SETSUBMIT sport 111
 INPUTIS   sport 111
 CONFIGIS  pop3_secure_port 111
 MATCH Updated POP3 SPA/AUTH port to 111; this change will not take affect until you restart POPFile
+SETSUBMIT sport 0
+INPUTIS   sport 111
+CONFIGIS  pop3_secure_port 111
+MATCH The port must be a number between 1 and 65535
 
 # Check autoupdate
 
