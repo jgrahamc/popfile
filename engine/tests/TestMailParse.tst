@@ -457,6 +457,8 @@ $cl->{color__} = '';
 
 # test decode_string
 
+test_assert_equal($cl->decode_string(undef), '');
+test_assert_equal($cl->decode_string("=?UNKNOWN?B??="), '');
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo?="), "foo");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?="), "foo bar");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo=20bar?="), "foo bar");

@@ -1826,17 +1826,18 @@ sub decode_string
     my ( $self, $mystring, $lang ) = @_;
     
     my $charset = '';
+    
+    return '' if (!defined($mystring));
 
     $lang = $self->{lang__} if ( !defined( $lang ) || ( $lang eq '' ) );
     
     my $output = '';
     my $last_is_encoded = 0;
-    my $post = $mystring;
     
     
     while ( $mystring =~ m/(.*?)(=\?([\w-]+)\?(B|Q)\?(.*?)\?=)/igc ) {
         my ($pre, $atom, $encoding, $value);
-        ($pre, $atom, $charset, $encoding, $value, $post) = ($1, $2, $3, $4, $5, $6);
+        ($pre, $atom, $charset, $encoding, $value) = ($1, $2, $3, $4, $5);
         
         $output .= $pre unless ($last_is_encoded && defined($atom) # Per RFC 2047 section 6.2
                                     && $pre =~ /^[\t ]+$/);

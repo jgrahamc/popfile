@@ -168,11 +168,50 @@ EOF
 close FILE;
 my $size2 = -s $file;
 
+sleep(2);
+
+
+# This is a message for testing evil spammer header tricks or 
+# unusual header malformations that may end up parsed into our
+# history database
+
+# Please list tricks or malformations here
+# Subject: =?UNKNOWN?B??= (Should produce a "header missing" string in the 
+#                            database rather than an empty string)
+#
+# To: =?utf-8?q?Do you covet to perc?=
+#     =?utf-8?q?eive precious follo?=
+#     =?utf-8?q?wing day ??=
+#
+# (This should decode to "Do you covet to perceive precious following day ?"
+
+my $slot2;
+
+( $slot2, $file ) = $h->reserve_slot();
+open FILE, ">$file";
+print FILE <<EOF;
+From: Evil Spammer who does tricks <nospam\@jgc.org>
+To: =?utf-8?q?Do you covet to perc?=
+ =?utf-8?q?eive precious follo?=
+ =?utf-8?q?wing day ??=
+Subject: =?UNKNOWN?B??=
+Date: Sat, 24 Jul 2020 03:46:32 -0700
+Message-ID: 123456
+
+This is the message body
+EOF
+close FILE;
+my $size3 = -s $file;
+
+
 my $session = $b->get_session_key( 'admin', '' );
 $h->commit_slot( $session, $slot, 'spam', 0 );
 $mq->service();
 $h->service();
 $h->commit_slot( $session, $slot1, 'personal', 0 );
+$mq->service();
+$h->service();
+$h->commit_slot( $session, $slot2, 'spam', 0 );
 $mq->service();
 $h->service();
 $b->release_session_key( $session );
@@ -187,7 +226,7 @@ my $hash = $h->get_message_hash( '1234',
 test_assert_equal( $hash, 'b3acb78f29968d1565ab3c55230c6547' );
 test_assert_equal( $slot1, $h->get_slot_from_hash( $hash ) );
 
-# Check that the two messages were correctly inserted into
+# Check that the three messages were correctly inserted into
 # the database
 
 @result = $h->{db__}->selectrow_array( "select * from history where id = 1;" );
@@ -223,6 +262,23 @@ test_assert_equal( $result[13], 'evil spammer nospam@jgc.org' ); # From
 test_assert_equal( $result[14], 'someone else nospam-everyone@jgc.org' );
 test_assert_equal( $result[15], '' ); # Cc
 test_assert_equal( $result[16], $size2 ); # size
+
+@result = $h->{db__}->selectrow_array( "select * from history where id = 3;" );
+test_assert_equal( $#result, 16 );
+test_assert_equal( $result[0], 3 ); # id
+test_assert_equal( $result[1], 1 ); # userid
+test_assert_equal( $result[2], 1 ); # committed
+test_assert_equal( $result[3], 'Evil Spammer who does tricks <nospam@jgc.org>' ); # From
+test_assert_equal( $result[4], 'Do you covet to perceive precious following day ?' ); # To
+test_assert_equal( $result[5], '' ); # Cc
+test_assert_equal( $result[6], '<subject header missing>' ); # Subject
+test_assert_equal( $result[7], 1595587592 );
+test_assert_equal( $result[10], 4 ); # bucketid
+test_assert_equal( $result[11], 0 ); # usedtobe
+test_assert_equal( $result[13], 'evil spammer who does tricks nospam@jgc.org' ); # From
+test_assert_equal( $result[14], 'do you covet to perceive precious following day ?' );
+test_assert_equal( $result[15], '' ); # Cc
+test_assert_equal( $result[16], $size3 ); # size
 # Try a reclassification and undo
 
 my $session = $b->get_session_key( 'admin', '' );
@@ -258,13 +314,15 @@ test_assert( defined( $h->{queries__}{$q} ) );
 
 $h->set_query( $q, '', '', '', 0 );
 
-test_assert_equal( $h->get_query_size( $q ), 2 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
 
-my @rows = $h->get_query_rows( $q, 1, 2 );
+my @rows = $h->get_query_rows( $q, 1, 3 );
 
-test_assert_equal( $#rows, 1 );
-test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
-test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
+test_assert_equal( $#rows, 2 );
+test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
+
 
 my @slot_row = $h->get_slot_fields( $rows[0][0] );
 test_assert_equal( join(':',@{$rows[0]}), join(':',@slot_row) );
@@ -273,38 +331,40 @@ test_assert_equal( join(':',@{$rows[0]}), join(':',@slot_row) );
 # sorted by from/to address
 
 $h->set_query( $q, '', '', 'from', 0 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
-@rows = $h->get_query_rows( $q, 1, 2 );
-test_assert_equal( $#rows, 1 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
+@rows = $h->get_query_rows( $q, 1, 3 );
+test_assert_equal( $#rows, 2 );
 test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
-test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 $h->set_query( $q, '', '', 'to' ,0 );
-@rows = $h->get_query_rows( $q, 1, 2 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
-test_assert_equal( $#rows, 1 );
-test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
-test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
+@rows = $h->get_query_rows( $q, 1, 3 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
+test_assert_equal( $#rows, 2 );
+test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
+test_assert_equal( $rows[2][1], 'Evil Spammer <nospam@jgc.org>' );
 
 $h->set_query( $q, '', '', 'from', 0 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
 @rows = $h->get_query_rows( $q, 1, 1 );
 test_assert_equal( $#rows, 0 );
 test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
 
 $h->set_query( $q, '', '', 'to', 0 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
 @rows = $h->get_query_rows( $q, 2, 1 );
 test_assert_equal( $#rows, 0 );
-test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 # Now try unsorted and filtered on a specific bucket
 
 $h->set_query( $q, 'spam', '', '', 0 );
-test_assert_equal( $h->get_query_size( $q ), 1 );
+test_assert_equal( $h->get_query_size( $q ), 2 );
 @rows = $h->get_query_rows( $q, 1, 1 );
 test_assert_equal( $#rows, 0 );
-test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
 test_assert_equal( $rows[0][8], 'spam' );
 
 $h->set_query( $q, 'personal', '', '', 0 );
@@ -317,11 +377,13 @@ test_assert_equal( $rows[0][8], 'personal' );
 # Try a negated bucket filter
 
 $h->set_query( $q, 'personal', '', '', 1 );
-test_assert_equal( $h->get_query_size( $q ), 1 );
-@rows = $h->get_query_rows( $q, 1, 1 );
-test_assert_equal( $#rows, 0 );
-test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $h->get_query_size( $q ), 2 );
+@rows = $h->get_query_rows( $q, 1, 2 );
+test_assert_equal( $#rows, 1 );
+test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
 test_assert_equal( $rows[0][8], 'spam' );
+test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[1][8], 'spam' );
 
 # Now try a search
 
@@ -332,11 +394,12 @@ test_assert_equal( $#rows, 0 );
 test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 $h->set_query( $q, '', 's', '', 0 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
-@rows = $h->get_query_rows( $q, 1, 2 );
-test_assert_equal( $#rows, 1 );
-test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
-test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
+test_assert_equal( $h->get_query_size( $q ), 3 );
+@rows = $h->get_query_rows( $q, 1, 3 );
+test_assert_equal( $#rows, 2 );
+test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 $h->set_query( $q, '', 'subject line', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 1 );
@@ -350,10 +413,12 @@ $h->set_query( $q, '', 's', '', 1 );
 test_assert_equal( $h->get_query_size( $q ), 0 );
 
 $h->set_query( $q, '', 'john', '', 1 );
-test_assert_equal( $h->get_query_size( $q ), 1 );
-@rows = $h->get_query_rows( $q, 1, 1 );
-test_assert_equal( $#rows, 0 );
-test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $h->get_query_size( $q ), 2 );
+@rows = $h->get_query_rows( $q, 1, 2 );
+test_assert_equal( $#rows, 1 );
+test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
+
 
 # Now try cases that return nothing
 
@@ -361,21 +426,21 @@ $h->set_query( $q, '', 'zzz', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 0 );
 
 $h->set_query( $q, '', 'zzz', '', 1 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
 
 $h->set_query( $q, 'other', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 0 );
 
 $h->set_query( $q, 'other', '', '', 1 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
 
 # Make sure that we don't requery unless necessary
 
 $h->set_query( $q, '', 's', '', 0 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
 @rows = $h->get_query_rows( $q, 1, 2 );
 $h->set_query( $q, '', 's', '', 0 );
-test_assert_equal( $#{$h->{queries__}{$q}{cache}}, 1 );
+test_assert_equal( $#{$h->{queries__}{$q}{cache}}, 2 );
 $h->set_query( $q, '', 't', '', 0 );
 test_assert_equal( $#{$h->{queries__}{$q}{cache}}, -1 );
 
@@ -412,7 +477,7 @@ $mq->service();
 $h->service();
 
 $h->set_query( $q, '', '', '', 0 );
-test_assert_equal( $h->get_query_size( $q ), 3 );
+test_assert_equal( $h->get_query_size( $q ), 4 );
 
 $h->set_query( $q, 'other', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 1 );
@@ -428,7 +493,7 @@ test_assert_equal( $rows[0][12], $size );
 # Now check that deletion works
 
 $h->set_query( $q, '', '', '', 0 );
-test_assert_equal( $h->get_query_size( $q ), 3 );
+test_assert_equal( $h->get_query_size( $q ), 4 );
 
 $file = $h->get_slot_file( 2 );
 test_assert( ( -e $file ) );

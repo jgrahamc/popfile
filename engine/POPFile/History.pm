@@ -553,7 +553,7 @@ sub commit_history__
         # sorting these fields
         #
         # "John Graham-Cumming" <spam@jgc.org> maps to
-        #     john graham-cumming <spam@jgc.org>
+        #     john graham-cumming spam@jgc.org
 
         my @sortable = ( 'from', 'to', 'cc' );
         my %sort_headers;
@@ -576,6 +576,11 @@ sub commit_history__
         my @required = ( 'from', 'to', 'cc', 'subject' );
 
         foreach my $h (@required) {
+
+            ${$header{$h}}[0] =
+                 $self->{classifier__}->{parser__}->decode_string(
+                     ${$header{$h}}[0] );
+            
             if ( !defined ${$header{$h}}[0] || ${$header{$h}}[0] =~ /^\s*$/ ) {
                 if ( $h ne 'cc' ) {
                     ${$header{$h}}[0] = "<$h header missing>";
@@ -583,10 +588,7 @@ sub commit_history__
                     ${$header{$h}}[0] = '';
                 }
             }
-
-            ${$header{$h}}[0] =
-                 $self->{classifier__}->{parser__}->decode_string(
-                     ${$header{$h}}[0] );
+            
             ${$header{$h}}[0] =~ s/\0//g;
             ${$header{$h}}[0] = $self->db__()->quote( ${$header{$h}}[0] );
         }
