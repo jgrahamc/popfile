@@ -260,7 +260,7 @@ Magnet_Error3                           新規マグネット '%s' にバケツ '%s' を割り
 Magnet_CurrentMagnets                   現在のマグネット
 Magnet_Message1                         次のマグネットにより、メールを常に特定のバケツに分類します。
 Magnet_CreateNew                        新規マグネット作成
-Magnet_Explanation                      マグネットには三つのタイプがあります:</b> <ul><li><b>差出人のアドレスまたは名前:</b> 例: john@company.com のように特定のアドレスがマッチする、<br />company.com のように company.com に属する全ての人たちがマッチする、<br />John Doe のように特定の人がマッチする、John のようにJohn という名前を持つ全ての人たちがマッチする。</li><li><b>宛先のアドレスまたは名前:</b> From: magnet と同様ですがメールの To: アドレスが対象です。</li> <li><b>件名に含まれる単語:</b> 例: hello とすると hello を件名に含む全てのメッセージがマッチします。</li></ul>
+Magnet_Explanation                      <b>マグネットには三つのタイプがあります:</b> <ul><li><b>差出人のアドレスまたは名前:</b> 例: john@company.com のように特定のアドレスがマッチする、<br />company.com のように company.com に属する全ての人たちがマッチする、<br />John Doe のように特定の人がマッチする、John のようにJohn という名前を持つ全ての人たちがマッチする。</li><li><b>宛先のアドレスまたは名前:</b> From: magnet と同様ですがメールの To: アドレスが対象です。</li> <li><b>件名に含まれる単語:</b> 例: hello とすると hello を件名に含む全てのメッセージがマッチします。</li></ul>
 Magnet_MagnetType                       マグネットタイプ
 Magnet_Value                            値
 Magnet_Always                           分類先のバケツ

@@ -261,7 +261,7 @@ Magnet_Error3                           Creato il nuovo magnete '%s' per il cest
 Magnet_CurrentMagnets                   Magneti correnti
 Magnet_Message1                         I magneti che seguono fanno s&igrave; che l'email venga sempre classificata nel cesto specificato.
 Magnet_CreateNew                        Crea un nuovo magnete
-Magnet_Explanation                      Sono disponibili i seguenti tipi di magnete:</b> <ul><li><b>Indirizzo o nome del Mittente:</b> Ad es.: john@company.com per individuare un indirizzo specifico, <br />company.com per individuare chiunque spedisca dal dominio company.com, <br />John Doe per individuare una persona specifica, John per individuare tutti i John</li><li><b>Indirizzo o nome di un Destinatario/Cc:</b> Funziona come il magnete sul Mittente ma con l'indirizzo del Destinatario/Cc</li> <li><b>Parole nell'Oggetto:</b> Ad es.: ciao per individuare tutti i messaggi con la parola ciao nell'oggetto</li></ul>
+Magnet_Explanation                      <b>Sono disponibili i seguenti tipi di magnete:</b> <ul><li><b>Indirizzo o nome del Mittente:</b> Ad es.: john@company.com per individuare un indirizzo specifico, <br />company.com per individuare chiunque spedisca dal dominio company.com, <br />John Doe per individuare una persona specifica, John per individuare tutti i John</li><li><b>Indirizzo o nome di un Destinatario/Cc:</b> Funziona come il magnete sul Mittente ma con l'indirizzo del Destinatario/Cc</li> <li><b>Parole nell'Oggetto:</b> Ad es.: ciao per individuare tutti i messaggi con la parola ciao nell'oggetto</li></ul>
 Magnet_MagnetType                       Tipo di magnete
 Magnet_Value                            Valore
 Magnet_Always                           Va sempre nel cesto

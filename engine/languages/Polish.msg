@@ -209,7 +209,7 @@ Magnet_Error3                           Utwórz nowy musik '%s' w folderze '%s'
 Magnet_CurrentMagnets                   Aktualne musiki
 Magnet_Message1                         Nastêpuj±ce musiki spowoduj± klasyfikacjê listów zawsze w okre¶lonych folderach.
 Magnet_CreateNew                        Utwórz nowy musik
-Magnet_Explanation                      Nastêpuj±ce rodzaje musików s± dostêpne:</b> <ul><li><b>Adres lub nazwa nadawcy:</b> na przyk³ad: john@company.com dotyczy konkretnego adresu, <br />company.com dotyczy wszystkich nadawców z company.com, <br />John Doe dotyczy konkretnej osoby, John dotyczy wszystkich Johnów</li><li><b>Adres lub nazwa Do/Cc:</b> Jak w przypadku pola Od, ale dotyczy pól Do:/Cc: </li> <li><b>S³owa w temacie:</b> na przyk³ad: hello dotyczy wszystkich wiadomo¶ci z hello w temacie</li></ul>
+Magnet_Explanation                      <b>Nastêpuj±ce rodzaje musików s± dostêpne:</b> <ul><li><b>Adres lub nazwa nadawcy:</b> na przyk³ad: john@company.com dotyczy konkretnego adresu, <br />company.com dotyczy wszystkich nadawców z company.com, <br />John Doe dotyczy konkretnej osoby, John dotyczy wszystkich Johnów</li><li><b>Adres lub nazwa Do/Cc:</b> Jak w przypadku pola Od, ale dotyczy pól Do:/Cc: </li> <li><b>S³owa w temacie:</b> na przyk³ad: hello dotyczy wszystkich wiadomo¶ci z hello w temacie</li></ul>
 Magnet_MagnetType                       Rodzaj musika
 Magnet_Value                            Warto¶æ
 Magnet_Always                           Zawsze idzie do folderu

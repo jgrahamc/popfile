@@ -170,7 +170,7 @@ Magnet_Error3                           Skapade ny magnet '%s' i '%s'
 Magnet_CurrentMagnets                   Aktuella magneter
 Magnet_Message1                         Följande magneter garanterar att email alltid hamnar i en viss hink.
 Magnet_CreateNew                        Skapa ny magnet
-Magnet_Explanation                      Tre typer av magneter är tillgängliga: <ul><li>Från adressen eller namnet:</b> Till exempel: test@företag.se för att matcha en specifik adress, <br>företag.se för att matcha alla avsändare från företaget, <br>John Doe för att matcha en specifik person, John för att matcha alla Johns<li><b>Till adressen eller namnet:</b> Liksom ovan men för to: eller till: -raden. <li><b>Ämnet:</b> Till exempel: Hej! för att matcha alla 'Hej!' i ämnesraden.</ul>
+Magnet_Explanation                      <b>Tre typer av magneter är tillgängliga: <ul><li>Från adressen eller namnet:</b> Till exempel: test@företag.se för att matcha en specifik adress, <br>företag.se för att matcha alla avsändare från företaget, <br>John Doe för att matcha en specifik person, John för att matcha alla Johns<li><b>Till adressen eller namnet:</b> Liksom ovan men för to: eller till: -raden. <li><b>Ämnet:</b> Till exempel: Hej! för att matcha alla 'Hej!' i ämnesraden.</ul>
 Magnet_MagnetType                       Magnettyper
 Magnet_Value                            Värden
 Magnet_Always                           Tillhör alltid magneten

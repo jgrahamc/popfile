@@ -214,7 +214,7 @@ Magnet_Error3                           새 자석인 '%s' 을 버킷 '%s' 에 생성
 Magnet_CurrentMagnets                   현재 자석
 Magnet_Message1                         다음 자석은 지정된 버킷으로 메일이 항상 분류되도록 합니다.
 Magnet_CreateNew                        새 자석 생성
-Magnet_Explanation                      세 종류의 자석이 가능합니다:</b> <ul><li><b>발신주소 또는 이름:</b> 예: john@company.com (특정 이메일 주소로), <br />company.com (company.com에서 보내는 모든 메일), <br />John Doe:Jonh Doe만 일치, John:첫단어가 John이면 모두 일치</li><li><b>수신자 메일주소 또는 이름:</b> 발신주소용 자석과 동일하나 수신자에 작용함</li> <li><b>제목의 단어:</b> 예)안녕하세요 는 제목란의 모든 안녕하세요 와 일치</li></ul>
+Magnet_Explanation                      <b>세 종류의 자석이 가능합니다:</b> <ul><li><b>발신주소 또는 이름:</b> 예: john@company.com (특정 이메일 주소로), <br />company.com (company.com에서 보내는 모든 메일), <br />John Doe:Jonh Doe만 일치, John:첫단어가 John이면 모두 일치</li><li><b>수신자 메일주소 또는 이름:</b> 발신주소용 자석과 동일하나 수신자에 작용함</li> <li><b>제목의 단어:</b> 예)안녕하세요 는 제목란의 모든 안녕하세요 와 일치</li></ul>
 Magnet_MagnetType                       자석 종류
 Magnet_Value                            값
 Magnet_Always                           항상 다음 버킷으로

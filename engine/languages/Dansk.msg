@@ -195,7 +195,7 @@ Magnet_Error3                           Tilføjede den nye magnet '%s' i spanden 
 Magnet_CurrentMagnets                   Magneter i brug
 Magnet_Message1                         Magneterne får breve til altid at blive klassificeret til den specificerede spand.
 Magnet_CreateNew                        Tilføj nye magneter
-Magnet_Explanation                      Der findes tre typer magneter: <ul><li>"Fra:"-adresse eller -navn:</b> For eksempel: john@firma.dk for at matche en specifik adresse, <br />firma.dk for at matche alle, der sender fra firma.dk, <br />John Doe for at matche en specifik person, John for at matche alle John'er.</li><li><b>"Til:"-adresse eller -navn:</b> Lige som en "Fra:"-magnet, men bare for "Til:"-adressen i et brev.</li><li><b>Ord i emnet</b> For eksempel: hej for at matche alle breve med ordet hej i emnet.</li></ul>
+Magnet_Explanation                      <b>Der findes tre typer magneter: <ul><li>"Fra:"-adresse eller -navn:</b> For eksempel: john@firma.dk for at matche en specifik adresse, <br />firma.dk for at matche alle, der sender fra firma.dk, <br />John Doe for at matche en specifik person, John for at matche alle John'er.</li><li><b>"Til:"-adresse eller -navn:</b> Lige som en "Fra:"-magnet, men bare for "Til:"-adressen i et brev.</li><li><b>Ord i emnet</b> For eksempel: hej for at matche alle breve med ordet hej i emnet.</li></ul>
 Magnet_MagnetType                       Magnettyper
 Magnet_Value                            Værdier
 Magnet_Always                           Tilhører altid spanden

@@ -206,7 +206,7 @@ Magnet_Error3                           Vytvoøit nový magnet '%s' v koši '%s'
 Magnet_CurrentMagnets                   Platné magnety
 Magnet_Message1                         Následující magnety zpùsobí, že zprávy budou vždy zaøazeny do urèeného koše.
 Magnet_CreateNew                        Založit nový magnet
-Magnet_Explanation                      Jsou dostupné tyto typy magnetù:</b> <ul><li><b>From: Adresa nebo jméno odesílatele:</b> Napøíklad: john@company.com pro konkrétní adresu, <br />company.com pro všechny odesílatele z company.com, <br />John Doe pro konkrétní osobu, John pro všechny Johny</li><li><b>To/Cc: Adresa nebo jméno pøíjemce/pøíjemcù:</b> Obdobnì jako magnet From: pro adresy pøíjemcù (hlavièky To: a Cc:).</li> <li><b>Subject: slova v pøedmìtu</b>Napøíklad: hello pro všechny zprávy se slovem hello v pøedmìtu</li></ul>
+Magnet_Explanation                      <b>Jsou dostupné tyto typy magnetù:</b> <ul><li><b>From: Adresa nebo jméno odesílatele:</b> Napøíklad: john@company.com pro konkrétní adresu, <br />company.com pro všechny odesílatele z company.com, <br />John Doe pro konkrétní osobu, John pro všechny Johny</li><li><b>To/Cc: Adresa nebo jméno pøíjemce/pøíjemcù:</b> Obdobnì jako magnet From: pro adresy pøíjemcù (hlavièky To: a Cc:).</li> <li><b>Subject: slova v pøedmìtu</b>Napøíklad: hello pro všechny zprávy se slovem hello v pøedmìtu</li></ul>
 Magnet_MagnetType                       Typ magnetu
 Magnet_Value                            Hodnota
 Magnet_Always                           Zaøadit vždy do koše

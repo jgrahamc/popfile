@@ -175,7 +175,7 @@ Magnet_Error3                           Hozd létre a '%s' mágnest a '%s' konténe
 Magnet_CurrentMagnets                   Mágnesek
 Magnet_Message1                         A következõ mágnes minden egyes levelet a megadott konténerbe fog irányitani.
 Magnet_CreateNew                        Hozz létre új mágnest
-Magnet_Explanation                      Három fajta mágnes létezik:</b> <ul><li><b>Feladó cime vagy neve:</b> Például: john@company.com, ha egy bizonyos email cimet keresünk<br>company.com ha mindenkit meg akarunk találni aki a company.com cimrõl jön, <br>"John Doe" ha egy bizonyos embert akarunk kiszûrni, John meg fog találni minden John-t<li><b>Cimyett cime vagy neve:</b> Ugyanaz mint a Feladó, de ez a Cimzett nevében és cimében keres.<li><b>Téma:</b> Például: hello meg fog találni minden email-t aminek a szó "hello" a témájában szerepel</ul>
+Magnet_Explanation                      <b>Három fajta mágnes létezik:</b> <ul><li><b>Feladó cime vagy neve:</b> Például: john@company.com, ha egy bizonyos email cimet keresünk<br>company.com ha mindenkit meg akarunk találni aki a company.com cimrõl jön, <br>"John Doe" ha egy bizonyos embert akarunk kiszûrni, John meg fog találni minden John-t<li><b>Cimyett cime vagy neve:</b> Ugyanaz mint a Feladó, de ez a Cimzett nevében és cimében keres.<li><b>Téma:</b> Például: hello meg fog találni minden email-t aminek a szó "hello" a témájában szerepel</ul>
 Magnet_MagnetType                       Mágnes tipus
 Magnet_Value                            Érték
 Magnet_Always                           Mindig a konténerbe megy

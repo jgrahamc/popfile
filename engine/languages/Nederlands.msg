@@ -176,7 +176,7 @@ Magnet_Error3                           Maak nieuwe magneet '%s' in bak '%s'
 Magnet_CurrentMagnets                   Huidige magneten
 Magnet_Message1                         De volgende magneten zorgen er altijd voor dat berichten in de gespecificeerde bak vallen.
 Magnet_CreateNew                        Maak Nieuwe Magneet
-Magnet_Explanation                      Er zijn drie type magneten beschikbaar: <ul><li>Van adres of naam:</b> B.v.: john@company.com om een specifiek adres te specificeren, <br />company.com om iedereen te specificeren die berichten sturen vanaf company.com, <br />John Doe om een bepaalde persoon te specificeren, John om alle Johns te specificeren</li><li><b>Naar adres of naam:</b> Net als een "Van" magneet maar nu voor de geadresseerde</li><li><b>Onderwerp woorden:</b> B.v.: Hallo om alle berichten met Hallo in het onderwerp te specificeren.</li></ul>
+Magnet_Explanation                      <b>Er zijn drie type magneten beschikbaar: <ul><li>Van adres of naam:</b> B.v.: john@company.com om een specifiek adres te specificeren, <br />company.com om iedereen te specificeren die berichten sturen vanaf company.com, <br />John Doe om een bepaalde persoon te specificeren, John om alle Johns te specificeren</li><li><b>Naar adres of naam:</b> Net als een "Van" magneet maar nu voor de geadresseerde</li><li><b>Onderwerp woorden:</b> B.v.: Hallo om alle berichten met Hallo in het onderwerp te specificeren.</li></ul>
 Magnet_MagnetType                       Magneet type
 Magnet_Value                            Waarde
 Magnet_Always                           Gaat altijd naar bak

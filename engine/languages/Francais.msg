@@ -256,7 +256,7 @@ Magnet_Error3                           Nouvel aimant '%s' créé pour la catégori
 Magnet_CurrentMagnets                   Aimants actuels
 Magnet_Message1                         Les aimants suivants entraînent la classification systématique d'un message dans la catégorie spécifiée.
 Magnet_CreateNew                        Créer un nouvel aimant
-Magnet_Explanation                      Trois types d'aimants sont disponibles:</b> <ul><li><b>Adresse ou nom de l'expéditeur:</b> Par exemple: john@company.com pour capter une adresse spécifique, <br />company.com pour capter les messages de tous les expéditeurs de company.com, <br />John Doe pour capter une personne en particulier, John pour capter tous les John</li><li><b>Adresse ou nom du destinataire:</b> Comme un aimant De: mais pour l'adresse du destinataire du message</li><li><b>Mots du sujet:</b> Par exemple: bonjour pour capter tous les messages avec bonjour dans le sujet</li></ul>
+Magnet_Explanation                      <b>Trois types d'aimants sont disponibles:</b> <ul><li><b>Adresse ou nom de l'expéditeur:</b> Par exemple: john@company.com pour capter une adresse spécifique, <br />company.com pour capter les messages de tous les expéditeurs de company.com, <br />John Doe pour capter une personne en particulier, John pour capter tous les John</li><li><b>Adresse ou nom du destinataire:</b> Comme un aimant De: mais pour l'adresse du destinataire du message</li><li><b>Mots du sujet:</b> Par exemple: bonjour pour capter tous les messages avec bonjour dans le sujet</li></ul>
 Magnet_MagnetType                       Type d'aimant
 Magnet_Value                            Valeur
 Magnet_Always                           Toujours envoyer dans la catégorie

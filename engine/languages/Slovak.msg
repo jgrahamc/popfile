@@ -180,7 +180,7 @@ Magnet_Error3                           Vytvorenı novı magnet '%s' v koši '%s'
 Magnet_CurrentMagnets                   Aktuálne magnety
 Magnet_Message1                         Nasledovné magnety klasifikujú poštu vdy do urèeného koša.
 Magnet_CreateNew                        Vytvori novı magnet
-Magnet_Explanation                      Existujú tri typy magnetov:</b> <ul><li><b>Adresa alebo meno odosielae¾a:</b> (políèko From: v pošte) Napr.: john@company.com pre konkrétnu adresu, <br />company.com pre kadého odosielate¾a z adresy company.com, <br />John Doe pre konkrétnu osobu, John pre kadného Johna</li><li><b>Adresa alebo meno príjemcu:</b> To isté ako predchádzajúce, ale pre políèko To: pošty</li> <li><b>Slová v subjekte:</b> Napr.: hello zaradí kadú poštu, ktorá má hello v subjekte</li></ul>
+Magnet_Explanation                      <b>Existujú tri typy magnetov:</b> <ul><li><b>Adresa alebo meno odosielae¾a:</b> (políèko From: v pošte) Napr.: john@company.com pre konkrétnu adresu, <br />company.com pre kadého odosielate¾a z adresy company.com, <br />John Doe pre konkrétnu osobu, John pre kadného Johna</li><li><b>Adresa alebo meno príjemcu:</b> To isté ako predchádzajúce, ale pre políèko To: pošty</li> <li><b>Slová v subjekte:</b> Napr.: hello zaradí kadú poštu, ktorá má hello v subjekte</li></ul>
 Magnet_MagnetType                       Typ magnetu
 Magnet_Value                            Hodnota
 Magnet_Always                           Zaradí sa vdy do koša

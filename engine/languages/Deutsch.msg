@@ -257,7 +257,7 @@ Magnet_Error3                           Erstelle neuen Magnet '%s' in Kategorie 
 Magnet_CurrentMagnets                   Aktuelle Magnete
 Magnet_Message1                         Die folgenden Magnete ordnen neue Post zwingend in eine angegebene Kategorie ein.
 Magnet_CreateNew                        Neuen Magnet erstellen
-Magnet_Explanation                      Diese Arten von Magneten sind verfügbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br />firma.de, um jeden zu erfassen, der von firma.de sendet, <br />Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaßt jeden Hans</li><li><b>Empfänger/CC-Adresse oder -Name:</b> Wie beim Absender-Magnet nur für die Empfänger/CC-Adresse der Nachricht.</li><li><b>Wörter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</li></ul>
+Magnet_Explanation                      <b>Diese Arten von Magneten sind verfügbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br />firma.de, um jeden zu erfassen, der von firma.de sendet, <br />Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaßt jeden Hans</li><li><b>Empfänger/CC-Adresse oder -Name:</b> Wie beim Absender-Magnet nur für die Empfänger/CC-Adresse der Nachricht.</li><li><b>Wörter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</li></ul>
 Magnet_MagnetType                       Typ des Magnets
 Magnet_Value                            Wert
 Magnet_Always                           Immer dieser Kategorie zuordnen

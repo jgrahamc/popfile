@@ -176,7 +176,7 @@ Magnet_Error3                           Opprettet den nye magneten '%s' i bøtten
 Magnet_CurrentMagnets                   Nåværende Magneter
 Magnet_Message1                         De følgende magnetene gjør at e-post alltid blir klassifisert til den spesifiserte bøtten.
 Magnet_CreateNew                        Opprett Ny Magnet
-Magnet_Explanation                      Tre typer magneter er anbefalt: <ul><li>Fra adressen eller navn:</b> For eksempel: john@firma.dk for å matche en spesifikk adresse, <br />firma.dk for å matche alle som sender fra firma.dk, <br />John Doe for å matche en spesifikk person, John for å matche alle John'er</li><li><b>Til adresse eller navn:</b> Samme som en Fra: Magnet men bare for Til: Adressen i en e-post</li><li><b>Emne-ord:</b> For eksempel: hei for å matche alle meldinger med ordet hei i emnet</li></ul>
+Magnet_Explanation                      <b>Tre typer magneter er anbefalt: <ul><li>Fra adressen eller navn:</b> For eksempel: john@firma.dk for å matche en spesifikk adresse, <br />firma.dk for å matche alle som sender fra firma.dk, <br />John Doe for å matche en spesifikk person, John for å matche alle John'er</li><li><b>Til adresse eller navn:</b> Samme som en Fra: Magnet men bare for Til: Adressen i en e-post</li><li><b>Emne-ord:</b> For eksempel: hei for å matche alle meldinger med ordet hei i emnet</li></ul>
 Magnet_MagnetType                       Magnettyper
 Magnet_Value                            Verdier
 Magnet_Always                           Tilhører alltid bøtten

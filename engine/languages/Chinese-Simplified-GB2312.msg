@@ -263,7 +263,7 @@ Magnet_Error3                           建立新的吸铁 '%s' 于 '%s' 邮筒中
 Magnet_CurrentMagnets                   现用的吸铁
 Magnet_Message1                         下列的吸铁会让信件总是被分类到特定的邮筒里.
 Magnet_CreateNew                        建立新的吸铁
-Magnet_Explanation                      有这些类别的吸铁可以用:</b> <ul><li><b>寄件者地址或名字:</b> 举例来说: john@company.com 就祇会吻合特定的地址, <br />company.com 会吻合到任何从 company.com 寄出来的人, <br />John Doe 会吻合特定的人, John 会吻合所有的 Johns</li><li><b>收件者/副本地址或名称:</b> 就跟寄件者一样: 但是吸铁祇会针对邮件讯息里的 To:/Cc: 地址生效</li> <li><b>主旨字词:</b> 例如: hello 会吻合所有主旨里有 hello 的邮件讯息</li></ul>
+Magnet_Explanation                      <b>有这些类别的吸铁可以用:</b> <ul><li><b>寄件者地址或名字:</b> 举例来说: john@company.com 就祇会吻合特定的地址, <br />company.com 会吻合到任何从 company.com 寄出来的人, <br />John Doe 会吻合特定的人, John 会吻合所有的 Johns</li><li><b>收件者/副本地址或名称:</b> 就跟寄件者一样: 但是吸铁祇会针对邮件讯息里的 To:/Cc: 地址生效</li> <li><b>主旨字词:</b> 例如: hello 会吻合所有主旨里有 hello 的邮件讯息</li></ul>
 Magnet_MagnetType                       吸铁类别
 Magnet_Value                            值
 Magnet_Always                           总是分到邮筒

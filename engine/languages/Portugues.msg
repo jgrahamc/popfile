@@ -209,7 +209,7 @@ Magnet_Error3                           Criar novo íman '%s' no receptáculo '%s'
 Magnet_CurrentMagnets                   Ímans Actuais
 Magnet_Message1                         Os seguintes ímans atraem as mensagens para receptáculo especificado.
 Magnet_CreateNew                        Criar Novo Íman
-Magnet_Explanation                      Três tipos de íman estão disponíveis: <ul><li>De um endereço ou nome:</b> Por exemplo: adriano@companhia.com para apanhar um endereço específico, <br />companhia.com para apanhar todo mundo que manda mensagens de companhia.com, <br />Adriano Gomes para apanhar uma pessoa específica, Adriano para apanhar todos os Adrianos</li><li><b>Para um endereço ou nome:</b> Como um íman Originador: mas para o endereço Para: de uma mensagem </li><li><b>Palavras no assunto:</b> Por exemplo: olá para apanhar todas as mensagens com olá no assunto</li></ul>
+Magnet_Explanation                      <b>Três tipos de íman estão disponíveis: <ul><li>De um endereço ou nome:</b> Por exemplo: adriano@companhia.com para apanhar um endereço específico, <br />companhia.com para apanhar todo mundo que manda mensagens de companhia.com, <br />Adriano Gomes para apanhar uma pessoa específica, Adriano para apanhar todos os Adrianos</li><li><b>Para um endereço ou nome:</b> Como um íman Originador: mas para o endereço Para: de uma mensagem </li><li><b>Palavras no assunto:</b> Por exemplo: olá para apanhar todas as mensagens com olá no assunto</li></ul>
 Magnet_MagnetType                       Tipo do íman
 Magnet_Value                            Valor
 Magnet_Always                           Colocar sempre no receptáculo

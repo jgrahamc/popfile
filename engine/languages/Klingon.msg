@@ -214,7 +214,7 @@ Magnet_Error3                        	chenmoH chu' peQ '%s' 'el ngaS '%s'
 Magnet_CurrentMagnets                	SaH peQ
 Magnet_Message1                      	pab peQ lo' QIn nob reH buv 'elto chuH ngaS.
 Magnet_CreateNew                       	chenmoH chu' peQ
-Magnet_Explanation                     	wej Segh peQ are SaH:</b> <ul><li><b>qang Daq pong:</b> vaj: john@company.com nob 'Iq le'be' Daq, <br />company.com nob 'Iq Hoch who ngeH qang company.com, <br />John Doe nob 'Iq le'be' ghot, John nob 'Iq all Johns</li><li><b>nob Daq pong:</b> Like qang: peQ but nej nob: Daq 'el 'ul ngoqDe'</li> <li><b>lut ghItlh:</b> vaj: ghom nob 'Iq all 'el ghom 'el lut</li></ul>
+Magnet_Explanation                     	<b>wej Segh peQ are SaH:</b> <ul><li><b>qang Daq pong:</b> vaj: john@company.com nob 'Iq le'be' Daq, <br />company.com nob 'Iq Hoch who ngeH qang company.com, <br />John Doe nob 'Iq le'be' ghot, John nob 'Iq all Johns</li><li><b>nob Daq pong:</b> Like qang: peQ but nej nob: Daq 'el 'ul ngoqDe'</li> <li><b>lut ghItlh:</b> vaj: ghom nob 'Iq all 'el ghom 'el lut</li></ul>
 Magnet_MagnetType                    	peQ Segh
 Magnet_Value                         	lo'laHghach
 Magnet_Always                        	Qeq nob ngaS
