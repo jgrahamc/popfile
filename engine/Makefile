@@ -17,13 +17,18 @@ windows: ; @$(MAKE) -C ../windows
 
 # package builds a zip file containing the POPFile package
 
-ZIPUP = wzzip -a $(POPFILEZIP) 
+ZIPUP = wzzip -P $(POPFILEZIP) -a
 POPFILEZIP=popfile.zip
 
 package: 
-	@$(ZIPUP) popfile.pl pix.gif black.gif
-	@$(ZIPUP) Classifier/*.pm POPFile/*.pm Proxy/*.pm UI/*.pm
-	@$(ZIPUP) manual/*.gif manual/*.html
+	rm -f $(POPFILEZIP)
+	@$(ZIPUP) popfile.pl pix.gif black.gif insert.pl
+	@$(ZIPUP) Classifier/*.pm POPFile/*.pm Proxy/*.pm
+	@$(ZIPUP) UI/HTML.pm
+	@$(ZIPUP) manual/*.gif manual/*.html -r
+	@$(ZIPUP) languages/*.msg
+	@$(ZIPUP) skins/*.css skins/*.gif
+	
 	
 
 	
