@@ -64,14 +64,14 @@ sub new
     #
     # The subkeys are
     #
-    #	cull			Used internally by load_history_cache (see there for details)
-    #   from			The address the email was from
-    #   short_from		Version of from with max 40 characters
-    # 	subject			The subject of the email
-    #   short_subject	Version of subject with max 40 characters
-    #	magnet			If a magnet was used to classify the mail contains the magnet string
-    #	bucket			The classification of the mail
-    #	reclassified	1 if the mail has already been reclassified
+    #    cull            Used internally by load_history_cache (see there for details)
+    #   from            The address the email was from
+    #   short_from        Version of from with max 40 characters
+    #     subject            The subject of the email
+    #   short_subject    Version of subject with max 40 characters
+    #    magnet            If a magnet was used to classify the mail contains the magnet string
+    #    bucket            The classification of the mail
+    #    reclassified    1 if the mail has already been reclassified
     # 
     # The history_keys array stores the list of keys in the history hash and are a 
     # (perhaps strict) subset of the keys of $self->{history} set by calls to 
@@ -170,7 +170,7 @@ sub initialize
     # Calculate a session key
     change_session_key($self);
 
-	$self->remove_mail_files();
+    $self->remove_mail_files();
     $self->calculate_today();
 
     return 1;
@@ -195,13 +195,13 @@ sub start
     load_language( $self, 'English' );
     load_language( $self, $self->{configuration}->{configuration}{language} ) if ( $self->{configuration}->{configuration}{language} ne 'English' );
 
-	# We need to force a history cache reload, note that this needs
-	# to come after loading the language since we might need History_NoFrom
-	# or History_NoSubject in while loading the cache
+    # We need to force a history cache reload, note that this needs
+    # to come after loading the language since we might need History_NoFrom
+    # or History_NoSubject in while loading the cache
 
-	$self->invalidate_history_cache();
-	$self->load_history_cache();
-	$self->sort_filter_history( '', '', '' );
+    $self->invalidate_history_cache();
+    $self->load_history_cache();
+    $self->sort_filter_history( '', '', '' );
 
     $self->{server} = IO::Socket::INET->new( Proto     => 'tcp',
                                     $self->{configuration}->{configuration}{localui}  == 1 ? (LocalAddr => 'localhost') : (),
@@ -302,7 +302,7 @@ sub service
                     }
 
                     if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
-                    	$client->autoflush(1);
+                        $client->autoflush(1);
                         $code = $self->handle_url($client, $2, $1, $content);
                     } else {
                         http_error( $self, $client, 500 );
@@ -314,7 +314,7 @@ sub service
         }
     }
 
-	$self->remove_mail_files();
+    $self->remove_mail_files();
 
     return $code;
 }
@@ -613,9 +613,9 @@ sub html_common_bottom
     # the POPFile home page on SourceForge
     
     if ( $self->{language}{ManualLanguage} eq 'en' ) {
-    	$result .= 'manual/en';
+        $result .= 'manual/en';
     } else {
-    	$result .= "http://popfile.sourceforge.net/manual/$self->{language}{ManualLanguage}";
+        $result .= "http://popfile.sourceforge.net/manual/$self->{language}{ManualLanguage}";
     }
 
     $result .= "/manual.html\">\n";
@@ -2049,9 +2049,9 @@ sub compare_mf
 # ---------------------------------------------------------------------------------------------
 sub invalidate_history_cache
 {
-	my ( $self ) = @_;
-	
-	$self->{history_invalid_} = 1;
+    my ( $self ) = @_;
+    
+    $self->{history_invalid_} = 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2070,56 +2070,56 @@ sub sort_filter_history
 {
     my ( $self, $filter, $search, $sort ) = @_;
 
-	# Place entries in the history_keys array based on three critera:
-	#
-	# 1. Whether the bucket they are classified in matches the $filter
-	# 2. Whether their from/subject matches the $search
-	# 3. In the order of $sort which can be from, subject or bucket
+    # Place entries in the history_keys array based on three critera:
+    #
+    # 1. Whether the bucket they are classified in matches the $filter
+    # 2. Whether their from/subject matches the $search
+    # 3. In the order of $sort which can be from, subject or bucket
 
-	delete $self->{history_keys_};
-	
-	if ( ( $filter ne '' ) || ( $search ne '' ) ) {
-		foreach my $file (sort compare_mf keys %{$self->{history_}}) {
-			if ( ( $filter eq '' ) || 
-				 ( $self->{history_}{$file}{bucket} eq $filter ) || 
-				 ( ( $filter eq '__filter__magnet' ) && ( $self->{history_}{$file}{magnet} ne '' ) ) ) {
-				if ( ( $search eq '' ) || 
-				   ( $self->{history_}{$file}{from}    =~ /\Q$search\E/i ) ||
-				   ( $self->{history_}{$file}{subject} =~ /\Q$search\E/i ) ) {
-				   		if ( defined( $self->{history_keys_} ) ) {
-							@{$self->{history_keys_}} = (@{$self->{history_keys_}}, $file);
-						} else {
-							@{$self->{history_keys_}} = ($file);
-						}
-				   }
-			}
-		}
-	} else {
-		@{$self->{history_keys_}} = keys %{$self->{history_}};
-	}
+    delete $self->{history_keys_};
+    
+    if ( ( $filter ne '' ) || ( $search ne '' ) ) {
+        foreach my $file (sort compare_mf keys %{$self->{history_}}) {
+            if ( ( $filter eq '' ) || 
+                 ( $self->{history_}{$file}{bucket} eq $filter ) || 
+                 ( ( $filter eq '__filter__magnet' ) && ( $self->{history_}{$file}{magnet} ne '' ) ) ) {
+                if ( ( $search eq '' ) || 
+                   ( $self->{history_}{$file}{from}    =~ /\Q$search\E/i ) ||
+                   ( $self->{history_}{$file}{subject} =~ /\Q$search\E/i ) ) {
+                           if ( defined( $self->{history_keys_} ) ) {
+                            @{$self->{history_keys_}} = (@{$self->{history_keys_}}, $file);
+                        } else {
+                            @{$self->{history_keys_}} = ($file);
+                        }
+                   }
+            }
+        }
+    } else {
+        @{$self->{history_keys_}} = keys %{$self->{history_}};
+    }
 
-	# If a sort is specified then use it to sort the history items by an a subkey
-	# (from, subject or bucket) otherwise use compare_mf to give the history back
-	# in the order the messages were received.  Note that when sorting on a alphanumeric
-	# field we ignore all punctuation characters so that "John and 'John and John
-	# all sort next to each other
+    # If a sort is specified then use it to sort the history items by an a subkey
+    # (from, subject or bucket) otherwise use compare_mf to give the history back
+    # in the order the messages were received.  Note that when sorting on a alphanumeric
+    # field we ignore all punctuation characters so that "John and 'John and John
+    # all sort next to each other
 
     if ( $sort ne '' ) {
         @{$self->{history_keys_}} = sort { 
-        									my ($a1,$b1) = ($self->{history_}{$a}{$sort}, 
-        								  	$self->{history_}{$b}{$sort}); 
-        								  	$a1 =~ s/[^A-Z0-9]//ig; 
-        								  	$b1 =~ s/[^A-Z0-9]//ig; 
-        								  	return ( $a1 cmp $b1 ); 
-        								  } @{$self->{history_keys_}};
+                                            my ($a1,$b1) = ($self->{history_}{$a}{$sort}, 
+                                              $self->{history_}{$b}{$sort}); 
+                                              $a1 =~ s/[^A-Z0-9]//ig; 
+                                              $b1 =~ s/[^A-Z0-9]//ig; 
+                                              return ( $a1 cmp $b1 ); 
+                                          } @{$self->{history_keys_}};
     } else {
-		# Here's a quick shortcut so that we don't have to iterate
-		# if there's no work for us to do
+        # Here's a quick shortcut so that we don't have to iterate
+        # if there's no work for us to do
 
-		if ( $self->history_size() > 0 ) {
-			@{$self->{history_keys_}} = sort compare_mf @{$self->{history_keys_}};
-		}
-	}    
+        if ( $self->history_size() > 0 ) {
+            @{$self->{history_keys_}} = sort compare_mf @{$self->{history_keys_}};
+        }
+    }    
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2135,56 +2135,56 @@ sub load_history_cache
 {
     my ( $self ) = @_;
 
-	# First we mark every entry in the history cache with cull set to one, after we have
-	# looked through the messages directory for message we will delete any of the entries
-	# in the hash that have cull still set to 1.  cull gets set to 0 everytime we see an
-	# existing history cache entry that is still on the disk, or when we create a new 
-	# entry.  Strictly speaking this should not be necessary because when files are deleted
-	# their corresponding history entry is meant to be deleted, but since disk is not 100%
-	# reliable we do this check so that the history cache is in sync with the disk at all
-	# times
+    # First we mark every entry in the history cache with cull set to one, after we have
+    # looked through the messages directory for message we will delete any of the entries
+    # in the hash that have cull still set to 1.  cull gets set to 0 everytime we see an
+    # existing history cache entry that is still on the disk, or when we create a new 
+    # entry.  Strictly speaking this should not be necessary because when files are deleted
+    # their corresponding history entry is meant to be deleted, but since disk is not 100%
+    # reliable we do this check so that the history cache is in sync with the disk at all
+    # times
 
     foreach my $key (keys %{$self->{history_}}) {
-    	$self->{history_}{$key}{cull} = 1;
+        $self->{history_}{$key}{cull} = 1;
     }
 
-	# Now get all the names of files from the appropriate history subdirectory and run
-	# through them looking for existing entries in the history which must be marked
-	# for non-culling and new entries that need to be added to the end
+    # Now get all the names of files from the appropriate history subdirectory and run
+    # through them looking for existing entries in the history which must be marked
+    # for non-culling and new entries that need to be added to the end
 
     my @history_files = sort compare_mf glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.msg";
 
     foreach my $i ( 0 .. $#history_files ) {
 
-    	# Strip any directory portion of the name in the current file so that we
-    	# just get the base name of the file that we are dealing with
+        # Strip any directory portion of the name in the current file so that we
+        # just get the base name of the file that we are dealing with
     
         $history_files[$i] =~ /(popfile.*\.msg)/;
         $history_files[$i] = $1;
 
-		# If this file already exists in the history cache then just mark it not 
-		# to be culled and move on. 
-		
-		if ( defined( $self->{history_}{$history_files[$i]} ) ) {
-			$self->{history_}{$history_files[$i]}{cull} = 0;
-		} else {
-		
-			# Find the class information for this file using the history_load_class helper
-			# function, and then parse the MSG file for the From and Subject information
+        # If this file already exists in the history cache then just mark it not 
+        # to be culled and move on. 
+        
+        if ( defined( $self->{history_}{$history_files[$i]} ) ) {
+            $self->{history_}{$history_files[$i]}{cull} = 0;
+        } else {
+        
+            # Find the class information for this file using the history_load_class helper
+            # function, and then parse the MSG file for the From and Subject information
 
-			my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->history_load_class( $history_files[$i] );
-			my $from    = '';
-			my $subject = '';
-			
-			if ( open MAIL, "<$self->{configuration}->{configuration}{msgdir}$history_files[$i]" ) {
-				while ( <MAIL> )  {
-					last          if ( /^(\r\n|\r|\n)/ );
-					$from = $1    if ( /^From:(.*)/i );
-					$subject = $1 if ( /^Subject:(.*)/i );
-					last if ( ( $from ne '' ) && ( $subject ne '' ) );
-				}
-				close MAIL;
-			}
+            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->history_load_class( $history_files[$i] );
+            my $from    = '';
+            my $subject = '';
+            
+            if ( open MAIL, "<$self->{configuration}->{configuration}{msgdir}$history_files[$i]" ) {
+                while ( <MAIL> )  {
+                    last          if ( /^(\r\n|\r|\n)/ );
+                    $from = $1    if ( /^From:(.*)/i );
+                    $subject = $1 if ( /^Subject:(.*)/i );
+                    last if ( ( $from ne '' ) && ( $subject ne '' ) );
+                }
+                close MAIL;
+            }
 
             $from    = "&lt;$self->{language}{History_NoFrom}&gt;"    if ( $from eq '' );
             $subject = "&lt;$self->{language}{History_NoSubject}&gt;" if ( !( $subject =~ /[^ \t\r\n]/ ) );
@@ -2208,36 +2208,40 @@ sub load_history_cache
                 $short_subject = "$1...";
             }
 
+            $from =~ s/&/&amp;/g;
             $from =~ s/</&lt;/g;
             $from =~ s/>/&gt;/g;
 
+            $short_from =~ s/&/&amp;/g;
             $short_from =~ s/</&lt;/g;
             $short_from =~ s/>/&gt;/g;
 
+            $subject =~ s/&/&amp;/g;
             $subject =~ s/</&lt;/g;
             $subject =~ s/>/&gt;/g;
 
+            $short_subject =~ s/&/&amp;/g;
             $short_subject =~ s/</&lt;/g;
             $short_subject =~ s/>/&gt;/g;
 
-			$self->{history_}{$history_files[$i]}{bucket}        = $bucket;
-			$self->{history_}{$history_files[$i]}{reclassified}  = $reclassified;
-			$self->{history_}{$history_files[$i]}{magnet}        = $magnet;
-			$self->{history_}{$history_files[$i]}{subject}       = $subject;
-			$self->{history_}{$history_files[$i]}{from}          = $from;
-			$self->{history_}{$history_files[$i]}{short_subject} = $short_subject;
-			$self->{history_}{$history_files[$i]}{short_from}    = $short_from;
-			$self->{history_}{$history_files[$i]}{cull}          = 0;
-		}
-	}
+            $self->{history_}{$history_files[$i]}{bucket}        = $bucket;
+            $self->{history_}{$history_files[$i]}{reclassified}  = $reclassified;
+            $self->{history_}{$history_files[$i]}{magnet}        = $magnet;
+            $self->{history_}{$history_files[$i]}{subject}       = $subject;
+            $self->{history_}{$history_files[$i]}{from}          = $from;
+            $self->{history_}{$history_files[$i]}{short_subject} = $short_subject;
+            $self->{history_}{$history_files[$i]}{short_from}    = $short_from;
+            $self->{history_}{$history_files[$i]}{cull}          = 0;
+        }
+    }
 
-	# Remove any entries from the history that have been removed from disk, see the big
-	# comment at the start of this function for more detail
+    # Remove any entries from the history that have been removed from disk, see the big
+    # comment at the start of this function for more detail
 
     foreach my $key (keys %{$self->{history_}}) {
-    	if ( $self->{history_}{$key}{cull} == 1 ) {
-    		delete $self->{history_}{$key};
-    	}
+        if ( $self->{history_}{$key}{cull} == 1 ) {
+            delete $self->{history_}{$key};
+        }
     }
 
     $self->{history_invalid_} = 0;
@@ -2271,13 +2275,13 @@ sub history_size
 {
     my ( $self ) = @_;
 
-	if ( defined( $self->{history_keys_} ) ) {
-		my @keys = @{$self->{history_keys_}};
+    if ( defined( $self->{history_keys_} ) ) {
+        my @keys = @{$self->{history_keys_}};
 
-		return ($#keys + 1);
-	} else {
-		return 0;
-	}
+        return ($#keys + 1);
+    } else {
+        return 0;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2413,37 +2417,37 @@ sub history_reclassify
 
     if ( defined( $self->{form}{change} ) ) {
 
-		# This hash will map filenames of MSG files in the history to the
-		# new classification that they should be, it is built by iterating
-		# through the $self->{form} looking for entries with the message number
-		# of each message that is displayed and then creating an entry in
-		# %messages if there is a corresponding entry in $self->{form} for
-		# that message number
+        # This hash will map filenames of MSG files in the history to the
+        # new classification that they should be, it is built by iterating
+        # through the $self->{form} looking for entries with the message number
+        # of each message that is displayed and then creating an entry in
+        # %messages if there is a corresponding entry in $self->{form} for
+        # that message number
 
         my %messages;
 
         foreach my $i ( $self->{form}{start_message}  .. $self->{form}{start_message} + $self->{configuration}->{configuration}{page_size} - 1) {
-        	my $mail_file = $self->{history_keys_}[$i];
+            my $mail_file = $self->{history_keys_}[$i];
 
-			# The first check makes sure we didn't run off the end of the history table
-			# the second that there is something defined for this message number and the
-			# third that this message number has a value (i.e. a bucket name)
+            # The first check makes sure we didn't run off the end of the history table
+            # the second that there is something defined for this message number and the
+            # third that this message number has a value (i.e. a bucket name)
 
             if ( defined( $mail_file ) && defined( $self->{form}{$i} ) && ( $self->{form}{$i} ne '' ) ) {
                 $messages{$mail_file} = $self->{form}{$i};
             }
         }
 
-		# The temp_corpus hash has two levels of keys: $temp_corpus{bucket}{word}
-		# where bucket is the name of one of the current buckets and word is a word
-		# in that bucket.  The value stored in the hash is the word count.
-		#
-		# TODO: this needs factoring out of here and into Classifier::Bayes
+        # The temp_corpus hash has two levels of keys: $temp_corpus{bucket}{word}
+        # where bucket is the name of one of the current buckets and word is a word
+        # in that bucket.  The value stored in the hash is the word count.
+        #
+        # TODO: this needs factoring out of here and into Classifier::Bayes
 
-		my %temp_corpus;
+        my %temp_corpus;
 
-		# At this point %messages maps that files that need reclassifying to their
-		# new bucket classification
+        # At this point %messages maps that files that need reclassifying to their
+        # new bucket classification
 
         while ( my ($mail_file, $newbucket) = each %messages ) {
 
@@ -2459,20 +2463,20 @@ sub history_reclassify
 
                 if (!defined( $temp_corpus{$newbucket} ) ) {
                     if ( open WORDS, "<$self->{configuration}->{configuration}{corpus}/$newbucket/table" ) {
-						while (<WORDS>) {
-							if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-								if ( $1 != 1 )  {
-									print "Incompatible corpus version in $newbucket\n";
-									return;
-								}
+                        while (<WORDS>) {
+                            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+                                if ( $1 != 1 )  {
+                                    print "Incompatible corpus version in $newbucket\n";
+                                    return;
+                                }
 
-								next;
-							}
-							
-							$temp_corpus{$newbucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
-						}
-						close WORDS;
-					}
+                                next;
+                            }
+                            
+                            $temp_corpus{$newbucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
+                        }
+                        close WORDS;
+                    }
                 }
 
                 # Parse the messages and tally the word-count
@@ -2517,13 +2521,13 @@ sub history_reclassify
 
         foreach my $abucket ( keys %temp_corpus ) {
             if ( open WORDS, ">$self->{configuration}->{configuration}{corpus}/$abucket/table" ) {
-				print WORDS "__CORPUS__ __VERSION__ 1\n";
-				foreach my $word ( keys %{$temp_corpus{$abucket}} ) {
-					print WORDS "$word $temp_corpus{$abucket}{$word}\n" if ( $temp_corpus{$abucket}{$word} > 0 );
-				}
-				close WORDS;
-			}
-			
+                print WORDS "__CORPUS__ __VERSION__ 1\n";
+                foreach my $word ( keys %{$temp_corpus{$abucket}} ) {
+                    print WORDS "$word $temp_corpus{$abucket}{$word}\n" if ( $temp_corpus{$abucket}{$word} > 0 );
+                }
+                close WORDS;
+            }
+            
             $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$abucket");
         }
 
@@ -2540,93 +2544,93 @@ sub history_undo
 {
     my( $self ) = @_;
 
-	foreach my $key (keys %{$self->{form}}) {
-		if ( $key =~ /^undo_([0-9]+)$/ ) {
-			my $mail_file = $self->{history_keys_}[$1];
-			my %temp_corpus;
+    foreach my $key (keys %{$self->{form}}) {
+        if ( $key =~ /^undo_([0-9]+)$/ ) {
+            my $mail_file = $self->{history_keys_}[$1];
+            my %temp_corpus;
 
-			# Load the class file
+            # Load the class file
 
-			my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->history_load_class( $mail_file );
+            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->history_load_class( $mail_file );
 
-			# Only undo if the message has been classified...
+            # Only undo if the message has been classified...
 
-			if ( defined( $usedtobe ) ) {
-				if (!defined( $temp_corpus{bucket} ) ) {
-					if ( open WORDS, "<$self->{configuration}->{configuration}{corpus}/$bucket/table" ) {
-						while (<WORDS>) {
-							if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-								if ( $1 != 1 )  {
-									print "Incompatible corpus version in $bucket\n";
-									return;
-								}
+            if ( defined( $usedtobe ) ) {
+                if (!defined( $temp_corpus{bucket} ) ) {
+                    if ( open WORDS, "<$self->{configuration}->{configuration}{corpus}/$bucket/table" ) {
+                        while (<WORDS>) {
+                            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+                                if ( $1 != 1 )  {
+                                    print "Incompatible corpus version in $bucket\n";
+                                    return;
+                                }
 
-								next;
-							}
+                                next;
+                            }
 
-							$temp_corpus{$bucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
-						}
-						close WORDS;
-					}
-				}
+                            $temp_corpus{$bucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
+                        }
+                        close WORDS;
+                    }
+                }
 
-				$self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$mail_file");
+                $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$mail_file");
 
-				# Tally the words
+                # Tally the words
 
-				foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
-					$self->{classifier}->{full_total} -= $self->{classifier}->{parser}->{words}{$word};
-					$temp_corpus{$bucket}{$word}      -= $self->{classifier}->{parser}->{words}{$word};
+                foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
+                    $self->{classifier}->{full_total} -= $self->{classifier}->{parser}->{words}{$word};
+                    $temp_corpus{$bucket}{$word}      -= $self->{classifier}->{parser}->{words}{$word};
 
-					delete $temp_corpus{$bucket}{$word} if ( $temp_corpus{$bucket}{$word} <= 0 );
-				}
+                    delete $temp_corpus{$bucket}{$word} if ( $temp_corpus{$bucket}{$word} <= 0 );
+                }
 
-				# Update statistics
+                # Update statistics
 
-				$self->{logger}->debug( "Undoing $mail_file from $bucket to $usedtobe" );
+                $self->{logger}->debug( "Undoing $mail_file from $bucket to $usedtobe" );
 
-				if ( $bucket ne $usedtobe ) {
-					$self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
-					$self->{classifier}->{parameters}{$bucket}{count}   -= 1;
-					$self->{classifier}->{parameters}{$usedtobe}{count} += 1;
-				}
+                if ( $bucket ne $usedtobe ) {
+                    $self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
+                    $self->{classifier}->{parameters}{$bucket}{count}   -= 1;
+                    $self->{classifier}->{parameters}{$usedtobe}{count} += 1;
+                }
 
-				# Since we have just changed the classification of this file and it has
-				# not been reclassified and has a new bucket name then we need to update the
-				# history cache to reflect that
+                # Since we have just changed the classification of this file and it has
+                # not been reclassified and has a new bucket name then we need to update the
+                # history cache to reflect that
 
-				$self->{history_}{$mail_file}{reclassified} = 0;
-				$self->{history_}{$mail_file}{bucket}       = $usedtobe;
+                $self->{history_}{$mail_file}{reclassified} = 0;
+                $self->{history_}{$mail_file}{bucket}       = $usedtobe;
 
-				# Update the class file
+                # Update the class file
 
-				$self->history_write_class( $mail_file, 0, ( $usedtobe || "unclassified" ), '', '');
+                $self->history_write_class( $mail_file, 0, ( $usedtobe || "unclassified" ), '', '');
 
-				# Add message feedback
+                # Add message feedback
 
-				$self->{feedback}{$mail_file} = sprintf( $self->{language}{History_ChangedTo}, ($self->{classifier}->{colors}{$usedtobe} || ''), $usedtobe );
-			}
+                $self->{feedback}{$mail_file} = sprintf( $self->{language}{History_ChangedTo}, ($self->{classifier}->{colors}{$usedtobe} || ''), $usedtobe );
+            }
 
-			# Commit the buckets
+            # Commit the buckets
 
-			$self->{classifier}->write_parameters();
-			$self->{configuration}->save_configuration();
+            $self->{classifier}->write_parameters();
+            $self->{configuration}->save_configuration();
 
-			foreach my $abucket ( keys %temp_corpus ) {
-				if ( open WORDS, ">$self->{configuration}->{configuration}{corpus}/$abucket/table" ) {
-					print WORDS "__CORPUS__ __VERSION__ 1\n";
-					foreach my $word ( keys %{$temp_corpus{$abucket}} ) {
-						print WORDS "$word $temp_corpus{$abucket}{$word}\n" if ( $temp_corpus{$abucket}{$word} > 0 );
-					}
-					close WORDS;
-				}
+            foreach my $abucket ( keys %temp_corpus ) {
+                if ( open WORDS, ">$self->{configuration}->{configuration}{corpus}/$abucket/table" ) {
+                    print WORDS "__CORPUS__ __VERSION__ 1\n";
+                    foreach my $word ( keys %{$temp_corpus{$abucket}} ) {
+                        print WORDS "$word $temp_corpus{$abucket}{$word}\n" if ( $temp_corpus{$abucket}{$word} > 0 );
+                    }
+                    close WORDS;
+                }
 
-				$self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$abucket");
-			}
+                $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$abucket");
+            }
 
-			$self->{classifier}->update_constants();
-		}
-	}
+            $self->{classifier}->update_constants();
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2639,31 +2643,31 @@ sub history_undo
 # ---------------------------------------------------------------------------------------------
 sub get_search_filter_widget
 {
-	my ( $self ) = @_;
-	
-	my $body = "<form action=\"/history\">\n";
-	$body .= "<label class=\"historyLabel\" for=\"historySearch\">$self->{language}{History_SearchMessage}:</label>\n";
-	$body .= "<input type=\"text\" id=\"historySearch\" name=\"search\" ";
-	$body .= "value=\"$self->{form}{search}\"" if (defined $self->{form}{search});
-	$body .= " />\n";
-	$body .= "<input type=\"submit\" class=\"submit\" name=\"setsearch\" value=\"$self->{language}{Find}\" />\n";
-	$body .= "&nbsp;&nbsp;<label class=\"historyLabel\" for=\"historyFilter\">$self->{language}{History_FilterBy}:</label>\n";
-	$body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\" />\n";
-	$body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
-	$body .= "<select name=\"filter\" id=\"historyFilter\">\n<option value=\"\"></option>";
-	my @buckets = sort keys %{$self->{classifier}->{total}};
-	foreach my $abucket (@buckets) {
-		$body .= "<option value=\"$abucket\"";
-		$body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
-		$body .= ">$abucket</option>\n";
-	}
-	$body .= "<option value=\"__filter__magnet\"" . ($self->{form}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n";
-	$body .= "<option value=\"unclassified\"" . ($self->{form}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
-	$body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\" />\n";
-	$body .= "<input type=\"submit\" class=\"submit\" name=\"reset_filter_search\" value=\"$self->{language}{History_ResetSearch}\" />\n";
-	$body .= "</form>\n";
-	
-	return $body;
+    my ( $self ) = @_;
+    
+    my $body = "<form action=\"/history\">\n";
+    $body .= "<label class=\"historyLabel\" for=\"historySearch\">$self->{language}{History_SearchMessage}:</label>\n";
+    $body .= "<input type=\"text\" id=\"historySearch\" name=\"search\" ";
+    $body .= "value=\"$self->{form}{search}\"" if (defined $self->{form}{search});
+    $body .= " />\n";
+    $body .= "<input type=\"submit\" class=\"submit\" name=\"setsearch\" value=\"$self->{language}{Find}\" />\n";
+    $body .= "&nbsp;&nbsp;<label class=\"historyLabel\" for=\"historyFilter\">$self->{language}{History_FilterBy}:</label>\n";
+    $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
+    $body .= "<select name=\"filter\" id=\"historyFilter\">\n<option value=\"\"></option>";
+    my @buckets = sort keys %{$self->{classifier}->{total}};
+    foreach my $abucket (@buckets) {
+        $body .= "<option value=\"$abucket\"";
+        $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
+        $body .= ">$abucket</option>\n";
+    }
+    $body .= "<option value=\"__filter__magnet\"" . ($self->{form}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n";
+    $body .= "<option value=\"unclassified\"" . ($self->{form}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
+    $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\" />\n";
+    $body .= "<input type=\"submit\" class=\"submit\" name=\"reset_filter_search\" value=\"$self->{language}{History_ResetSearch}\" />\n";
+    $body .= "</form>\n";
+    
+    return $body;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2677,9 +2681,9 @@ sub history_page
 {
     my ( $self, $client ) = @_;
 
-	# Set up default values for various form elements that have been passed
-	# in or not so that we don't have to worry about undefined values later
-	# on in the function
+    # Set up default values for various form elements that have been passed
+    # in or not so that we don't have to worry about undefined values later
+    # on in the function
 
     $self->{form}{sort}   = '' if ( !defined( $self->{form}{sort}   ) );
     $self->{form}{search} = '' if ( !defined( $self->{form}{search} ) );
@@ -2702,8 +2706,8 @@ sub history_page
         $self->{form}{setsearch} = 1;
     }
 
-	# Set up the text that will appear at the top of the history page
-	# indicating the current filter and search settings
+    # Set up the text that will appear at the top of the history page
+    # indicating the current filter and search settings
 
     my $filtered = '';
     if ( !( $self->{form}{filter} eq '' ) ) {
@@ -2752,30 +2756,30 @@ sub history_page
     if ( defined($self->{form}{clearpage}) ) {
         foreach my $i ( $self->{form}{start_message} .. $self->{form}{start_message} + $self->{configuration}->{configuration}{page_size} - 1 ) {
             if ( defined( $self->{history_keys_}[$i] ) ) {
-				$self->history_delete_file( $self->{history_keys_}[$i], 
-				                            $self->{configuration}->{configuration}{archive} );
+                $self->history_delete_file( $self->{history_keys_}[$i], 
+                                            $self->{configuration}->{configuration}{archive} );
             }
         }
     }
 
-	# If the history cache is invalid then we need to reload it and then if
-	# any of the sort, search or filter options have changed they must be
-	# applied.  The watch word here is to avoid doing work
-	
+    # If the history cache is invalid then we need to reload it and then if
+    # any of the sort, search or filter options have changed they must be
+    # applied.  The watch word here is to avoid doing work
+    
     $self->load_history_cache() if ( $self->{history_invalid_} == 1 );
     $self->sort_filter_history( $self->{form}{filter}, 
-    							$self->{form}{search}, 
-    							$self->{form}{sort} ) if ( ( defined( $self->{form}{setfilter}     ) ) || 
-     													   ( defined( $self->{form}{setsort}       ) ) ||
-     													   ( defined( $self->{form}{setsearch}     ) ) ||
-     													   ( defined( $self->{form}{deletemessage} ) ) || 
-     													   ( defined( $self->{form}{clearall}      ) ) || 
-     													   ( defined( $self->{form}{clearpage}     ) ) );
+                                $self->{form}{search}, 
+                                $self->{form}{sort} ) if ( ( defined( $self->{form}{setfilter}     ) ) || 
+                                                            ( defined( $self->{form}{setsort}       ) ) ||
+                                                            ( defined( $self->{form}{setsearch}     ) ) ||
+                                                            ( defined( $self->{form}{deletemessage} ) ) || 
+                                                            ( defined( $self->{form}{clearall}      ) ) || 
+                                                            ( defined( $self->{form}{clearpage}     ) ) );
 
-	my $body = '';
+    my $body = '';
 
     if ( !$self->history_cache_empty() )  {
-	    my $highlight_message = '';
+        my $highlight_message = '';
         my $start_message = 0;
         
         $start_message = $self->{form}{start_message} if ( ( defined($self->{form}{start_message}) ) && ($self->{form}{start_message} > 0 ) );
@@ -2826,7 +2830,7 @@ sub history_page
         $body .= "<table class=\"historyWidgetsTop\" summary=\"\">\n<tr>\n";
 
         # Search From/Subject widget
-		my @buckets = sort keys %{$self->{classifier}->{total}};
+        my @buckets = sort keys %{$self->{classifier}->{total}};
         $body .= "<td colspan=\"5\" valign=middle>\n";
         $body .= $self->get_search_filter_widget();
         $body .= "</td>\n</tr>\n</table>\n";
@@ -2889,10 +2893,10 @@ sub history_page
 
         foreach my $i ($start_message ..  $stop_message) {
             my $mail_file     = $self->{history_keys_}[$i];
-			my $from          = $self->{history_}{$mail_file}{from};
-			my $subject       = $self->{history_}{$mail_file}{subject};
-			my $short_from    = $self->{history_}{$mail_file}{short_from};
-			my $short_subject = $self->{history_}{$mail_file}{short_subject};
+            my $from          = $self->{history_}{$mail_file}{from};
+            my $subject       = $self->{history_}{$mail_file}{subject};
+            my $short_from    = $self->{history_}{$mail_file}{short_from};
+            my $short_subject = $self->{history_}{$mail_file}{short_subject};
             my $bucket        = $self->{history_}{$mail_file}{bucket};
             my $reclassified  = $self->{history_}{$mail_file}{reclassified};
 
@@ -2935,10 +2939,10 @@ sub history_page
                     }
                     $body .= "</select>\n";
                     
-		            if ( ( defined($self->{form}{view}) ) && ( $self->{form}{view} eq $mail_file ) ) {
-						$body .= "<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language}{Reclassify}\" />";
-					}
-				} else {
+                    if ( ( defined($self->{form}{view}) ) && ( $self->{form}{view} eq $mail_file ) ) {
+                        $body .= "<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language}{Reclassify}\" />";
+                    }
+                } else {
                     $body .= " ($self->{language}{History_MagnetUsed}: $self->{history_}{$mail_file}{magnet})";
                 }
             }
@@ -3175,15 +3179,15 @@ sub handle_url
         $self->parse_form( $content );
     }
 
-	if ( $url eq '/jump_to_message' )  {
-		my $found = 0;
-		my $file = $self->{form}{view};
-		foreach my $akey ( keys %{ $self->{history_} } ) {
-			if ($akey eq $file) {
-				$found = 1;
-				last;
-			}
-		}
+    if ( $url eq '/jump_to_message' )  {
+        my $found = 0;
+        my $file = $self->{form}{view};
+        foreach my $akey ( keys %{ $self->{history_} } ) {
+            if ($akey eq $file) {
+                $found = 1;
+                last;
+            }
+        }
 
         # Force a history_reload if we did not find this file in the history cache
         # but we do find it on disk using perl's -e file test operator (returns
@@ -3361,27 +3365,27 @@ sub remove_mail_files
 {
     my ( $self ) = @_;
     my $yesterday = defined($self->{today})?$self->{today}:0;
-	$self->calculate_today();
+    $self->calculate_today();
 
     if ( $self->{today} > $yesterday ) {    
-		my @mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.???";
+        my @mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.???";
 
-		foreach my $mail_file (@mail_files) {
-			my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
+        foreach my $mail_file (@mail_files) {
+            my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
 
-			if ( $ctime < (time - $self->{configuration}->{configuration}{history_days} * $seconds_per_day) )  {
-				$self->history_delete_file( $mail_file, $self->{configuration}->{configuration}{archive} );
-			}
-		}
+            if ( $ctime < (time - $self->{configuration}->{configuration}{history_days} * $seconds_per_day) )  {
+                $self->history_delete_file( $mail_file, $self->{configuration}->{configuration}{archive} );
+            }
+        }
 
-		 # Clean up old style msg/cls files
+         # Clean up old style msg/cls files
 
-		@mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*_*.???";
+        @mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*_*.???";
 
-		foreach my $mail_file (@mail_files) {
-			unlink($mail_file);
-		}
-	}
+        foreach my $mail_file (@mail_files) {
+            unlink($mail_file);
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -3413,42 +3417,42 @@ sub history_delete_file
     $mail_file =~ /(popfile.+\=.+\.msg)$/;
     $mail_file = $1;
 
-	if ( $archive ) {
-		my $path = $self->{configuration}->{configuration}{archive_dir};
-		
-		mkdir( $path );
+    if ( $archive ) {
+        my $path = $self->{configuration}->{configuration}{archive_dir};
+        
+        mkdir( $path );
 
-		my ($reclassified, $bucket, $usedtobe, $magnet) = $self->history_load_class( $mail_file );
+        my ($reclassified, $bucket, $usedtobe, $magnet) = $self->history_load_class( $mail_file );
 
-		if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) ) {
-			$path .= "\/" . $bucket;
-			mkdir( $path );
+        if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) ) {
+            $path .= "\/" . $bucket;
+            mkdir( $path );
 
-			if ( $self->{configuration}->{configuration}{archive_classes} > 0) {
-				# archive to a random sub-directory of the bucket archive
-				my $subdirectory = int( rand( $self->{configuration}->{configuration}{archive_classes} ) );
-				$path .= "\/" . $subdirectory;
-				mkdir( $path );
-			}
+            if ( $self->{configuration}->{configuration}{archive_classes} > 0) {
+                # archive to a random sub-directory of the bucket archive
+                my $subdirectory = int( rand( $self->{configuration}->{configuration}{archive_classes} ) );
+                $path .= "\/" . $subdirectory;
+                mkdir( $path );
+            }
 
-			# TODO This may be UNSAFE, please write a better comment that explains
-			# why this might be unsafe.  What does unsafe mean in this context?
+            # TODO This may be UNSAFE, please write a better comment that explains
+            # why this might be unsafe.  What does unsafe mean in this context?
 
-			$self->history_copy_file( "$self->{configuration}->{configuration}{msgdir}$mail_file", $path, $mail_file );
-		}
-	}
+            $self->history_copy_file( "$self->{configuration}->{configuration}{msgdir}$mail_file", $path, $mail_file );
+        }
+    }
 
-	# Before deleting the file make sure that the appropriate entry in the
-	# history cache is also remove
+    # Before deleting the file make sure that the appropriate entry in the
+    # history cache is also remove
 
-	delete $self->{history_}{$mail_file};
+    delete $self->{history_}{$mail_file};
 
-	# Now remove the files from the disk, remove both the msg file containing
-	# the mail message and its associated CLS file
+    # Now remove the files from the disk, remove both the msg file containing
+    # the mail message and its associated CLS file
 
-	unlink( "$self->{configuration}->{configuration}{msgdir}$mail_file" );
-	$mail_file =~ s/msg$/cls/;
-	unlink( "$self->{configuration}->{configuration}{msgdir}$mail_file" );
+    unlink( "$self->{configuration}->{configuration}{msgdir}$mail_file" );
+    $mail_file =~ s/msg$/cls/;
+    unlink( "$self->{configuration}->{configuration}{msgdir}$mail_file" );
 }
 
 
