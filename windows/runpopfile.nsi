@@ -137,7 +137,11 @@ perl_missing:
 
 got_exe_path:
   ReadRegStr ${L_TEMP} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner"
-  StrCmp ${L_TEMP} ${L_WINUSERNAME} 0 add_user
+  StrCmp ${L_TEMP} ${L_WINUSERNAME} read_data
+  StrCmp ${L_TEMP} "" read_data
+  Goto add_user
+
+read_data:
   ReadEnvStr ${L_POPFILE_ROOT} "POPFILE_ROOT"
   ReadEnvStr ${L_POPFILE_USER} "POPFILE_USER"
   StrCmp ${L_POPFILE_ROOT} "" set_root
