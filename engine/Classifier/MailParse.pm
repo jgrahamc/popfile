@@ -2436,7 +2436,15 @@ sub convert_encoding
         }
     }
 
-    Encode::from_to($string, $from, $to) unless ($from eq $to);
+    unless ($from eq $to) {
+        my ($orig_string) = $string;
+
+        # Workaround for Encode::Unicode error bug.
+        eval {
+            Encode::from_to($string, $from, $to);
+        };
+        $string = $orig_string if ($@);
+    }
     return $string;
 }
 
