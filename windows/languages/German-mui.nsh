@@ -40,7 +40,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT \
-"Dieser Assistent wird Sie durch die Installation von POPFile begleiten.\r\n\r\n\Es wird empfohlen vor der Installation alle anderen Programme zu schlieﬂen.\r\n\r\n"
+"Dieser Assistent wird Sie durch die Installation von POPFile begleiten.\r\n\r\nEs wird empfohlen vor der Installation alle anderen Programme zu schlieﬂen.\r\n\r\n"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish

@@ -40,7 +40,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT \
-"This wizard will guide you through the installation of POPFile.\r\n\r\n\It is recommended that you close all other applications before starting Setup.\r\n\r\n"
+"This wizard will guide you through the installation of POPFile.\r\n\r\nIt is recommended that you close all other applications before starting Setup.\r\n\r\n"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
