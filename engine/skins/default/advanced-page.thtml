@@ -69,9 +69,9 @@
 </TMPL_IF>
 <tr><td><TMPL_VAR NAME="Advanced_Parameter"></td>
 <td><input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">">
-<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </td></tr>
 </TMPL_LOOP>
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
 </table>
 <p><input type="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params"></form>
