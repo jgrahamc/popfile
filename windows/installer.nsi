@@ -911,7 +911,7 @@ save_HKCU_root_sfn:
   SetOutPath $G_ROOTDIR
 
   ; Remove redundant files (from earlier test versions of the installer)
-  
+
   Delete $G_ROOTDIR\wrapper.exe
   Delete $G_ROOTDIR\wrapperf.exe
   Delete $G_ROOTDIR\wrapperb.exe
@@ -2117,9 +2117,20 @@ look_for_popfile:
 
 look_for_uninstalluser:
   IfFileExists "$G_ROOTDIR\uninstalluser.exe" 0 uninstall_popfile
+
+  ; Uninstall the 'User Data' in the PROGRAM folder before uninstalling the PROGRAM files
+
   HideWindow
   ExecWait '"$G_ROOTDIR\uninstalluser.exe" _?=$G_ROOTDIR'
   BringToFront
+
+  ; If any email settings have NOT been restored and the user wishes to try again later,
+  ; the relevant INI file will still exist and we should not remove it or uninstalluser.exe
+
+  IfFileExists "$G_ROOTDIR\pfi-outexpress.ini" uninstall_popfile
+  IfFileExists "$G_ROOTDIR\pfi-outlook.ini" uninstall_popfile
+  IfFileExists "$G_ROOTDIR\pfi-eudora.ini" uninstall_popfile
+  Delete "$G_ROOTDIR\uninstalluser.exe"
 
 uninstall_popfile:
   SetDetailsPrint textonly
@@ -2261,6 +2272,7 @@ menucleanup:
   Delete $G_ROOTDIR\popfileb.exe
   Delete $G_ROOTDIR\popfileif.exe
   Delete $G_ROOTDIR\popfileib.exe
+  Delete $G_ROOTDIR\popfile-service.exe
   Delete $G_ROOTDIR\stop_pf.exe
   Delete $G_ROOTDIR\license
 
@@ -2398,17 +2410,23 @@ final_check:
 
   ; if $INSTDIR was removed, skip these next ones
 
-  IfFileExists "$INSTDIR\*.*" 0 removed
-  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO removed
+  IfFileExists "$INSTDIR\*.*" 0 exit
+
+  ; If 'User Data' uninstaller still exists, we cannot offer to remove the remaining files
+  ; (some email settings have not been restored and the user wants to try again later)
+
+  IfFileExists "$G_ROOTDIR\uninstalluser.exe" exit
+
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO exit
   DetailPrint "$(PFI_LANG_UN_LOG_5)"
   Delete "$INSTDIR\*.*"
   RMDir /r $INSTDIR
-  IfFileExists "$INSTDIR\*.*" 0 removed
+  IfFileExists "$INSTDIR\*.*" 0 exit
   DetailPrint "$(PFI_LANG_UN_LOG_6)"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
-removed:
 
+exit:
   SetDetailsPrint both
 
   Pop ${L_TEMP}
