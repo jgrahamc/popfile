@@ -70,17 +70,17 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # Default port for SMTP service
+    # By default we do fork
+    $self->config_( 'force_fork', 1 );
 
+    # Default port for SMTP service
     $self->config_( 'port', 25 );
 
     # Where to forward on to
-
     $self->config_( 'chain_server', '' );
     $self->config_( 'chain_port', 25 );
 
     # Only accept connections from the local machine for smtp
-
     $self->config_( 'local', 1 );
 
     # The welcome string from the proxy is configurable

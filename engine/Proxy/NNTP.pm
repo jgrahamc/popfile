@@ -70,6 +70,10 @@ sub initialize
 {
     my ( $self ) = @_;
 
+    # By default we don't fork
+
+    $self->config_( 'force_fork', 0 );
+
     # Default ports for NNTP service and the user interface
 
     $self->config_( 'port', 119 );

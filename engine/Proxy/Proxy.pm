@@ -192,7 +192,6 @@ sub reaper
     }
 }
 
-
 # ---------------------------------------------------------------------------------------------
 #
 # read_pipe_
@@ -203,7 +202,6 @@ sub reaper
 # $handle   The handle of the pipe to read
 #
 # ---------------------------------------------------------------------------------------------
-
 sub read_pipe_
 {
     my ($self, $handle) = @_;
@@ -328,20 +326,33 @@ sub service
                 # and set the socket to binmode so that no CRLF translation goes on
 
                 $self->global_config_( 'download_count', $self->global_config_( 'download_count' ) + 1 );
-                my ($pid,$pipe) = &{$self->{forker_}};
+
+                # If we have force_fork turned on then we will do a fork, otherwise we will handle this
+                # inline, in the inline case we need to create the two ends of a pipe that will be used
+                # as if there was a child process
+
                 binmode( $client );
 
-                # If we are in the parent process then push the pipe handle onto the children list
+                if ( $self->config_( 'force_fork' ) ) {
+                    my ( $pid, $pipe ) = &{$self->{forker_}};
 
-                if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
-                    $self->{children__}{$pid} = $pipe;
-                }
+                    # If we are in the parent process then push the pipe handle onto the children list
 
-                # If we fail to fork, or are in the child process then process this request
+                    if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
+                        $self->{children__}{$pid} = $pipe;
+                    }
 
-                if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe );
-                    exit(0) if ( defined( $pid ) );
+                    # If we fail to fork, or are in the child process then process this request
+
+                    if ( !defined( $pid ) || ( $pid == 0 ) ) {
+                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe );
+                        exit(0) if ( defined( $pid ) );
+                    }
+	        } else {
+                    pipe my $reader, my $writer;
+
+                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer );
+                    $self->{flush_child_data_}( $self, $reader );
                 }
             }
 
