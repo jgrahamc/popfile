@@ -51,7 +51,7 @@
   !insertmacro MUI_PAGECOMMAND_DIRECTORY
   Page custom SetOptionsPage  ": Options"
   !insertmacro MUI_PAGECOMMAND_INSTFILES
-  Page custom SetOutlookOrOutlookExpressPage  ": Configure Outlook or Outlook Express"
+  Page custom SetOutlookOrOutlookExpressPage  ": Configure Outlook Express"
   !insertmacro MUI_PAGECOMMAND_FINISH
 
   ;Component-selection page
@@ -326,7 +326,7 @@ Function SetOptionsPage
   Pop $R0
 FunctionEnd
 
-; This function is used to reconfigure Outlook or Outlook Express accounts
+; This function is used to reconfigure Outlook Express accounts
 
 Function SetOutlookOrOutlookExpressPage
 
@@ -395,7 +395,7 @@ next_acct:
   StrCmp $R6 "" next_acct_increment
   StrCmp $R6 "127.0.0.1" next_acct_increment
 
-  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook or Outlook Express" "POPFile can reconfigure Outlook or Outlook Express for you"
+  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" "POPFile can reconfigure Outlook Express for you"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" $R6
 
