@@ -108,7 +108,7 @@ sub service_server
 
         while ( $self->{send__} =~ s/^([^\r\n]+)[\r\n]+// ) {
             $self->tee_( $handle, "$1$eol" );
-            select( undef, undef, undef, 0.1 );
+            select( undef, undef, undef, 0.15 );
         }
 
         # If there's data available to read then read it into the received
