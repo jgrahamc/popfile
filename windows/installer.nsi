@@ -15,10 +15,12 @@
 
   !define MUI_PRODUCT "POPFile"
   !define MUI_VERSION "0.19.0RC3"
+  !define RELEASE_NOTES "..\engine\v0.19.0.change"
+  
   !include "MUI.nsh"
 
 #----------------------------------------------------------------------------------------
-# CBP Configuration Data (leave lines commented-out if defaults are satisfactory)
+# CBP Configuration Data (to override defaults, un-comment the lines below and modify them)
 #----------------------------------------------------------------------------------------
 #   ; Maximum number of buckets handled (in range 2 to 8)
 #
@@ -26,12 +28,12 @@
 #
 #   ; Default bucket selection (use "" if no buckets are to be pre-selected)
 #
-#   !define CBP_DEFAULT_LIST "in-box|junk|personal|work"
+#   !define CBP_DEFAULT_LIST "inbox|spam|personal|work"
 #
 #   ; List of suggestions for bucket names (use "" if no suggestions are required)
 #
 #   !define CBP_SUGGESTION_LIST \
-#   "admin|business|computers|family|financial|general|hobby|in-box|junk|list-admin|\
+#   "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|\
 #   miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|\
 #   travel|work"
 #----------------------------------------------------------------------------------------
@@ -55,13 +57,19 @@
 
   !define MUI_WELCOMEPAGE
   !define MUI_LICENSEPAGE
+
   ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
+  
 #    !define MUI_LICENSEPAGE_RADIOBUTTONS
     !define MUI_LICENSEPAGE_CHECKBOX
+    
   !define MUI_COMPONENTSPAGE
   !define MUI_DIRECTORYPAGE
+  
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
+  
     !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE CheckExistingConfig
+    
   !define MUI_ABORTWARNING
   !define MUI_FINISHPAGE
 
@@ -82,17 +90,15 @@
   ; NSIS provides 20 general purpose user registers:
   ; (a) $0 to $9 are used as global registers
   ; (b) $R0 to $R9 are used as local registers
+  
+  ; Local registers referred to by 'defines' use names starting with 'L_' (eg L_LNE, L_OLDUI)
+  ; and the scope of these 'defines' is limited to the "routine" where they are used.
 
   !define POP3     $0   ; POP3 port (1-65535)
   !define GUI      $1   ; GUI port (1-65535)
   !define STARTUP  $2   ; automatic startup flag (1 = yes, 0 = no)
   !define CFG      $3   ; general purpose file handle
   
-  !define OEID     $6
-  !define ID       $7
-  !define OEIDENT  $8
-  !define ACCTID   $9
-
 #--------------------------------------------------------------------------
 # Language
 #--------------------------------------------------------------------------
@@ -176,14 +182,18 @@
 
 Function .onInit
 
+  !define L_RESULT  $R0
+  
+  Push ${L_RESULT}
+
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
 
-  File /oname=$PLUGINSDIR\release.txt "..\engine\v0.19.0.change"
+  File /oname=$PLUGINSDIR\release.txt "${RELEASE_NOTES}"
   MessageBox MB_YESNO "Display POPFile Release Notes ?$\r$\n$\r$\n\
       'Yes' recommended if you are upgrading." IDNO exit
-  SearchPath $R0 notepad.exe
-  StrCmp $R0 "" use_file_association
+  SearchPath ${L_RESULT} notepad.exe
+  StrCmp ${L_RESULT} "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
   GoTo exit
 
@@ -191,6 +201,9 @@ use_file_association:
   ExecShell "open" "$PLUGINSDIR\release.txt"
   
 exit:
+  Pop ${L_RESULT}
+  
+  !undef L_RESULT
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -217,7 +230,7 @@ Section "POPFile" SecPOPFile
   SetOutPath $INSTDIR
    
   File "..\engine\license"
-  File "..\engine\v0.19.0.change"
+  File "${RELEASE_NOTES}"
   File "..\engine\*.pl"
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
@@ -472,6 +485,11 @@ Function CheckExistingConfig
   !define L_LNE       $R7     ; a line from popfile.cfg
   !define L_OLDUI     $R6     ; used to hold old-style of GUI port
   
+  Push ${L_CLEANCFG}
+  Push ${L_CMPRE}
+  Push ${L_LNE}
+  Push ${L_OLDUI}
+  
   StrCpy ${POP3} ""
   StrCpy ${GUI} ""
   StrCpy ${L_OLDUI} ""
@@ -579,6 +597,11 @@ default_gui:
 
 ports_ok:
 
+  Pop ${L_OLDUI}
+  Pop ${L_LNE}
+  Pop ${L_CMPRE}
+  Pop ${L_CLEANCFG}
+
   !undef L_CLEANCFG
   !undef L_CMPRE
   !undef L_LNE
@@ -600,6 +623,9 @@ Function SetOptionsPage
 
   !define L_PORTLIST  $R9   ; combo box ports list
   !define L_RESULT    $R8
+  
+  Push ${L_PORTLIST}
+  Push ${L_RESULT}
 
   ; The function "CheckExistingConfig" loads ${POP3} and ${GUI} with the settings found in
   ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
@@ -652,6 +678,9 @@ show_defaults:
   
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
 
+  Pop ${L_RESULT}
+  Pop ${L_PORTLIST}
+
   !undef L_PORTLIST
   !undef L_RESULT
 
@@ -668,6 +697,8 @@ FunctionEnd
 Function CheckPortOptions
 
   !define L_RESULT    $R9
+  
+  Push ${L_RESULT}
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${POP3} "ioA.ini" "Field 2" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ ${GUI} "ioA.ini" "Field 4" "State"
@@ -703,14 +734,19 @@ bad_gui:
 ports_must_differ:
   MessageBox MB_OK "The POP3 port must be different from the 'User Interface' port.$\n$\n\
       Please change your port selections."
-  Goto bad_exit
 
 bad_exit:
+
   ; Stay with the custom page created by "SetOptionsPage"
+
+  Pop ${L_RESULT}
   Abort
   
 good_exit:
+
   ; Allow next page in the installation sequence to be shown
+  
+  Pop ${L_RESULT}
   
   !undef L_RESULT
 
@@ -724,36 +760,246 @@ FunctionEnd
 
 Function SetOutlookOrOutlookExpressPage
 
-  ; More than one "identity" can be created in OE. Each of these identities is
+  ; More than one "identity" can be created in OE. Each of these identities is 
   ; given a GUID and these GUIDs are stored in HKEY_CURRENT_USER\Identities.
+  
   ; Each identity can have several email accounts and the details for these
   ; accounts are grouped according to the GUID which "owns" the accounts.
 
-  ; When OE is first installed it creates a default identity which is given the
-  ; name "Main Identity". Although there is a GUID for this default identity,
-  ; OE stores the email account data for this account in a different location
-  ; from that of any extra identities which are created by the user.
-
   ; We step through every identity defined in HKEY_CURRENT_USER\Identities and
-  ; for each one found check its OE email account data. If an identity with
-  ; an "Identity Ordinal" value of 1 is found, we need to look in the area
-  ; dedicated to the initial "Main Identity", otherwise we look for email
-  ; account data in that GUID's entry in HKEY_CURRENT_USER\Identities.
-
-  ; The email account data for all identities, although stored in different
-  ; locations, uses the same structure. The "path" for each identity starts
-  ; with "HKEY_CURRENT_USER\" and ends with "\Internet Account Manager\Accounts".
+  ; for each one found check its OE email account data.
+  
+  ; When OE is installed, it (usually) creates an initial identity which stores its
+  ; email account data in a fixed registry location. If an identity with an "Identity Ordinal"
+  ; value of 1 is found, we need to look for its OE email account data in
+  ;
+  ;     HK_CURRENT_USER\Software\Microsoft\Internet Account Manager\Accounts
+  ;
+  ; otherwise we look in the GUID's entry in HKEY_CURRENT_USER\Identities, using the path
+  ;
+  ;     HK_CURRENT_USER\Identities\{GUID}\Software\Microsoft\Internet Account Manager\Accounts
 
   ; All of the OE account data for an identity appears "under" the path defined
-  ; above, e.g. if an identity has more than three accounts they are found here:
+  ; above, e.g. if an identity has several accounts, the account data is stored like this:
   ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000001
   ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000002
-  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000003
   ;    etc
 
-  !define L_LNE         $R9
-  !define L_SEPARATOR   $R8
-  !define L_TEMP        $R3
+  !define L_ACCOUNT     $R9   ; path to the data for the current OE account (less the HKCU part)
+  !define L_ACCT_INDEX  $R8   ; used to loop through OE accounts for the current OE Identity
+  !define L_GUID        $R7   ; GUID of the current entry in HKCU\Identities list
+  !define L_GUID_INDEX  $R6   ; used to loop through the list of OE Identities
+  !define L_IDENTITY    $R5   ; plain text form of OE Identity name
+  !define L_OEDATA      $R4   ; some data (it varies) for current OE account
+  !define L_OEPATH      $R3   ; holds part of the path used to access OE account data
+  !define L_SEPARATOR   $R2   ; char used to separate the pop3 server from the username
+  !define L_TEMP        $R1
+
+  Push ${L_ACCOUNT}
+  Push ${L_ACCT_INDEX}
+  Push ${L_GUID}
+  Push ${L_GUID_INDEX}
+  Push ${L_IDENTITY}
+  Push ${L_OEDATA}
+  Push ${L_OEPATH}
+  Push ${L_SEPARATOR}
+  Push ${L_TEMP}
+  
+  ; Determine the separator character to be used when configuring an email account for POPFile
+  
+  Call GetSeparator
+  Pop ${L_SEPARATOR}
+
+  StrCpy ${L_GUID_INDEX} 0
+  
+  ; Get the next identity from the registry
+
+get_guid:  
+  EnumRegKey ${L_GUID} HKCU "Identities" ${L_GUID_INDEX}
+  StrCmp ${L_GUID} "" finished_oe_config
+
+  ; Check if this is the GUID for the first "Main Identity" created by OE as the account data
+  ; for that identity is stored separately from the account data for the other OE identities. 
+
+  ReadRegDWORD ${L_TEMP} HKCU "Identities\${L_GUID}" "Identity Ordinal"
+  IntCmp ${L_TEMP} 1 firstID otherID otherID
+  
+firstID:
+  StrCpy ${L_OEPATH} ""
+  goto check_accounts
+  
+otherID:
+  StrCpy ${L_OEPATH} "Identities\${L_GUID}\"
+
+check_accounts:
+
+  ; Now check all of the accounts for this particular identity
+
+  StrCpy ${L_ACCT_INDEX} 0
+  
+  ; Get the next set of OE account data for the current OE Identity
+
+next_acct:
+  EnumRegKey ${L_ACCOUNT} \
+             HKCU "${L_OEPATH}Software\Microsoft\Internet Account Manager\Accounts" \
+             ${L_ACCT_INDEX}
+  StrCmp ${L_ACCOUNT} "" finished_this_guid
+  StrCpy ${L_ACCOUNT} \
+        "${L_OEPATH}Software\Microsoft\Internet Account Manager\Accounts\${L_ACCOUNT}"
+
+  ; Now extract the POP3 Server data, if this does not exist then this account is
+  ; not configured for mail so move on. If the data is "127.0.0.1" assume the account has
+  ; already been configured for use with POPFile.
+
+  ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 Server"
+  StrCmp ${L_OEDATA} "" try_next_account
+  StrCmp ${L_OEDATA} "127.0.0.1" try_next_account
+  
+  ; If 'POP3 Server' contains the separator character, we cannot configure this account
+  
+  Push ${L_OEDATA}
+  Push ${L_SEPARATOR}
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 try_next_account
+
+  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" \
+      "POPFile can reconfigure Outlook Express for you"
+      
+  ; Ensure the 'configure this account' check box is NOT ticked
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
+  
+  ; Prepare to display the 'POP3 Server' data
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" ${L_OEDATA}
+
+  ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "SMTP Email Address"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" ${L_OEDATA}
+  
+  ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
+  
+  ; If 'POP3 User Name' contains the separator character, we cannot configure this account
+  
+  Push ${L_OEDATA}
+  Push ${L_SEPARATOR}
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 try_next_account
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
+  
+  ; Find the Username used by OE for this identity and the OE Account Name
+  ; (so we can unambiguously report which email account we are offering to reconfigure).
+
+  ReadRegStr ${L_IDENTITY} HKCU "Identities\${L_GUID}\" "Username"
+  StrCpy ${L_IDENTITY} $\"${L_IDENTITY}$\"
+  ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "Account Name"
+  StrCpy ${L_OEDATA} $\"${L_OEDATA}$\"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" \
+      "${L_OEDATA} account for the ${L_IDENTITY} identity"
+  
+  ; Display the OE account data and offer to configure this account to work with POPFile
+  
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioB.ini"
+  Pop ${L_TEMP}
+  
+  StrCmp ${L_TEMP} "cancel" finished_this_guid
+  StrCmp ${L_TEMP} "back" finished_this_guid
+
+  ; Has the user ticked the 'configure this account' check box ?
+  
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Field 2" "State"
+  StrCmp ${L_TEMP} "1" change_oe try_next_account
+
+change_oe:
+  ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
+  ReadRegStr ${L_TEMP} HKCU ${L_ACCOUNT} "POP3 Server"
+  
+  ; To be able to restore the registry to previous settings when we uninstall we
+  ; write a special file called popfile.reg containing the registry settings 
+  ; prior to modification in the form of lines consisting of
+  ;
+  ; the\key
+  ; thesubkey
+  ; the\value
+  
+  FileOpen  ${CFG} $INSTDIR\popfile.reg a
+  FileSeek  ${CFG} 0 END
+  FileWrite ${CFG} "${L_ACCOUNT}$\n"
+  FileWrite ${CFG} "POP3 User Name$\n"
+  FileWrite ${CFG} "${L_OEDATA}$\n"     
+  FileWrite ${CFG} "${L_ACCOUNT}$\n"
+  FileWrite ${CFG} "POP3 Server$\n"
+  FileWrite ${CFG} "${L_TEMP}$\n"    
+  FileClose ${CFG}
+  
+  WriteRegStr HKCU ${L_ACCOUNT} "POP3 User Name" "${L_TEMP}${L_SEPARATOR}${L_OEDATA}" 
+  WriteRegStr HKCU ${L_ACCOUNT} "POP3 Server" "127.0.0.1"
+
+try_next_account:
+  IntOp ${L_ACCT_INDEX} ${L_ACCT_INDEX} + 1
+  goto next_acct
+
+finished_this_guid:
+
+  ; Now move on to the next identity
+  
+  IntOp ${L_GUID_INDEX} ${L_GUID_INDEX} + 1
+  goto get_guid
+
+finished_oe_config:
+
+  Pop ${L_TEMP}
+  Pop ${L_SEPARATOR}
+  Pop ${L_OEPATH}
+  Pop ${L_OEDATA}
+  Pop ${L_IDENTITY}
+  Pop ${L_GUID_INDEX}
+  Pop ${L_GUID}
+  Pop ${L_ACCT_INDEX}
+  Pop ${L_ACCOUNT}
+
+  !undef L_ACCOUNT
+  !undef L_ACCT_INDEX
+  !undef L_GUID
+  !undef L_GUID_INDEX
+  !undef L_IDENTITY
+  !undef L_OEDATA
+  !undef L_OEPATH
+  !undef L_SEPARATOR
+  !undef L_TEMP
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: GetSeparator
+#
+# Returns the character to be used as the separator when configuring an e-mail account.
+# If the character is not defined in popfile.cfg, the default separator (':') is returned
+#
+# Inputs:
+#         none
+# Outputs:
+#         (top of stack)     - character to be used as the separator
+#
+#  Usage:
+#    Call GetSeparator
+#    Pop $R0
+#
+#   ($R0 at this point is ":" unless popfile.cfg has altered the default setting)
+#
+#--------------------------------------------------------------------------
+
+Function GetSeparator
+
+  !define L_LNE         $R9   ; a line from the popfile.cfg file
+  !define L_PARAM       $R8
+  !define L_SEPARATOR   $R7   ; character used to separate the pop3 server from the username
+
+  Push ${L_SEPARATOR}
+  Push ${L_LNE}
+  Push ${L_PARAM}
   
   StrCpy ${L_SEPARATOR} ""
   
@@ -765,10 +1011,10 @@ loop:
   FileRead   ${CFG} ${L_LNE}
   IfErrors separator_done
 
-  StrCpy ${L_TEMP} ${L_LNE} 10
-  StrCmp ${L_TEMP} "separator " old_separator
-  StrCpy ${L_TEMP} ${L_LNE} 15
-  StrCmp ${L_TEMP} "pop3_separator " new_separator
+  StrCpy ${L_PARAM} ${L_LNE} 10
+  StrCmp ${L_PARAM} "separator " old_separator
+  StrCpy ${L_PARAM} ${L_LNE} 15
+  StrCmp ${L_PARAM} "pop3_separator " new_separator
   Goto loop
   
 old_separator:
@@ -786,118 +1032,17 @@ separator_done:
   
   ; Use separator character from popfile.cfg (if present) otherwise use a semicolon
   
-  StrCmp ${L_SEPARATOR} "" 0 check_accounts
+  StrCmp ${L_SEPARATOR} "" 0 exit
   StrCpy ${L_SEPARATOR} ":"
 
-check_accounts:
-  StrCpy ${OEID} 0
-  
-  ; Get the next identity from the registry
-
-next_id:  
-  EnumRegKey ${ID} HKCU "Identities" ${OEID}
-  StrCmp ${ID} "" finished_oe
-
-  ; Check if this is the GUID for the first "Main Identity" created by OE (i.e. the GUID has
-  ; an "Identity Ordinal" value of 1) as the account data for this identity is stored
-  ; separately from the other identities. 
-
-  ReadRegDWORD $R4 HKCU "Identities\${ID}" "Identity Ordinal"
-  StrCmp $R4 "1" firstID otherID
-firstID:
-  StrCpy ${OEIDENT} ""
-  goto checkID
-otherID:
-  StrCpy ${OEIDENT} "Identities\${ID}\"
-
-checkID:
-  ; Now check all of the accounts for this particular identity
-
-  StrCpy $R1 0
-  
-  ; Get the next set of OE account data for the specified OE Identity
-
-next_acct:
-  EnumRegKey ${ACCTID} HKCU "${OEIDENT}Software\Microsoft\Internet Account Manager\Accounts" $R1
-  StrCmp ${ACCTID} "" finished_this_id
-
-  ; Now extract the POP3 Server, if this does not exist then this account is
-  ; not configured for mail so move on
-  
-  StrCpy $R5 "${OEIDENT}Software\Microsoft\Internet Account Manager\Accounts\${ACCTID}"
-  ReadRegStr $R6 HKCU $R5 "POP3 Server"
-  StrCmp $R6 "" next_acct_increment
-  StrCmp $R6 "127.0.0.1" next_acct_increment
-
-  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" \
-      "POPFile can reconfigure Outlook Express for you"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" $R6
-
-  ; Find the Username used by OE for this identity and the OE Account Name
-  ; (so we can unambiguously report which email account we are offering
-  ; to reconfigure).
-
-  ReadRegStr $R7 HKCU "Identities\${ID}\" "Username"
-  StrCpy $R7 $\"$R7$\"
-  ReadRegStr $R6 HKCU $R5 "SMTP Email Address"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" $R6
-  ReadRegStr $R6 HKCU $R5 "POP3 User Name"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" $R6
-  ReadRegStr $R6 HKCU $R5 "Account Name"
-  StrCpy $R6 $\"$R6$\"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" \
-      "$R6 account for the $R7 identity"
-  
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioB.ini"
-  Pop $R0
-  
-  StrCmp $R0 "cancel" finished_this_id
-  StrCmp $R0 "back" finished_this_id
-
-  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "ioB.ini" "Field 2" "State"
-  StrCmp $R5 "1" change_oe next_acct_increment
-
-change_oe:
-  StrCpy $R5 "${OEIDENT}Software\Microsoft\Internet Account Manager\Accounts\${ACCTID}"
-  ReadRegStr $R6 HKCU $R5 "POP3 User Name"
-  ReadRegStr $R7 HKCU $R5 "POP3 Server"
-  
-  ; To be able to restore the registry to previous settings when we uninstall we
-  ; write a special file called popfile.reg containing the registry settings 
-  ; prior to modification in the form of lines consisting of
-  ;
-  ; the\key
-  ; thesubkey
-  ; the\value
-  
-  FileOpen  ${CFG} $INSTDIR\popfile.reg a
-  FileSeek  ${CFG} 0 END
-  FileWrite ${CFG} "$R5$\n"
-  FileWrite ${CFG} "POP3 User Name$\n"
-  FileWrite ${CFG} "$R6$\n"     
-  FileWrite ${CFG} "$R5$\n"
-  FileWrite ${CFG} "POP3 Server$\n"
-  FileWrite ${CFG} "$R7$\n"    
-  FileClose ${CFG}
-  
-  WriteRegStr HKCU $R5 "POP3 User Name" "$R7${L_SEPARATOR}$R6" 
-  WriteRegStr HKCU $R5 "POP3 Server" "127.0.0.1"
-
-next_acct_increment:
-  IntOp $R1 $R1 + 1
-  goto next_acct
-
-finished_this_id:
-  ; Now move on to the next identity
-  IntOp ${OEID} ${OEID} + 1
-  goto next_id
-
-finished_oe:
+exit:
+  Pop ${L_PARAM}
+  Pop ${L_LNE}
+  Exch ${L_SEPARATOR}
 
   !undef L_LNE
+  !undef L_PARAM
   !undef L_SEPARATOR
-  !undef L_TEMP
 
 FunctionEnd
 
