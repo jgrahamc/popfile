@@ -12,7 +12,8 @@
 #                       (1) adduser.exe     (NSIS script: adduser.nsi)
 #                       (2) msgcapture.exe  (NSIS script: msgcapture.nsi)
 #                       (3) runpopfile.exe  (NSIS script: runpopfile.nsi)
-#                       (4) stop_pf.exe     (NSIS script: stop_popfile.nsi)
+#                       (4) runsqlite.exe   (NSIS script: runsqlite.nsi)
+#                       (5) stop_pf.exe     (NSIS script: stop_popfile.nsi)
 #
 #                   (B) The following programs (built using NSIS) are optional:
 #
@@ -923,6 +924,7 @@ save_HKCU_root_sfn:
   File "runpopfile.exe"
   File "stop_pf.exe"
   File "sqlite.exe"
+  File "runsqlite.exe"
   File "adduser.exe"
   File /nonfatal "test\pfidiag.exe"
   File "msgcapture.exe"
@@ -1635,42 +1637,34 @@ Section /o "XMLRPC" SecXMLRPC
 
 SectionEnd
 
-#-------------------------------------------
-# IMAP is not included in the 0.22.0 release
-# -------------------------------------------
-;;
-;;#--------------------------------------------------------------------------
-;;# Installer Section: (optional) POPFile IMAP component (default = not selected)
-;;#
-;;# If this component is selected, the installer installs the experimental IMAP module.
-;;#--------------------------------------------------------------------------
-;;
-;;Section /o "IMAP" SecIMAP
-;;
-;;  SetDetailsPrint textonly
-;;  DetailPrint "Installing IMAP module..."
-;;  SetDetailsPrint listonly
-;;
-;;  ; At present (30 July 2004) the IMAP.pm module resides in the 'Services' sub-folder.
-;;  ; Before the 0.22.0 release, the IMAP.pm module was stored in the 'POPFile' sub-folder
-;;  ; then it was moved (briefly) to the 'Server' sub-folder before finally ending up in
-;;  ; the 'Services' sub-folder for the 0.22.0 release.
-;;
-;;  SetOutpath "$G_ROOTDIR\Services"
-;;  File "..\engine\Services\IMAP.pm"
-;;
-;;  Delete "$G_ROOTDIR\POPFile\IMAP.pm"
-;;  Delete "$G_ROOTDIR\Server\IMAP.pm"
-;;
-;;  SetDetailsPrint textonly
-;;  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
-;;  SetDetailsPrint listonly
-;;
-;;SectionEnd
-;;
-#-------------------------------------------
-# IMAP is not included in the 0.22.0 release
-# -------------------------------------------
+#--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile IMAP component (default = not selected)
+#
+# If this component is selected, the installer installs the experimental IMAP module.
+#--------------------------------------------------------------------------
+
+Section /o "IMAP" SecIMAP
+
+  SetDetailsPrint textonly
+  DetailPrint "Installing IMAP module..."
+  SetDetailsPrint listonly
+
+  ; At present (30 July 2004) the IMAP.pm module resides in the 'Services' sub-folder.
+  ; Before the 0.22.0 release, the IMAP.pm module was stored in the 'POPFile' sub-folder
+  ; then it was moved (briefly) to the 'Server' sub-folder before finally ending up in
+  ; the 'Services' sub-folder for the 0.22.0 release.
+
+  SetOutpath "$G_ROOTDIR\Services"
+  File "..\engine\Services\IMAP.pm"
+
+  Delete "$G_ROOTDIR\POPFile\IMAP.pm"
+  Delete "$G_ROOTDIR\Server\IMAP.pm"
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+SectionEnd
 
 #--------------------------------------------------------------------------
 # Installer Section: (optional) Perl IO::Socket::Socks module (default = not selected)
@@ -1703,13 +1697,7 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecNNTP}        $(DESC_SecNNTP)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSMTP}        $(DESC_SecSMTP)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}      $(DESC_SecXMLRPC)
-#-------------------------------------------
-# IMAP is not included in the 0.22.0 release
-# -------------------------------------------
-;;    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}        $(DESC_SecIMAP)
-#-------------------------------------------
-# IMAP is not included in the 0.22.0 release
-# -------------------------------------------
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}        $(DESC_SecIMAP)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSOCKS}       $(DESC_SecSOCKS)
     !ifndef NO_KAKASI
       !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
@@ -2334,27 +2322,21 @@ check_options:
   ; version we are about to upgrade includes that program component then the user is asked for
   ; permission to upgrade the component [To do: disable the component if user says 'No' ??]
 
-#-------------------------------------------
-# IMAP is not included in the 0.22.0 release
-# -------------------------------------------
-;;  !insertmacro SectionFlagIsSet ${SecIMAP} ${SF_SELECTED} check_nntp look_for_imap
-;;
-;;look_for_imap:
-;;  IfFileExists "$G_ROOTDIR\Services\IMAP.pm" ask_about_imap
-;;  IfFileExists "$G_ROOTDIR\Server\IMAP.pm" ask_about_imap
-;;  IfFileExists "$G_ROOTDIR\POPFile\IMAP.pm" ask_about_imap check_nntp
-;;
-;;ask_about_imap:
-;;  StrCpy $G_PLS_FIELD_1 "POPFile IMAP"
-;;  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
-;;      ${MB_NL}${MB_NL}\
-;;      $(MBCOMPONENT_PROB_2)" IDNO check_nntp
-;;  !insertmacro SelectSection ${SecIMAP}
-;;
-;;check_nntp:
-#-------------------------------------------
-# IMAP is not included in the 0.22.0 release
-# -------------------------------------------
+  !insertmacro SectionFlagIsSet ${SecIMAP} ${SF_SELECTED} check_nntp look_for_imap
+
+look_for_imap:
+  IfFileExists "$G_ROOTDIR\Services\IMAP.pm" ask_about_imap
+  IfFileExists "$G_ROOTDIR\Server\IMAP.pm" ask_about_imap
+  IfFileExists "$G_ROOTDIR\POPFile\IMAP.pm" ask_about_imap check_nntp
+
+ask_about_imap:
+  StrCpy $G_PLS_FIELD_1 "POPFile IMAP"
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
+      ${MB_NL}${MB_NL}\
+      $(MBCOMPONENT_PROB_2)" IDNO check_nntp
+  !insertmacro SelectSection ${SecIMAP}
+
+check_nntp:
   !insertmacro SectionFlagIsSet ${SecNNTP} ${SF_SELECTED} check_smtp look_for_nntp
 
 look_for_nntp:
@@ -2907,6 +2889,7 @@ Section "un.POPFile Core" UnSecCore
   Delete "$G_ROOTDIR\runpopfile.exe"
   Delete "$G_ROOTDIR\adduser.exe"
   Delete "$G_ROOTDIR\sqlite.exe"
+  Delete "$G_ROOTDIR\runsqlite.exe"
   Delete "$G_ROOTDIR\pfidiag.exe"
   Delete "$G_ROOTDIR\msgcapture.exe"
   Delete "$G_ROOTDIR\pfimsgcapture.exe"
