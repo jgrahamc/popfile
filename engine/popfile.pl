@@ -1538,6 +1538,31 @@ sub history_page
     }
 
     @mail_files = sort compare_mf @mail_files;
+
+    if ( $form{search} ne '' ) 
+    {
+        for my $i ( 0..$#mail_files )
+        {
+            my $mail_file;
+            my $subject = '';
+            $mail_file = $mail_files[$i];
+
+            open MAIL, "<messages/$mail_file";
+            while (<MAIL>) 
+            {
+                if ( /^Subject:(.*)/i )
+                {
+                    if ( $subject eq '' ) 
+                    {
+                        $subject = $1;
+                        $subject =~ s/<(.*)>/&lt;$1&gt;/g;
+                        $subject =~ s/\"(.*)\"/$1/g;
+                    }
+                }
+            }
+            close MAIL;
+        }
+    }
     
     if ( $#mail_files >= 0 ) 
     {
@@ -1732,7 +1757,7 @@ sub history_page
         }
 
         $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
-        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form>";
+        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=search Value=Find></form>";
 
         if ( $configuration{page_size} <= $#mail_files )
         {
@@ -2452,6 +2477,7 @@ $configuration{separator}    = ':';
 $configuration{skin}         = 'default';
 $configuration{history_days} = 2;
 $configuration{corpus}       = 'corpus';
+$configuration{unclassified_probability} = 0;
 
 # Load skins
 load_skins();
@@ -2484,6 +2510,10 @@ print "    Loading buckets...\n";
 
 # Get the classifier
 $classifier = new Classifier::Bayes;
+if ( $configuration{unclassified_probability} != 0 ) 
+{
+    $classifier->{unclassified} = $configuration{unclassified_probability};
+}
 $classifier->load_word_matrix();
 
 debug( "POPFile Engine v$major_version.$minor_version.$build_version running" );

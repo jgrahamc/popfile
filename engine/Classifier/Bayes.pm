@@ -72,6 +72,9 @@ sub new
     # Where the corpus is stored
     $self->{corpus}            = 'corpus';
     
+    # The unclassified cutoff probability
+    $self->{unclassified}      = 0.5;
+    
     return bless $self, $type;
 }
 
@@ -588,7 +591,7 @@ sub classify_file
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
 
-    if ( ( $total == 0 ) || ( $score{$ranking[0]} <= log(0.5 * $total) ) )
+    if ( ( $total == 0 ) || ( $score{$ranking[0]} <= log($self->{unclassified} * $total) ) )
     {
         return "unclassified";
     }
