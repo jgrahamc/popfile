@@ -288,7 +288,7 @@ no_trailing_slash:
 
 found_eol:
   StrCpy ${CBP_L_TEXTEND} "<eol>"
-
+  
 loop:
   FileRead ${CBP_L_FILE_HANDLE} ${CBP_L_TEMP}
   StrCmp ${CBP_L_TEMP} "" cfg_file_done
@@ -330,7 +330,7 @@ check_eol:
 
 cfg_file_done:
   FileClose ${CBP_L_FILE_HANDLE}
-
+  
   ; If a SQL setting other than the default SQLite one is found, assume existing system is using
   ; an alternative SQL database (such as MySQL) so there is no need to create any buckets
 
@@ -638,6 +638,9 @@ FunctionEnd
 #
 # It is assumed that the 'base directory' is in standard Windows format with no trailing slash.
 #
+# The result is returned without a trailing slash even if the 'data folder' parameter had one,
+# e.g. 'C:\Program Files\POPFile' and 'corpus/' result in 'C:\Program Files\POPFile\corpus'
+#
 # The 'data folder' may be supplied in a variety of different formats, for example:
 # corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
 #----------------------------------------------------------------------------------------------
@@ -710,6 +713,13 @@ slashconversion:
   Call CBP_StrBackSlash            ; ensure parameter uses backslashes
   Pop ${CBP_L_DATA}
 
+  ; Strip trailing slash (so we always return a result without a trailing slash)
+  
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 1 -1
+  StrCmp ${CBP_L_TEMP} '\' 0 analyse_data
+  StrCpy ${CBP_L_DATA} ${CBP_L_DATA} -1
+
+analyse_data:
   StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 2
   StrCmp ${CBP_L_TEMP} ".\" sub_folder
   StrCmp ${CBP_L_TEMP} "\\" got_path
