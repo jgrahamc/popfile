@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.38"
+  !define C_PFI_VERSION  "0.2.39"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -2490,8 +2490,8 @@ try_old_style:
   StrCmp ${L_RESULT} "success" exit_now
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   StrCpy $G_PLS_FIELD_1 "POPFile"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -4676,8 +4676,8 @@ lastaction_no:
   Call ShutdownViaUI
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "password?" 0 exit_without_banner
-  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   StrCpy $G_PLS_FIELD_1 "POPFile"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -4745,8 +4745,8 @@ do_not_show_banner:
   Call ShutdownViaUI
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "password?" 0 continue
-  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   StrCpy $G_PLS_FIELD_1 "POPFile"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -5229,8 +5229,8 @@ Section "un.Shutdown POPFile" UnSecShutdown
   StrCmp ${L_EXE} "" section_exit
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   StrCpy $G_PLS_FIELD_1 "POPFile"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
