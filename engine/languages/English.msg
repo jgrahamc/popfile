@@ -75,8 +75,6 @@ ID                                      ID
 Date                                    Date
 Arrived                                 Arrived
 Size                                    Size
-Up                                      Up
-Down                                    Down
 Go                                      Go
 Edit                                    Edit
 Logout                                  Logout
