@@ -1717,40 +1717,18 @@ sub run_popfile
     my $connect_server = shift;
     my $connect_port   = shift;
     my $ui_port        = shift;
-    my $server;
-    my $ui;
     
-    if ( $configuration{localpop} == 1 )
-    {
-        $server = IO::Socket::INET->new( Proto     => 'tcp',
-                                        LocalAddr => 'localhost', 
-                                        LocalPort => $listen_port,
-                                        Listen    => SOMAXCONN,
-                                        Reuse     => 1 ) or die "Couldn't open the local POP3 listen port $listen_port";
-    }
-    else
-    {
-        $server = IO::Socket::INET->new( Proto     => 'tcp',
-                                        LocalPort => $listen_port,
-                                        Listen    => SOMAXCONN,
-                                        Reuse     => 1 ) or die "Couldn't open the server POP3 listen port $listen_port";
-    }
+    my $server = IO::Socket::INET->new( Proto     => 'tcp',
+                                    $configuration{localpop} == 1 ? (LocalAddr => 'localhost') : (), 
+                                    LocalPort => $listen_port,
+                                    Listen    => SOMAXCONN,
+                                    Reuse     => 1 ) or die "Couldn't open the POP3 listen port $listen_port";
     
-    if ( $configuration{localpop} == 1 )
-    {
-        $ui     = IO::Socket::INET->new( Proto     => 'tcp',
-                                         LocalAddr => 'localhost', 
-                                         LocalPort => $ui_port,
-                                         Listen    => SOMAXCONN,
-                                         Reuse     => 1 ) or die "Couldn't open the local GUI port $ui_port";
-    }
-    else
-    {
-        $ui     = IO::Socket::INET->new( Proto     => 'tcp',
-                                         LocalPort => $ui_port,
-                                         Listen    => SOMAXCONN,
-                                         Reuse     => 1 ) or die "Couldn't open the server GUI port $ui_port";
-    }
+    my $ui     = IO::Socket::INET->new( Proto     => 'tcp',
+                                    $configuration{localui}  == 1 ? (LocalAddr => 'localhost') : (), 
+                                     LocalPort => $ui_port,
+                                     Listen    => SOMAXCONN,
+                                     Reuse     => 1 ) or die "Couldn't open the GUI port $ui_port";
 
     # This is used to perform select calls on the $server socket so that we can decide when there is 
     # a call waiting an accept it without having to block
