@@ -26,8 +26,9 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2 Release Candidate 2" compiler,
-; released 5 January 2004, with the NSIS CVS snapshot from 12 January 2004 (08:44 GMT) applied.
+; This version of the script has been tested with the "NSIS 2 Release Candidate 3" compiler,
+; released 26 January 2004, with no patches applied.
+; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
 
 ; IMPORTANT WARNING:
 ; This script should not be built with any earlier version than "NSIS 2 Release Candidate 2"
@@ -35,7 +36,7 @@
 ; strings properly (the resulting installers display garbled screens, making them unusable).
 
 ; INSTALLER SIZE: The LZMA compression method can be used to reduce the size of the 'setup.exe'
-; file by around 30% compared to the default compression method but at the expense of greatly
+; file by around 25% compared to the default compression method but at the expense of greatly
 ; increased compilation times (LZMA compilation takes almost two and a half times as long as it
 ; does when the default compression method is used, based upon some informal tests).
 
@@ -78,17 +79,6 @@
 # the additional Perl components it requires cause the installer to almost double in size.
 # If the /DNO_KAKASI command-line switch is used, the installer will be built without these
 # additional packages so the compile time and the installer size will be greatly reduced.
-#
-#--------------------------------------------------------------------------
-# Run-time command-line switches (used by 'setup.exe')
-#--------------------------------------------------------------------------
-#
-# /OUTLOOK
-#
-# The 'Outlook' reconfiguration code has had very little testing so far, therefore the
-# installer does not normally offer to reconfigure 'Outlook' accounts. To enable the
-# configuration of 'Outlook' accounts, use the command-line switch /OUTLOOK when starting
-# the installer (the commands 'setup.exe /OUTLOOK' or 'setup.exe /outlook' can be used)
 #
 #--------------------------------------------------------------------------
 
@@ -157,6 +147,12 @@
 # /DNO_KAKASI is used then a smaller installer can be built by omitting the Japanese support.
 #--------------------------------------------------------------------------
 
+  ;------------------------------------------------
+  ; Define PFI_VERBOSE to get more compiler output
+  ;------------------------------------------------
+
+## !define PFI_VERBOSE
+
   ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
@@ -202,7 +198,7 @@
   ; The Kakasi package is distributed as a ZIP file which contains several folders
   ; (bin, doc, include, lib and share) all of which are under a top level folder
   ; called 'kakasi'. 'C_KAKASI_DIR' is used to refer to the folder into which the
-  ; Kakasi ZIP file has been unzipped.
+  ; Kakasi ZIP file has been unzipped so that NSIS can find the files when making the installer.
   ;
   ; The 'itaijidict' file's path should be '${C_KAKASI_DIR}\kakasi\share\kakasi\itaijidict'
   ; The 'kanwadict'  file's path should be '${C_KAKASI_DIR}\kakasi\share\kakasi\kanwadict'
@@ -244,11 +240,47 @@
 
   !define C_MIN_BANNER_DISPLAY_TIME    250
 
-  ;------------------------------------------------
-  ; Define PFI_VERBOSE to get more compiler output
-  ;------------------------------------------------
+#--------------------------------------------------------------------------
+# User Registers (Global)
+#--------------------------------------------------------------------------
 
-## !define PFI_VERBOSE
+  ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
+
+  Var G_ROOTDIR            ; full path to the folder used for the POPFile program files
+  Var G_USERDIR            ; full path to the folder containing the 'popfile.cfg' file
+  Var G_MPBINDIR           ; full path to the folder used for the minimal Perl EXE and DLL files
+  Var G_MPLIBDIR           ; full path to the folder used for the rest of the minimal Perl files
+
+  Var G_POP3               ; POP3 port (1-65535)
+  Var G_GUI                ; GUI port (1-65535)
+  Var G_STARTUP            ; automatic startup flag (1 = yes, 0 = no)
+  Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
+
+  Var G_OOECONFIG_HANDLE   ; to access list of all Outlook/Outlook Express accounts found
+  Var G_OOECHANGES_HANDLE  ; to access list of Outlook/Outlook Express configuration changes
+  Var G_OOELIST_INDEX      ; to access the list of up to 6 Outlook/Outlook Express accounts
+  Var G_OOELIST_CBOX       ; to access one of the 6 checkbox fields on the configuration page
+  Var G_SEPARATOR          ; character used to separate the POP3 server from the username
+
+  Var G_HWND               ; HWND of the dialog we are going to modify
+  Var G_DLGITEM            ; HWND of the field we are going to modify on that dialog
+  Var G_FONT               ; the font we use to modify that field
+
+  Var G_WINUSERNAME        ; current Windows user login name
+  Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
+
+  ; NSIS provides 20 general purpose user registers:
+  ; (a) $R0 to $R9   are used as local registers
+  ; (b) $0 to $9     are used as additional local registers
+
+  ; Local registers referred to by 'defines' use names starting with 'L_' (eg L_LNE, L_OLDUI)
+  ; and the scope of these 'defines' is limited to the "routine" where they are used.
+
+  ; In earlier versions of the NSIS compiler, 'User Variables' did not exist, and the convention
+  ; was to use $R0 to $R9 as 'local' registers and $0 to $9 as 'global' ones. This is why this
+  ; script uses registers $R0 to $R9 in preference to registers $0 to $9.
+
+  ; POPFile constants have been given names beginning with 'C_' (eg C_README)
 
 #--------------------------------------------------------------------------
 # Use the "Modern User Interface" and standard NSIS Section flag utilities
@@ -267,7 +299,7 @@
   VIProductVersion "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.0"
 
   VIAddVersionKey "ProductName" "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
+  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName" "The POPFile Project"
   VIAddVersionKey "LegalCopyright" "© 2001-2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
@@ -275,15 +307,15 @@
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "Multi-Language (with Kakasi)"
+      VIAddVersionKey "Build" "Multi-Language (with Kakasi) using global DIR variables"
     !else
-      VIAddVersionKey "Build" "Multi-Language (without Kakasi)"
+      VIAddVersionKey "Build" "Multi-Language (without Kakasi) using global DIR variables"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "English-Mode (with Kakasi)"
+      VIAddVersionKey "Build" "English-Mode (with Kakasi) using global DIR variables"
     !else
-      VIAddVersionKey "Build" "English-Mode (without Kakasi)"
+      VIAddVersionKey "Build" "English-Mode (without Kakasi) using global DIR variables"
     !endif
   !endif
 
@@ -403,6 +435,7 @@
 
   ; Always show the language selection dialog, even if a language has been stored in the
   ; registry (the language stored in the registry will be selected as the default language)
+  ; This makes it easy to recover from a previous 'bad' choice of language for the installer
 
   !define MUI_LANGDLL_ALWAYSSHOW
 
@@ -517,12 +550,6 @@
   Page custom StartPOPFilePage "CheckLaunchOptions"
 
   ;---------------------------------------------------
-  ; Installer Page - Convert Corpus (if necessary)
-  ;---------------------------------------------------
-
-  Page custom ConvertCorpusPage
-
-  ;---------------------------------------------------
   ; Installer Page - Finish (may offer to start UI)
   ;---------------------------------------------------
 
@@ -557,43 +584,6 @@
   ;---------------------------------------------------
 
   !insertmacro MUI_UNPAGE_INSTFILES
-
-#--------------------------------------------------------------------------
-# User Registers (Global)
-#--------------------------------------------------------------------------
-
-  ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
-
-  Var G_POP3               ; POP3 port (1-65535)
-  Var G_GUI                ; GUI port (1-65535)
-  Var G_STARTUP            ; automatic startup flag (1 = yes, 0 = no)
-  Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
-
-  Var G_OOECONFIG_HANDLE   ; to access list of all Outlook/Outlook Express accounts found
-  Var G_OOECHANGES_HANDLE  ; to access list of Outlook/Outlook Express configuration changes
-  Var G_OOELIST_INDEX      ; to access the list of up to 6 Outlook/Outlook Express accounts
-  Var G_OOELIST_CBOX       ; to access one of the 6 checkbox fields on the configuration page
-  Var G_SEPARATOR          ; character used to separate the POP3 server from the username
-
-  Var G_HWND               ; HWND of the dialog we are going to modify
-  Var G_DLGITEM            ; HWND of the field we are going to modify on that dialog
-  Var G_FONT               ; the font we use to modify that field
-
-  Var G_WINUSERNAME        ; current Windows user login name
-  Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
-
-  ; NSIS provides 20 general purpose user registers:
-  ; (a) $R0 to $R9   are used as local registers
-  ; (b) $0 to $9     are used as additional local registers
-
-  ; Local registers referred to by 'defines' use names starting with 'L_' (eg L_LNE, L_OLDUI)
-  ; and the scope of these 'defines' is limited to the "routine" where they are used.
-
-  ; In earlier versions of the NSIS compiler, 'User Variables' did not exist, and the convention
-  ; was to use $R0 to $R9 as 'local' registers and $0 to $9 as 'global' ones. This is why this
-  ; script uses registers $R0 to $R9 in preference to registers $0 to $9.
-
-  ; POPFile constants have been given names beginning with 'C_' (eg C_README)
 
 #--------------------------------------------------------------------------
 # Language Support for the installer and uninstaller
@@ -696,23 +686,10 @@ Function .onInit
   !define L_INPUT_FILE_HANDLE   $R9
   !define L_OUTPUT_FILE_HANDLE  $R8
   !define L_TEMP                $R7
-  !define L_RESERVED            $1    ; used in the system.dll call
 
   Push ${L_INPUT_FILE_HANDLE}
   Push ${L_OUTPUT_FILE_HANDLE}
   Push ${L_TEMP}
-  Push ${L_RESERVED}
-
-  ; Ensure only one copy of this installer is running
-
-  System::Call 'kernel32::CreateMutexA(i 0, i 0, t "OnlyOnePFI_mutex") i .r1 ?e'
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} 0 continue
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Another copy of the POPFile installer is already running!"
-  Abort
-
-continue:
 
   ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
@@ -751,7 +728,6 @@ close_files:
   FileClose ${L_INPUT_FILE_HANDLE}
   FileClose ${L_OUTPUT_FILE_HANDLE}
 
-  Pop ${L_RESERVED}
   Pop ${L_TEMP}
   Pop ${L_OUTPUT_FILE_HANDLE}
   Pop ${L_INPUT_FILE_HANDLE}
@@ -759,7 +735,6 @@ close_files:
   !undef L_INPUT_FILE_HANDLE
   !undef L_OUTPUT_FILE_HANDLE
   !undef L_TEMP
-  !undef L_RESERVED
 
 FunctionEnd
 
@@ -768,12 +743,25 @@ FunctionEnd
 # (custom .onGUIInit function)
 #
 # Used to complete the initialisation of the installer.
-# (this code was moved from '.onInit' in order to permit the custom pages
-# to be set up to use the language selected by the user)
+# This code was moved from '.onInit' in order to permit the use of language-specific strings
+# (the selected language is not available inside the '.onInit' function)
 #--------------------------------------------------------------------------
 
 Function PFIGUIInit
 
+  !define L_RESERVED            $1    ; used in the system.dll call
+
+  Push ${L_RESERVED}
+
+  ; Ensure only one copy of this installer is running
+
+  System::Call 'kernel32::CreateMutexA(i 0, i 0, t "OnlyOnePFI_mutex") i .r1 ?e'
+  Pop ${L_RESERVED}
+  StrCmp ${L_RESERVED} 0 mutex_ok
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_INSTALLER_MUTEX)"
+  Abort
+
+mutex_ok:
   SearchPath $G_NOTEPAD notepad.exe
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
@@ -793,7 +781,7 @@ continue:
   ; There may be a slight delay at this point and on some systems the 'Welcome' page may appear
   ; in two stages (first an empty MUI page appears and a little later the page contents appear).
   ; This looks a little strange (and may prompt the user to start clicking buttons too soon)
-  ; so we display a banner to reassure the user. This banner will be removed by 'CheckUserRights'
+  ; so we display a banner to reassure the user. The banner will be removed by 'CheckUserRights'
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
 
@@ -805,7 +793,6 @@ continue:
   Call SetOutlookOutlookExpressPage_Init
   Call SetEudoraPage_Init
   Call StartPOPFilePage_Init
-  Call ConvertCorpusPage_Init
 
   !ifndef NO_KAKASI
 
@@ -814,6 +801,10 @@ continue:
       Call HandleKakasi
 
   !endif
+
+  Pop ${L_RESERVED}
+
+  !undef L_RESERVED
 
 FunctionEnd
 
@@ -834,6 +825,31 @@ Section "POPFile" SecPOPFile
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
   SetDetailsPrint listonly
+
+  ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure.
+  ; Phase 1 of the multi-user support introduced in 0.21.0 may require some slight changes
+  ; to the folder structure (initial investigations suggest that perl.exe, wperl.exe and the
+  ; perl58.dll may need to be placed in a different folder from the other minimal Perl files).
+
+  ; A possible folder arrangement could be:
+  ;
+  ; (a) $INSTDIR         - the top-level installation folder (wrapper*.exe and uninstall.exe),
+  ; (b) $INSTDIR\bin     - holds only perl.exe, wperl.exe and perl58.dll
+  ; (c) $INSTDIR\lib     - POPFile and minimal Perl, same structure as used in earlier versions
+  ; (d) $INSTDIR\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
+  ; (e) $INSTDIR\kakasi  - holds the (optional) Kakasi package used to process Japanese email
+
+  ; For increased flexibility, four global user variables are used in addition to $INSTDIR
+  ; (this makes it easier to change the folder structure used by the installer)
+
+  ; For this build, the original folder structure is maintained which means that the working
+  ; directory must always be set to the installation folder before running POPFile (otherwise
+  ; a fatal 'Perl' error occurs immediately)
+
+  StrCpy $G_ROOTDIR   $INSTDIR
+  StrCpy $G_USERDIR   $INSTDIR
+  StrCpy $G_MPBINDIR  $INSTDIR
+  StrCpy $G_MPLIBDIR  $INSTDIR
 
   ; If we are installing over a previous version, ensure that version is not running
 
@@ -856,20 +872,26 @@ Section "POPFile" SecPOPFile
 
   SetOutPath $INSTDIR
 
-  File "..\engine\license"
-  File "${C_RELEASE_NOTES}"
-  CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\${C_README}.txt" "$INSTDIR\${C_README}.txt"
-
-  File "..\engine\popfile.exe"
-  File "..\engine\popfilef.exe"
-  File "..\engine\popfileb.exe"
-  File "..\engine\popfileif.exe"
-  File "..\engine\popfileib.exe"
-
-  File "stop_pf.exe"
   File "wrapper.exe"
   File "wrapperf.exe"
   File "wrapperb.exe"
+
+  SetOutPath $G_ROOTDIR
+
+  File "..\engine\license"
+  File "${C_RELEASE_NOTES}"
+  CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\${C_README}.txt" "$G_ROOTDIR\${C_README}.txt"
+
+##  ; Unable to rebuild the popfile*.exe programs to work with current CVS code,
+##  ; so there is no point installing them at the moment.
+
+##;  File "..\engine\popfile.exe"
+##;  File "..\engine\popfilef.exe"
+##;  File "..\engine\popfileb.exe"
+##;  File "..\engine\popfileif.exe"
+##;  File "..\engine\popfileib.exe"
+
+  File "stop_pf.exe"
   File "sqlite.exe"
 
   ; Create default configuration data for use by the 'wrapper' utilities
@@ -877,8 +899,9 @@ Section "POPFile" SecPOPFile
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserName"       "$G_WINUSERNAME"
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserLock"       "Yes"
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "SearchResult"   "Installer"
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "POPFileFolder"  "$INSTDIR"
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserDataFolder" "$INSTDIR"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "PerlBinFolder"  "$G_MPBINDIR"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "POPFileFolder"  "$G_ROOTDIR"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserDataFolder" "$G_USERDIR"
 
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
@@ -890,7 +913,9 @@ Section "POPFile" SecPOPFile
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
 
-  IfFileExists "$INSTDIR\stopwords" 0 copy_stopwords
+  SetOutPath $G_USERDIR
+
+  IfFileExists "$G_USERDIR\stopwords" 0 copy_stopwords
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
       $\r$\n$\r$\n\
@@ -899,11 +924,11 @@ Section "POPFile" SecPOPFile
       $(PFI_LANG_MBSTPWDS_3) 'stopwords.bak')\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBSTPWDS_4) 'stopwords.default')" IDNO copy_default_stopwords
-  IfFileExists "$INSTDIR\stopwords.bak" 0 make_backup
-  SetFileAttributes "$INSTDIR\stopwords.bak" NORMAL
+  IfFileExists "$G_USERDIR\stopwords.bak" 0 make_backup
+  SetFileAttributes "$G_USERDIR\stopwords.bak" NORMAL
 
 make_backup:
-  CopyFiles /SILENT /FILESONLY "$INSTDIR\stopwords" "$INSTDIR\stopwords.bak"
+  CopyFiles /SILENT /FILESONLY "$G_USERDIR\stopwords" "$G_USERDIR\stopwords.bak"
 
 copy_stopwords:
   File "..\engine\stopwords"
@@ -915,34 +940,34 @@ copy_default_stopwords:
   FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
   FileWrite ${L_CFG} "html_port $G_GUI$\r$\n"
   FileClose ${L_CFG}
-  IfFileExists "$INSTDIR\popfile.cfg" 0 update_config
-  SetFileAttributes "$INSTDIR\popfile.cfg" NORMAL
-  IfFileExists "$INSTDIR\popfile.cfg.bak" 0 make_cfg_backup
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 update_config
+  SetFileAttributes "$G_USERDIR\popfile.cfg" NORMAL
+  IfFileExists "$G_USERDIR\popfile.cfg.bak" 0 make_cfg_backup
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBCFGBK_1) 'popfile.cfg' $(PFI_LANG_MBCFGBK_2) ('popfile.cfg.bak').\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBCFGBK_3)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBCFGBK_4)" IDNO update_config
-  SetFileAttributes "$INSTDIR\popfile.cfg.bak" NORMAL
+  SetFileAttributes "$G_USERDIR\popfile.cfg.bak" NORMAL
 
 make_cfg_backup:
-  CopyFiles /SILENT /FILESONLY $INSTDIR\popfile.cfg $INSTDIR\popfile.cfg.bak
+  CopyFiles /SILENT /FILESONLY $G_USERDIR\popfile.cfg $G_USERDIR\popfile.cfg.bak
 
 update_config:
-  CopyFiles /SILENT /FILESONLY $PLUGINSDIR\popfile.cfg $INSTDIR\
+  CopyFiles /SILENT /FILESONLY $PLUGINSDIR\popfile.cfg $G_USERDIR\
 
-  SetOutPath $INSTDIR\Classifier
+  SetOutPath $G_ROOTDIR\Classifier
 
   File "..\engine\Classifier\Bayes.pm"
   File "..\engine\Classifier\WordMangle.pm"
   File "..\engine\Classifier\MailParse.pm"
   File "..\engine\Classifier\popfile.sql"
 
-  SetOutPath $INSTDIR\Platform
+  SetOutPath $G_ROOTDIR\Platform
   File "..\engine\Platform\MSWin32.pm"
 
-  SetOutPath $INSTDIR\POPFile
+  SetOutPath $G_ROOTDIR\POPFile
   File "..\engine\POPFile\MQ.pm"
   File "..\engine\POPFile\Loader.pm"
   File "..\engine\POPFile\Logger.pm"
@@ -951,24 +976,25 @@ update_config:
 
   ; CVS builds use installer version data to set the POPFile version
 
-  FileOpen ${L_CFG} "$INSTDIR\POPFile\popfile_version" w
+  FileOpen ${L_CFG} "$G_ROOTDIR\POPFile\popfile_version" w
   FileWrite ${L_CFG} "${C_POPFILE_MAJOR_VERSION}$\r$\n${C_POPFILE_MINOR_VERSION}$\r$\n${C_POPFILE_REVISION}$\r$\n"
   FileClose ${L_CFG}
 
-  SetOutPath $INSTDIR\Proxy
+  SetOutPath $G_ROOTDIR\Proxy
   File "..\engine\Proxy\Proxy.pm"
   File "..\engine\Proxy\POP3.pm"
 
-  SetOutPath $INSTDIR\UI
+  SetOutPath $G_ROOTDIR\UI
   File "..\engine\UI\HTML.pm"
   File "..\engine\UI\HTTP.pm"
 
-  SetOutPath $INSTDIR\manual
+  SetOutPath $G_ROOTDIR\manual
   File "..\engine\manual\*.gif"
-  SetOutPath $INSTDIR\manual\en
+
+  SetOutPath $G_ROOTDIR\manual\en
   File "..\engine\manual\en\*.html"
 
-  SetOutPath $INSTDIR\languages
+  SetOutPath $G_ROOTDIR\languages
   File "..\engine\languages\English.msg"
 
   ; Install the Minimal Perl files
@@ -977,10 +1003,13 @@ update_config:
   DetailPrint "$(PFI_LANG_INST_PROG_PERL)"
   SetDetailsPrint listonly
 
-  SetOutPath $INSTDIR
+  SetOutPath $G_MPBINDIR
   File "${C_PERL_DIR}\bin\perl.exe"
   File "${C_PERL_DIR}\bin\wperl.exe"
   File "${C_PERL_DIR}\bin\perl58.dll"
+
+  SetOutPath $G_MPLIBDIR
+
   File "${C_PERL_DIR}\lib\AutoLoader.pm"
   File "${C_PERL_DIR}\lib\Carp.pm"
   File "${C_PERL_DIR}\lib\Config.pm"
@@ -993,6 +1022,7 @@ update_config:
   File "${C_PERL_DIR}\lib\lib.pm"
   File "${C_PERL_DIR}\lib\locale.pm"
   File "${C_PERL_DIR}\lib\POSIX.pm"
+  File "${C_PERL_DIR}\lib\re.pm"
   File "${C_PERL_DIR}\lib\SelectSaver.pm"
   File "${C_PERL_DIR}\lib\Socket.pm"
   File "${C_PERL_DIR}\lib\strict.pm"
@@ -1001,72 +1031,72 @@ update_config:
   File "${C_PERL_DIR}\lib\warnings.pm"
   File "${C_PERL_DIR}\lib\XSLoader.pm"
 
-  SetOutPath $INSTDIR\Carp
+  SetOutPath $G_MPLIBDIR\Carp
   File "${C_PERL_DIR}\lib\Carp\*"
 
-  SetOutPath $INSTDIR\Digest
+  SetOutPath $G_MPLIBDIR\Digest
   File "${C_PERL_DIR}\lib\Digest\MD5.pm"
 
-  SetOutPath $INSTDIR\Exporter
+  SetOutPath $G_MPLIBDIR\Exporter
   File "${C_PERL_DIR}\lib\Exporter\*"
 
-  SetOutPath $INSTDIR\File
+  SetOutPath $G_MPLIBDIR\File
   File "${C_PERL_DIR}\lib\File\Glob.pm"
 
-  SetOutPath $INSTDIR\Getopt
+  SetOutPath $G_MPLIBDIR\Getopt
   File "${C_PERL_DIR}\lib\Getopt\Long.pm"
 
-  SetOutPath $INSTDIR\IO
+  SetOutPath $G_MPLIBDIR\IO
   File "${C_PERL_DIR}\lib\IO\*"
 
-  SetOutPath $INSTDIR\IO\Socket
+  SetOutPath $G_MPLIBDIR\IO\Socket
   File "${C_PERL_DIR}\lib\IO\Socket\*"
 
-  SetOutPath $INSTDIR\MIME
+  SetOutPath $G_MPLIBDIR\MIME
   File "${C_PERL_DIR}\lib\MIME\*"
 
-  SetOutPath $INSTDIR\Sys
+  SetOutPath $G_MPLIBDIR\Sys
   File "${C_PERL_DIR}\lib\Sys\*"
 
-  SetOutPath $INSTDIR\Text
+  SetOutPath $G_MPLIBDIR\Text
   File "${C_PERL_DIR}\lib\Text\ParseWords.pm"
 
-  SetOutPath $INSTDIR\warnings
+  SetOutPath $G_MPLIBDIR\warnings
   File "${C_PERL_DIR}\lib\warnings\register.pm"
 
-  SetOutPath $INSTDIR\auto\Digest\MD5
+  SetOutPath $G_MPLIBDIR\auto\Digest\MD5
   File "${C_PERL_DIR}\lib\auto\Digest\MD5\*"
 
-  SetOutPath $INSTDIR\auto\DynaLoader
+  SetOutPath $G_MPLIBDIR\auto\DynaLoader
   File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
 
-  SetOutPath $INSTDIR\auto\File\Glob
+  SetOutPath $G_MPLIBDIR\auto\File\Glob
   File "${C_PERL_DIR}\lib\auto\File\Glob\*"
 
-  SetOutPath $INSTDIR\auto\IO
+  SetOutPath $G_MPLIBDIR\auto\IO
   File "${C_PERL_DIR}\lib\auto\IO\*"
 
-  SetOutPath $INSTDIR\auto\MIME\Base64
+  SetOutPath $G_MPLIBDIR\auto\MIME\Base64
   File "${C_PERL_DIR}\lib\auto\MIME\Base64\*"
 
-  SetOutPath $INSTDIR\auto\POSIX
+  SetOutPath $G_MPLIBDIR\auto\POSIX
   File "${C_PERL_DIR}\lib\auto\POSIX\POSIX.dll"
   File "${C_PERL_DIR}\lib\auto\POSIX\autosplit.ix"
   File "${C_PERL_DIR}\lib\auto\POSIX\load_imports.al"
 
-  SetOutPath $INSTDIR\auto\Socket
+  SetOutPath $G_MPLIBDIR\auto\Socket
   File "${C_PERL_DIR}\lib\auto\Socket\*"
 
-  SetOutPath $INSTDIR\auto\Sys\Hostname
+  SetOutPath $G_MPLIBDIR\auto\Sys\Hostname
   File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
 
   ; Install Perl modules and library files for BerkeleyDB support
 
-  SetOutPath $INSTDIR
+  SetOutPath $G_MPLIBDIR
   File "${C_PERL_DIR}\site\lib\BerkeleyDB.pm"
   File "${C_PERL_DIR}\lib\UNIVERSAL.pm"
 
-  SetOutPath $INSTDIR\auto\BerkeleyDB
+  SetOutPath $G_MPLIBDIR\auto\BerkeleyDB
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\autosplit.ix"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.bs"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.dll"
@@ -1075,27 +1105,27 @@ update_config:
 
   ; Install Perl modules and library files for SQLite support
 
-  SetOutPath $INSTDIR
+  SetOutPath $G_MPLIBDIR
   File "${C_PERL_DIR}\lib\base.pm"
   File "${C_PERL_DIR}\lib\overload.pm"
   File "${C_PERL_DIR}\site\lib\DBI.pm"
 
-  SetOutPath $INSTDIR\auto\DBD\SQLite
+  SetOutPath $G_MPLIBDIR\auto\DBD\SQLite
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.bs"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.dll"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.lib"
 
-  SetOutPath $INSTDIR\auto\DBI
+  SetOutPath $G_MPLIBDIR\auto\DBI
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.bs"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.dll"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.lib"
 
-  SetOutPath $INSTDIR\String
+  SetOutPath $G_MPLIBDIR\String
   File "${C_PERL_DIR}\site\lib\String\Interpolate.pm"
 
-  SetOutPath $INSTDIR\DBD
+  SetOutPath $G_MPLIBDIR\DBD
   File "${C_PERL_DIR}\site\lib\DBD\SQLite.pm"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
@@ -1120,8 +1150,10 @@ update_config:
                  "$INSTDIR\wrapper.exe"
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
+
+  SetOutPath $G_ROOTDIR
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
-                 "$INSTDIR\${C_README}.txt"
+                 "$G_ROOTDIR\${C_README}.txt"
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" \
@@ -1129,7 +1161,7 @@ update_config:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
-              "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
+              "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
               "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
@@ -1138,9 +1170,9 @@ update_config:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
-  SetOutPath $INSTDIR
+  SetOutPath $G_ROOTDIR
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
-                 "$INSTDIR\stop_pf.exe" "/showerrors $G_GUI"
+                 "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
   StrCmp $G_STARTUP "1" 0 skip_autostart_set
       SetOutPath $SMSTARTUP
@@ -1184,56 +1216,115 @@ SectionEnd
 # The backup is created in the '$INSTDIR\backup' folder. Information on the backup is stored
 # in the 'backup.ini' file to assist in restoring the old corpus. A copy of 'popfile.cfg'
 # is also placed in the backup folder.
+#
+# If corpus conversion is required, create a list of bucket files to be monitored during the
+# conversion process (it can take several minutes to convert large corpus files)
 #--------------------------------------------------------------------------
 
 Section "-NonSQLCorpusBackup" SecBackup
 
   !define L_CFG_HANDLE    $R9     ; handle for "popfile.cfg"
-  !define L_CORPUS_PATH   $R8     ; full path to the corpus
-  !define L_TEMP          $R7
+  !define L_BUCKET_COUNT  $R8     ; used to update the list of bucket filenames
+  !define L_BUCKET_NAME   $R7     ; name of a bucket folder
+  !define L_CORPUS_PATH   $R6     ; full path to the corpus
+  !define L_CORPUS_SIZE   $R5     ; total number of bytes in all the table/table.db files found
+  !define L_TEMP          $R4
 
   Push ${L_CFG_HANDLE}
+  Push ${L_BUCKET_COUNT}
+  Push ${L_BUCKET_NAME}
   Push ${L_CORPUS_PATH}
+  Push ${L_CORPUS_SIZE}
   Push ${L_TEMP}
 
-  IfFileExists "$INSTDIR\popfile.cfg" 0 exit
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
   IfFileExists "$INSTDIR\backup\nonsql\*.*" exit
+
+  ; Save installation-specific data for use by the 'Corpus Conversion' utility
+
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "PERLDIR" "$G_MPBINDIR"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "ROOTDIR" "$G_ROOTDIR"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "USERDIR" "$G_USERDIR"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "KReboot"  "no"
 
   ; Use data in 'popfile.cfg' to generate the full path to the corpus folder
 
-  Push $INSTDIR
+  Push $G_USERDIR
   Call GetCorpusPath
   Pop ${L_CORPUS_PATH}
 
-  FindFirst ${L_CFG_HANDLE} ${L_TEMP} ${L_CORPUS_PATH}\*.*
+  StrCpy ${L_BUCKET_COUNT} 0
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "BucketList" "FileCount" ${L_BUCKET_COUNT}
+
+  FindFirst ${L_CFG_HANDLE} ${L_BUCKET_NAME} ${L_CORPUS_PATH}\*.*
 
   ; If the "corpus" directory does not exist then "${L_CFG_HANDLE}" will be empty
 
   StrCmp ${L_CFG_HANDLE} "" nothing_to_backup
 
-  ; Now search through the corpus folder, looking for buckets (at this point ${L_TEMP} is ".")
+  StrCpy ${L_CORPUS_SIZE} 0
+
+  FindNext ${L_CFG_HANDLE} ${L_BUCKET_NAME}
+  StrCmp ${L_BUCKET_NAME} ".." corpus_check
+  StrCmp ${L_BUCKET_NAME} "" check_bucket_count got_bucket_name
+
+  ; Now search through the corpus folder, looking for buckets
 
 corpus_check:
-  FindNext ${L_CFG_HANDLE} ${L_TEMP}
-  StrCmp ${L_TEMP} ".." corpus_check
-  StrCmp ${L_TEMP} "" nothing_to_backup
+  FindNext ${L_CFG_HANDLE} ${L_BUCKET_NAME}
+  StrCmp ${L_BUCKET_NAME} "" check_bucket_count
+
+got_bucket_name:
 
   ; Assume what we've found is a bucket folder, now check if it contains
-  ; a BerkeleyDB file or a flat-file corpus file. We stop our search as
-  ; soon as we find either type of file (i.e. we do not examine every bucket)
+  ; a BerkeleyDB file or a flat-file corpus file. We make a list of all the
+  ; buckets we find so we can later monitor the progress of the conversion process.
+  ; If we find both types of corpus file in a particular bucket, we add both to the list.
 
-  IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table.db" backup_corpus
-  IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table" backup_corpus
+  IfFileExists "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table.db" bdb_bucket
+  IfFileExists "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table" flat_bucket
   Goto corpus_check
 
-backup_corpus:
+bdb_bucket:
+  IntOp ${L_BUCKET_COUNT} ${L_BUCKET_COUNT} + 1
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "BucketList" "FileCount" ${L_BUCKET_COUNT}
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "File_Name" \
+                                       "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table.db"
+  Push "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table.db"
+  Call GetFileSize
+  Pop ${L_TEMP}
+  IntOp ${L_CORPUS_SIZE} ${L_CORPUS_SIZE} + ${L_TEMP}
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "File_Size" "${L_TEMP}"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "Stop_Time" "0"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "ElapsTime" "0"
+
+  IfFileExists "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table" 0 corpus_check
+
+flat_bucket:
+  IntOp ${L_BUCKET_COUNT} ${L_BUCKET_COUNT} + 1
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "BucketList" "FileCount" ${L_BUCKET_COUNT}
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "File_Name" \
+                                       "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table"
+  Push "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table"
+  Call GetFileSize
+  Pop ${L_TEMP}
+  IntOp ${L_CORPUS_SIZE} ${L_CORPUS_SIZE} + ${L_TEMP}
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "File_Size" "${L_TEMP}"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "Stop_Time" "0"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "ElapsTime" "0"
+  Goto corpus_check
+
+check_bucket_count:
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "BucketList" "TotalSize" ${L_CORPUS_SIZE}
+  FlushINI "$PLUGINSDIR\corpus.ini"
+  StrCpy ${L_BUCKET_COUNT} 0 nothing_to_backup
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_CORPUS)"
   SetDetailsPrint listonly
 
   CreateDirectory "$INSTDIR\backup\nonsql"
-  CopyFiles "$INSTDIR\popfile.cfg" "$INSTDIR\backup\popfile.cfg"
+  CopyFiles "$G_USERDIR\popfile.cfg" "$INSTDIR\backup\popfile.cfg"
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "CorpusPath" "${L_CORPUS_PATH}"
 
   StrCpy ${L_TEMP} ${L_CORPUS_PATH}
@@ -1256,6 +1347,8 @@ continue:
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Corpus" "${L_TEMP}"
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "new"
 
+  File "/oname=$PLUGINSDIR\monitorcc.exe" "monitorcc.exe"
+
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
@@ -1265,11 +1358,17 @@ nothing_to_backup:
 
 exit:
   Pop ${L_TEMP}
+  Pop ${L_CORPUS_SIZE}
   Pop ${L_CORPUS_PATH}
+  Pop ${L_BUCKET_NAME}
+  Pop ${L_BUCKET_COUNT}
   Pop ${L_CFG_HANDLE}
 
   !undef L_CFG_HANDLE
+  !undef L_BUCKET_COUNT
+  !undef L_BUCKET_NAME
   !undef L_CORPUS_PATH
+  !undef L_CORPUS_SIZE
   !undef L_TEMP
 
 SectionEnd
@@ -1284,12 +1383,14 @@ Section "Skins" SecSkins
   DetailPrint "$(PFI_LANG_INST_PROG_SKINS)"
   SetDetailsPrint listonly
 
-  SetOutPath $INSTDIR\skins
+  SetOutPath $G_ROOTDIR\skins
   File "..\engine\skins\*.css"
   File "..\engine\skins\*.gif"
-  SetOutPath $INSTDIR\skins\lavishImages
+
+  SetOutPath $G_ROOTDIR\skins\lavishImages
   File "..\engine\skins\lavishImages\*.gif"
-  SetOutPath $INSTDIR\skins\sleetImages
+
+  SetOutPath $G_ROOTDIR\skins\sleetImages
   File "..\engine\skins\sleetImages\*.gif"
 
   SetDetailsPrint textonly
@@ -1328,7 +1429,7 @@ Section "Languages" SecLangs
   DetailPrint "$(PFI_LANG_INST_PROG_LANGS)"
   SetDetailsPrint listonly
 
-  SetOutPath $INSTDIR\languages
+  SetOutPath $G_ROOTDIR\languages
   File "..\engine\languages\*.msg"
 
   ; There are several special cases: some UI languages are not yet supported by the
@@ -1345,7 +1446,7 @@ use_inherited_lang:
   StrCmp ${L_LANG} "Hebrew"  0 use_installer_lang
 
 special_case:
-  IfFileExists "$INSTDIR\languages\${L_LANG}.msg" lang_save
+  IfFileExists "$G_ROOTDIR\languages\${L_LANG}.msg" lang_save
 
 use_installer_lang:
 
@@ -1390,7 +1491,7 @@ use_installer_lang:
   goto lang_done
 
 lang_save:
-  FileOpen  ${L_CFG} $INSTDIR\popfile.cfg a
+  FileOpen  ${L_CFG} $G_USERDIR\popfile.cfg a
   FileSeek  ${L_CFG} 0 END
   FileWrite ${L_CFG} "html_language ${L_LANG}$\r$\n"
   FileClose ${L_CFG}
@@ -1436,24 +1537,37 @@ SectionEnd
       Push $INSTDIR\kakasi\share\kakasi\kanwadict
       Call WriteEnvStr
 
+      ; Save installation-specific data for use by the 'Corpus Conversion' utility
+      ; if we are running on a Win9x system and require a reboot to install Kakasi properly.
+
+      IfRebootFlag 0 continue
+
+      WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "KReboot" "yes"
+      WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" \
+                          "ITAIJIDICTPATH" "$INSTDIR\kakasi\share\kakasi\itaijidict"
+      WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" \
+                          "KANWADICTPATH"  "$INSTDIR\kakasi\share\kakasi\kanwadict"
+
+    continue:
+
       ;--------------------------------------------------------------------------
       ; Install Perl modules: base.pm, the Encode collection and Text::Kakasi
       ;--------------------------------------------------------------------------
 
-      SetOutPath $INSTDIR
+      SetOutPath $G_MPLIBDIR
       File "${C_PERL_DIR}\lib\base.pm"
       File "${C_PERL_DIR}\lib\Encode.pm"
 
-      SetOutPath $INSTDIR\Encode
+      SetOutPath $G_MPLIBDIR\Encode
       File /r "${C_PERL_DIR}\lib\Encode\*"
 
-      SetOutPath $INSTDIR\auto\Encode
+      SetOutPath $G_MPLIBDIR\auto\Encode
       File /r "${C_PERL_DIR}\lib\auto\Encode\*"
 
-      SetOutPath $INSTDIR\Text
+      SetOutPath $G_MPLIBDIR\Text
       File "${C_PERL_DIR}\site\lib\Text\Kakasi.pm"
 
-      SetOutPath $INSTDIR\auto\Text\Kakasi
+      SetOutPath $G_MPLIBDIR\auto\Text\Kakasi
       File "${C_PERL_DIR}\site\lib\auto\Text\Kakasi\*"
 
     SectionEnd
@@ -1552,10 +1666,10 @@ FunctionEnd
 # Installer Function: CheckUserRights
 # (the "pre" function for the WELCOME page)
 #
+# Try to ensure the installer window is not hidden behind any other windows.
+#
 # On systems which support different types of user, recommend that POPFile is installed by
 # a user with 'Administrative' rights (this makes it easier to use POPFile's multi-user mode).
-#
-# Try to ensure the installer window is not hidden behind any other windows.
 #--------------------------------------------------------------------------
 
 Function CheckUserRights
@@ -1604,18 +1718,12 @@ not_admin:
       $(PFI_LANG_WELCOME_ADMIN_TEXT)"
 
 exit:
+  Pop ${L_WELCOME_TEXT}
 
   ; Remove the banner which was displayed by the 'PFIGUIInit' function
 
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
-
-  ; After showing the release notes, the installer may not be "on top" so try to correct this.
-  ; (On Windows XP this command only flashes the installer's task bar icon)
-
-  BringToFront
-  
-  Pop ${L_WELCOME_TEXT}
 
   !undef L_WELCOME_TEXT
 
@@ -1648,44 +1756,44 @@ Function MakeItSafe
   ; 'popfileif.exe', or 'perl.exe' ('wperl.exe' is another possibility if this is an upgraded
   ; installation). Earlier versions of POPFile use only 'perl.exe' or 'wperl.exe'.
 
-  DetailPrint "Checking $INSTDIR\popfileb.exe"
+  DetailPrint "Checking $G_ROOTDIR\popfileb.exe"
 
-  Push "$INSTDIR\popfileb.exe"
+  Push "$G_ROOTDIR\popfileb.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  DetailPrint "Checking $INSTDIR\popfileib.exe"
+  DetailPrint "Checking $G_ROOTDIR\popfileib.exe"
 
-  Push "$INSTDIR\popfileib.exe"
+  Push "$G_ROOTDIR\popfileib.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  DetailPrint "Checking $INSTDIR\popfilef.exe"
+  DetailPrint "Checking $G_ROOTDIR\popfilef.exe"
 
-  Push "$INSTDIR\popfilef.exe"
+  Push "$G_ROOTDIR\popfilef.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  DetailPrint "Checking $INSTDIR\popfileif.exe"
+  DetailPrint "Checking $G_ROOTDIR\popfileif.exe"
 
-  Push "$INSTDIR\popfileif.exe"
+  Push "$G_ROOTDIR\popfileif.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  DetailPrint "Checking $INSTDIR\wperl.exe"
+  DetailPrint "Checking $G_MPBINDIR\wperl.exe"
 
-  Push "$INSTDIR\wperl.exe"
+  Push "$G_MPBINDIR\wperl.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  DetailPrint "Checking $INSTDIR\perl.exe"
+  DetailPrint "Checking $G_MPBINDIR\perl.exe"
 
-  Push "$INSTDIR\perl.exe"
+  Push "$G_MPBINDIR\perl.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" exit_now
@@ -1790,8 +1898,11 @@ Function CheckExistingConfig
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
 
-  IfFileExists "$INSTDIR\popfile.pl" warning
-  IfFileExists "$INSTDIR\popfile.cfg" warning
+  StrCpy $G_ROOTDIR $INSTDIR
+  StrCpy $G_USERDIR $INSTDIR
+
+  IfFileExists "$G_ROOTDIR\popfile.pl" warning
+  IfFileExists "$G_USERDIR\popfile.cfg" warning
   Goto continue
 
 warning:
@@ -1843,7 +1954,7 @@ init_port_vars:
 
   ClearErrors
 
-  FileOpen  ${L_CFG} $INSTDIR\popfile.cfg r
+  FileOpen  ${L_CFG} $G_USERDIR\popfile.cfg r
   FileOpen  ${L_CLEANCFG} $PLUGINSDIR\popfile.cfg w
 
 loop:
@@ -2462,7 +2573,7 @@ Function SetOutlookExpressPage
   Call GetDateTimeStamp
   Pop ${L_TEMP}
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "OutlookExpress" "${L_TEMP}"
-  IfFileExists "$INSTDIR\popfile.reg" 0 check_oe_config_enabled
+  IfFileExists "$G_USERDIR\popfile.reg" 0 check_oe_config_enabled
   Push "popfile.reg"
   Call ConvertOOERegData
 
@@ -2500,30 +2611,36 @@ abort_oe_config:
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_EXPCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
   StrCmp $G_OOECONFIG_HANDLE "" exit
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_EXPCFG_IO_CANCELLED)$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+      $(PFI_LANG_EXPCFG_IO_CANCELLED)\
+      $\r$\n"
   Goto finished_oe_config
 
 open_logfiles:
   !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "BackEnabled" "1"
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
 
-  FileOpen  $G_OOECONFIG_HANDLE "$INSTDIR\expconfig.txt" w
-  FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\expconfig.txt" w
+  FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})\
+      $\r$\n$\r$\n"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)\
+      $\r$\n$\r$\n"
 
-  FileOpen  $G_OOECHANGES_HANDLE "$INSTDIR\expchanges.txt" a
+  FileOpen  $G_OOECHANGES_HANDLE "$G_USERDIR\expchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
-  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_ExpCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_ExpCFG_LOG_AFTER) (${L_TEMP})\
+      $\r$\n$\r$\n"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)\
+      $\r$\n$\r$\n"
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
@@ -2687,7 +2804,8 @@ no_padding:
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_EMAILADDRESS}" 30
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
-  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}\
+      $\r$\n"
 
   IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
 
@@ -2759,10 +2877,14 @@ continue_guid:
   goto get_guid
 
 finished_oe_config:
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+      $(PFI_LANG_OOECFG_LOG_END)\
+      $\r$\n$\r$\n"
   FileClose $G_OOECONFIG_HANDLE
 
-  FileWrite $G_OOECHANGES_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$\r$\n\
+      $(PFI_LANG_OOECFG_LOG_END)\
+      $\r$\n$\r$\n"
   FileClose $G_OOECHANGES_HANDLE
 
 exit:
@@ -2861,7 +2983,7 @@ outlook_express:
   StrCpy ${L_UNDOFILE} "pfi-outexpress.ini"
 
 read_old_file:
-  FileOpen  ${L_CFG} "$INSTDIR\${L_REG_FILE}" r
+  FileOpen  ${L_CFG} "$G_USERDIR\${L_REG_FILE}" r
 
 next_entry:
   FileRead ${L_CFG} ${L_REG_KEY}
@@ -2888,15 +3010,15 @@ next_entry:
 
   ; New entry detected, so we create a new 'undo' entry for it
 
-  ReadINIStr  ${L_UNDO} "$INSTDIR\${L_UNDOFILE}" "History" "ListSize"
+  ReadINIStr  ${L_UNDO} "$G_USERDIR\${L_UNDOFILE}" "History" "ListSize"
   StrCmp ${L_UNDO} "" 0 update_list_size
   StrCpy ${L_UNDO} 1
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "ListSize" "1"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "History" "ListSize" "1"
   Goto add_entry
 
 update_list_size:
   IntOp ${L_UNDO} ${L_UNDO} + 1
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "ListSize" "${L_UNDO}"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "History" "ListSize" "${L_UNDO}"
 
 add_entry:
   StrCmp ${L_REG_FILE} "popfile.reg" outlook_express_stamp
@@ -2907,44 +3029,44 @@ outlook_express_stamp:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
 
 save_entry:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "Undo-${L_UNDO}" "Imported on ${L_TEMP}"
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_UNDO}" "1"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "History" "Undo-${L_UNDO}" "Imported on ${L_TEMP}"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "History" "IniV-${L_UNDO}" "1"
 
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "Restored" "No"
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "RegistryKey" "${L_REG_KEY}"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "Restored" "No"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "RegistryKey" "${L_REG_KEY}"
 
 add_to_current:
   StrCmp ${L_REG_SUBKEY} "POP3 User Name" 0 not_username
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3UserName" "${L_REG_VALUE}"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3UserName" "${L_REG_VALUE}"
   Goto next_entry
 
 not_username:
   StrCmp ${L_REG_SUBKEY} "POP3 Server" 0 not_server
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3Server" "${L_REG_VALUE}"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3Server" "${L_REG_VALUE}"
   Goto next_entry
 
 not_server:
   StrCmp ${L_REG_SUBKEY} "POP3 Server" 0 next_entry
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3Port" "${L_REG_VALUE}"
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_UNDO}" "2"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3Port" "${L_REG_VALUE}"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "History" "IniV-${L_UNDO}" "2"
   Goto next_entry
 
 end_of_file:
   FileClose ${L_CFG}
 
-  IfFileExists "$INSTDIR\${L_REG_FILE}.bk1" 0 the_first
-  IfFileExists "$INSTDIR\${L_REG_FILE}.bk2" 0 the_second
-  IfFileExists "$INSTDIR\${L_REG_FILE}.bk3" 0 the_third
-  Delete "$INSTDIR\${L_REG_FILE}.bk3"
+  IfFileExists "$G_USERDIR\${L_REG_FILE}.bk1" 0 the_first
+  IfFileExists "$G_USERDIR\${L_REG_FILE}.bk2" 0 the_second
+  IfFileExists "$G_USERDIR\${L_REG_FILE}.bk3" 0 the_third
+  Delete "$G_USERDIR\${L_REG_FILE}.bk3"
 
 the_third:
-  Rename "$INSTDIR\${L_REG_FILE}.bk2" "$INSTDIR\${L_REG_FILE}.bk3"
+  Rename "$G_USERDIR\${L_REG_FILE}.bk2" "$G_USERDIR\${L_REG_FILE}.bk3"
 
 the_second:
-  Rename "$INSTDIR\${L_REG_FILE}.bk1" "$INSTDIR\${L_REG_FILE}.bk2"
+  Rename "$G_USERDIR\${L_REG_FILE}.bk1" "$G_USERDIR\${L_REG_FILE}.bk2"
 
 the_first:
-  Rename "$INSTDIR\${L_REG_FILE}" "$INSTDIR\${L_REG_FILE}.bk1"
+  Rename "$G_USERDIR\${L_REG_FILE}" "$G_USERDIR\${L_REG_FILE}.bk1"
 
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
@@ -3110,28 +3232,28 @@ next_row:
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
 
-  ReadINIStr  ${L_UNDO} "$INSTDIR\pfi-outexpress.ini" "History" "ListSize"
+  ReadINIStr  ${L_UNDO} "$G_USERDIR\pfi-outexpress.ini" "History" "ListSize"
   StrCmp ${L_UNDO} "" 0 update_list_size
   StrCpy ${L_UNDO} 1
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "ListSize" "1"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "ListSize" "1"
   Goto add_entry
 
 update_list_size:
   IntOp ${L_UNDO} ${L_UNDO} + 1
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "ListSize" "${L_UNDO}"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "ListSize" "${L_UNDO}"
 
 add_entry:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "IniV-${L_UNDO}" "3"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "IniV-${L_UNDO}" "3"
 
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "Restored" "No"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "RegistryKey" "${L_REGKEY}"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3UserName" "${L_POP3USERNAME}"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3Server" "${L_POP3SERVER}"
-  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3Port" "${L_POP3PORT}"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "Restored" "No"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "RegistryKey" "${L_REGKEY}"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3UserName" "${L_POP3USERNAME}"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3Server" "${L_POP3SERVER}"
+  WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3Port" "${L_POP3PORT}"
 
   ; Reconfigure the Outlook Express account
 
@@ -3192,8 +3314,6 @@ FunctionEnd
 # Installer Function: SetOutlookPage (generates a custom page)
 #
 # This function is used to reconfigure Outlook accounts
-#
-# NOTE: This function is only used when the /OUTLOOK command-line switch is supplied
 #--------------------------------------------------------------------------
 
 Function SetOutlookPage
@@ -3250,12 +3370,6 @@ Function SetOutlookPage
   Push ${L_TEMP}
   Push ${L_USERNAME}
 
-  ; Only check 'Outlook' accounts if this option was requested when the installer was launched
-
-  Call GetParameters
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "/OUTLOOK" 0 exit
-
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OUTCFG_TITLE)" "$(PFI_LANG_OUTCFG_SUBTITLE)"
 
   ; Create timestamp used for all Outlook configuration activities
@@ -3264,7 +3378,7 @@ Function SetOutlookPage
   Call GetDateTimeStamp
   Pop ${L_TEMP}
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "Outlook" "${L_TEMP}"
-  IfFileExists "$INSTDIR\outlook.reg" 0 check_for_outlook
+  IfFileExists "$G_USERDIR\outlook.reg" 0 check_for_outlook
   Push "outlook.reg"
   Call ConvertOOERegData
 
@@ -3329,7 +3443,9 @@ abort_outlook_config:
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OUTCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
   StrCmp $G_OOECONFIG_HANDLE "" exit
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OUTCFG_IO_CANCELLED)$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+      $(PFI_LANG_OUTCFG_IO_CANCELLED)\
+      $\r$\n"
   Goto finished_outlook_config
 
 open_logfiles:
@@ -3340,23 +3456,27 @@ open_logfiles:
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "Outlook" "${L_TEMP}"
 
-  FileOpen  $G_OOECONFIG_HANDLE "$INSTDIR\outconfig.txt" w
-  FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\outconfig.txt" w
+  FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})\
+      $\r$\n$\r$\n"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)\
+      $\r$\n$\r$\n"
 
-  FileOpen  $G_OOECHANGES_HANDLE "$INSTDIR\outchanges.txt" a
+  FileOpen  $G_OOECHANGES_HANDLE "$G_USERDIR\outchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
-  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})\
+      $\r$\n$\r$\n"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)\
+      $\r$\n$\r$\n"
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
@@ -3485,7 +3605,8 @@ no_padding:
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_EMAILADDRESS}" 30
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
-  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}\
+      $\r$\n"
 
   IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
 
@@ -3548,10 +3669,14 @@ display_list_again:
   Call ResetOutlookOutlookExpressAccountList
 
 finished_outlook_config:
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+      $(PFI_LANG_OOECFG_LOG_END)\
+      $\r$\n$\r$\n"
   FileClose $G_OOECONFIG_HANDLE
 
-  FileWrite $G_OOECHANGES_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$\r$\n\
+      $(PFI_LANG_OOECFG_LOG_END)\
+      $\r$\n$\r$\n"
   FileClose $G_OOECHANGES_HANDLE
 
 exit:
@@ -3663,28 +3788,28 @@ next_row:
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
 
-  ReadINIStr  ${L_UNDO} "$INSTDIR\pfi-outlook.ini" "History" "ListSize"
+  ReadINIStr  ${L_UNDO} "$G_USERDIR\pfi-outlook.ini" "History" "ListSize"
   StrCmp ${L_UNDO} "" 0 update_list_size
   StrCpy ${L_UNDO} 1
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "ListSize" "1"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "ListSize" "1"
   Goto add_entry
 
 update_list_size:
   IntOp ${L_UNDO} ${L_UNDO} + 1
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "ListSize" "${L_UNDO}"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "ListSize" "${L_UNDO}"
 
 add_entry:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "Outlook"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "IniV-${L_UNDO}" "3"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "IniV-${L_UNDO}" "3"
 
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "Restored" "No"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "RegistryKey" "${L_REGKEY}"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3UserName" "${L_POP3USERNAME}"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3Server" "${L_POP3SERVER}"
-  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3Port" "${L_POP3PORT}"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "Restored" "No"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "RegistryKey" "${L_REGKEY}"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3UserName" "${L_POP3USERNAME}"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3Server" "${L_POP3SERVER}"
+  WriteINIStr "$G_USERDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3Port" "${L_POP3PORT}"
 
   ; Reconfigure the Outlook account
 
@@ -3696,7 +3821,8 @@ add_entry:
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_ACCOUNTNAME}" 20
   !insertmacro OOECONFIG_CHANGES_LOG  "127.0.0.1"        17
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"  40
-  FileWrite $G_OOECHANGES_HANDLE "$G_POP3$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$G_POP3\
+      $\r$\n"
 
   Goto continue
 
@@ -4032,22 +4158,22 @@ write_intro:
   StrCmp ${L_PREVDOM} ${L_DOMPORT} get_next_persona
   StrCmp ${L_PERPORT} "Dominant" 0 get_next_persona
 
-  ReadINIStr  ${L_STATUS} "$INSTDIR\pfi-eudora.ini" "History" "ListSize"
+  ReadINIStr  ${L_STATUS} "$G_USERDIR\pfi-eudora.ini" "History" "ListSize"
   IntOp ${L_STATUS} ${L_STATUS} + 1
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "ListSize" "${L_STATUS}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "ListSize" "${L_STATUS}"
 
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Undo-${L_STATUS}" "Created on ${L_CFGTIME}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Path-${L_STATUS}" "${L_ININAME}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "User-${L_STATUS}" "$G_WINUSERNAME"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Type-${L_STATUS}" "$G_WINUSERTYPE"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "IniV-${L_STATUS}" "2"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "Undo-${L_STATUS}" "Created on ${L_CFGTIME}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "Path-${L_STATUS}" "${L_ININAME}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "User-${L_STATUS}" "$G_WINUSERNAME"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "Type-${L_STATUS}" "$G_WINUSERTYPE"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "IniV-${L_STATUS}" "2"
 
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Restored" "No"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Persona" "${L_PERSONA}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "*.*"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPServer" "*.*"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "LoginName" "*.*"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "Dominant"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Restored" "No"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Persona" "${L_PERSONA}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "*.*"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPServer" "*.*"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "LoginName" "*.*"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "Dominant"
 
   StrCmp ${L_PREVDOM} "Default" inherit_default_pop3
   WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPPort" ${L_PREVDOM}
@@ -4058,29 +4184,29 @@ inherit_default_pop3:
   Goto get_next_persona
 
 reconfigure_persona:
-  ReadINIStr  ${L_STATUS} "$INSTDIR\pfi-eudora.ini" "History" "ListSize"
+  ReadINIStr  ${L_STATUS} "$G_USERDIR\pfi-eudora.ini" "History" "ListSize"
   StrCmp ${L_STATUS} "" 0 update_list_size
   StrCpy ${L_STATUS} 1
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "ListSize" "1"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "ListSize" "1"
   Goto add_entry
 
 update_list_size:
   IntOp ${L_STATUS} ${L_STATUS} + 1
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "ListSize" "${L_STATUS}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "ListSize" "${L_STATUS}"
 
 add_entry:
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Undo-${L_STATUS}" "Created on ${L_CFGTIME}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Path-${L_STATUS}" "${L_ININAME}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "User-${L_STATUS}" "$G_WINUSERNAME"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Type-${L_STATUS}" "$G_WINUSERTYPE"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "IniV-${L_STATUS}" "2"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "Undo-${L_STATUS}" "Created on ${L_CFGTIME}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "Path-${L_STATUS}" "${L_ININAME}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "User-${L_STATUS}" "$G_WINUSERNAME"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "Type-${L_STATUS}" "$G_WINUSERTYPE"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "History" "IniV-${L_STATUS}" "2"
 
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Restored" "No"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Persona" "${L_PERSONA}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "${L_ACCOUNT}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPServer" "${L_SERVER}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "LoginName" "${L_USER}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "${L_PERPORT}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Restored" "No"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Persona" "${L_PERSONA}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "${L_ACCOUNT}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPServer" "${L_SERVER}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "LoginName" "${L_USER}"
+  WriteINIStr "$G_USERDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "${L_PERPORT}"
 
   WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPAccount" "${L_SERVER}$G_SEPARATOR${L_USER}@127.0.0.1"
   WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPServer"  "127.0.0.1"
@@ -4182,7 +4308,7 @@ Function StartPOPFilePage
   ; Ensure 'popfile.cfg' has valid settings for system tray icon and console mode
   ; (if necessary, add the default settings to the file and update the [Inherited] copies)
 
-  FileOpen  ${L_CFG} "$INSTDIR\popfile.cfg" a
+  FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" a
   FileSeek  ${L_CFG} 0 END
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "Console"
@@ -4212,24 +4338,6 @@ close_file:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
-
-  ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
-  ; or from BerkeleyDB format to the new SQL database format (installer uses SQLite package)
-
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
-  StrCmp ${L_TEMP} "new" 0 display_the_page
-
-  ; Corpus conversion will occur when POPFile is started - this may take several minutes,
-  ; so we ensure that POPFile will not be run in the background when it is run for the
-  ; first time (by using the Start Menu or by running 'popfile.exe').
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
-  Push "1"
-  Call SetConsoleMode
-
-  ; Remove the 'Click Next to convert the corpus' text (because we need to reboot first)
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "NumFields" "7"
 
   Goto display_the_page
 
@@ -4322,11 +4430,11 @@ check_radio_buttons:
   ; Selection has been changed from 'use console' or 'run in background' to 'do not run POPFile'
 
   StrCmp ${L_TEMP} "background" background_to_no
-  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}f.exe"
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}f.exe"
   Goto lastaction_no
 
 background_to_no:
-  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}b.exe"
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}b.exe"
 
 lastaction_no:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "no"
@@ -4341,7 +4449,7 @@ lastaction_no:
 
 run_popfile:
 
-  ; Set ${L_EXE} to "" as we do not yet know if we are going to monitor a file in $INSTDIR
+  ; Set ${L_EXE} to "" as we do not yet know if we are going to monitor a file in $G_ROOTDIR
 
   StrCpy ${L_EXE} ""
 
@@ -4356,7 +4464,7 @@ run_popfile:
   StrCmp ${L_TEMP} "console" exit_without_banner
   StrCmp ${L_TEMP} "no" lastaction_console
   StrCmp ${L_TEMP} "" lastaction_console
-  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}b.exe"
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}b.exe"
 
 lastaction_console:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "console"
@@ -4368,7 +4476,7 @@ run_in_background:
   StrCmp ${L_TEMP} "background" exit_without_banner
   StrCmp ${L_TEMP} "no" lastaction_background
   StrCmp ${L_TEMP} "" lastaction_background
-  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}f.exe"
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}f.exe"
 
 lastaction_background:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "background"
@@ -4439,67 +4547,14 @@ exit_without_banner:
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Installer Function: ConvertCorpusPage_Init (adds language texts to custom page INI file)
-#
-# This function adds language texts to the INI file used by the "ConvertCorpusPage" function
-# (to make the custom page use the language selected by the user for the installer)
+# Installer Function: ConvertCorpus
 #--------------------------------------------------------------------------
 
-Function ConvertCorpusPage_Init
+Function ConvertCorpus
 
-  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "RTL" "$(^RTL)"
-
-  !insertmacro PFI_IO_TEXT "ioD.ini" "1" "$(PFI_LANG_NONSQLDB_IO_NOTE_1)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "2" "$(PFI_LANG_NONSQLDB_IO_NOTE_2)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "3" "$(PFI_LANG_NONSQLDB_IO_NOTE_3)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "4" "$(PFI_LANG_NONSQLDB_IO_NOTE_4)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "5" "$(PFI_LANG_NONSQLDB_IO_NOTE_5)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "6" "$(PFI_LANG_NONSQLDB_IO_NOTE_6)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "7" "$(PFI_LANG_NONSQLDB_IO_NOTE_7)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "8" "$(PFI_LANG_NONSQLDB_IO_NOTE_8)"
-
-FunctionEnd
-
-#--------------------------------------------------------------------------
-# Installer Function: ConvertCorpusPage (generates a custom page)
-#
-# Displays custom page when an existing flat file or BerkeleyDB corpus has to be converted to
-# the new SQL format (this installer installs the SQLite package). Conversion may take several
-# minutes during which time the POPFile User Interface will be unresponsive.
-#--------------------------------------------------------------------------
-
-Function ConvertCorpusPage
-
-  !define L_TEMP   $R9
-
-  Push ${L_TEMP}
-
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
-  StrCmp ${L_TEMP} "new" 0 exit
-
-  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_NONSQLDB_TITLE)" "$(PFI_LANG_NONSQLDB_SUBTITLE)"
-
-  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioD.ini"
-  Pop $G_HWND                 ; HWND of dialog we want to modify
-
-  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
-
-  GetDlgItem $G_DLGITEM $G_HWND 1202             ; Field 3 = text in the WARNING groupbox frame
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
-  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
-
-  GetDlgItem $G_DLGITEM $G_HWND 1203             ; Field 4 = text inside the WARNING groupbox
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
-  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
-
-  !insertmacro MUI_INSTALLOPTIONS_SHOW
-
-exit:
-  Pop ${L_TEMP}
-
-  !undef L_TEMP
+  HideWindow
+  ExecWait '"$PLUGINSDIR\monitorcc.exe" "$PLUGINSDIR\corpus.ini"'
+  BringToFront
 
 FunctionEnd
 
@@ -4532,9 +4587,7 @@ Function CheckRunStatus
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
 
-  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
-
-  Goto selection_ok
+  Goto corpus_conversion_check
 
 no_reboot_reqd:
 
@@ -4548,29 +4601,19 @@ no_reboot_reqd:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
   StrCmp ${L_TEMP} "1" disable_UI_option
 
-  ; If corpus conversion (from flat file or BerkeleyDB format) is required, we cannot offer to
-  ; display the POPFile UI (conversion may take several minutes, during which time the UI will
-  ; be unresponsive)
+corpus_conversion_check:
+
+  ; If corpus conversion (from flat file or BerkeleyDB format) is required, we need to wait
+  ; until it has been completed before displaying the 'Finish' page (corpus conversion may take
+  ; several minutes, during which time the UI will appear to have 'locked up')
 
   ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 selection_ok
 
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
-
-  ; When 'popfile.exe' is used to run POPFile, the 'windows_console' parameter in 'popfile.cfg'
-  ; is used to choose between running in a console window or running in the background. However
-  ; for corpus conversion we want to run in a console window (to display the progress reports,
-  ; in case the conversion takes several minutes), so we "cheat" by using 'popfilef.exe' to run
-  ; POPFile in a console window with the system tray icon disabled. This avoids the need to make
-  ; any changes to 'popfile.cfg' so the next time 'popfile.exe' is used to start POPFile, the
-  ; the settings in 'popfile.cfg' will be used.
-
-  SetOutPath $INSTDIR
-  ClearErrors
-  Exec '"$INSTDIR\wrapperf.exe"'
-  IfErrors 0 disable_UI_option
-  MessageBox MB_OK|MB_TOPMOST "An error occurred when starting the corpus conversion process."
+  Call ConvertCorpus
+  Goto selection_ok
 
 disable_UI_option:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "State" "0"
@@ -4602,11 +4645,11 @@ FunctionEnd
 Function ShowReadMe
 
   StrCmp $G_NOTEPAD "" use_file_association
-  Exec 'notepad.exe "$INSTDIR\${C_README}.txt"'
+  Exec 'notepad.exe "$G_ROOTDIR\${C_README}.txt"'
   goto exit
 
 use_file_association:
-  ExecShell "open" "$INSTDIR\${C_README}.txt"
+  ExecShell "open" "$G_ROOTDIR\${C_README}.txt"
 
 exit:
 FunctionEnd
@@ -4620,6 +4663,31 @@ Function un.onInit
   ; Retrieve the language used when this version was installed, and use it for the uninstaller
 
   !insertmacro MUI_UNGETLANGUAGE
+
+  ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure.
+  ; Phase 1 of the multi-user support introduced in 0.21.0 may require some slight changes
+  ; to the folder structure (initial investigations suggest that perl.exe, wperl.exe and the
+  ; perl58.dll may need to be placed in a different folder from the other minimal Perl files).
+
+  ; A possible folder arrangement could be:
+  ;
+  ; (a) $INSTDIR         - the top-level installation folder (wrapper*.exe and uninstall.exe),
+  ; (b) $INSTDIR\bin     - holds only perl.exe, wperl.exe and perl58.dll
+  ; (c) $INSTDIR\lib     - POPFile and minimal Perl, same structure as used in earlier versions
+  ; (d) $INSTDIR\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
+  ; (e) $INSTDIR\kakasi  - holds the (optional) Kakasi package used to process Japanese email
+
+  ; For increased flexibility, four global user variables are used in addition to $INSTDIR
+  ; (this makes it easier to change the folder structure used by the installer)
+
+  ; For this build, the original folder structure is maintained which means that the working
+  ; directory must always be set to the installation folder before running POPFile (otherwise
+  ; a fatal 'Perl' error occurs immediately)
+
+  StrCpy $G_ROOTDIR   $INSTDIR
+  StrCpy $G_USERDIR   $INSTDIR
+  StrCpy $G_MPBINDIR  $INSTDIR
+  StrCpy $G_MPLIBDIR  $INSTDIR
 
 FunctionEnd
 
@@ -4637,8 +4705,8 @@ Section "Uninstall"
   !define L_UNDOFILE    $R4   ; file holding original email client settings
   !define L_UNDOSTATUS  $R3   ; email client restore flag ('success' or 'fail')
 
-  IfFileExists $INSTDIR\popfile.pl skip_confirmation
-  IfFileExists $INSTDIR\popfile.exe skip_confirmation
+  IfFileExists $G_ROOTDIR\popfile.pl skip_confirmation
+  IfFileExists $G_ROOTDIR\popfile.exe skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
         "$(PFI_LANG_UN_MBNOTFOUND_1) '$INSTDIR'.\
         $\r$\n$\r$\n\
@@ -4682,32 +4750,32 @@ start_uninstall:
 
   ; If the POPFile we are to uninstall is still running, one of the EXE files will be 'locked'
 
-  Push "$INSTDIR\popfileb.exe"
+  Push "$G_ROOTDIR\popfileb.exe"
   Call un.CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  Push "$INSTDIR\popfileib.exe"
+  Push "$G_ROOTDIR\popfileib.exe"
   Call un.CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  Push "$INSTDIR\popfilef.exe"
+  Push "$G_ROOTDIR\popfilef.exe"
   Call un.CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  Push "$INSTDIR\popfileif.exe"
+  Push "$G_ROOTDIR\popfileif.exe"
   Call un.CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  Push "$INSTDIR\wperl.exe"
+  Push "$G_MPBINDIR\wperl.exe"
   Call un.CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-  Push "$INSTDIR\perl.exe"
+  Push "$G_MPBINDIR\perl.exe"
   Call un.CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" remove_shortcuts
@@ -4717,7 +4785,7 @@ attempt_shutdown:
   StrCpy ${L_OLDUI} ""
 
   ClearErrors
-  FileOpen ${L_CFG} "$INSTDIR\popfile.cfg" r
+  FileOpen ${L_CFG} "$G_USERDIR\popfile.cfg" r
 
 loop:
   FileRead ${L_CFG} ${L_LNE}
@@ -4806,41 +4874,39 @@ remove_shortcuts:
   DetailPrint "$(PFI_LANG_UN_PROGRESS_3)"
   SetDetailsPrint listonly
 
-  Delete $INSTDIR\popfile.pl
-  Delete $INSTDIR\popfile.exe
-  Delete $INSTDIR\popfile.cfg.bak
-  Delete $INSTDIR\*.pm
-  Delete $INSTDIR\*.dll
-  Delete $INSTDIR\wperl.exe
   Delete $INSTDIR\wrapper.exe
   Delete $INSTDIR\wrapperf.exe
   Delete $INSTDIR\wrapperb.exe
   Delete $INSTDIR\wrapper.ini
-  Delete $INSTDIR\sqlite.exe
 
-  Delete $INSTDIR\expchanges.txt
-  Delete $INSTDIR\expconfig.txt
-  Delete $INSTDIR\outchanges.txt
-  Delete $INSTDIR\outconfig.txt
+  Delete $G_ROOTDIR\popfile.pl
+  Delete $G_ROOTDIR\popfile.exe
+  Delete $G_ROOTDIR\*.pm
+  Delete $G_ROOTDIR\sqlite.exe
 
-  Delete $INSTDIR\*.gif
-  Delete $INSTDIR\*.log
-  Delete $INSTDIR\*.change
-  Delete $INSTDIR\*.change.txt
+  Delete $G_ROOTDIR\*.gif
+  Delete $G_ROOTDIR\*.change
+  Delete $G_ROOTDIR\*.change.txt
 
-  Delete $INSTDIR\bayes.pl
-  Delete $INSTDIR\insert.pl
-  Delete $INSTDIR\pipe.pl
-  Delete $INSTDIR\favicon.ico
-  Delete $INSTDIR\perl.exe
-  Delete $INSTDIR\popfile.exe
-  Delete $INSTDIR\popfilef.exe
-  Delete $INSTDIR\popfileb.exe
-  Delete $INSTDIR\popfileif.exe
-  Delete $INSTDIR\popfileib.exe
-  Delete $INSTDIR\stop_pf.exe
-  Delete $INSTDIR\license
-  Delete $INSTDIR\popfile.cfg
+  Delete $G_ROOTDIR\bayes.pl
+  Delete $G_ROOTDIR\insert.pl
+  Delete $G_ROOTDIR\pipe.pl
+  Delete $G_ROOTDIR\favicon.ico
+  Delete $G_ROOTDIR\popfile.exe
+  Delete $G_ROOTDIR\popfilef.exe
+  Delete $G_ROOTDIR\popfileb.exe
+  Delete $G_ROOTDIR\popfileif.exe
+  Delete $G_ROOTDIR\popfileib.exe
+  Delete $G_ROOTDIR\stop_pf.exe
+  Delete $G_ROOTDIR\license
+
+  Delete $G_USERDIR\popfile.cfg
+  Delete $G_USERDIR\popfile.cfg.bak
+  Delete $G_USERDIR\*.log
+  Delete $G_USERDIR\expchanges.txt
+  Delete $G_USERDIR\expconfig.txt
+  Delete $G_USERDIR\outchanges.txt
+  Delete $G_USERDIR\outconfig.txt
 
   ;------------------------------------
 
@@ -4851,7 +4917,7 @@ remove_shortcuts:
   ;------------------------------------
 
   StrCpy ${L_UNDOFILE} "pfi-outexpress.ini"
-  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 end_oe_restore
+  IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 end_oe_restore
   Push  ${L_UNDOFILE}
   Push "$(PFI_LANG_UN_PROGRESS_4)"
   Call un.RestoreOOE
@@ -4866,12 +4932,12 @@ remove_shortcuts:
       $(PFI_LANG_UN_MBEMAIL_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_oe_restore
-  ExecShell "open" "$INSTDIR\${L_UNDOFILE}.errors.txt"
+  ExecShell "open" "$G_USERDIR\${L_UNDOFILE}.errors.txt"
   Goto end_oe_restore
 
 delete_oe_data:
-  Delete "$INSTDIR\${L_UNDOFILE}"
-  Delete "$INSTDIR\popfile.reg.bk*"
+  Delete "$G_USERDIR\${L_UNDOFILE}"
+  Delete "$G_USERDIR\popfile.reg.bk*"
 
 end_oe_restore:
 
@@ -4880,7 +4946,7 @@ end_oe_restore:
   ;------------------------------------
 
   StrCpy ${L_UNDOFILE} "pfi-outlook.ini"
-  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 end_outlook_restore
+  IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 end_outlook_restore
   Push  ${L_UNDOFILE}
   Push "$(PFI_LANG_UN_PROGRESS_7)"
   Call un.RestoreOOE
@@ -4895,12 +4961,12 @@ end_oe_restore:
       $(PFI_LANG_UN_MBEMAIL_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_outlook_restore
-  ExecShell "open" "$INSTDIR\${L_UNDOFILE}.errors.txt"
+  ExecShell "open" "$G_USERDIR\${L_UNDOFILE}.errors.txt"
   Goto end_outlook_restore
 
 delete_outlook_data:
-  Delete "$INSTDIR\${L_UNDOFILE}"
-  Delete "$INSTDIR\outlook.reg.bk*"
+  Delete "$G_USERDIR\${L_UNDOFILE}"
+  Delete "$G_USERDIR\outlook.reg.bk*"
 
 end_outlook_restore:
 
@@ -4909,7 +4975,7 @@ end_outlook_restore:
   ;------------------------------------
 
   StrCpy ${L_UNDOFILE} "pfi-eudora.ini"
-  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 end_eudora_restore
+  IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 end_eudora_restore
   Push  ${L_UNDOFILE}
   Push "$(PFI_LANG_UN_PROGRESS_8)"
   Call un.RestoreEudora
@@ -4924,62 +4990,67 @@ end_outlook_restore:
       $(PFI_LANG_UN_MBEMAIL_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_eudora_restore
-  ExecShell "open" "$INSTDIR\${L_UNDOFILE}.errors.txt"
+  ExecShell "open" "$G_USERDIR\${L_UNDOFILE}.errors.txt"
   Goto end_eudora_restore
 
 delete_eudora_data:
-  Delete "$INSTDIR\${L_UNDOFILE}"
+  Delete "$G_USERDIR\${L_UNDOFILE}"
 
 end_eudora_restore:
 
   ;------------------------------------
 
-  Delete $INSTDIR\Classifier\*.pm
-  Delete $INSTDIR\Classifier\popfile.sql
-  RMDir $INSTDIR\Classifier
+  Delete $G_ROOTDIR\Classifier\*.pm
+  Delete $G_ROOTDIR\Classifier\popfile.sql
+  RMDir $G_ROOTDIR\Classifier
 
-  Delete $INSTDIR\Platform\*.pm
-  Delete $INSTDIR\Platform\*.dll
-  RMDir $INSTDIR\Platform
+  Delete $G_ROOTDIR\Platform\*.pm
+  Delete $G_ROOTDIR\Platform\*.dll
+  RMDir $G_ROOTDIR\Platform
 
-  Delete $INSTDIR\POPFile\*.pm
-  Delete $INSTDIR\POPFile\popfile_version
-  RMDir $INSTDIR\POPFile
+  Delete $G_ROOTDIR\POPFile\*.pm
+  Delete $G_ROOTDIR\POPFile\popfile_version
+  RMDir $G_ROOTDIR\POPFile
 
-  Delete $INSTDIR\Proxy\*.pm
-  RMDir $INSTDIR\Proxy
+  Delete $G_ROOTDIR\Proxy\*.pm
+  RMDir $G_ROOTDIR\Proxy
 
-  Delete $INSTDIR\UI\*.pm
-  RMDir $INSTDIR\UI
+  Delete $G_ROOTDIR\UI\*.pm
+  RMDir $G_ROOTDIR\UI
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROGRESS_5)"
   SetDetailsPrint listonly
 
-  Delete $INSTDIR\skins\*.css
-  Delete $INSTDIR\skins\*.gif
-  Delete $INSTDIR\skins\lavishImages\*.gif
-  Delete $INSTDIR\skins\sleetImages\*.gif
-  RMDir $INSTDIR\skins\sleetImages
-  RMDir $INSTDIR\skins\lavishImages
-  RMDir $INSTDIR\skins
+  Delete $G_MPBINDIR\*.dll
+  Delete $G_MPBINDIR\perl.exe
+  Delete $G_MPBINDIR\wperl.exe
+  RMDir $G_MPBINDIR
 
-  Delete $INSTDIR\manual\en\*.html
-  RMDir $INSTDIR\manual\en
-  Delete $INSTDIR\manual\*.gif
-  RMDir $INSTDIR\manual
+  Delete $G_ROOTDIR\skins\*.css
+  Delete $G_ROOTDIR\skins\*.gif
+  Delete $G_ROOTDIR\skins\lavishImages\*.gif
+  Delete $G_ROOTDIR\skins\sleetImages\*.gif
+  RMDir $G_ROOTDIR\skins\sleetImages
+  RMDir $G_ROOTDIR\skins\lavishImages
+  RMDir $G_ROOTDIR\skins
 
-  Delete $INSTDIR\languages\*.msg
-  RMDir $INSTDIR\languages
+  Delete $G_ROOTDIR\manual\en\*.html
+  RMDir $G_ROOTDIR\manual\en
+  Delete $G_ROOTDIR\manual\*.gif
+  RMDir $G_ROOTDIR\manual
 
-  RMDir /r $INSTDIR\corpus
-  Delete $INSTDIR\popfile.db
+  Delete $G_ROOTDIR\languages\*.msg
+  RMDir $G_ROOTDIR\languages
 
-  RMDir /r $INSTDIR\messages
+  RMDir /r $G_USERDIR\corpus
+  Delete $G_USERDIR\popfile.db
 
-  Delete $INSTDIR\stopwords
-  Delete $INSTDIR\stopwords.bak
-  Delete $INSTDIR\stopwords.default
+  RMDir /r $G_USERDIR\messages
+
+  Delete $G_USERDIR\stopwords
+  Delete $G_USERDIR\stopwords.bak
+  Delete $G_USERDIR\stopwords.default
 
   IfFIleExists "$INSTDIR\kakasi\*.*" 0 skip_kakasi
   RMDir /r "$INSTDIR\kakasi"
@@ -4996,21 +5067,24 @@ skip_kakasi:
   DetailPrint "$(PFI_LANG_UN_PROGRESS_6)"
   SetDetailsPrint listonly
 
-  RMDir /r "$INSTDIR\auto"
-  RMDir /r "$INSTDIR\Carp"
-  RMDir /r "$INSTDIR\DBD"
-  RMDir /r "$INSTDIR\Digest"
-  RMDir /r "$INSTDIR\Encode"
-  RMDir /r "$INSTDIR\Exporter"
-  RMDir /r "$INSTDIR\File"
-  RMDir /r "$INSTDIR\Getopt"
-  RMDir /r "$INSTDIR\IO"
-  RMDir /r "$INSTDIR\MIME"
-  RMDir /r "$INSTDIR\String"
-  RMDir /r "$INSTDIR\Sys"
-  RMDir /r "$INSTDIR\Text"
-  RMDir /r "$INSTDIR\warnings"
-  RMDir /r "$INSTDIR\Win32"
+  RMDir /r "$G_MPLIBDIR\auto"
+  RMDir /r "$G_MPLIBDIR\Carp"
+  RMDir /r "$G_MPLIBDIR\DBD"
+  RMDir /r "$G_MPLIBDIR\Digest"
+  RMDir /r "$G_MPLIBDIR\Encode"
+  RMDir /r "$G_MPLIBDIR\Exporter"
+  RMDir /r "$G_MPLIBDIR\File"
+  RMDir /r "$G_MPLIBDIR\Getopt"
+  RMDir /r "$G_MPLIBDIR\IO"
+  RMDir /r "$G_MPLIBDIR\MIME"
+  RMDir /r "$G_MPLIBDIR\String"
+  RMDir /r "$G_MPLIBDIR\Sys"
+  RMDir /r "$G_MPLIBDIR\Text"
+  RMDir /r "$G_MPLIBDIR\warnings"
+  RMDir /r "$G_MPLIBDIR\Win32"
+
+  Delete "$G_MPLIBDIR\*.pm"
+  RMDIR $G_MPLIBDIR
 
   ;------------------------------------
   ; If email client problems found, offer to leave uninstaller behind with the relevant files
@@ -5032,6 +5106,7 @@ complete_uninstall:
 
   Delete "$INSTDIR\Uninstall.exe"
 
+  RMDir $G_ROOTDIR
   RMDir $INSTDIR
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
@@ -5122,12 +5197,12 @@ Function un.RestoreOOE
   Push ${L_USERTYPE}
   Push ${L_ERRORLOG}
 
-  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 nothing_to_restore
+  IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 nothing_to_restore
 
   Call un.GetDateTimeStamp
   Pop ${L_TEMP}
 
-  FileOpen  ${L_ERRORLOG} "$INSTDIR\${L_UNDOFILE}.errors.txt" a
+  FileOpen  ${L_ERRORLOG} "$G_USERDIR\${L_UNDOFILE}.errors.txt" a
   FileSeek  ${L_ERRORLOG} 0 END
   FileWrite ${L_ERRORLOG} "Time  : ${L_TEMP}\
       $\r$\n\
@@ -5145,7 +5220,7 @@ Function un.RestoreOOE
 
   DetailPrint "$(PFI_LANG_UN_LOG_2): ${L_UNDOFILE}"
   ClearErrors
-  ReadINIStr ${L_INDEX} "$INSTDIR\${L_UNDOFILE}" "History" "ListSize"
+  ReadINIStr ${L_INDEX} "$G_USERDIR\${L_UNDOFILE}" "History" "ListSize"
   IfErrors ooe_restore_corrupt
   Push ${L_INDEX}
   Call un.StrCheckDecimal
@@ -5159,32 +5234,32 @@ read_ooe_undo_entry:
 
   ; Check the 'undo' entry has all of the necessary values
 
-  ReadINIStr ${L_TEMP} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored"
+  ReadINIStr ${L_TEMP} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored"
   StrCmp ${L_TEMP} "Yes" next_ooe_undo
 
-  ReadINIStr ${L_INIV} "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_INDEX}"
+  ReadINIStr ${L_INIV} "$G_USERDIR\${L_UNDOFILE}" "History" "IniV-${L_INDEX}"
   IntCmp 3 ${L_INIV} 0 0 skip_user_checks
 
-  ReadINIStr ${L_USERNAME} "$INSTDIR\${L_UNDOFILE}" "History" "User-${L_INDEX}"
+  ReadINIStr ${L_USERNAME} "$G_USERDIR\${L_UNDOFILE}" "History" "User-${L_INDEX}"
   StrCmp ${L_USERNAME} "" skip_ooe_undo
   StrCmp ${L_USERNAME} $G_WINUSERNAME 0 foreign_ooe_undo
 
-  ReadINIStr ${L_USERTYPE} "$INSTDIR\${L_UNDOFILE}" "History" "Type-${L_INDEX}"
+  ReadINIStr ${L_USERTYPE} "$G_USERDIR\${L_UNDOFILE}" "History" "Type-${L_INDEX}"
   StrCmp ${L_USERTYPE} "" skip_ooe_undo
 
 skip_user_checks:
-  ReadINIStr ${L_REG_KEY} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "RegistryKey"
+  ReadINIStr ${L_REG_KEY} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "RegistryKey"
   StrCmp ${L_REG_KEY} "" skip_ooe_undo
 
-  ReadINIStr ${L_POP_USER} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3UserName"
+  ReadINIStr ${L_POP_USER} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3UserName"
   StrCmp ${L_POP_USER} "" skip_ooe_undo
 
-  ReadINIStr ${L_POP_SERVER} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3Server"
+  ReadINIStr ${L_POP_SERVER} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3Server"
   StrCmp ${L_POP_SERVER} "" skip_ooe_undo
 
   IntCmp 3 ${L_INIV} 0 0 skip_port_check
 
-  ReadINIStr ${L_POP_PORT} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3Port"
+  ReadINIStr ${L_POP_PORT} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3Port"
   StrCmp ${L_POP_PORT} "" skip_ooe_undo
 
 skip_port_check:
@@ -5204,7 +5279,7 @@ skip_port_check:
   WriteRegDWORD HKCU ${L_REG_KEY} "POP3 Port" ${L_POP_PORT}
 
 skip_port_restore:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
 
   DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 User Name: ${L_POP_USER}"
   DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 Server: ${L_POP_SERVER}"
@@ -5213,20 +5288,20 @@ skip_port_restore:
   Goto next_ooe_undo
 
 foreign_ooe_undo:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
   FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)$\r$\n"
   StrCpy ${L_MESSAGE} "foreign"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_ooe_undo
 
 ooe_undo_not_valid:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
   FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_ooe_undo
 
 skip_ooe_undo:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
   FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)$\r$\n"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
@@ -5254,7 +5329,7 @@ save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
-  FlushINI "$INSTDIR\${L_UNDOFILE}"
+  FlushINI "$G_USERDIR\${L_UNDOFILE}"
 
 exit_now:
   Pop ${L_ERRORLOG}
@@ -5365,7 +5440,7 @@ Function un.RestoreEudora
   Push ${L_USERTYPE}
   Push ${L_ERRORLOG}
 
-  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 nothing_to_restore
+  IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 nothing_to_restore
 
   SetDetailsPrint textonly
   DetailPrint "${L_MESSAGE}"
@@ -5391,7 +5466,7 @@ restore_eudora:
   Call un.GetDateTimeStamp
   Pop ${L_TEMP}
 
-  FileOpen  ${L_ERRORLOG} "$INSTDIR\${L_UNDOFILE}.errors.txt" a
+  FileOpen  ${L_ERRORLOG} "$G_USERDIR\${L_UNDOFILE}.errors.txt" a
   FileSeek  ${L_ERRORLOG} 0 END
   FileWrite ${L_ERRORLOG} "Time  : ${L_TEMP}\
       $\r$\n\
@@ -5402,7 +5477,7 @@ restore_eudora:
 
   DetailPrint "$(PFI_LANG_UN_LOG_2): ${L_UNDOFILE}"
   ClearErrors
-  ReadINIStr ${L_INDEX} "$INSTDIR\${L_UNDOFILE}" "History" "ListSize"
+  ReadINIStr ${L_INDEX} "$G_USERDIR\${L_UNDOFILE}" "History" "ListSize"
   IfErrors eudora_restore_corrupt
   Push ${L_INDEX}
   Call un.StrCheckDecimal
@@ -5416,40 +5491,40 @@ read_eudora_undo_entry:
 
   ; Check the 'undo' entry has all of the necessary values
 
-  ReadINIStr ${L_TEMP} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored"
+  ReadINIStr ${L_TEMP} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored"
   StrCmp ${L_TEMP} "Yes" next_eudora_undo
 
-  ReadINIStr ${L_ININAME} "$INSTDIR\${L_UNDOFILE}" "History" "Path-${L_INDEX}"
+  ReadINIStr ${L_ININAME} "$G_USERDIR\${L_UNDOFILE}" "History" "Path-${L_INDEX}"
   StrCmp ${L_ININAME} "" skip_eudora_undo
   IfFileExists ${L_ININAME} 0 skip_eudora_undo
 
   ; Very early versions of the Eudora 'undo' file do not have 'User-x' and 'Type-x' data
   ; so we ignore these two entries when processing such a file
 
-  ReadINIStr ${L_TEMP} "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_INDEX}"
+  ReadINIStr ${L_TEMP} "$G_USERDIR\${L_UNDOFILE}" "History" "IniV-${L_INDEX}"
   StrCmp ${L_TEMP} "" basic_eudora_undo
 
-  ReadINIStr ${L_USERNAME} "$INSTDIR\${L_UNDOFILE}" "History" "User-${L_INDEX}"
+  ReadINIStr ${L_USERNAME} "$G_USERDIR\${L_UNDOFILE}" "History" "User-${L_INDEX}"
   StrCmp ${L_USERNAME} "" skip_eudora_undo
   StrCmp ${L_USERNAME} $G_WINUSERNAME 0 foreign_eudora_undo
 
-  ReadINIStr ${L_USERTYPE} "$INSTDIR\${L_UNDOFILE}" "History" "Type-${L_INDEX}"
+  ReadINIStr ${L_USERTYPE} "$G_USERDIR\${L_UNDOFILE}" "History" "Type-${L_INDEX}"
   StrCmp ${L_USERTYPE} "" skip_eudora_undo
 
 basic_eudora_undo:
-  ReadINIStr ${L_PERSONA} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Persona"
+  ReadINIStr ${L_PERSONA} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Persona"
   StrCmp ${L_PERSONA} "" skip_eudora_undo
 
-  ReadINIStr ${L_POP_ACCOUNT} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPAccount"
+  ReadINIStr ${L_POP_ACCOUNT} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPAccount"
   StrCmp ${L_POP_ACCOUNT} "" skip_eudora_undo
 
-  ReadINIStr ${L_POP_SERVER} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPServer"
+  ReadINIStr ${L_POP_SERVER} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPServer"
   StrCmp ${L_POP_SERVER} "" skip_eudora_undo
 
-  ReadINIStr ${L_POP_LOGIN} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "LoginName"
+  ReadINIStr ${L_POP_LOGIN} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "LoginName"
   StrCmp ${L_POP_LOGIN} "" skip_eudora_undo
 
-  ReadINIStr ${L_POP_PORT} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPPort"
+  ReadINIStr ${L_POP_PORT} "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPPort"
   StrCmp ${L_POP_PORT} "" skip_eudora_undo
 
   ClearErrors
@@ -5479,7 +5554,7 @@ remove_port_setting:
   DeleteINIStr "${L_ININAME}" "${L_PERSONA}" "POPPort"
 
 restored:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
 
   StrCmp ${L_POP_SERVER} "*.*" log_port_restore
   DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPServer': ${L_POP_SERVER}"
@@ -5491,20 +5566,20 @@ log_port_restore:
   Goto next_eudora_undo
 
 foreign_eudora_undo:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
   FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)$\r$\n"
   StrCpy ${L_MESSAGE} "foreign"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_eudora_undo
 
 eudora_undo_not_valid:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
   FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_eudora_undo
 
 skip_eudora_undo:
-  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
+  WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
   FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)$\r$\n"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
@@ -5532,7 +5607,7 @@ save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
-  FlushINI "$INSTDIR\${L_UNDOFILE}"
+  FlushINI "$G_USERDIR\${L_UNDOFILE}"
 
 exit_now:
   Pop ${L_ERRORLOG}
