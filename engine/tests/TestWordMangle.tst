@@ -8,6 +8,8 @@
 
 use Classifier::WordMangle;
 
+unlink 'stopwords';
+
 my $w = new Classifier::WordMangle;
 
 # Test basic mangling functions
