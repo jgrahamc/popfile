@@ -10,4 +10,6 @@ error:
 
 runtest:
 	@perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
+ifdef DEBUGARGS
 	@perl ../coverage.pl
+endif
