@@ -51,19 +51,19 @@ sub new
 
     # This is the error message returned if the connection at any
     # time times out while handling a command
-
-    $self->{connection_timeout_error_} = '';
+    #
+    # $self->{connection_timeout_error_} = '';
 
     # This is the error returned (with the host and port appended)
     # if contacting the remote server fails
-
-    $self->{connection_failed_error_}  = '';
+    #
+    # $self->{connection_failed_error_}  = '';
 
     # This is a regular expression used by get_response_ to determine
     # if a response from the remote server is good or not (good being
     # that the last command succeeded)
-
-    $self->{good_response_}            = '';
+    #
+    # $self->{good_response_}            = '';
 
     return bless $self, $type;
 }

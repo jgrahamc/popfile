@@ -82,7 +82,7 @@ sub initialize
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count ) = @_;
+    my ( $self, $client, $download_count, $pipe ) = @_;
 
     # Number of messages downloaded in this session
     my $count = 0;

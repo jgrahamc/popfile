@@ -327,10 +327,10 @@ sub child__
         # close the connection immediately
         if ( $command =~ /QUIT/i ) {
             if ( $mail )  {
-                $self->echo_response_($mail, $client, $command );
+                $self->echo_response_( $mail, $client, $command );
                 close $mail;
             } else {
-                $self->tee_(  $client, "+OK goodbye$eol" );
+                $self->tee_( $client, "+OK goodbye$eol" );
             }
             last;
         }
