@@ -1664,23 +1664,21 @@ SubSectionEnd
 #--------------------------------------------------------------------------
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} "Extra POPFile components (for advanced users)"
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecNNTP}    "POPFile NNTP proxy"
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecSMTP}    "POPFile SMTP proxy"
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile}     $(DESC_SecPOPFile)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}       $(DESC_SecSkins)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}       $(DESC_SecLangs)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} $(DESC_SubSecOptional)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecNNTP}        $(DESC_SecNNTP)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSMTP}        $(DESC_SecSMTP)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}      $(DESC_SecXMLRPC)
 #-------------------------------------------
 # IMAP is not included in the 0.22.0 release
 # -------------------------------------------
-;;    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
-;;        "Installs POPFile's experimental IMAP module"
+;;    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}        $(DESC_SecIMAP)
 #-------------------------------------------
 # IMAP is not included in the 0.22.0 release
 # -------------------------------------------
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecSOCKS}  \
-        "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSOCKS}       $(DESC_SecSOCKS)
     !ifndef NO_KAKASI
       !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
     !endif
