@@ -115,26 +115,26 @@ for my $parse_test (@parse_tests) {
     
     # Parse the document and then check the words hash against the words in the
     # wrd file
-    
+
     $cl->parse_stream( $parse_test );
 
     open WORDS, "<$words";
     while ( <WORDS> ) {
         if ( /(.+) (\d+)/ ) {
-            test_assert_equal( $cl->{words}{$1}, $2 );
+            test_assert_equal( $cl->{words}{$1}, $2, $words );
         }
     }
     close WORDS;
 }
 
 # Check that from, to and subject get set correctly when parsing a message
-$cl->parse_stream( 'tests/TestMailParse013.tst' );
+$cl->parse_stream( 'tests/TestMailParse013.msg' );
 test_assert_equal( $cl->{from},    'RN <rrr@nnnnnnnnn.com>'                        );
 test_assert_equal( $cl->{to},      '"Armlet Forum" <armlet-forum@news.palmos.com>' );
 test_assert_equal( $cl->{subject}, '(Archive Copy) RE: CW v9 and armlets...'       );
-$cl->parse_stream( 'tests/TestMailParse018.tst' );
+$cl->parse_stream( 'tests/TestMailParse018.msg' );
 $cl->{to} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
 test_assert_equal( $1, 'bugtracker@relativity.com' );
-$cl->parse_stream( 'tests/TestMailParse019.tst' );
+$cl->parse_stream( 'tests/TestMailParse019.msg' );
 $cl->{to} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
 test_assert_equal( $1, 'bugtracker@relativity.com' );
