@@ -338,22 +338,22 @@ sub tee_
 sub echo_to_regexp_
 {
     my ( $self, $mail, $client, $regexp, $verbose ) = @_;
-    
+
     $verbose = 0 if (!defined($verbose));
 
     while ( <$mail> ) {
         # Check for an abort
-        
+
         last if ( $self->{alive_} == 0 );
 
         if (!$verbose) {
             print $client $_;
         } else {
             # This creates log output
-            
+
             $self->tee_($client, $_);
         }
-                        
+
         last if ( $_ =~ $regexp );
     }
 }
@@ -372,7 +372,7 @@ sub echo_to_regexp_
 sub echo_to_dot_
 {
     my ( $self, $mail, $client ) = @_;
-    
+
     # The termination has to be a single line with exactly a dot on it and nothing
     # else other than line termination characters.  This is vital so that we do
     # not mistake a line beginning with . as the end of the block

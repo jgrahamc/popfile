@@ -159,13 +159,11 @@ sub update_pseudoword
     my $mword = "$prefix:$word";
 
     if ( $self->{color__} ) {
-        $literal =~ s/</&lt;/g;
-        $literal =~ s/>/&gt;/g;
-        my $color = $self->{bayes__}->get_color($mword);
-        my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
-        if ( $encoded == 0 )  {
-	    $self->{ut__} =~ s/\Q$literal\E/$to/g;
-        } else {
+        if ( $encoded == 1 )  {
+            $literal =~ s/</&lt;/g;
+            $literal =~ s/>/&gt;/g;
+            my $color = $self->{bayes__}->get_color($mword);
+            my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
             $self->{ut__} .= $to . ' ';
         }
     } else {
@@ -1172,14 +1170,13 @@ sub parse_header
 {
     my ($self, $header, $argument, $mime, $encoding) = @_;
 
-    print "Header ($header) ($argument)\n" if ($self->{debug});
+    print "Header ($header) ($argument)\n";# if ($self->{debug});
 
-    if ($self->{color__}) {
-        # Remove over-reading
-        $self->{ut__} = '';
+    if ( $self->{color__} ) {
+        my $color     = $self->{bayes__}->get_color( "header:$header" );
 
-        # Qeueue just this header for colorization
-        $self->{ut__} = splitline("$header: $argument\015\012", $encoding);
+        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $argument\015\012";
+print $self->{ut__};
     }
 
     # After a discussion with Tim Peters and some looking at emails
