@@ -1296,6 +1296,8 @@ sub bucket_page
 {
     my ( $self, $client, $templ ) = @_;
 
+    $templ = $self->load_template__( 'bucket-page.thtml' );
+
     $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, $self->{form_}{showbucket} ) );
 
     my $bucket_count = $self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{showbucket} );
@@ -1471,7 +1473,7 @@ sub corpus_page
     }
 
     if ( defined($self->{form_}{showbucket}) )  {
-        $self->bucket_page( $client );
+        $self->bucket_page( $client, $templ );
         return;
     }
 
@@ -3465,7 +3467,8 @@ sub get_bucket_parameter__
     # rest we leave untouched in @_ and pass to the real API
 
     my $self = shift;
-    return $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, @_ );
+    my $result = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, @_ );
+    return $result;
 }
 sub set_bucket_parameter__
 {
