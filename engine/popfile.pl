@@ -17,7 +17,7 @@ use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 9;
+my $minor_version = 10;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -39,9 +39,6 @@ my $total_size = 0;
 
 # The number of the highest message
 my $highest_message = 0;
-
-# 1 if we want debug messages
-my $debug = 1;
 
 # The name of the debug file
 my $debug_filename;
@@ -72,6 +69,49 @@ my $mail;
 my $classifier;
 
 my $seconds_per_day = 60 * 60 * 24;
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_command_line - Parse ARGV
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_command_line 
+{
+    if ( $#ARGV >= 0 ) 
+    {
+        my $i = 0;
+        
+        while ( $i < $#ARGV ) 
+        {
+            if ( $ARGV[$i] =~ /^-(.+)$/ )
+            {
+                if ( defined($configuration{$1}) )
+                {
+                    if ( $i < $#ARGV )
+                    {
+                        $configuration{$1} = $ARGV[$i+1];
+                        $i += 2;
+                    }
+                    else
+                    {
+                        print "Missing argument for $ARGV[$i]\n";
+                        last;
+                    }
+                }
+                else
+                {
+                    print "Unknown command line option $ARGV[$i]\n";
+                    last;
+                }
+            }
+            else
+            {
+                print "Expected a command line option and got $ARGV[$i]\n";
+                last;
+            }
+        }
+    }
+}
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -154,7 +194,7 @@ sub debug
 {
     my ( $message ) = @_;
     
-    if ( $debug )
+    if ( $configuration{debug} > 0 )
     {
         # Check to see if we are handling the USER/PASS command and if we are then obscure the
         # account information
@@ -166,13 +206,21 @@ sub debug
         chomp $message;
         $message .= "\n";
 
-        open DEBUG, ">>$debug_filename";
-        binmode DEBUG;
         my $now = localtime;
-        print DEBUG $now;
-        print DEBUG ": ";
-        print DEBUG $message;
-        close DEBUG;
+        my $msg = "$now: $message";
+        
+        if ( $configuration{debug} & 1 ) 
+        {
+            open DEBUG, ">>$debug_filename";
+            binmode DEBUG;
+            print DEBUG $msg;
+            close DEBUG;
+        }
+        
+        if ( $configuration{debug} & 2 )
+        {
+            print $msg;
+        }
     }
 }
 
@@ -485,9 +533,17 @@ sub verify_connected
     {                 
         if ( $mail->connected ) 
         {
+            # Wait 10 seconds for a response from the remote server and if 
+            # there isn't one then give up trying to connect
+            my $selector = new IO::Select( $mail );
+            last unless () = $selector->can_read(10);
+            
             # Read the response from the real server and say OK
-            my $line = <$mail>;
-            debug( $line );
+            my $buf        = '';
+            my $max_length = 8192;
+            my $n          = sysread( $mail, $buf, $max_length, length $buf );
+            
+            debug( $buf );
             return 1;
         }
     }
@@ -516,8 +572,8 @@ sub flush_extra
     {
         if ( $mail->connected )
         {
-            my $selector = new IO::Select( $mail );
-            my $buf = "";
+            my $selector   = new IO::Select( $mail );
+            my $buf        = '';
             my $max_length = 8192;
 
             while( 1 )
@@ -1099,17 +1155,19 @@ $debug_filename = "popfile$today.log";
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
-$configuration{used}     = 0;
-$configuration{messages} = 0;
+$configuration{debug}    = 0;
 $configuration{port}     = 110;
 $configuration{subject}  = 1;
-$configuration{server}   = $ARGV[1];
-$configuration{sport}    = $ARGV[2];
+$configuration{server}   = '';
+$configuration{sport}    = '';
 
 print "    Loading configuration\n";
 
 # Load the current configuration from disk
 load_configuration();
+
+# Handle the command line
+parse_command_line();
 
 print "    Cleaning stale log files\n";
 
@@ -1122,8 +1180,10 @@ print "    Loading corpus...\n";
 $classifier = new Classifier::Bayes;
 $classifier->load_word_matrix();
 
+debug( "POPFile Engine v$major_version.$minor_version running" );
+
 # Run the POP server and handle requests
-run_popfile($ARGV[0] || $configuration{port}, $configuration{server}, $configuration{sport});
+run_popfile($configuration{port}, $configuration{server}, $configuration{sport});
 
 print "    Saving configuration\n";
 
