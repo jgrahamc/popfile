@@ -278,7 +278,7 @@ View_ShowScores                         Show word scores
 View_WordMatrix                         Word matrix
 
 Windows_TrayIcon                        Show POPFile icon in Windows system tray?
-Windows_Console                         Output POPFile message in a console window?
+Windows_Console                         Run POPFile in a console window?
 Windows_NextTime                        <p><font color="red">This change will not take effect until the next time you start POPFile</font>
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
