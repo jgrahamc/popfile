@@ -1142,6 +1142,8 @@ sub encode
     my ( $self, $text ) = @_;
 
     $text =~ s/ /\+/;
+    $text =~ s/%/%25/g;
+    $text =~ s/#/%23/g;
 
     return $text;
 }
@@ -1298,7 +1300,7 @@ sub bucket_page
         $percent = int( 10000 * $self->{classifier}->{total}{$self->{form}{showbucket}} / $self->{classifier}->{full_total} ) / 100;
         $percent = "$percent%";
     }
-    $body .= "<td>\n<tr>\n<td>\n<hr />\n<span class=\"bucketsLabel\">$self->{language}{SingleBucket_Percentage}</spanb>\n<td>\n<hr />&nbsp;\n<td align=\"right\"><hr />$percent<td></table>";
+    $body .= "<td>\n<tr>\n<td>\n<hr />\n<span class=\"bucketsLabel\">$self->{language}{SingleBucket_Percentage}</span>\n<td>\n<hr />&nbsp;\n<td align=\"right\"><hr />$percent<td></table>";
 
     $body .= "<h2 class=\"buckets\">" ;
     $body .= sprintf( $self->{language}{SingleBucket_WordTable},  "<font color=\"$self->{classifier}->{colors}{$self->{form}{showbucket}}\">$self->{form}{showbucket}" )  ;
@@ -1307,14 +1309,30 @@ sub bucket_page
     for my $i (@{$self->{classifier}->{matrix}{$self->{form}{showbucket}}}) {
         if ( defined($i) )  {
             my $j = $i;
-            $j =~ s/\|\|/, /g;
+
+            # Split the entries on the double bars, get rid of any extra bars, then grab a copy of the first char
+	    
+	    $j =~ s/\|\|/, /g;
             $j =~ s/\|//g;
             $j =~ /^(.)/;
             my $first = $1;
+
+            # Highlight any words used this session
+	    
             $j =~ s/([^ ]+) (L\-[\.\d]+)/\*$1 $2<\/font>/g;
             $j =~ s/L(\-[\.\d]+)/int( $self->{classifier}->{total}{$self->{form}{showbucket}} * exp($1) + 0.5 )/ge;
-            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/<a href=\"\/buckets\?session=$self->{session_key}\&amp;lookup=Lookup\&amp;word=$1#Lookup\">$1<\/a> $2/g;
-            $body .= "<tr><td valign=\"top\">\n<b>$first</b>\n<td valign=\"top\">\n$j";
+	    
+	    # Add the link to the corpus lookup
+	    
+            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/"<a href=\"\/buckets\?session=$self->{session_key}\&amp;lookup=Lookup\&amp;word=" . encode($self,$1) . "#Lookup\">$1<\/a> $2"/ge;
+	    
+	    # Add the bucket color if this word was used this session. IMPORTANT: this regex relies
+	    # on the fact that Classifier::WordMangle (mangle) removes astericks from all corpus words
+	    # and therefore assumes that any asterick was placed the by the highlight regex several
+	    # lines above.
+	    
+	    $j =~ s/([\*])/<font color=\"$self->{classifier}->{colors}{$self->{form}{showbucket}}\">$1/g;
+            $body .= "<tr><td valign=\"top\">\n<b>$first</b></td>\n<td valign=\"top\">\n$j</td></tr>\n";
         }
     }
     $body .= "</table>";
@@ -2796,11 +2814,9 @@ sub parse_form
         my $arg = $1;
         $self->{form}{$arg} = $2;
 
-        while ( ( $self->{form}{$arg} =~ /%([0-9A-F][0-9A-F])/i ) != 0 ) {
-            my $from = "%$1";
-            my $to   = chr(hex("0x$1"));
-            $self->{form}{$arg} =~ s/$from/$to/g;
-        }
+	# Expand %7E (hex) escapes in the form data
+
+	$self->{form}{$arg} =~ s/%([0-9A-F][0-9A-F])/chr hex $1/gie;
 
         $self->{form}{$arg} =~ s/\+/ /g;
 
