@@ -22,6 +22,9 @@ error:
 	@echo "package  - Build Windows installer, and create"
 	@echo "           ZIP files for Windows and cross-platform"
 	@echo "           version"
+	@echo "rc       - After doing package moves the ZIP files to be RC zip files"
+	@echo "           The RC number is set with the RC parameter so do" 
+	@echo "           make rc RC=RC6 for example."
 
 # test runs the POPFile unit test suite
 
@@ -92,3 +95,17 @@ skins: skins/*.css skins/*.gif  skins/*/*.gif
 # installer
 
 package: $(POPFILE_ZIP) windows
+
+# Used to convert the ZIP files to RC ZIP files and 
+# upload to SourceForge
+
+rc: CP_ZIP      = popfile-$(POPFILE_VERSION)$(RC).zip
+rc: WINDOWS_ZIP = ../windows/popfile-$(POPFILE_VERSION)$(RC)-windows.zip
+
+rc: 
+	rm -f $(CP_ZIP)
+	rm -f $(WINDOWS_ZIP)
+	mv $(POPFILE_ZIP) $(CP_ZIP)	
+	mv ../windows/popfile-$(POPFILE_VERSION)-windows.zip $(WINDOWS_ZIP)
+	chmod go+r $(CP_ZIP) $(WINDOWS_ZIP)
+	scp -p $(CP_ZIP) $(WINDOWS_ZIP) jgrahamc@popfile.sourceforge.net:/home/groups/p/po/popfile/htdocs
