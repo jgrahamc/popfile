@@ -235,7 +235,7 @@
             <TMPL_IF NAME="View_If_Bar_2">
 
             <td align="left">
-                <img src="autogen_<TMPL_VAR NAME="View_Color_2" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width_2">" height="10" alt="<TMPL_VAR NAME="Score_Word_2">" title="<TMPL_VAR NAME="Score_Word_1">">
+                <img src="autogen_<TMPL_VAR NAME="View_Color_2" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width_2">" height="10" alt="<TMPL_VAR NAME="Score_Word_2">" title="<TMPL_VAR NAME="Score_Word_2">">
             </td>
             <td align="right">
                 <TMPL_VAR NAME="View_Chart_Word_2">

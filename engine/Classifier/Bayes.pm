@@ -2252,7 +2252,7 @@ sub classify
                     my $word_2 = $words[$#words - $i];
 
                     my $width_1 = int( $chart{$word_1} * $scale + .5 );
-                    my $width_2 = int( $chart{$word_2} * $scale + .5 ) * -1;
+                    my $width_2 = int( $chart{$word_2} * $scale - .5 ) * -1;
 
                     last if ( $width_1 <=0 && $width_2 <= 0 );
                     
