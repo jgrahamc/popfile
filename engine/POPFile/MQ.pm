@@ -11,7 +11,8 @@ use POPFile::Module;
 # send messages without having to know which modules need to receive
 # its messages.
 #
-# Message delivery is asynchronous and guaranteed.
+# Message delivery is asynchronous and guaranteed, as well as guaranteed 
+# first in, first out (FIFO) per process.
 #
 # The following public functions are defined:
 #
