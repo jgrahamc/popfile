@@ -250,6 +250,7 @@ while ( <FILE> ) {
     }
 }
 close FILE;
+`cp corpus/zeotrope/table temp.wrd`;
 
 test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
 

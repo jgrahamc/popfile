@@ -1110,6 +1110,7 @@ sub start_parse
     $self->{ut__}           = '';
     $self->{quickmagnets__} = {};
 
+    $self->{htmlbodycolor__} = map_color( $self, 'white' );
     $self->{htmlbackcolor__} = map_color( $self, 'white' );
     $self->{htmlfontcolor__} = map_color( $self, 'black' );
     $self->compute_html_color_distance();
