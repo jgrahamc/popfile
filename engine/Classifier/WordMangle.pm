@@ -122,25 +122,6 @@ sub mangle
 
     $word =~ s/://g if ( !defined( $allow_colon ) );
 
-    # One common spam trick is to use accented characters incorrectly such as fàntástïc
-    # which to an English speaker reads as fantastic.  To work around this we remove all
-    # accents from characters, this is the accent equivalent of lower casing all the
-    # letters
-    
-    $word =~ s/[\xaaàáâäãå]/a/g;
-    $word =~ s/[éèêë]/e/g;
-    $word =~ s/[ìíîï]/i/g;
-    $word =~ s/[\xbağòóôõö]/o/g;
-    $word =~ s/[ùúûüµ]/u/g;
-    $word =~ s/[ıÿ]/y/g;
-    $word =~ s/ç/c/g;
-    $word =~ s/\x9e/z/g;
-    $word =~ s/\x9a/s/g;
-    $word =~ s/\x9c/oe/g;
-    $word =~ s/\xe6/ae/g;
-    $word =~ s/\x83/f/g;
-    $word =~ s/ñ/n/g;    
-    
     return $word;
 }
 
