@@ -278,7 +278,7 @@ sub http_ok
     
     my $lastuser = 'TODO';
     
-    $text = "<html><head><title>$self->{language}{Header_Title}</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$self->{configuration}->{configuration}{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache>$refresh</head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;$self->{language}{Header_Title}<td align=right valign=middle><a href=/shutdown>$self->{language}{Header_Shutdown}</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?session=$self->{session_key}&filter=>$self->{language}{Header_History}</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$self->{session_key}>$self->{language}{Header_Buckets}</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$self->{session_key}>$self->{language}{Header_Magnets}</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$self->{session_key}>$self->{language}{Header_Configuration}</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$self->{session_key}>$self->{language}{Header_Security}</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$self->{session_key}>$self->{language}{Header_Advanced}</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}.$self->{configuration}{build_version} - <a href=manual/$self->{language}{LanguageCode}/manual.html>$self->{language}{Footer_Manual}</a> - <a href=http://popfile.sourceforge.net/>$self->{language}{Footer_HomePage}</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>$self->{language}{Footer_FeedMe}</a> - <a href=http://sourceforge.net/tracker/index.php?group_id=63137&atid=502959>$self->{language}{Footer_RequestFeature}</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>$self->{language}{Footer_MailingList}</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
+    $text = "<html><head><title>$self->{language}{Header_Title}</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$self->{configuration}->{configuration}{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache>$refresh</head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;$self->{language}{Header_Title}<td align=right valign=middle><a href=/shutdown>$self->{language}{Header_Shutdown}</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?setfilter=&session=$self->{session_key}&filter=>$self->{language}{Header_History}</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$self->{session_key}>$self->{language}{Header_Buckets}</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$self->{session_key}>$self->{language}{Header_Magnets}</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$self->{session_key}>$self->{language}{Header_Configuration}</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$self->{session_key}>$self->{language}{Header_Security}</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$self->{session_key}>$self->{language}{Header_Advanced}</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}.$self->{configuration}{build_version} - <a href=manual/$self->{language}{LanguageCode}/manual.html>$self->{language}{Footer_Manual}</a> - <a href=http://popfile.sourceforge.net/>$self->{language}{Footer_HomePage}</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>$self->{language}{Footer_FeedMe}</a> - <a href=http://sourceforge.net/tracker/index.php?group_id=63137&atid=502959>$self->{language}{Footer_RequestFeature}</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>$self->{language}{Footer_MailingList}</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
     
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
@@ -1047,7 +1047,7 @@ sub corpus_page
             my $total = 0;
             foreach my $bucket (@buckets) {
                 if ( $self->{classifier}->get_value( $bucket, $word ) != 0 ) {
-                    my $prob = exp($self->{classifier}->get_value( $bucket, $word ));
+                    my $prob = exp( $self->{classifier}->get_value( $bucket, $word ) );
                     $total += $prob;
                     if ( $max_bucket eq '' ) {
                         $body .= $heading;
@@ -1060,24 +1060,26 @@ sub corpus_page
                 # Take into account the probability the Bayes calculation applies
                 # for the buckets in which the word is not found.
                 else {
-                    $total += 0.1 / $self->{classifier}->{full_total};
+                    if ( $self->{classifier}->{full_total} > 0 ) {
+                        $total += 0.1 / $self->{classifier}->{full_total};
+                    }
                 }
             }
 
             foreach my $bucket (@buckets) {
                 if ( $self->{classifier}->get_value( $bucket, $word ) != 0 ) {
-                    my $prob = exp($self->{classifier}->get_value( $bucket, $word ));
-                    my $n = $prob / $total;
-                    my $score = log($n)/log(@buckets)+1;
-                    my $normal = sprintf("%.10f", $n);
-                    $score = sprintf("%.10f", $score);
-                    my $probf = sprintf("%.10f", $prob);
-                    my $bold = '';
+                    my $prob    = exp( $self->{classifier}->get_value( $bucket, $word ) );
+                    my $n       = ($total > 0)?$prob / $total:0;
+                    my $score   = ($#buckets >= 0)?log($n)/log(@buckets)+1:0;
+                    my $normal  = sprintf("%.10f", $n);
+                    $score      = sprintf("%.10f", $score);
+                    my $probf   = sprintf("%.10f", $prob);
+                    my $bold    = '';
                     my $endbold = '';
                     if ( $score =~ /^[^\-]/ ) {
                         $score = "&nbsp;$score";
                     }
-                    $bold = "<b>" if ( $max == $prob );
+                    $bold    = "<b>"  if ( $max == $prob );
                     $endbold = "</b>" if ( $max == $prob );
                     $body .= "<tr><td>$bold<font color=$self->{classifier}->{colors}{$bucket}>$bucket</font>$endbold<td><td>$bold<tt>$probf</tt>$endbold<td><td>$bold<tt>$normal</tt>$endbold<td><td>$bold<tt>$score</tt>$endbold";
                 }
@@ -1173,7 +1175,7 @@ sub load_history_cache
         }
         $bucket =~ s/[\r\n]//g;
         
-        if ( ( $filter eq '' ) || ( $bucket eq $filter ) )  {
+        if ( ( $filter eq '' ) || ( $bucket eq $filter ) || ( ( $filter eq '__filter__magnet' ) && ( $magnet ne '' ) ) ) {
             my $found = 1;
             
             if ( $search ne '' ) {
@@ -1296,7 +1298,11 @@ sub history_page
     if ( !defined($self->{form}{filter}) || ( $self->{form}{filter} eq '__filter__all' ) )  {
         $self->{form}{filter} = '';
     } else {
-        $filtered = sprintf( $self->{language}{History_Filter}, $self->{classifier}->{colors}{$self->{form}{filter}}, $self->{form}{filter} ) if ( $self->{form}{filter} ne '' );
+        if ( $self->{form}{filter} eq '__filter__magnet' ) {
+            $filtered .= $self->{language}{History_Magnet};
+        } else {
+            $filtered = sprintf( $self->{language}{History_Filter}, $self->{classifier}->{colors}{$self->{form}{filter}}, $self->{form}{filter} ) if ( $self->{form}{filter} ne '' );
+        }
     }
 
     $filtered .= sprintf( $self->{language}{History_Search}, $self->{form}{search} ) if ( defined($self->{form}{search}) );
@@ -1491,7 +1497,7 @@ sub history_page
             $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
             $body .= ">$abucket</option>";
         }
-        $body .= "</select><input type=submit class=submit name=setfilter value='$self->{language}{Filter}'></form><b>$self->{language}{Classification}</b><td><b>$self->{language}{History_ShouldBe}</b>";            
+        $body .= "<option value=__filter__magnet>&lt;$self->{language}{History_ShowMagnet}&gt;</option></select><input type=submit class=submit name=setfilter value='$self->{language}{Filter}'></form><b>$self->{language}{Classification}</b><td><b>$self->{language}{History_ShouldBe}</b>";            
 
         my $stripe = 0;
 
@@ -1671,7 +1677,7 @@ sub history_page
             $body .= ">$abucket</option>";
         }
 
-        $body .= "</select><input type=submit class=submit name=setfilter value='$self->{language}{Filter}'></form>";
+        $body .= "<option value=__filter__magnet>&lt;$self->{language}{History_ShowMagnet}&gt;</option></select><input type=submit class=submit name=setfilter value='$self->{language}{Filter}'></form>";
     }
     
     http_ok($self, $client,$body,2); 
@@ -1686,12 +1692,12 @@ sub history_page
 # ---------------------------------------------------------------------------------------------
 sub password_page 
 {
-    my ( $self, $client, $error ) = @_;
+    my ( $self, $client, $error, $redirect ) = @_;
     my $session_temp = $self->{session_key};
     
     # Show a page asking for the password with no session key information on it
     $self->{session_key} = '';
-    my $body = "<h2>$self->{language}{Password_Title}</h2><form action=/password><b>$self->{language}{Password_Enter}:</b> <input type=password name=password> <input type=submit class=submit name=submit value=$self->{language}{Password_Go}></form>";
+    my $body = "<h2>$self->{language}{Password_Title}</h2><form action=/password><input type=hidden name=redirect value=$redirect><b>$self->{language}{Password_Enter}:</b> <input type=password name=password> <input type=submit class=submit name=submit value=$self->{language}{Password_Go}></form>";
     $body .= "<blockquote><font color=red>$self->{language}{Password_Error1}</font></blockquote>" if ( $error == 1 );
     http_ok($self, $client, $body, 99);
     $self->{session_key} = $session_temp;
@@ -1717,9 +1723,11 @@ sub handle_url
 
     # See if there are any form parameters and if there are parse them into the %form hash
     delete $self->{form};
-
+    
     # Remove a # element
     $url =~ s/#.*//;
+
+    print $url . $eol;
 
     if ( $url =~ s/\?(.*)// )  {
         my $arguments = $1;
@@ -1731,14 +1739,14 @@ sub handle_url
             while ( ( $self->{form}{$arg} =~ /%([0-9A-F][0-9A-F])/i ) != 0 ) {
                 my $from = "%$1";
                 my $to   = chr(hex("0x$1"));
-                $to =~ s/(\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                $to =~ s/(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
                 $self->{form}{$arg} =~ s/$from/$to/g;
             }
 
             $self->{form}{$arg} =~ s/\+/ /g;
         }
     }
-    
+
     if ( $url eq '/jump_to_message' )  {
         $self->{form}{session} = $self->{session_key};
         $url = '/history';
@@ -1758,22 +1766,27 @@ sub handle_url
         http_file( $self,  $client, $1, 'text/html' );
         return 1;
     }
-
+    
     # Check the password 
     if ( $url eq '/password' )  {
         if ( $self->{form}{password} eq $self->{configuration}->{configuration}{password} )  {
+            change_session_key( $self );
             $self->{form}{session} = $self->{session_key};
-            $url = '/';
+            if ( defined( $self->{form}{redirect} ) ) {
+                $url = $self->{form}{redirect}; 
+            } else {
+                $url = '/';
+            }
         } else {
-            password_page( $self, $client, 1);
+            password_page( $self, $client, 1, '/' );
             return 1;
         }
     }
 
     # If there's a password defined then check to see if the user already knows the
     # session key, if they don't then drop to the password screen
-    if ( ( (!defined($self->{form}{session})) || ( $self->{form}{session} ne $self->{session_key} ) ) && ( $self->{configuration}->{configuration}{password} ne '' ) ) {
-        password_page( $self, $client, 0);
+    if ( ( (!defined($self->{form}{session})) || ($self->{form}{session} eq '' ) || ( $self->{form}{session} ne $self->{session_key} ) ) && ( $self->{configuration}->{configuration}{password} ne '' ) ) {
+        password_page( $self, $client, 0, $url );
         return 1;
     }
 
@@ -1786,7 +1799,7 @@ sub handle_url
     change_session_key( $self );
 
     if ( $url eq '/shutdown' )  {
-        http_ok($self, $client, "POPFile shutdown", -1);
+        http_ok( $self, $client, "POPFile shutdown", -1 );
         return 0;
     }
 
