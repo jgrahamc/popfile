@@ -171,9 +171,6 @@ sub initialize
     # Calculate a session key
     change_session_key($self);
 
-    $self->remove_mail_files();
-    $self->calculate_today();
-
     # The parent needs a reference to the url handler function
     $self->{url_handler_} = \&url_handler__;
 
@@ -190,6 +187,11 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
+
+    # This needs to occur at launch, but after initialization
+    
+    $self->remove_mail_files();
+    $self->calculate_today();
 
     # Ensure that the messages subdirectory exists
 
