@@ -92,9 +92,20 @@ Section x
   !define L_POPFILE_USER  $R7   ; path to user's popfile.cfg file
   !define L_TEMP          $R6
   !define L_WINOS_FLAG    $R5   ; 1 = modern Windows system, 0 = Win9x system
+  !define L_WINUSERNAME   $R4
 
   !define L_RESERVED      $0    ; used in system.dll calls
 
+	ClearErrors
+	UserInfo::GetName
+	IfErrors default_name
+	Pop ${L_WINUSERNAME}
+  StrCmp ${L_WINUSERNAME} "" 0 check_registry
+
+default_name:
+  StrCpy ${L_WINUSERNAME} "UnknownUser"
+
+check_registry:
   ReadRegStr ${L_EXEFILE} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
   IfFileExists "${L_EXEFILE}\popfile.exe" got_exe_path
 
@@ -104,6 +115,19 @@ Section x
   StrCpy ${L_EXEFILE} $EXEDIR
   IfFileExists "${L_EXEFILE}\popfile.exe" got_exe_path
 
+  ; Minimal Perl not found, so look for an alternative ActivePerl installation
+
+  SearchPath ${L_EXEFILE} perl.exe
+  StrCmp ${L_EXEFILE} "" perl_missing
+
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION "Warning: minimal Perl not found !\
+      $\r$\n$\r$\n\
+      Do you want to run POPFile using:\
+      $\r$\n$\r$\n\
+      ${L_EXEFILE}" IDNO exit
+  Goto got_exe_path
+
+perl_missing:
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start POPFile !\
       $\r$\n$\r$\n\
       (POPFile start program not found:\
@@ -112,6 +136,8 @@ Section x
   Goto exit
 
 got_exe_path:
+  ReadRegStr ${L_TEMP} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner"
+  StrCmp ${L_TEMP} ${L_WINUSERNAME} 0 add_user
   ReadEnvStr ${L_POPFILE_ROOT} "POPFILE_ROOT"
   ReadEnvStr ${L_POPFILE_USER} "POPFILE_USER"
   StrCmp ${L_POPFILE_ROOT} "" set_root
@@ -156,6 +182,11 @@ set_user_now:
   Goto exit
 
 start_popfile:
+  IfFileExists "${L_EXEFILE}\popfile.exe" use_minimal_perl
+  Exec '"${L_EXEFILE}" "${L_POPFILE_ROOT}\popfile.pl"'
+  Return
+
+use_minimal_perl:
   Exec '"${L_EXEFILE}\popfile.exe"'
   Return
 
