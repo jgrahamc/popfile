@@ -2933,10 +2933,10 @@ sub view_page
 
     # Close button
 
-    $body .= "<tr>\n<td class=\"openMessageCloser\">";
-    $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
-    $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
-    $body .= "</td>\n</tr>\n";
+    # $body .= "<tr>\n<td class=\"openMessageCloser\">";
+    # $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
+    # $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
+    # $body .= "</td>\n</tr>\n";
 
     $body .= "<tr><td>";
     $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"POST\">\n";
