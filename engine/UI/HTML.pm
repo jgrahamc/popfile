@@ -1033,6 +1033,8 @@ sub advanced_page
 
     $templ->param( 'Advanced_Loop_Word' => \@word_loop );
 
+    $templ->param( 'Advanced_POPFILE_CFG' => $self->get_user_path_( 'popfile.cfg' ) );
+
     my $last_module = '';
 
     my @param_loop;
