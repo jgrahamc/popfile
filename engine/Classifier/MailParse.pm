@@ -781,8 +781,8 @@ sub parse_stream
 
     # Variables to save header information to while parsing headers
 
-    my $header;
-    my $argument;
+    my $header = '';
+    my $argument = '';
 
     # Clear the word hash
 
