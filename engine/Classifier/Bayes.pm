@@ -393,7 +393,19 @@ sub set_value_
 {
     my ( $self, $session, $bucket, $word, $value ) = @_;
 
-    $self->db_put_word_count__( $session, $bucket, $word, $value );
+    if ( $self->db_put_word_count__( $session, $bucket, $word, $value ) == 1 ) {
+
+        # If we set the word count to zero then clean it up by deleting the
+        # entry
+
+        my $userid = $self->valid_session_key__( $session );
+        my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+        $self->{db_delete_zero_words__}->execute( $bucketid );
+
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -814,11 +826,6 @@ sub db_put_word_count__
 
     $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
 
-    # If we set the word count to zero then clean it up by deleting the
-    # entry
-
-    $self->{db_delete_zero_words__}->execute( $bucketid );
-
     return 1;
 }
 
@@ -1012,7 +1019,7 @@ sub upgrade_bucket__
 
                         if ( /^([^\s]+) (\d+)$/ ) {
   			    if ( $2 != 0 ) {
-                                $self->set_value_( $session, $bucket, $1, $2 );
+                                $self->db_put_word_count__( $session, $bucket, $1, $2 );
 			    }
                         } else {
                             $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
@@ -1063,7 +1070,7 @@ sub upgrade_bucket__
 
 	    $wc += 1;
             if ( $h{$word} != 0 ) {
-                $self->set_value_( $session, $bucket, $word, $h{$word} );
+                $self->db_put_word_count__( $session, $bucket, $word, $h{$word} );
 	    }
 	}
 
