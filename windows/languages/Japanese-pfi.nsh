@@ -101,10 +101,10 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TITLE        "POPFile Corpus(コーパス、単語ファイル)の変換"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUBTITLE     "インストールしようとしているバージョンの POPFile と動作するためには、今ある corpus を変換する必要があります"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUBTITLE     "インストールしようとしているバージョンの POPFile と動作するためには、今ある corpus を変換する必要があります。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus の変換は完了しました"
-!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "続行するには「閉じる」をクリックして下さい"
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus の変換は完了しました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "続行するには「閉じる」をクリックして下さい。"
 
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,7 +125,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "'$G_WINUSERNAME' のための POPFile データの保存先"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "'$G_WINUSERNAME' のための POPFile データを保存するフォルダを選んでください"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "'$G_WINUSERNAME' のための POPFile データを保存するフォルダを選んでください。"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "このバージョンの POPFile は各ユーザーごとに異なるデータファイルを使用します。$\r$\n$\r$\nセットアップは次のフォルダを '$G_WINUSERNAME' ユーザー用の POPFile データのために使用します。別のフォルダを使用するには、[参照] を押して他のフォルダを選んで下さい。 $_CLICK"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "'$G_WINUSERNAME' の POPFile データの保存先"
 
@@ -134,7 +134,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_TITLE        "'$G_WINUSERNAME' ユーザーのための POPFile の設定"
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "POPFile 設定ファイルをこのユーザー用にアップデートし終わるまでしばらくお待ち下さい"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "POPFile 設定ファイルをこのユーザー用にアップデートし終わるまでしばらくお待ち下さい。"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the 'Add POPFile User' wizard)
@@ -147,7 +147,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TITLE        "'$G_WINUSERNAME' ユーザーのための POPFile データのアンインストール"
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "このユーザー用 POPFile 設定データをコンピューターから削除します"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "このユーザー用 POPFile 設定データをコンピューターから削除します。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "'$G_WINUSERNAME' ユーザー用 POPFile 設定データは次のフォルダから削除されます。 $_CLICK"
 
@@ -156,7 +156,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_TITLE       "'$G_WINUSERNAME' ユーザー用 POPFile データの削除"
-!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_SUBTITLE    "このユーザーの POPFile 設定ファイルが削除されるまでしばらくお待ち下さい"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_SUBTITLE    "このユーザーの POPFile 設定ファイルが削除されるまでしばらくお待ち下さい。"
 
 
 #==========================================================================
@@ -197,7 +197,7 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE        "旧いシステムコンポーネントが検出されました"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE        "旧いシステムコンポーネントが検出されました。"
 
 ; Text strings displayed on the custom page
 
@@ -205,7 +205,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile は特定のブラウザーを必要とせず、ほとんどどのブラウザーとも動作します。\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "最小バージョンの Perl をインストールします(POPFile は Perl で書かれています)。\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "POPFile に付属する Perl はインターネットエクスプローラー 5.5(あるいはそれ以上)のコンポーネントの一部を必要とします。\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "インストーラーはインターネットエクスプローラーを検出しました"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "インストーラーはインターネットエクスプローラーを検出しました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "POPFile のいくつかの機能は正常に動作しないかもしれません。\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "POPFile で問題が起こった場合、新しいバージョンのインターネットエクスプローラーにアップグレードすることを推奨します。"
 
@@ -350,9 +350,9 @@
 ; Text displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "(*) 印が付いているメールクライアントについては、単純なアカウント設定である限り、設定を自動的に変更することができます。\r\n認証を必要とするアカウントについては手動で変更することを強く推奨します。"
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "重要: 自動的に設定変更できるメールクライアントについては、今すぐシャットダウンして下さい。\r\n\r\nこの機能はまだ開発途中の機能です。(例えばいくつかの Outlook アカウントは検出されないかもしれません。\r\nメールクライアントを使用する前に設定変更がうまくいったかどうか確認して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "重要: 自動的に設定変更できるメールクライアントについては、今すぐシャットダウンして下さい。\r\n\r\nこの機能はまだ開発途中の機能です。(例えばいくつかの Outlook アカウントは検出されないかもしれません。)\r\nメールクライアントを使用する前に設定変更がうまくいったかどうか確認して下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL    "メールクライアントの設定変更はキャンセルされました"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL    "メールクライアントの設定変更はキャンセルされました。"
 
 #--------------------------------------------------------------------------
 # Text used on buttons to skip configuration of email clients
@@ -369,13 +369,13 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT         "警告: Outlook が起動中です！"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD         "警告: Eudora が起動中です！"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1      "メールクライアントをシャットダウンした後、「再試行」をクリックして下さい"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2      "(「無視」をクリックすれば続行できますが、この操作はあまりお勧めできません)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3      "「中止」をクリックしてこのメールクライアントの設定変更をスキップして下さい"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1      "メールクライアントをシャットダウンした後、「再試行」をクリックして下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2      "(「無視」をクリックすれば続行できますが、この操作はあまりお勧めできません。)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3      "「中止」をクリックしてこのメールクライアントの設定変更をスキップして下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4      "メールクライアントをシャットダウンした後、「再試行」をクリックして元の設定に戻して下さい"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5      "(「無視」をクリックすれば設定を元に戻せますが、この操作はあまりお勧めできません)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6      "「中止」をクリックして元の設定に戻して下さい"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4      "メールクライアントをシャットダウンした後、「再試行」をクリックして元の設定に戻して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5      "(「無視」をクリックすれば設定を元に戻せますが、この操作はあまりお勧めできません。)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6      "「中止」をクリックして元の設定に戻して下さい。"
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Outlook/Outlook Express
@@ -391,8 +391,8 @@
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Outlook Express の設定変更はキャンセルされました"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Outlook の設定変更はキャンセルされました"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Outlook Express の設定変更はキャンセルされました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Outlook の設定変更はキャンセルされました。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_BOXHDR     "アカウント"
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_ACCOUNTHDR "アカウント"
@@ -451,11 +451,11 @@
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED   "Eudora の設定変更はキャンセルされました"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED   "Eudora の設定変更はキャンセルされました。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1     "POPFile は次の Eudora パーソナリティを検出しました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2     "POPFile 用に自動的に設定を変更することができます。"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX    "POPFile 用にこのパーソナリティの設定を変更する"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX    "POPFile 用にこのパーソナリティの設定を変更する。"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT    "<主要> パーソナリティ"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA     "パーソナリティ"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_EMAIL       "メールアドレス:"
@@ -493,19 +493,19 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MUTEX        "別の 'Corpus Conversion Monitor' が既に起動中です！"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PRIVATE      "'Corpus Conversion Monitor' は POPFile インストーラーの一部です"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PRIVATE      "'Corpus Conversion Monitor' は POPFile インストーラーの一部です。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOFILE       "エラー: Corpus 変換データファイルが存在しません！"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "エラー: POPFile のパスが見つかりません"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "エラー: 環境変数をセットすることができません"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "エラー: Kakasi のパスが見つかりません"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "corpus 変換のプロセスを起動中にエラーが発生しました"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "エラー: POPFile のパスが見つかりません。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "エラー: 環境変数をセットすることができません。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "エラー: Kakasi のパスが見つかりません。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "corpus 変換のプロセスを起動中にエラーが発生しました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "予想残り時間: "
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "分"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(最初のファイルが変換されるのを待っています)"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TOTALFILES   "$G_BUCKET_COUNT 個のバケツファイルを変換します"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(最初のファイルが変換されるのを待っています。)"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TOTALFILES   "$G_BUCKET_COUNT 個のバケツファイルを変換します。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_N   "$G_ELAPSED_TIME.$G_DECPLACES 分経過。あと $G_STILL_TO_DO 個のファイルを変換します。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_1   "$G_ELAPSED_TIME.$G_DECPLACES 分経過。あと1個のファイルを変換します。"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUMMARY      "Corpus の変換には $G_ELAPSED_TIME.$G_DECPLACES 分かかりました"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUMMARY      "Corpus の変換には $G_ELAPSED_TIME.$G_DECPLACES 分かかりました。"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile
@@ -536,27 +536,27 @@
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDIFFUSER_1      "'$G_WINUSERNAME' は他のユーザーに属するデータを削除しようとしています"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDIFFUSER_1      "'$G_WINUSERNAME' は他のユーザーに属するデータを削除しようとしています。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "POPFile は次のディレクトリにインストールされていないようです:"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "それでも続行しますか(推奨できません)？"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "それでも続行しますか(推奨できません。)？"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "アンインストールはユーザーより中止されました"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "アンインストールはユーザーより中止されました。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_1        "'Outlook Express' の問題です！"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_2        "'Outlook' の問題です！"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_3        "'Eudora' の問題です！"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_1         "いくつかの設定を元に戻すことができませんでした"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_1         "いくつかの設定を元に戻すことができませんでした。"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_2         "エラーレポートを表示しますか？"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_1         "いくつかのメールクライアントの設定を元に戻すことができませんでした！"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_2         "(詳細については $INSTDIR フォルダを参照してください)"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "'No' をクリックすればエラーを無視して全てを削除します"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "'Yes' をクリックすればデータは保存されます(これは、後でまた再試行する時のためです)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_2         "(詳細については $INSTDIR フォルダを参照してください。)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "'No' をクリックすればエラーを無視して全てを削除します。"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "'Yes' をクリックすればデータは保存されます。(これは、後でまた再試行する時のためです。)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい)"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "POPFile「ユーザーデータ」ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "POPFile「ユーザーデータ」ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "注意"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "は削除できませんでした。"
