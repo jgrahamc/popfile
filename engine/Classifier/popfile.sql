@@ -271,9 +271,7 @@ create table history( id integer primary key, -- unique ID for this entry
 -- ---------------------------------------------------------------------------------------------
 --
 -- NOTE: The following alter table statements are required by MySQL in order
---       to get the ID fields to auto_increment on inserts. These statements
---       will all generate error messages when fed to SQLite, simply ignore
---       the errors.
+--       to get the ID fields to auto_increment on inserts.
 --
 -- ---------------------------------------------------------------------------------------------
 
@@ -288,6 +286,7 @@ alter table user_params modify id int(11) auto_increment;
 alter table user_template modify id int(11) auto_increment;
 alter table users modify id int(11) auto_increment;
 alter table words modify id int(11) auto_increment;
+alter table words modify word binary(255);
 
 -- TRIGGERS
 
