@@ -58,6 +58,7 @@
 #
 #   windows\POPFileIcon\popfile.ico
 #
+#   windows\UI\pfi_modern.exe
 #   windows\UI\pfi_headerbmpr.exe
 #
 # This test program does NOT install POPFile or make any Outlook Express configuration changes.
@@ -84,7 +85,7 @@
 ; servers (so it is NOT subject to the same problems as the 'NSIS Update' feature).
 ;
 ; This version of the script has been tested with NSIS 2.0b4 (CVS) after updating it by using
-; the 11 August 2003 (19:44 GMT) version of the NSIS CVS snapshot.
+; the 27 August 2003 (19:44 GMT) version of the NSIS CVS snapshot.
 
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
@@ -153,9 +154,9 @@
   !define MUI_PRODUCT       "PFI Testbed"
 
   !ifndef ENGLISH_ONLY
-    !define MUI_VERSION     "0.6.0 (ML)"
+    !define MUI_VERSION     "0.6.1 (ML)"
   !else
-    !define MUI_VERSION     "0.6.0 (English)"
+    !define MUI_VERSION     "0.6.1 (English)"
   !endif
 
   !define C_README          "translator.change"
@@ -210,11 +211,11 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "0.6.0.0"
+  VIProductVersion "0.6.1.0"
 
   VIAddVersionKey "ProductName" "POPFile Installer Language Testbed"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
-  VIAddVersionKey "CompanyName" "POPFile Team"
+  VIAddVersionKey "CompanyName" "The POPFile Project"
   VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile Installer Language Testbed"
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
@@ -326,6 +327,12 @@
   ;-----------------------------------------
   ; Interface Settings
   ;-----------------------------------------
+
+  ; The banner provided by the default 'modern.exe' UI does not provide much room for the
+  ; two lines of text, e.g. the German version is truncated, so we use a custom UI which
+  ; provides slightly wider text areas. Each area is still limited to a single line of text.
+
+  !define MUI_UI "UI\pfi_modern.exe"
 
   ; The 'hdr-common.bmp' logo is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
@@ -442,6 +449,7 @@
         !insertmacro PFI_LANG_LOAD "German"
         !insertmacro PFI_LANG_LOAD "Spanish"
         !insertmacro PFI_LANG_LOAD "French"
+        !insertmacro PFI_LANG_LOAD "Greek"
         !insertmacro PFI_LANG_LOAD "Japanese"
         !insertmacro PFI_LANG_LOAD "Korean"
         !insertmacro PFI_LANG_LOAD "Hungarian"
@@ -795,6 +803,7 @@ Section "Languages" SecLangs
         !insertmacro UI_LANG_CONFIG "GERMAN" "Deutsch"
         !insertmacro UI_LANG_CONFIG "SPANISH" "Español"
         !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
+        !insertmacro UI_LANG_CONFIG "GREEK" "Hellenic"
         !insertmacro UI_LANG_CONFIG "JAPANESE" "Nihongo"
         !insertmacro UI_LANG_CONFIG "KOREAN" "Korean"
         !insertmacro UI_LANG_CONFIG "HUNGARIAN" "Hungarian"
