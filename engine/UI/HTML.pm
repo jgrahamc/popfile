@@ -878,7 +878,7 @@ sub security_page
     $body .= "<div class=\"securityPassWidget\">\n" ;
     
     # Password widget
-    $body .= "<form action=\"/security\"><span class=\"securityLabel\">$self->{language}{Security_Password}:</span> <br />\n" ;
+    $body .= "<form action=\"/security\" method=\"post\"><span class=\"securityLabel\">$self->{language}{Security_Password}:</span> <br />\n" ;
     $body .= "<input name=\"password\" type=\"password\" value=\"$self->{configuration}->{configuration}{password}\">\n" ;
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_server\" value=\"$self->{language}{Apply}\">\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n</form>\n";
@@ -2681,7 +2681,7 @@ sub password_page
     
     # Show a page asking for the password with no session key information on it
     $self->{session_key} = '';
-    my $body = "<h2 class=\"password\">$self->{language}{Password_Title}</h2><form action=\"/password\">" ;
+    my $body = "<h2 class=\"password\">$self->{language}{Password_Title}</h2><form action=\"/password\" method=\"post\">" ;
     $body .= "<input type=hidden name=redirect value=\"$redirect\"><span class=\"passwordLabel\">$self->{language}{Password_Enter}:</span> " ;
     $body .= "<input type=password name=password> " ;
     $body .= "<input type=submit class=submit name=submit value=\"$self->{language}{Password_Go}\">\n</form>\n";
@@ -2813,6 +2813,7 @@ sub handle_url
     if ( $url eq '/password' )  {
         if ( $self->{form}{password} eq $self->{configuration}->{configuration}{password} )  {
             change_session_key( $self );
+            delete $self->{form}{password};
             $self->{form}{session} = $self->{session_key};
             if ( defined( $self->{form}{redirect} ) ) {
                 $url = $self->{form}{redirect}; 
