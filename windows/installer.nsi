@@ -114,7 +114,7 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0 (CORPUS BACKUP)"
+  !define MUI_VERSION   "0.20.0RC3"
 
   !define C_README        "v0.20.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -763,12 +763,6 @@ update_config:
   SetOutPath $INSTDIR\warnings
   File "${C_PERL_DIR}\lib\warnings\register.pm"
 
-  SetOutPath $INSTDIR\Win32
-  File "${C_PERL_DIR}\site\lib\Win32\API.pm"
-
-  SetOutPath $INSTDIR\Win32\API
-  File "${C_PERL_DIR}\site\lib\Win32\API\*.pm"
-
   SetOutPath $INSTDIR\auto\DynaLoader
   File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
 
@@ -791,9 +785,6 @@ update_config:
 
   SetOutPath $INSTDIR\auto\Sys\Hostname
   File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
-
-  SetOutPath $INSTDIR\auto\Win32\API
-  File "${C_PERL_DIR}\site\lib\auto\Win32\API\*"
 
   ; Install Perl modules and library files for BerkeleyDB support
 
@@ -2677,7 +2668,6 @@ skip_kakasi:
   RMDir /r "$INSTDIR\Sys"
   RMDir /r "$INSTDIR\Text"
   RMDir /r "$INSTDIR\warnings"
-  RMDir /r "$INSTDIR\Win32"
 
   Delete "$INSTDIR\Uninstall.exe"
 
