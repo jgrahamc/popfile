@@ -45,12 +45,12 @@ END
 	# Print out information for each file
 	for my $file (keys %count)	
 	{
-	    if ( ( $file =~ /^[^\/]/ ) && ( $file ne 'tests.pl' ) && !( $file =~ /^Test\// ) ) {
+	    if ( ( $file =~ /^[^\/]/ ) && ( $file ne '../tests.pl' ) && !( $file =~ /^..\/\/Test\// ) ) {
 		my $current_line   = 0;
                 my $block_executed = 0;
 		
 		open SOURCE_FILE, "<$file";
-		
+
 		# Read in each line of the source file and keep track of whether 
 		# it was executed or not using a new couple of keys in the 
 		# %count hash for each file: total_lines, total_executable_lines 
@@ -89,7 +89,7 @@ END
                                     $block_executed = 0;
 		                }
 			    } else {
-#                                print "$file:$current_line $_" if ( $file =~/MailParse/);
+                                print "$file:$current_line $_" if ( $file =~/WordMangle/);
                             }
 			}
 
@@ -102,7 +102,10 @@ END
      }
 
 	foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
-	    print sprintf( "Coverage of %-32s %d%%\n", "$file...", $files{$file});
+            my $clean = $file;
+            $clean =~ s/^\.\.\/\///;
+		
+	    print sprintf( "Coverage of %-32s %d%%\n", "$clean...", $files{$file});
 	}
 }
 

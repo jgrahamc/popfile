@@ -28,14 +28,14 @@ coverage:
 ifdef TESTARGS
 	@echo with arguments '$(TESTARGS)'
 endif
-	@perl -d:TestCoverage tests.pl $(TESTARGS)
+	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=-d:TestCoverage
 
 test:     
 	@echo Running test suite
 ifdef TESTARGS
 	@echo with arguments '$(TESTARGS)'
 endif
-	@perl tests.pl $(TESTARGS)
+	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=
 
 # windows builds the Windows installer
 

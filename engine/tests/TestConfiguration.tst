@@ -53,10 +53,10 @@ test_assert_equal( $c->global_config_( 'msgdir' ), 'messages/' );
 
 # Check that the PID file gets created and then deleted and
 # contains the correct process ID
-$c->config_( 'piddir', 'tests/' );
+$c->config_( 'piddir', '../tests/' );
 test_assert_equal( $c->start(), 1 );
-test_assert( ( -e 'tests/popfile.pid' ) );
-open PIDFILE, '<tests/popfile.pid';
+test_assert( ( -e 'popfile.pid' ) );
+open PIDFILE, '<popfile.pid';
 my $pid = <PIDFILE>;
 close PIDFILE;
 test_assert_equal( $pid, $$ );
@@ -64,7 +64,7 @@ open (STDERR, ">stdout.tmp");
 test_assert_equal( $c->start(), 0 );
 close STDERR;
 $c->stop();
-test_assert( !( -e 'tests/popfile.pid' ) );
+test_assert( !( -e 'popfile.pid' ) );
 
 # Check that parameter upgrading works
 

@@ -43,4 +43,15 @@ $p->stop();
 $p->classifier( 'foo' );
 test_assert_equal( $p->{classifier__}, 'foo' );
 
+# Test the helper methods of Proxy
+use Test::SimpleProxy;
+my $sp = new Test::SimpleProxy;
 
+$sp->configuration( $c );
+$sp->mq( $mq );
+$sp->logger( $l );
+
+$sp->initialize();
+$sp->config_( 'port', 9999 );
+test_assert_equal( $sp->start(), 1 );
+$sp->start_server();

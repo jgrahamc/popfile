@@ -52,3 +52,10 @@ while (<WORDS>) {
 close WORDS;
 test_assert( $found );
 test_assert_equal( $w->remove_stopword( 'bigword' ), 1 );
+
+# Make sure that stopping and starting reloads the stopwords
+test_assert_equal( $w->add_stopword( 'anotherbigword' ), 1 );
+my $w2 = new Classifier::WordMangle;
+my @stopwords = $w2->stopwords();
+test_assert_equal( $#stopwords, 0 );
+test_assert_equal( $stopwords[0], 'anotherbigword' );

@@ -132,7 +132,7 @@ sub test_assert_regexp
 
 # MAIN
 
-my @tests = glob 'tests/*.tst';
+my @tests = glob '*.tst';
 
 # Either match all the possible tests, or take the first argument
 # on the command line and use it as a regular expression that must

@@ -37,7 +37,6 @@ $b->logger( $l );
 
 
 $b->initialize();
-$b->config_( 'corpus', 'tests/corpus' );
 $b->start();
 
 # getting and setting values
@@ -58,7 +57,7 @@ test_assert_equal( $buckets[2], '' );
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages 
 # to be parsed with the resulting classification in TestMailParse.cls
 
-my @class_tests = sort glob 'tests/TestMailParse*.msg';
+my @class_tests = sort glob 'TestMailParse*.msg';
 
 for my $class_test (@class_tests) {
     my $class_file = $class_test;
@@ -77,7 +76,7 @@ for my $class_test (@class_tests) {
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages 
 # to be sent through classify_and_modify
 
-$b->global_config_( 'msgdir', 'tests/' );
+$b->global_config_( 'msgdir', '../tests/' );
 $b->module_config_( 'html', 'port', 8080 );
 $b->module_config_( 'html', 'local', 1 );
 $b->global_config_( 'xtc',  1 );
@@ -86,10 +85,10 @@ $b->module_config_( 'pop3', 'local', 1 );
 $b->global_config_( 'subject',  1 );
 $b->set_bucket_parameter( 'spam', 'subject', 1 );
 
-my @modify_tests = sort glob 'tests/TestMailParse*.msg';
+my @modify_tests = sort glob 'TestMailParse*.msg';
 
 for my $modify_file (@modify_tests) {
-    if ( ( open MSG, "<$modify_file" ) && ( open OUTPUT, ">tests/temp.out" ) ) {
+    if ( ( open MSG, "<$modify_file" ) && ( open OUTPUT, ">temp.out" ) ) {
 	    $b->classify_and_modify( \*MSG, \*OUTPUT, 0, 0, 0, '' );
 	    close MSG;
 		close OUTPUT;
@@ -98,7 +97,7 @@ for my $modify_file (@modify_tests) {
 		$output_file    =~ s/msg/cam/;
 
 		open CAM, "<$output_file";
-		open OUTPUT, "<tests/temp.out";
+		open OUTPUT, "<temp.out";
 		while ( <OUTPUT> ) {
 		    my $output_line = $_;
 			my $cam_line    = <CAM>;
@@ -109,8 +108,8 @@ for my $modify_file (@modify_tests) {
 		
 		close CAM;
 		close OUTPUT;
-		unlink( 'tests/popfile0=0.msg' );
-		unlink( 'tests/popfile0=0.cls' );
-		unlink( 'tests/temp.out' );
+		unlink( 'popfile0=0.msg' );
+		unlink( 'popfile0=0.cls' );
+		unlink( 'temp.out' );
     }
 }

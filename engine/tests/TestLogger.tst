@@ -36,10 +36,11 @@ test_assert_equal( $l->config_('logdir'), './' );
 test_assert_equal( $l->global_config_('debug'), 1 );
 
 # Change the log locatioin
-$l->config_( 'logdir', 'tests/' );
-test_assert_equal( $l->config_('logdir'), 'tests/' );
+$l->config_( 'logdir', '../tests/' );
+test_assert_equal( $l->config_('logdir'), '../tests/' );
 $l->calculate_today__();
-test_assert_regexp( $l->debug_filename(), 'tests/' );
+test_assert_regexp( $l->debug_filename(), '../tests/' );
+unlink( $l->debug_filename() );
 
 # Test that the last ten functionality works
 my @last_ten = $l->last_ten();
