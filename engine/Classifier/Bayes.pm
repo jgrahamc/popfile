@@ -982,6 +982,7 @@ sub classify_and_modify
     my $getting_headers = 1;
 
     my $temp_file  = $self->history_filename($dcount,$mcount, ".msg",1);
+    my $nopath_temp_file = $self->history_filename($dcount,$mcount,".msg",0);    
     
     # Get the class-file info without the path, since we'd just need to strip it
     my $class_file = $self->history_filename($dcount,$mcount, ".cls",0);
@@ -1099,9 +1100,6 @@ sub classify_and_modify
                                                                          ( $self->{parameters__}{$classification}{quarantine} == 0 ) );
 
     # Add the XPL header
-    my $nopath_temp_file = $temp_file;
-    $nopath_temp_file =~ s/.*\/([^\/]+)/$1/;
-
     my $xpl = '';
 
     $xpl .= "http://";
