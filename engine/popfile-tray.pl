@@ -125,6 +125,8 @@ $POPFile->CORE_initialize();
 $POPFile->CORE_config();
 $POPFile->CORE_start();
 
+SetIcon( 'trayicon' );
+
 # We terminate here because that lets PerlTray start and it will call the Timer
 # function above
 
