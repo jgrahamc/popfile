@@ -103,7 +103,6 @@ sub release
 
     if ( defined( $self->{handle__} ) ) {
         close $self->{handle__};
-        unlink $self->{name__};
         $self->{handle__} = undef;
     }
 }

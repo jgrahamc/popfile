@@ -5,6 +5,7 @@ REQUIRED	0.0.0	Date::Parse
 REQUIRED	0.0.0	Digest::MD5
 OPTIONAL-Japanese Language Support	0.0.0	Encode
 OPTIONAL-Japanese Language Support	0.0.0	Encode::Guess
+REQUIRED	0.0.0	Fcntl
 REQUIRED	0.0.0	File::Copy
 REQUIRED	0.0.0	Getopt::Long
 REQUIRED	0.0.0	HTML::Tagset
@@ -20,5 +21,4 @@ REQUIRED	0.0.0	MIME::QuotedPrint
 REQUIRED	0.0.0	POSIX
 REQUIRED	0.0.0	Sys::Hostname
 OPTIONAL-Japanese Language Support	0.0.0	Text::Kakasi
-REQUIRED	0.0.0	Thread::Semaphore
 OPTIONAL-XML-RPC Server Support	0.0.0	XMLRPC::Transport::HTTP

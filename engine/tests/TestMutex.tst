@@ -25,30 +25,38 @@
 # ----------------------------------------------------------------------------
 
 use POPFile::Mutex;
+use POSIX ":sys_wait_h";
 
 my $m1 = new POPFile::Mutex( 'first' );
 my $m2 = new POPFile::Mutex( 'first' );
 my $m3 = new POPFile::Mutex( 'second' );
 
 test_assert( $m1->acquire() );
-test_assert( ( -e 'popfile_mutex_first.mtx' ) );
 $m1->release();
-test_assert( !( -e 'popfile_mutex_first.mtx' ) );
 test_assert( $m1->acquire() );
-test_assert( ( -e 'popfile_mutex_first.mtx' ) );
 $m1->release();
-test_assert( !( -e 'popfile_mutex_first.mtx' ) );
 test_assert( $m1->acquire() );
-test_assert( ( -e 'popfile_mutex_first.mtx' ) );
 test_assert( !$m1->acquire() );
-test_assert( ( -e 'popfile_mutex_first.mtx' ) );
 test_assert( $m3->acquire() );
-test_assert( ( -e 'popfile_mutex_second.mtx' ) );
 test_assert( !$m2->acquire(1) );
-test_assert( ( -e 'popfile_mutex_first.mtx' ) );
 $m1->release();
-test_assert( !( -e 'popfile_mutex_first.mtx' ) );
 $m2->release();
-test_assert( !( -e 'popfile_mutex_first.mtx' ) );
 $m3->release();
-test_assert( !( -e 'popfile_mutex_second.mtx' ) );
+
+my $pid = fork();
+
+if ( $pid == 0 ) {
+    select( undef,undef,undef,1);
+    test_assert( $m1->acquire() );
+    select( undef,undef,undef,5);
+    $m1->release();
+    exit 0;
+} else {
+    select( undef,undef,undef,2);
+    test_assert( $m2->acquire() );
+    select( undef,undef,undef,1);
+    $m2->release();
+    while ( waitpid( $pid, &WNOHANG ) != $pid ) {
+    }
+}
+

@@ -27,8 +27,6 @@ package Classifier::MailParse;
 use strict;
 use locale;
 
-use POPFile::Mutex;
-
 use MIME::Base64;
 use MIME::QuotedPrint;
 
@@ -2504,6 +2502,7 @@ sub parse_line_with_kakasi
 
     if ( $need_semaphore ) {
         if ( !defined( $self->{mutex__} ) ) {
+   	    require POPFile::Mutex;
   	    $self->{mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
         }
         $self->{mutex__}->acquire();
