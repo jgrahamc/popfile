@@ -226,7 +226,8 @@ sub debug
         return;
     }
 
-    if ( $level > $self->config_( 'level' ) ) {
+    if ( ( !defined( $self->config_( 'level' ) ) ) ||
+         ( $level > $self->config_( 'level' ) ) ) {
         return;
     }
 

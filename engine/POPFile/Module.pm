@@ -827,6 +827,7 @@ sub get_module__
 
     if ( !exists( $self->{modules__}{$alias} ) ) {
         $self->{modules__}{$alias} = $self->{loader__}->get_module( $module );
+        $self->log_( 1, $self->{name__} . " needs module $module" );
     }
 
     return $self->{modules__}{$alias};
