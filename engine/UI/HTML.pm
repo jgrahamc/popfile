@@ -2496,6 +2496,12 @@ sub load_history_cache__
 {
     my ( $self ) = @_;
 
+    # We calculate the largest value for the first number in the MSG file
+    # names to verify at the end that the global download_count parameter
+    # has not been corrupted.
+
+    my $max = 0;
+
     # First we mark every entry in the history cache with cull set to one, after we have
     # looked through the messages directory for message we will delete any of the entries
     # in the hash that have cull still set to 1.  cull gets set to 0 everytime we see an
@@ -2520,8 +2526,12 @@ sub load_history_cache__
         # Strip any directory portion of the name in the current file so that we
         # just get the base name of the file that we are dealing with
 
-        $history_files[$i] =~ /(popfile\d+=\d+\.msg)$/;
+        $history_files[$i] =~ /(popfile(\d+)=\d+\.msg)$/;
         $history_files[$i] = $1;
+
+        if ( $2 > $max ) {
+            $max = $2;
+	}
 
         # If this file already exists in the history cache then just mark it not
         # to be culled and move on.
@@ -2546,6 +2556,10 @@ sub load_history_cache__
     $self->{history_invalid__} = 0;
     $self->{need_resort__}     = 0;
     $self->sort_filter_history( '', '', '' );
+
+    if ( $max > $self->global_config_( 'download_count' ) ) {
+        $self->global_config_( 'download_count', $max+1 );
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
