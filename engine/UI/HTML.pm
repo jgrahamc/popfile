@@ -3416,7 +3416,7 @@ sub history_delete_file
         
     $mail_file =~ /(popfile.+\=.+\.msg)/;
     $mail_file = $1;
-    print "delete: $mail_file\n";
+    $self->{logger}->debug( "delete: $mail_file" );
 
     if ( $archive ) {
         my $path = $self->{configuration}->{configuration}{archive_dir};
