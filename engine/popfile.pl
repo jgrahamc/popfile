@@ -1501,13 +1501,16 @@ sub history_page
         
         foreach my $i ( $form{start_message} .. $form{start_message} + $configuration{page_size} - 1 )
         {
-            my $class_file = $history_cache[$i];
-            $class_file =~ s/msg$/cls/;
-            if ( $class_file ne '' ) 
+            if ( $i <= $#history_cache ) 
             {
-                unlink("messages/$history_cache[$i]");
-                unlink("messages/$class_file");
-                debug( "Removing $history_cache[$i] because of Remove Page" );
+                my $class_file = $history_cache[$i];
+                $class_file =~ s/msg$/cls/;
+                if ( $class_file ne '' ) 
+                {
+                    unlink("messages/$history_cache[$i]");
+                    unlink("messages/$class_file");
+                    debug( "Removing $history_cache[$i] because of Remove Page" );
+                }
             }
         }
 
