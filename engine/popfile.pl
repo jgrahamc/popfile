@@ -74,6 +74,7 @@ my $seconds_per_day = 60 * 60 * 24;
 
 # Color constants
 my $main_color      = '#ededca';
+my $stripe_color    = '#dfdfaf';
 my $tab_color       = '#ededca';
 my $stab_color      = '#cccc99';
 my $highlight_color = '#cccc99';
@@ -1166,6 +1167,8 @@ sub history_page
         $stop_message = $#mail_files;
     }
     
+    my $stripe = 0;
+    
     foreach my $i ($start_message ..  $stop_message)
     {
         my $mail_file;
@@ -1226,7 +1229,20 @@ sub history_page
         }
         $body .= "<a name=$mail_file>";
         $body .= "<tr";
-        $body .= " bgcolor=$highlight_color" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
+        if ( ( $form{view} eq $mail_file ) || ( $form{file} eq $mail_file ) )
+        {
+            $body .= " bgcolor=$highlight_color" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
+        }
+        else
+        {
+            if ( $stripe ) 
+            {
+                $body .= " bgcolor=$stripe_color"; 
+            }
+        }
+
+        $stripe = 1 - $stripe;
+        
         $body .= "><td>";
         $body .= $i+1 . "<td>";
         my $class_file = $mail_file;
@@ -1438,13 +1454,13 @@ sub run_popfile
                                         LocalAddr => 'localhost', 
                                         LocalPort => $listen_port,
                                         Listen    => SOMAXCONN,
-                                        Reuse     => 1 );
+                                        Reuse     => 1 ) or die "Couldn't open the POP3 listen port $listen_port";
 
     my $ui     = IO::Socket::INET->new( Proto     => 'tcp',
                                         LocalAddr => 'localhost', 
                                         LocalPort => $ui_port,
                                         Listen    => SOMAXCONN,
-                                        Reuse     => 1 );
+                                        Reuse     => 1 ) or die "Couldn't open the GUI port $ui_port";;
 
     # This is used to perform select calls on the $server socket so that we can decide when there is 
     # a call waiting an accept it without having to block
