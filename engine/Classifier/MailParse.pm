@@ -977,7 +977,6 @@ sub parse_html
     my ( $self, $line, $encoded ) = @_;
 
     my $found = 1;
-    my $non_html = '';
 
     $line =~ s/[\r\n]+//gm;
 
@@ -1033,7 +1032,6 @@ sub parse_html
                 next;
             } else {
                 $self->{html_arg__} .= $line;
-                $self->add_line( $non_html, $encoded, '' );
                 return 1;
             }
         }
@@ -1056,7 +1054,6 @@ sub parse_html
             $self->{html_tag__}    = $2;
             $self->{html_arg__}    = $3;
             $self->{in_html_tag__} = 1;
-            $self->add_line( $non_html, $encoded, '' );
             return 1;
         }
 
@@ -1066,11 +1063,9 @@ sub parse_html
 
         if ( $line =~ s/^([^<]+)(<|$)/$2/ ) {
             $found = 1;
-            $non_html .= $1;
+            $self->add_line( $1, $encoded, '' );
         }
     }
-
-    $self->add_line( $non_html, $encoded, '' );
 
     return 0;
 }

@@ -159,7 +159,7 @@ sub forked
 
 # ---------------------------------------------------------------------------------------------
 #
-# forked
+# postfork
 #
 # This is called inside the parent process that has just forked, since the parent needs access
 # to the database we reopen it

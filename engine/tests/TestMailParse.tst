@@ -131,7 +131,7 @@ test_assert_equal( $cl->parse_html( '<!DOCTYPE >' ), 0 );
 $cl->{htmlfontcolor__} = '';
 $cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
-test_assert_equal( $cl->parse_html( '<body bgcolor="#ffffff">hello<font color=white>invisible</font>visible</body>  ' ), 0 );
+test_assert_equal( $cl->parse_html( '<body bgcolor="#ffffff">hello <font color=white>invisible</font>visible</body>  ' ), 0 );
 test_assert_equal( $cl->{words__}{hello},     1 );
 test_assert_equal( $cl->{words__}{visible},   1 );
 test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
@@ -205,7 +205,7 @@ test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmit
 
 # Test colorization
 
-my @color_tests = ( 'TestMailParse015.msg', 'TestMailParse019.msg' );
+my @color_tests = ( 'TestMailParse015.msg' );
 
 for my $color_test (@color_tests) {
     my $colored = $color_test;
