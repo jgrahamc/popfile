@@ -143,6 +143,7 @@ sub load_configuration
     
     if ( open CONFIG, "<popfile.cfg" ) {
         while ( <CONFIG> ) {
+            s/(\015|\012)//g; 
             if ( /(\S+) (.+)/ ) {
                 $self->{configuration}{$1} = $2;
             }
