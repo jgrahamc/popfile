@@ -286,7 +286,7 @@ sub parse_stream
             {
                 while ( $argument =~ s/<(.+?)>// ) 
                 {
-                    update_word($self, $1);
+                    update_word($self, $1, 0);
                 }
                 
                 add_line( $self, $argument, 0 );
