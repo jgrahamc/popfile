@@ -1739,7 +1739,8 @@ sub corpus_page
     }
 
     if ( ( defined($self->{form_}{newname}) ) && ( $self->{form_}{oname} ne '' ) ) {
-        if ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ )  {
+        if ( ( $self->{form_}{newname} eq '' ) && 
+             ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) )  {
             $templ->param( 'Corpus_If_Rename_Error' => 1 );
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
