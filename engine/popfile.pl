@@ -20,11 +20,6 @@ use locale;
 
 my %components;
 
-# This is the A PIECE OF PLATFORM SPECIFIC CODE and all it does is force Windows users to have
-# v5.8.0 because that's the version with good fork() support everyone else can use whatever they
-# want.  This is  probably only temporary because at some point I am going to force 5.8.0 for
-# everyone because of the better Unicode support
-
 my $on_windows = 0;
 
 if ( $^O eq 'MSWin32' ) {
@@ -245,6 +240,22 @@ $SIG{CHLD}  = $on_windows?'IGNORE':\&reaper;
 
 print "    Loading... ";
 
+# Look for a module called Platform::<platform> where <platform> is the value of $^O
+# and if it exists then load it as a component of POPFile.  IN this way we can have
+# platform specific code (or not) encapsulated.  Note that such a module needs to be
+# a POPFile Loadable Module and a subclass of POPFile::Module to operate correctly
+
+my $platform = $^O;
+
+if ( -e "Platform/$platform.pm" ) {
+   require "Platform/$platform.pm";
+   $platform = "Platform::$platform";
+   my $mod  = new $platform;
+   my $name = $mod->name();
+   $components{core}{$name} = $mod;
+   print " {$name}";
+}
+
 load_modules( 'POPFile',    'core'       );
 load_modules( 'Classifier', 'classifier' );
 load_modules( 'UI',         'ui'         );
@@ -253,8 +264,8 @@ load_modules( 'Proxy',      'proxy'      );
 # The version number
 
 $components{core}{config}->{major_version} = 0;
-$components{core}{config}->{minor_version} = 18;
-$components{core}{config}->{build_version} = 1;
+$components{core}{config}->{minor_version} = 19;
+$components{core}{config}->{build_version} = 0;
 
 print "\nPOPFile Engine v$components{core}{config}->{major_version}.$components{core}{config}->{minor_version}.$components{core}{config}->{build_version} starting";
 
