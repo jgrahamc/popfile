@@ -768,6 +768,10 @@
 #    Installer Function:   GetParent
 #    Uninstaller Function: un.GetParent
 #
+#    Macro:                GetPOPFileSchemaVersion
+#    Installer Function:   GetPOPFileSchemaVersion
+#    Uninstaller Function: un.GetPOPFileSchemaVersion
+#
 #    Macro:                GetSQLdbPathName
 #    Installer Function:   GetSQLdbPathName
 #    Uninstaller Function: un.GetSQLdbPathName
@@ -2051,6 +2055,126 @@
 
 
 #--------------------------------------------------------------------------
+# Macro: GetPOPFileSchemaVersion
+#
+# The installation process and the uninstall process may both need a function which determines
+# the Database Schema version used by POPFile. POPFile compares this value with the value stored
+# in the SQL database to determine when an automatic database upgrade is required. Upgrades can
+# take several minutes during which POPFile will appear to be locked up. This function helps the
+# installer detect when the SQLite database will be upgraded so it can use the Message Capture
+# Utility to display the database upgrade progress reports. This macro makes maintenance easier
+# by ensuring both processes use identical functions with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro GetPOPFileSchemaVersion "" and !insertmacro GetPOPFileSchemaVersion "un."
+# commands are included in this file so the NSIS script can use 'Call GetPOPFileSchemaVersion'
+# and 'Call un.GetPOPFileSchemaVersion' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - full pathname of the file containing POPFile's database schema
+#
+# Outputs:
+#         (top of stack)     - one of the following result strings:
+#                              (a) x          - where 'x' is the version number, e.g. '2'
+#                              (b) ()         - early versions of popfile.sql did not specify
+#                                               a version number in the first line (the first
+#                                               line just started with "-- ----------------")
+#                              (c) (<error>)  - an error occurred when determining the schema
+#                                               version number or when accessing the file
+#
+#                              If the result is enclosed in parentheses then an error occurred
+#                              (the special case "()" assumes the file is a very early version)
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "C:\Program Files\POPFile\Classifier\popfile.sql"
+#         Call GetPOPFileSchemaVersion
+#         Pop $R0
+#
+#         ($R0 will be "3" if the first line of the popfile.sql file is "-- POPFILE SCHEMA 3")
+#--------------------------------------------------------------------------
+
+!macro GetPOPFileSchemaVersion UN
+  Function ${UN}GetPOPFileSchemaVersion
+
+    !define L_FILENAME   $R9  ; pathname of the POPFile schema file
+    !define L_HANDLE     $R8  ; used to access the schema file
+    !define L_RESULT     $R7  ; string returned on top of the stack
+    !define L_TEMP       $R6
+
+    Exch ${L_FILENAME}
+    Push ${L_RESULT}
+    Exch
+    Push ${L_HANDLE}
+    Push ${L_TEMP}
+
+    StrCpy ${L_RESULT} "unable to open file"
+
+    ClearErrors
+    FileOpen ${L_HANDLE} "${L_FILENAME}" r
+    IfErrors error_exit
+    FileRead ${L_HANDLE} ${L_RESULT}
+    FileClose ${L_HANDLE}
+
+    StrCmp ${L_RESULT} "" error_exit
+    Push ${L_RESULT}
+    Call ${UN}TrimNewlines
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" error_exit
+
+    ; The POPFile database schema file is 'popfile.sql' and since CVS version 1.14 the first
+    ; line of the file contains the version number (e.g. "-- POPFILE SCHEMA 3"). In earlier
+    ; versions, the first line started with "-- ---------------" instead (the schema version
+    ; number was not mentioned).
+
+    StrCpy ${L_TEMP} ${L_RESULT} 18
+    StrCmp ${L_TEMP} "-- POPFILE SCHEMA " schema_found
+    StrCmp ${L_TEMP} "-- ---------------" 0 error_exit
+    StrCpy ${L_RESULT} ""
+
+  error_exit:
+
+    ; Schema string not found so return first 50 chars enclosed in parentheses to indicate error
+
+    StrCpy ${L_RESULT} ${L_RESULT} 50
+    StrCpy ${L_RESULT} "(${L_RESULT})"
+    Goto exit
+
+  schema_found:
+    StrCpy ${L_RESULT} ${L_RESULT} "" 18
+
+  exit:
+    Pop ${L_TEMP}
+    Pop ${L_HANDLE}
+    Pop ${L_FILENAME}
+    Exch ${L_RESULT}
+
+    !undef L_FILENAME
+    !undef L_HANDLE
+    !undef L_RESULT
+    !undef L_TEMP
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: GetPOPFileSchemaVersion
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetPOPFileSchemaVersion ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetPOPFileSchemaVersion
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetPOPFileSchemaVersion "un."
+
+
+#--------------------------------------------------------------------------
 # Macro: GetSQLdbPathName
 #
 # The installation process and the uninstall process may both need a function which finds the
@@ -2431,7 +2555,7 @@
   FunctionEnd
 !macroend
 
-!ifdef BACKUP | RUNSQLITE | RESTORE
+!ifdef BACKUP | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: GetSQLiteSchemaVersion
     #
