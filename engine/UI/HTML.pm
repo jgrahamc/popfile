@@ -1484,7 +1484,7 @@ sub corpus_page
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n</form>\n";
 
     if ( ( defined($self->{form}{lookup}) ) || ( defined($self->{form}{word}) ) ) {
-       my $word = $self->{classifier}->{mangler}->mangle($self->{form}{word});
+       my $word = $self->{classifier}->{mangler}->mangle($self->{form}{word}, 1);
 
         $body .= "<blockquote>";
 
