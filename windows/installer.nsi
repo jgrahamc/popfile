@@ -234,6 +234,16 @@
 
   !define C_STARTUP_DELAY    1000
 
+  ;-------------------------------------------------------------------------------
+  ; Constant used to avoid problems with Banner.dll
+  ;
+  ; (some versions of the DLL do not like being 'destroyed' immediately)
+  ;-------------------------------------------------------------------------------
+
+  ; Minimum time for the banner to be shown (in milliseconds)
+
+  !define C_MIN_BANNER_DISPLAY_TIME    250
+
   ;------------------------------------------------
   ; Define PFI_VERBOSE to get more compiler output
   ;------------------------------------------------
@@ -2304,6 +2314,7 @@ incrm_index:
 display_results:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Field 2" "State" "${L_CLIENT_LIST}"
 
+  Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioF.ini"
@@ -2922,8 +2933,7 @@ the_second:
 the_first:
   Rename "$INSTDIR\${L_REG_FILE}" "$INSTDIR\${L_REG_FILE}.bk1"
 
-  Sleep 250           ; ensure banner appears for at least 250ms
-
+  Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
   Pop ${L_UNDOFILE}
@@ -4370,6 +4380,7 @@ display_banner:
   ClearErrors
   Exec '"$INSTDIR\wrapper.exe"'
   IfErrors 0 continue
+  Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "An error occurred when the installer tried to start POPFile.\
       $\r$\n$\r$\n\
@@ -4393,6 +4404,7 @@ check_if_ready:
   IntCmp ${L_TIMEOUT} 0 remove_banner remove_banner check_if_ready
 
 remove_banner:
+  Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
 exit_without_banner:
