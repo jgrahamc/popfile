@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.7"
+  !define C_PFI_VERSION  "0.1.8"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -4544,7 +4544,15 @@ cleanup_registry:
 
   ; if $G_USERDIR was removed, skip these next ones
 
-  IfFileExists $G_USERDIR 0 removed
+  IfFileExists "$G_USERDIR\*.*" 0 removed
+    
+    ; Check if the user data was stored in same folder as the POPFile program files
+    
+    IfFileExists "$G_USERDIR\popfile.pl" removed
+    IfFileExists "$G_USERDIR\perl.exe" removed
+    
+    ; Assume it is safe to offer to remove everything now
+    
     MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO removed
     DetailPrint "$(PFI_LANG_UN_LOG_8)"
     Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
