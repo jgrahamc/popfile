@@ -2744,18 +2744,22 @@ sub new_history_file__
     $from =~ s/&/&amp;/g;
     $from =~ s/</&lt;/g;
     $from =~ s/>/&gt;/g;
+    $from =~ s/"/&quot;/g;
 
     $short_from =~ s/&/&amp;/g;
     $short_from =~ s/</&lt;/g;
     $short_from =~ s/>/&gt;/g;
+    $short_from =~ s/"/&quot;/g;
 
     $subject =~ s/&/&amp;/g;
     $subject =~ s/</&lt;/g;
     $subject =~ s/>/&gt;/g;
+    $subject =~ s/"/&quot;/g;
 
     $short_subject =~ s/&/&amp;/g;
     $short_subject =~ s/</&lt;/g;
     $short_subject =~ s/>/&gt;/g;
+    $short_subject =~ s/"/&quot;/g;
 
     # If the index is known, stick it straight into the history else go into
     # the precache for merging into history when the history is viewed next
