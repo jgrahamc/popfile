@@ -4,7 +4,7 @@
 #                     used by 'installer.nsi' when installing/uninstalling the
 #                     'Kakasi' package.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

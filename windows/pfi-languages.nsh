@@ -4,7 +4,7 @@
 #                       supported by the POPFile Windows installer and its associated
 #                       utilties. This makes maintenance easier.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
