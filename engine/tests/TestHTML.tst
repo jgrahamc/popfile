@@ -25,19 +25,19 @@
 # Set up the test corpus and use the Test msg and cls files
 # to create a current history set
 
-test_assert( (`rm -rf corpus` || 0) == 0 );
-test_assert( (`cp -R corpus.base corpus` || 0) == 0 );
-test_assert( (`rm -rf corpus/CVS` || 0) == 0 );
-test_assert( (`rm -rf corpus/other/CVS` || 0) == 0 );
-test_assert( (`rm -rf corpus/spam/CVS` || 0) == 0 );
-test_assert( (`rm -rf corpus/personal/CVS` || 0) == 0 );
-test_assert( (`rm -rf messages` || 0) == 0 );
-`rm -f __db.*`;
+rmtree( 'corpus' );
+test_assert( rec_cp( 'corpus.base', 'corpus' ) );
+test_assert( rmtree( 'corpus/CVS' ) > 0 );
+test_assert( rmtree( 'corpus/other/CVS' ) > 0 );
+test_assert( rmtree( 'corpus/spam/CVS' ) > 0 );
+test_assert( rmtree( 'corpus/personal/CVS' ) > 0 );
+rmtree( 'messages' );
+`rm -f __db.*`;  # todo: make tool independent
 unlink 'popfile.cfg';
 unlink 'popfile.db';
 
 unlink( 'stopwords' );
-test_assert( (`cp stopwords.base stopwords` || 0 ) == 0 );
+test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 mkdir 'messages';
 my @messages = glob '*.msg';
@@ -74,7 +74,7 @@ sub find_form
 
         if ( defined( $input ) ) {
             return ( $form, $input );
-	}
+        }
     }
 
     test_assert( 0, "Unable to find form element '$name'" );
@@ -282,28 +282,28 @@ if ( $pid == 0 ) {
                 $h->config_( 'archive_dir', 'archive' );
                 $h->config_( 'archive_classes', 1 );
 
-                `date --set='3 days'`;
+                `date --set='3 days'`;  # todo: make tool independent
                 $h->remove_mail_files();
-                `date --set='3 days ago'`;
+                `date --set='3 days ago'`;  # todo: make tool independent
                 test_assert( !( -e 'messages/popfile1=1.msg' ) );
                 test_assert( !( -e 'messages/popfile1_1.msg' ) );
                 test_assert( -e 'archive/spam/0/popfile1=1.msg' );
 
                 print $uwriter "OK\n";
                 last;
-	    }
+            }
 
             if ( $command =~ /^__GETCONFIG (.+)/ ) {
                 my $value = $c->parameter( $1 );
                 print $uwriter "OK $value\n";
                 next;
-	    }
+            }
 
             if ( $command =~ /^__SETCONFIG (.+) (.+)?/ ) {
                 $c->parameter( $1, defined($2)?$2:'' );
                 print $uwriter "OK\n";
                 next;
-	    }
+            }
 
             if ( $command =~ /^__GETPARAMETER ([^ ]+) (.+)/ ) {
                 my $session = $b->get_session_key( 'admin', '' );
@@ -311,31 +311,31 @@ if ( $pid == 0 ) {
                 $b->release_session_key( $session );
                 print $uwriter "OK $value\n";
                 next;
-	    }
+            }
 
             if ( $command =~ /^__SENDMESSAGE ([^ ]+) (.+)/ ) {
                 $b->mq_post_( $1, $2, '' );
                 $mq->service();
                 print $uwriter "OK\n";
                 next;
-	    }
+            }
 
             if ( $command =~ /^__CHECKMAGNET ([^ ]+) ([^ ]+) ([^\r\n]+)/ ) {
                 my $session = $b->get_session_key( 'admin', '' );
                 my $found = 0;
                 for my $magnet ($b->get_magnets( $session, $1, $2 ) ) {
-		    if ( $magnet eq $3 ) {
+                    if ( $magnet eq $3 ) {
                         print $uwriter "OK\n";
                         $found = 1;
                         last;
-		    }
-		}
+                    }
+                }
 
                 $b->release_session_key( $session );
                 print $uwriter "ERR\n" if ( !$found );
                 next;
-	    }
-	}
+            }
+        }
     }
 
     close $dreader;
@@ -377,7 +377,7 @@ if ( $pid == 0 ) {
 
         if ( $line =~ /^#/ ) {
             next;
-	}
+        }
 
         $in->( $line );
         $line = "$in";
@@ -389,7 +389,7 @@ if ( $pid == 0 ) {
             $content = $response->content;
             @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
             next;
-	}
+        }
 
         if ( $line =~ /^CLICK +(.+)$/ ) {
             my $name = $1;
@@ -400,16 +400,16 @@ if ( $pid == 0 ) {
                 my $response = $ua->request( $request );
                 if ( $response->code == 302 ) {
                     $content = get(url("http://127.0.0.1:$port" . $response->headers->header('Location')));
-		} else {
+                } else {
                     test_assert_equal( $response->code, 200, "From script line $line_number" );
                     $content = $response->content;
                 }
                 @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
-	    } else {
+            } else {
                 test_assert( 0, "Failed to create request form at script line $line_number" );
             }
             next;
-	}
+        }
 
         if ( $line =~ /^PARAMETERIS +([^ ]+) ([^ ]+) ?(.+)?$/ ) {
             my ( $bucket, $param, $expected ) = ( $1, $2, $3 );
@@ -419,7 +419,7 @@ if ( $pid == 0 ) {
             $reply =~ /^OK ([^\r\n]+)/;
             test_assert_equal( $1, $expected, "From script line $line_number" );
             next;
-	}
+        }
 
         if ( $line =~ /^CONFIGIS +([^ ]+) ?(.+)?$/ ) {
             my ( $option, $expected ) = ( $1, $2 );
@@ -433,7 +433,7 @@ if ( $pid == 0 ) {
             }
             test_assert_equal( $reply, $expected, "From script line $line_number asking for $option and got reply $reply" );
             next;
-	}
+        }
 
         if ( $line =~ /^SETCONFIG +([^ ]+) ?(.+)?$/ ) {
             my ( $option, $value ) = ( $1, $2 );
@@ -443,9 +443,9 @@ if ( $pid == 0 ) {
 
             if ( !( $reply =~ /^OK/ ) ) {
                 test_assert( 0, "From script line $line_number" );
-	    }
+            }
             next;
-	}
+        }
 
         if ( $line =~ /^SENDMSG +([^ ]+) (.+)$/ ) {
             my ( $msg, $param ) = ( $1, $2 );
@@ -454,9 +454,9 @@ if ( $pid == 0 ) {
 
             if ( !( $reply =~ /^OK/ ) ) {
                 test_assert( 0, "From script line $line_number" );
-	    }
+            }
             next;
-	}
+        }
 
         if ( $line =~ /^MAGNETIS +([^ ]+) ([^ ]+) (.+)$/ ) {
             my ( $bucket, $type, $magnet ) = ( $1, $2, $3 );
@@ -465,42 +465,42 @@ if ( $pid == 0 ) {
 
             if ( !( $reply =~ /^OK/ ) ) {
                 test_assert( 0, "From script line $line_number" );
-	    }
+            }
             next;
-	}
+        }
 
         if ( $line =~ /^INPUTIS +([^ ]+) ?(.+)?$/ ) {
             my ( $name, $expected ) = ( $1, $2 );
             $expected = '' if ( !defined( $expected ) );
             test_assert_equal( form_input( $name ), $expected, "From script line $line_number" );
             next;
-	}
+        }
 
         if ( $line =~ /^SETINPUTN +([^ ]+) +(\d+) ?(.+)?$/ ) {
             my ( $name, $nth, $value ) = ( $1, $2, $3 );
             $value = '' if ( !defined( $value ) );
             form_input( $name, $value, $nth );
             next;
-	}
+        }
 
         if ( $line =~ /^(SETINPUT|SETSUBMIT) +([^ ]+) ?(.+)?$/ ) {
             my ( $name, $value ) = ( $2, $3 );
             $value = '' if ( !defined( $value ) );
             form_input( $name, $value );
             next if ( $line =~ /^SETINPUT/ );
-	}
+        }
 
         # Note drop through here from previous if
 
         if ( $line =~ /^(SET)?SUBMIT +([^ ]+)/ ) {
             my $request = form_submit( $2 );
             if ( defined( $request ) ) {
-	        my $response = $ua->request( $request );
+                my $response = $ua->request( $request );
                 $content = $response->content;
                 @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
-	    }
+            }
             next;
-	}
+        }
 
         if ( $line =~ /^MATCH +(.+)$/ ) {
             test_assert_regexp( $content, "\Q$1\E", "From script line $line_number" );
@@ -523,13 +523,13 @@ if ( $pid == 0 ) {
                 $in->( $line );
                 $line = "$in";
 
-	        if ( $line =~ /^ENDMATCH$/ ) {
+                if ( $line =~ /^ENDMATCH$/ ) {
                     last;
-	        }
+                }
 
                 $block .= "\n" unless ( $block eq '' );
                 $block .= $line;
-	    }
+            }
 
             test_assert_regexp( $content, "\Q$block\E", "From script line $line_number" );
             next;
@@ -543,13 +543,13 @@ if ( $pid == 0 ) {
                 $line =~ s/^[\t ]+//g;
                 $line =~ s/[\r\n\t ]+$//g;
 
-	        if ( $line =~ /^ENDCODE$/ ) {
+                if ( $line =~ /^ENDCODE$/ ) {
                     last;
-	        }
+                }
 
                 $block .= $line;
                 $block .= "\n";
-	    }
+            }
 
             eval( $block );
             next;
@@ -557,7 +557,7 @@ if ( $pid == 0 ) {
 
         if ( $line =~ /[^ \t\r\n]/ ) {
             test_assert( 0, "Don't understand line $line_number" );
-	}
+        }
     }
 
     close SCRIPT;

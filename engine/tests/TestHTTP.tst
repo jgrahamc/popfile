@@ -22,10 +22,10 @@
 #
 # ---------------------------------------------------------------------------------------------
 
-test_assert( `rm -rf messages` == 0 );
-test_assert( `rm -rf corpus` == 0 );
-test_assert( `cp -R corpus.base corpus` == 0 );
-test_assert( `rm -rf corpus/CVS` == 0 );
+rmtree( 'messages' );
+rmtree( 'corpus' );
+test_assert( rec_cp( 'corpus.base', 'corpus' ) );
+test_assert( rmtree( 'corpus/CVS' ) > 0 );
 
 sub my_handler
 {

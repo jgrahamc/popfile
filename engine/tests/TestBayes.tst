@@ -22,14 +22,14 @@
 #
 # ---------------------------------------------------------------------------------------------
 
-test_assert( `rm -rf messages` == 0 );
-test_assert( `rm -rf corpus` == 0 );
-test_assert( `cp -R corpus.base corpus` == 0 );
-test_assert( `rm -rf corpus/CVS` == 0 );
+rmtree( 'messages' );
+rmtree( 'corpus' );
+test_assert( rec_cp( 'corpus.base', 'corpus' ) );
+test_assert( rmtree( 'corpus/CVS' ) > 0 );
 
 unlink 'popfile.db';
 unlink 'stopwords';
-test_assert( `cp stopwords.base stopwords` == 0 );
+test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 mkdir 'messages';
 
@@ -519,9 +519,9 @@ for my $class_test (@class_tests) {
     my $class;
 
     if ( open CLASS, "<$class_file" ) {
-    	$class = <CLASS>;
-    	$class =~ s/[\r\n]//g;
-    	close CLASS;
+        $class = <CLASS>;
+        $class =~ s/[\r\n]//g;
+        close CLASS;
     }
 
     test_assert_equal( $b->classify( $session, $class_test ), $class, $class_test );
@@ -543,30 +543,30 @@ my @modify_tests = sort glob 'TestMailParse*.msg';
 
 for my $modify_file (@modify_tests) {
     if ( ( open MSG, "<$modify_file" ) && ( open OUTPUT, ">temp.out" ) ) {
-	    my ( $class, $slot ) = $b->classify_and_modify( $session, \*MSG, \*OUTPUT, 0, '' );
-	    close MSG;
-		close OUTPUT;
+        my ( $class, $slot ) = $b->classify_and_modify( $session, \*MSG, \*OUTPUT, 0, '' );
+        close MSG;
+        close OUTPUT;
 
-		my $output_file = $modify_file;
-		$output_file    =~ s/msg/cam/;
+        my $output_file = $modify_file;
+        $output_file    =~ s/msg/cam/;
 
-		open CAM, "<$output_file";
-		open OUTPUT, "<temp.out";
-		while ( <OUTPUT> ) {
-		    my $output_line = $_;
-			my $cam_line    = <CAM>;
-			$output_line =~ s/[\r\n]//g;
-			$cam_line =~ s/[\r\n]//g;
-                        if ( ( $output_line ne '.' ) || ( $cam_line ne '' ) ) {
-                            next if ( $output_line =~ /X-POPFile-Link/ );
-   			    test_assert_equal( $output_line, $cam_line, $modify_file );
-                        }
-		}
+        open CAM, "<$output_file";
+        open OUTPUT, "<temp.out";
+        while ( <OUTPUT> ) {
+            my $output_line = $_;
+            my $cam_line    = <CAM>;
+            $output_line =~ s/[\r\n]//g;
+            $cam_line =~ s/[\r\n]//g;
+            if ( ( $output_line ne '.' ) || ( $cam_line ne '' ) ) {
+                next if ( $output_line =~ /X-POPFile-Link/ );
+                test_assert_equal( $output_line, $cam_line, $modify_file );
+            }
+        }
 
-		close CAM;
-		close OUTPUT;
-		$h->delete_slot( $slot );
-		unlink( 'temp.out' );
+        close CAM;
+        close OUTPUT;
+        $h->delete_slot( $slot );
+        unlink( 'temp.out' );
     }
 }
 

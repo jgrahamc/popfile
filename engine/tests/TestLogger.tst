@@ -130,17 +130,17 @@ test_assert( defined( $mq->{queue__}{TICKD}[0] ), "checking TICKD message" );
 
 if ( getlogin() eq 'root' ) {
     my $file = $l->debug_filename();
-    `date --set='2 days'`;
+    `date --set='2 days'`;  # todo: make tool independent
     $l->service();
     $mq->service();
     my $exists = ( -e $file );
     test_assert( $exists, "checking that debug file was deleted" );
-    `date --set='1 day'`;
+    `date --set='1 day'`;  # todo: make tool independent
     $l->service();
     $mq->service();
     $exists = ( -e $file );
     test_assert( !$exists, "checking that debug file was deleted" );
-    `date --set='3 days ago'`;
+    `date --set='3 days ago'`;  # todo: make tool independent
 } else {
     print "Warning: skipping clean up tests because you are not root\n";
 }

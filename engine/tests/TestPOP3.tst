@@ -83,12 +83,12 @@ sub server
         $command =~ s/(\015|\012)//g;
 
         if ( $command =~ /^USER (.*)/i ) {
-	    if ( $1 =~ /(gooduser|goslow|hang|slowlf)/ ) {
+            if ( $1 =~ /(gooduser|goslow|hang|slowlf)/ ) {
                  print $client "+OK Welcome $1$eol";
                  $goslow = ( $1 =~ /goslow/ );
                  $hang   = ( $1 =~ /hang/   );
                  $slowlf = ( $1 =~ /slowlf/ );
-	    } else {
+            } else {
                  print $client "-ERR Unknown user $1$eol";
             }
             next;
@@ -119,7 +119,7 @@ sub server
                     }
                     next;
 
-    	        } else {
+                } else {
                      print $client "-ERR Unknown APOP user $1$eol";
                      next;
                 }
@@ -133,13 +133,13 @@ sub server
 
 
         if ( $command =~ /PASS (.*)/i ) {
-	    if ( $1 =~ /secret/ ) {
+            if ( $1 =~ /secret/ ) {
                  print $client "+OK Now logged in$eol";
-	    } else {
+            } else {
                  print $client "-ERR Bad Password$eol";
             }
             next;
-	}
+        }
 
         if ( ( $command =~ /LIST ?(.*)?/i ) ||
              ( $command =~ /UIDL ?(.*)?/i ) ||
@@ -147,24 +147,24 @@ sub server
             my $count = 0;
             my $size  = 0;
             for my $i (0..$#messages) {
-	        if ( $messages[$i] ne '' ) {
+                if ( $messages[$i] ne '' ) {
                     $count += 1;
                     $size  += ( -s $messages[$i] );
-	        }
-	    }
+                }
+            }
 
             print $client "+OK $count $size$eol";
 
             if ( $command =~ /STAT/ ) {
                 next;
-	    }
+            }
 
             for my $i (0..$#messages) {
-	        if ( $messages[$i] ne '' ) {
+                if ( $messages[$i] ne '' ) {
                      my $resp = ( $command =~ /LIST/ )?( -s $messages[$i] ):$messages[$i];
                      print $client ($i+1) . " $resp$eol";
-	        }
-	    }
+                }
+            }
 
             print $client ".$eol";
 
@@ -194,10 +194,10 @@ sub server
 
         if ( $command =~ /DELE (.*)/i ) {
             my $index = $1 - 1;
-	    if ( defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
+            if ( defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
                 $messages[$index] = '';
                 print $client "+OK Deleted $1$eol";
-	    } else {
+            } else {
                 print $client "-ERR No such message $1$eol";
             }
             next;
@@ -205,7 +205,7 @@ sub server
 
         if ( $command =~ /RETR (\d+)/i ) {
             my $index = $1 - 1;
-	    if ( defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
+            if ( defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
                  print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
                  my $slowlftemp = $slowlf;
@@ -228,16 +228,16 @@ sub server
 
                      if ( $goslow ) {
                          select( undef, undef, undef, 3 );
-		     }
+                     }
                      if ( $hang ) {
                          select( undef, undef, undef, 30 );
                      }
-		 }
+                 }
                  close FILE;
 
                  print $client ".$eol";
 
-	    } else {
+            } else {
                 print $client "-ERR No such message $1$eol";
             }
             next;
@@ -246,7 +246,7 @@ sub server
         if ( $command =~ /TOP (.*) (.*)/i ) {
             my $index = $1 - 1;
             my $countdown = $2;
-	    if ( $messages[$index] ne '' ) {
+            if ( $messages[$index] ne '' ) {
                  print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
                  open FILE, "<$messages[$index]";
@@ -258,18 +258,18 @@ sub server
 
                      if ( $line =~ /^[\r\n]+$/ ) {
                          last;
-		     }
-		 }
+                     }
+                 }
                  while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
                      $line =~ s/\r|\n//g;
                      print $client "$line$eol";
                      $countdown -= 1;
-		 }
+                 }
                  close FILE;
 
                  print $client ".$eol";
 
-	    } else {
+            } else {
                 print $client "-ERR No such message $1$eol";
             }
             next;
@@ -302,10 +302,10 @@ sub server
     return 1;
 }
 
-test_assert( scalar(`rm -rf corpus`) == 0 );
-test_assert( scalar(`cp -R corpus.base corpus`) == 0 );
-test_assert( scalar(`rm -rf corpus/CVS`) == 0 );
-test_assert( scalar(`rm -rf messages/*`) == 0 );
+rmtree( 'corpus' );
+test_assert( rec_cp( 'corpus.base', 'corpus' ) );
+test_assert( rmtree( 'corpus/CVS' ) > 0 );
+test_assert( scalar(`rm -rf messages/*`) == 0 ); # todo: make tool independent
 
 my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
@@ -414,7 +414,7 @@ if ( $pid == 0 ) {
             if ( my $client = $server->accept() ) {
                 last if !server($client, $apop_server);
                 close $client;
-	    }
+            }
         }
         
         #print "defined!\n" if (defined($dserverreader) && defined($dserverwriter) );
@@ -513,31 +513,31 @@ if ( $pid == 0 ) {
                 my $command = <$dreader>;
 
                 if ( $command =~ /__QUIT/ ) {
-		    print $uwriter "OK\n";
+                    print $uwriter "OK\n";
                     last;
-		}
+                }
 
                 if ( $command =~ /__TOPTOO/ ) {
                     $p->config_( 'toptoo', 1 );
-		    print $uwriter "OK\n";
+                    print $uwriter "OK\n";
                     next;
-		}
+                }
 
                 if ( $command =~ /__SECUREBAD/ ) {
                     $p->config_( 'secure_server', '127.0.0.1' );
                     $p->config_( 'secure_port', 8111 );
-		    print $uwriter "OK\n";
+                    print $uwriter "OK\n";
                     next;
-		}
+                }
 
                 if ( $command =~ /__SECUREOK/ ) {
                     $p->config_( 'secure_server', '127.0.0.1' );
                     $p->config_( 'secure_port', 8110 );
-		    print $uwriter "OK\n";
+                    print $uwriter "OK\n";
                     next;
-		}
-	    }
-	}
+                }
+            }
+        }
 
         close $dreader;
         close $uwriter;
@@ -629,19 +629,19 @@ if ( $pid == 0 ) {
             if ( $messages[$i] ne '' ) {
                 $count += 1;
                 $size  += ( -s $messages[$i] );
-	    }
-	}
+            }
+        }
 
         $result = <$client>;
         test_assert_equal( $result, "+OK $count $size$eol" );
 
         for my $i (0..$#messages) {
-	     if ( $messages[$i] ne '' ) {
+             if ( $messages[$i] ne '' ) {
                  my $resp = ( -s $messages[$i] );
                  $result = <$client>;
                  test_assert_equal( $result, ($i+1) . " $resp$eol" );
-	    }
-	}
+            }
+        }
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
@@ -654,12 +654,12 @@ if ( $pid == 0 ) {
         test_assert_equal( $result, "+OK $count $size$eol" );
 
         for my $i (0..$#messages) {
-	     if ( $messages[$i] ne '' ) {
+             if ( $messages[$i] ne '' ) {
                  my $resp = $messages[$i];
                  $result = <$client>;
                  test_assert_equal( $result, ($i+1) . " $resp$eol" );
-	    }
-	}
+            }
+        }
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
@@ -691,7 +691,7 @@ if ( $pid == 0 ) {
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -717,7 +717,7 @@ if ( $pid == 0 ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
             test_assert_equal( $fl, $ml );
-	}
+        }
         test_assert( eof(FILE) );
         test_assert( eof(HIST) );
         close FILE;
@@ -753,7 +753,7 @@ if ( $pid == 0 ) {
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -779,7 +779,7 @@ if ( $pid == 0 ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
             test_assert_equal( $fl, $ml );
-	}
+        }
         test_assert( !eof(FILE) );
         test_assert( eof(HIST) );
         close FILE;
@@ -843,11 +843,11 @@ if ( $pid == 0 ) {
             test_assert_equal( $result, $line );
             if ( $headers == 0 ) {
                 $countdown -= 1;
-	    }
+            }
             if ( $line =~ /^[\r\n]+$/ ) {
                 $headers = 0;
-	    }
-	}
+            }
+        }
         close FILE;
 
         $result = <$client>;
@@ -884,7 +884,7 @@ if ( $pid == 0 ) {
             test_assert( $result =~ /\015/ );
             $result =~ s/\015//;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -910,7 +910,7 @@ if ( $pid == 0 ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
             test_assert_equal( $fl, $ml );
-	}
+        }
         test_assert( eof(FILE) );
         test_assert( eof(HIST) );
         close FILE;
@@ -969,11 +969,11 @@ if ( $pid == 0 ) {
             test_assert_equal( $result, $line, "[$result][$line]" );
             if ( $headers == 0 ) {
                 $countdown -= 1;
-	    }
+            }
             if ( $line =~ /^[\r\n]+$/ ) {
                 $headers = 0;
-	    }
-	}
+            }
+        }
         close FILE;
 
         $result = <$client>;
@@ -990,7 +990,7 @@ if ( $pid == 0 ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
             test_assert_equal( $fl, $ml );
-	}
+        }
         test_assert( eof(FILE) );
         test_assert( eof(HIST) );
         close FILE;
@@ -1021,7 +1021,7 @@ if ( $pid == 0 ) {
             $result =~ s/[\r\n]//g;
             $result =~ s/popfile2=8/popfile0=0/;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -1044,7 +1044,7 @@ if ( $pid == 0 ) {
             test_assert( $result =~ /\015/ );
             $result =~ s/\015//;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -1063,7 +1063,7 @@ if ( $pid == 0 ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
             test_assert_equal( $fl, $ml );
-	}
+        }
         test_assert( eof(FILE) );
         test_assert( eof(HIST) );
         close FILE;
@@ -1090,7 +1090,7 @@ if ( $pid == 0 ) {
             $result =~ s/[\r\n]//g;
             $result =~ s/popfile2=9/popfile0=0/;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -1115,7 +1115,7 @@ if ( $pid == 0 ) {
             $result =~ s/[\r\n]//g;
             $result =~ s/popfile2=9/popfile0=0/;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -1141,11 +1141,11 @@ if ( $pid == 0 ) {
             test_assert_equal( $result, $line );
             if ( $headers == 0 ) {
                 $countdown -= 1;
-	    }
+            }
             if ( $line =~ /^[\r\n]+$/ ) {
                 $headers = 0;
-	    }
-	}
+            }
+        }
         close FILE;
 
         $result = <$client>;
@@ -1162,7 +1162,7 @@ if ( $pid == 0 ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
             test_assert_equal( $fl, $ml );
-	}
+        }
         test_assert( eof(FILE) );
         close FILE;
         close HIST;
@@ -1240,15 +1240,15 @@ if ( $pid == 0 ) {
             while ( $result = <$client> ) {
                 if ( $result =~ /TimeoutPrevention/ ) {
                     next;
-	        } else {
+                } else {
                     last;
                 }
-	    }
+            }
             $result =~ s/popfile3=1/popfile0=0/;
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;
@@ -1292,7 +1292,7 @@ if ( $pid == 0 ) {
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
-	}
+        }
         close FILE;
 
         $result = <$client>;

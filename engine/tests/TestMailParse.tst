@@ -22,12 +22,12 @@
 #
 # ---------------------------------------------------------------------------------------------
 
-test_assert( (`rm -rf messages` || 0 ) == 0 );
-test_assert( (`rm -rf corpus` || 0 ) == 0 );
-test_assert( (`cp -R corpus.base corpus` || 0) == 0 );
-test_assert( (`rm -rf corpus/CVS` || 0 ) == 0 );
+rmtree( 'messages' );
+rmtree( 'corpus' );
+test_assert( rec_cp( 'corpus.base', 'corpus' ) );
+test_assert( rmtree( 'corpus/CVS' ) > 0 );
 unlink 'stopwords';
-test_assert( `cp stopwords.base stopwords` == 0 );
+test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 use Classifier::MailParse;
 use Classifier::Bayes;

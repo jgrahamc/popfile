@@ -26,6 +26,32 @@
 use strict;
 
 require IO::Handle;
+use File::Copy;
+use File::Find;
+use File::Path;
+
+sub rec_cp
+{
+    my ( $from, $to ) = @_;
+    my $ok = 1;
+
+    my $subref = 
+        sub { 
+            my $f = $_; 
+            my $t = $f; 
+            $t =~ s/^$from/$to/; 
+            if ( -d $f ) {
+                mkdir $t ;
+            }
+            else {
+                copy( $f, $t) or $ok = 0; 
+            }
+        };
+    my %optref = ( wanted => $subref, no_chdir => 1 );
+    find ( \%optref , $from );
+    
+    return $ok;
+}
 
 # Look for all the TST files in the tests/ subfolder and run
 # each of them by including them in this file with the use statement
