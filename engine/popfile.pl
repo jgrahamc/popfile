@@ -71,17 +71,23 @@ my $classifier;
 # Constant used by the log rotation code
 my $seconds_per_day = 60 * 60 * 24;
 
+# Color constants
+my $main_color      = '#ffffcc';
+my $tab_color       = '#ccffff';
+my $stab_color      = '#99ffff';
+my $highlight_color = 'lightcyan';
+
 # These two variables are used to create the HTML UI for POPFile
-my $header = "<html><head><title>POPFile VERSION</title></head>\
-<body bgcolor=#ffffff><h1><span class=useem>POPFile VERSION</span></h1>\
+my $header = "<html><head><title>POPFile Maintenance</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style></head>\
+<body bgcolor=$main_color><h1><span class=useem>POPFile Maintenance</span></h1>\
 <table width=100% cellspacing=0><tr><td width=2></td>\
 <td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history>History</a></b></font></td><td width=2></td>\
 <td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/buckets>Buckets</a></b></font></td><td width=2></td>\
 <td bgcolor=TAB0 width=10% align=center><font size=+1><b>&nbsp;<a href=/configuration>Configuration</a></b></font></td>\
 <td width=70%>&nbsp;</td></tr>\
-<tr height=5 bgcolor=#ffff99><td height=5 colspan=7 bgcolor=#ffff99></td></tr></table>\
-<table width=100% cellpadding=12 cellspacing=0><tr><td width=50% valign=top bgcolor=#ffff99>";
-my $footer = "<p><hr></tr></table><p></body></html>";
+<tr height=5 bgcolor=$main_color><td height=5 colspan=7 bgcolor=$main_color></td></tr></table>\
+<table width=100% cellpadding=12 cellspacing=0><tr><td width=50% valign=top bgcolor=$main_color>";
+my $footer = "</tr></table><hr><p align=center>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a></body></html>";
 
 # Hash used to store form parameters
 my %form = {};
@@ -649,8 +655,8 @@ sub flush_extra
 sub http_ok
 {
     my ( $text, $selected ) = @_;
-    my @tab = ( 'lightblue', 'lightblue', 'lightblue' );
-    $tab[$selected] = '#ffff99';
+    my @tab = ( $tab_color, $tab_color, $tab_color );
+    $tab[$selected] = $stab_color;
     
     $text = $header . $text . $footer;
     
@@ -1074,7 +1080,7 @@ sub history_page
         
         $body .= "<a name=$mail_file>";
         $body .= "<tr";
-        $body .= " bgcolor=lightgreen" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
+        $body .= " bgcolor=$highlight_color" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
         $body .= "><td>";
         $body .= $i+1 . "<td>";
         my $class_file = $mail_file;
@@ -1119,7 +1125,7 @@ sub history_page
         # Check to see if we want to view a message
         if ( $form{view} eq $mail_file )
         {
-            $body .= "<tr><td><td colspan=3 bgcolor=lightgreen>";
+            $body .= "<tr><td><td colspan=3 bgcolor=$highlight_color>";
             $classifier->{parser}->{color} = 1;
             $classifier->{parser}->{bayes} = $classifier;
             $body .= $classifier->{parser}->parse_stream($form{view});
@@ -1872,6 +1878,7 @@ debug( "POPFile Engine v$major_version.$minor_version running" );
 
 # Fix up the page template with the current version number
 $header =~ s/VERSION/v$major_version\.$minor_version/g;
+$footer =~ s/VERSION/v$major_version\.$minor_version/g;
 
 # Run the POP server and handle requests
 run_popfile($configuration{port}, $configuration{server}, $configuration{sport}, $configuration{ui_port});
