@@ -3,7 +3,7 @@
 ;
 
 !define MUI_PRODUCT "POPFile" 
-!define MUI_VERSION "0.18.0 (RC1)"
+!define MUI_VERSION "0.18.0 (RC2)"
 
 !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
 
