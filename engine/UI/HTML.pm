@@ -2173,9 +2173,9 @@ sub history_page
         return $self->http_redirect_( $client, "/history?start_message=" . ( ( $self->{form_}{jumptopage} - 1 ) * $self->user_config_( 1, 'page_size' ) ) . '&' . $self->print_form_fields_(1,0,('filter','search','sort','session','negate') ) );
     }
 
-    $self->handle_history_bar__( $client, $templ, $template, $page );
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
                                                     $page );
+    $self->handle_history_bar__( $client, $templ, $template, $page );
 
     # Set up default values for various form elements that have been passed
     # in or not so that we don't have to worry about undefined values later
