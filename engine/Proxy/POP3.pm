@@ -831,6 +831,7 @@ sub calculate_today
     
     # Create the name of the debug file for the debug() function
     $self->{today} = int( time / $seconds_per_day ) * $seconds_per_day;
+    $self->{mail_filename}  = "popfile$self->{today}";
     $self->{debug_filename} = "popfile$self->{today}.log";
 }
 1;
