@@ -13,7 +13,7 @@ setup.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css
 setup2.exe: installer2.nsi io*.ini
 setup2.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css
 	@echo Making installer $@...
-	@../NSIS/makensis.exe /V2 installer2.nsi
+	@../NSIS/makensis.exe /V4 installer2.nsi
 
 popfile-windows.zip: setup.exe	
 	@echo Packaging release file $@...
