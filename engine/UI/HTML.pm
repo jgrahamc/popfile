@@ -450,7 +450,7 @@ sub url_handler__
         return 1;
     }
 
-    if ( ( $url eq '/' ) || (!defined($self->{form_}{session})) ) {
+    if ( ! defined($self->{form_}{session}) ) {
         delete $self->{form_};
     }
 
@@ -3304,7 +3304,7 @@ sub shutdown_page__
 
     # Replace the link to the style sheet with the style sheet itself
 
-    $text =~ s/\Q<link rel="stylesheet" type="text\/css" href="skins\/style.css" title="POPFile-Style">\E/$css/;
+    $text =~ s/\Q<link rel="stylesheet" type="text\/css" href="${root}style.css" title="POPFile-Style">\E/$css/;
 
     # Remove the session key from the menu links:
 
