@@ -176,7 +176,9 @@ sub child__
         if ( $command =~ /$user_command/i ) {
             if ( $1 ne '' )  {
                 print $pipe "LOGIN:$4$eol";
+                flush $pipe;
                 $self->yield_( $ppipe, $pid );
+
                 if ( $mail = $self->verify_connected_( $mail, $client, $1, $3 || 110 ) )  {
 
                     # Pass through the USER command with the actual user name for this server,
@@ -336,6 +338,7 @@ sub child__
 
                             print $pipe "CLASS:$class$eol";
                             print $pipe "NEWFL:$history_file$eol";
+                            flush $pipe;
                             $self->yield_( $ppipe, $pid );
                         }
                     }
@@ -434,6 +437,7 @@ sub child__
                     $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, '' );
 
                     print $pipe "CLASS:$class$eol";
+                    flush $pipe;
                     $self->yield_( $ppipe, $pid );
                 }
 
@@ -454,6 +458,7 @@ sub child__
 
                     print $pipe "NEWFL:$history_file$eol";
                     print $pipe "CLASS:$class$eol";
+                    flush $pipe;
                     $self->yield_( $ppipe, $pid );
 
                     # Note locally that file has been retrieved
@@ -496,6 +501,7 @@ sub child__
     close $mail if defined( $mail );
     close $client;
     print $pipe "CMPLT$eol";
+    flush $pipe;
     $self->yield_( $ppipe, $pid );
     close $pipe;
 

@@ -252,6 +252,7 @@ sub child__
 
                     print $pipe "CLASS:$class$eol";
                     print $pipe "NEWFL:$history_file$eol";
+                    flush $pipe;
                     $self->yield_( $ppipe, $pid );
                 }
 
@@ -335,6 +336,7 @@ sub child__
     close $news if defined( $news );
     close $client;
     print $pipe "CMPLT$eol";
+    flush $pipe;
     $self->yield_( $ppipe, $pid );
     close $pipe;
 

@@ -230,6 +230,7 @@ sub child__
                 # Tell the parent that we just handled a mail
                 print $pipe "CLASS:$class$eol";
                 print $pipe "NEWFL:$history_file$eol";
+                flush $pipe;
                 $self->yield_( $ppipe, $pid );
 
                 my $response = <$mail>;
@@ -266,6 +267,7 @@ sub child__
     close $mail if defined( $mail );
     close $client;
     print $pipe "CMPLT$eol";
+    flush $pipe;
     $self->yield_( $ppipe, $pid );
     close $pipe;
 }
