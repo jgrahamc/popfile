@@ -804,7 +804,7 @@ sub get_module
         $type = lc($1);
         $name = lc($2);
 
-        $type =~ s/^POPFile$/core/
+        $type =~ s/^POPFile$/core/i;
     }
 
     return $self->{components__}{$type}{$name};
