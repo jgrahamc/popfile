@@ -171,6 +171,123 @@ test_assert_equal( $cl->{words__}{hello},     1 );
 test_assert_equal( $cl->{words__}{visible},   1 );
 test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
 
+# CSS tests
+$cl->{htmlfontcolor__} = '';
+$cl->{words__}         = {};
+$cl->{in_html_tag}   = 0;
+
+my $style = $cl->parse_css_style('color: #ff00ff; background: red' );
+
+test_assert_equal( $style->{'color'}, '#ff00ff' );
+test_assert_equal( scalar( $cl->parse_css_color($style->{'color'}) ), 'ff00ff' );
+
+test_assert_equal( $style->{'background'}, 'red' );
+test_assert_equal( scalar($cl->parse_css_color($style->{'background'})), 'ff0000' );
+
+$style = $cl->parse_css_style( '{color: #ff00ff; background: red }', 1 );
+
+test_assert_equal( $style->{'color'}, '#ff00ff' );
+test_assert_equal( scalar( $cl->parse_css_color($style->{'color'}) ), 'ff00ff' );
+
+test_assert_equal( $style->{'background'}, 'red' );
+test_assert_equal( scalar($cl->parse_css_color($style->{'background'})), 'ff0000' );
+
+my ( $red, $green, $blue ) = $cl->parse_css_color( '#ff00ff' );
+
+test_assert_equal( $red, 255   );
+test_assert_equal( $green, 0   );
+test_assert_equal( $blue, 255  );
+
+( $red, $green, $blue ) = $cl->parse_css_color( '#f0f' );
+
+test_assert_equal( $red, 255  );
+test_assert_equal( $green, 0  );
+test_assert_equal( $blue, 255 );
+
+( $red, $green, $blue ) = $cl->parse_css_color( '#ff00f' );
+
+test_assert_equal( $red, -1 );
+test_assert_equal( $green, -1 );
+test_assert_equal( $blue, -1 );
+
+( $red, $green, $blue ) = $cl->parse_css_color( 'rgb(255,255,255)' );
+
+test_assert_equal( $red, 255 );
+test_assert_equal( $green, 255 );
+test_assert_equal( $blue, 255 );
+
+( $red, $green, $blue ) = $cl->parse_css_color( 'rgb(300,300,300)' );
+
+test_assert_equal( $red, 255 );
+test_assert_equal( $green, 255 );
+test_assert_equal( $blue, 255 );
+
+( $red, $green, $blue ) = $cl->parse_css_color( 'rgb(-1,-1,-1)' );
+
+test_assert_equal( $red, 0 );
+test_assert_equal( $green, 0 );
+test_assert_equal( $blue, 0 );
+
+( $red, $green, $blue ) = $cl->parse_css_color( 'rgb( 0% , 100% , 0% )' );
+
+test_assert_equal( $red, 0 );
+test_assert_equal( $green, 255 );
+test_assert_equal( $blue, 0 );
+
+( $red, $green, $blue ) = $cl->parse_css_color( 'rgb( 110% , 110% , 110% )' );
+
+test_assert_equal( $red, 255 );
+test_assert_equal( $green, 255 );
+test_assert_equal( $blue, 255 );
+
+test_assert_equal( scalar( $cl->parse_css_color( 'rgb(1,1,1%)') ), 'error' );
+
+test_assert_equal( scalar( $cl->parse_css_color( 'foo' ) ), 'error' );
+
+( $red, $green, $blue ) = $cl->parse_css_color( 'foo' );
+
+test_assert_equal( $red, -1 );
+test_assert_equal( $green, -1 );
+test_assert_equal( $blue, -1 );
+
+$cl->parse_html( '<body style="color:#ffffff;background: white">' );
+test_assert_equal( $cl->{words__}{'html:cssfontcolorffffff'}, 1 );
+test_assert_equal( $cl->{words__}{'html:cssbackcolorffffff'}, 1 );
+
+test_assert_equal( $cl->{htmlfontcolor__}, 'ffffff' );
+test_assert_equal( $cl->{htmlbackcolor__}, 'ffffff' );
+test_assert_equal( $cl->{htmlbodycolor__}, 'ffffff' );
+
+test_assert_equal( $cl->{cssfontcolortag__}, 'body');
+test_assert_equal( $cl->{cssbackcolortag__}, 'body');
+
+$cl->parse_html( 'aaaa<a style="visibility:hidden">' );
+test_assert_equal( $cl->{words__}{'html:cssvisibilityhidden'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:invisibleink'}, 1 );
+
+$cl->parse_html( '</a><div style="display:none">' );
+test_assert_equal( $cl->{words__}{'html:cssdisplaynone'}, 1 );
+
+$cl->parse_html( '</div></body>' );
+
+test_assert_equal( $cl->{cssfontcolortag__}, '' );
+test_assert_equal( $cl->{cssbackcolortag__}, '' );
+test_assert_equal( $cl->{htmlfontcolor__}, '000000' );
+test_assert_equal( $cl->{htmlbackcolor__}, 'ffffff' );
+test_assert_equal( $cl->{htmlbodycolor__}, 'ffffff' );
+
+
+
+$cl->parse_html( '<p style="color: rgb(0,0,0);background: #000000">' );
+
+test_assert_equal( $cl->{words__}{'html:cssfontcolor000000'}, 1 );
+test_assert_equal( $cl->{words__}{'html:cssbackcolor000000'}, 1 );
+
+$cl->{htmlfontcolor__} = '';
+$cl->{words__}         = {};
+$cl->{in_html_tag}   = 0;
+
+
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages
 # to be parsed with the resulting values for the words hash in TestMailParse\d+.wrd
 
@@ -222,7 +339,7 @@ test_assert_equal( $1, 'bugtracker@rltvty.com' );
 # Check that multi-line To: and CC: headers get handled properly
 $cl->parse_file( 'TestMailParse021.msg' );
 $cl->{to__} =~ s/[\r\n]//g;
-test_assert_equal( $cl->{to__},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, <dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com>, <dsmith@crossville.com>, <dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, <dsmith@dasia.net>' );
+test_assert_equal( $cl->{to__},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, <dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com> , <dsmith@crossville.com>, <dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, <dsmith@dasia.net>' );
 $cl->{cc__} =~ s/[\r\n]//g;
 test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmith@crusader.com, dsmith@datasync.com, <dsmith@doorpi.net>, <dsmith@dnet.net>, <dsmith@cybcon.com>, <dsmith@csonline.net>, <dsmith@directlink.net>, <dsmith@cvip.net>, <dsmith@dragonbbs.com>, <dsmith@crosslinkinc.com>, <dsmith@dccnet.com>, <dsmith@dakotacom.net>' );
 
@@ -298,7 +415,7 @@ test_assert_equal( $subject[2], 'parts' );
 # test first20
 
 $cl->parse_file( 'TestMailParse022.msg' );
-test_assert_equal( $cl->first20(), ' This is the title image' );
+test_assert_equal( $cl->first20(), ' This is the title image tag ALT string' );
 $cl->parse_file( 'TestMailParse021.msg' );
 test_assert_equal( $cl->first20(), ' Take Control of Your Computer With This Top of the Line Software Norton SystemWorks Software Suite Professional Edition Includes Six' );
 
@@ -324,5 +441,4 @@ test_assert_equal( $cl->{words__}{'html:imgwidth42'}, 1 );
 test_assert_equal( $cl->{words__}{'html:imgheight41'}, 1 );
 
 $b->stop();
-
 1;

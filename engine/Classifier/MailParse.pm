@@ -155,12 +155,18 @@ sub new
 
     $self->{quickmagnets__}      = {};
 
-    # These store the current HTML background color2 and font color to
+    # These store the current HTML background color and font color to
     # detect "invisible ink" used by spammers
 
     $self->{htmlbackcolor__} = map_color( $self, 'white' );
     $self->{htmlbodycolor__} = map_color( $self, 'white' );
     $self->{htmlfontcolor__} = map_color( $self, 'black' );
+
+    # store the tag that set the foreground/background color so the color can be
+    # unset when the tag closes
+
+    $self->{cssfontcolortag__} = '';
+    $self->{cssbackcolortag__} = '';
 
     # This is the distance betwee the back color and the font color
     # as computed using compute_rgb_distance
@@ -663,6 +669,20 @@ sub update_tag
             $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
             $self->compute_html_color_distance();
         }
+        
+        if ( $self->{cssbackcolortag__} =~ /^$tag/ ) {
+            $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
+            $self->{cssbackcolortag__} = '';
+
+            print "CSS back color reset to $self->{htmlbackcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );
+        }          
+        
+        if ( $self->{cssfontcolortag__} =~ /^$tag$/ ) {
+            $self->{htmlfontcolor__} = map_color( $self, 'black' );
+            $self->{cssfontcolortag__} = '';
+
+            print "CSS font color reset to $self->{htmlfontcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );            
+        }
 
         return;
     }
@@ -855,13 +875,13 @@ sub update_tag
 
             my $style = $self->parse_css_style($value);
 
-            if ($self->{debug__}) {
-                print "      CSS properties: ";
+            if ($self->{debug__}) {             # PROFILE BLOCK START
+                print "      CSS properties: "; # This is blocked as dead code unless debugging
                 foreach my $key (keys( %{$style})) {
                     print "$key($style->{$key}), ";
                 }
                 print "\n";
-            }
+            }                                   # PROFILE BLOCK STOP
 
             # CSS font sizing
             if (defined($style->{'font-size'})) {
@@ -882,7 +902,7 @@ sub update_tag
             if (defined($style->{'visibility'})) {
                 $self->update_pseudoword( 'html', "cssvisibility" . $style->{'visibility'}, $encoded, $original );
             }
-            
+
             # CSS display
             if (defined($style->{'display'})) {
                 $self->update_pseudoword( 'html', "cssdisplay" . $style->{'display'}, $encoded, $original );
@@ -893,19 +913,19 @@ sub update_tag
 
             if (defined($style->{'color'})) {
                 my $color = $style->{'color'};
-                
+
                 print "      CSS color: $color\n" if ($self->{debug__});
 
                 $color = $self->parse_css_color($color);
 
                 if ( $color ne "error" ) {
-
-                    $self->{htmlfontcolor__} = map_color($self, $color);
-
                     $self->{htmlfontcolor__} = $color;
                     $self->compute_html_color_distance();
+                    $self->{csscolortag__} = $tag;
                     print "      CSS set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
                     $self->update_pseudoword( 'html', "cssfontcolor$self->{htmlfontcolor__}", $encoded, $original );
+                    
+                    $self->{cssfontcolortag__} = $tag;
                 }
             }
 
@@ -921,6 +941,11 @@ sub update_tag
                     $self->{htmlbackcolor__} = $background_color;
                     $self->compute_html_color_distance();
                     print "       CSS set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
+
+                    $self->{htmlbodycolor__} = $background_color if ( $tag =~ /^body$/i );
+                    $self->{cssbackcolortag__} = $tag;
+
+                    $self->update_pseudoword( 'html', "cssbackcolor$self->{htmlbackcolor__}", $encoded, $original );
                 }
             }
 
@@ -929,29 +954,34 @@ sub update_tag
             if (defined($style->{'background'})) {
                 my $expression;
                 my $background = $style->{'background'};
-                
+
                 # Take the possibly multi-expression "background" property
-                
+
                 while ( $background =~ s/^([^ \t\r\n\f]+)( |$)// ) {
-                    
+
                     # and examine each expression individually
-                    
+
                     $expression = $1;
                     print "       CSS expression $expression in background property\n" if ($self->{debug__} );
-                    
+
                     my $background_color = $self->parse_css_color($expression);
-                    
+
                     # to see if it is a color
 
                     if ($background_color ne "error") {
                         $self->{htmlbackcolor__} = $background_color;
                         $self->compute_html_color_distance();
                         print "       CSS set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
-                    }                    
+                        
+                        $self->{htmlbodycolor__} = $background_color if ( $tag =~ /^body$/i );
+                        $self->{cssbackcolortag__} = $tag;
+
+                        $self->update_pseudoword( 'html', "cssbackcolor$self->{htmlbackcolor__}", $encoded, $original );
+                    }
                 }
             }
         }
-        
+
         # TODO: move this up into the style part above
 
         # Tags with style attributes (this one may impact performance!!!)
@@ -1442,9 +1472,9 @@ sub stop_parse
     if ( $self->{in_html_tag__} ) {
         $self->add_line( $self->{html_tag__} . ' ' . $self->{html_arg__}, 0, '' );
     }
-    
+
     # if we are here, and still have headers stored, we must have a bodyless message
-    
+
     #TODO: Fix me
 
     if ( $self->{header__} ne '' ) {
@@ -1753,6 +1783,9 @@ sub parse_header
     $fix_argument =~ s/</&lt;/g;
     $fix_argument =~ s/>/&gt;/g;
 
+    $argument =~ s/(\r\n|\r|\n)/ /g;
+    $argument =~ s/^[ \t]+//;
+
     if ( $self->update_pseudoword( 'header', $header, 0, $header ) ) {
         if ( $self->{color__} ne '' ) {
             my $color     = $self->get_color__("header:$header" );
@@ -1986,9 +2019,9 @@ sub parse_css_color
 
     # http://www.w3.org/TR/CSS2/syndata.html#color-units
 
-    my ($r, $g, $b, $error) = (0,0,0,0);
+    my ($r, $g, $b, $error, $found) = (0,0,0,0,0);
 
-    if ($color =~ /rgb\( ?(.*?) ?\, ?(.*?) ?\, ?(.*?) ?\)/ ) {
+    if ($color =~ /^rgb\( ?(.*?) ?\, ?(.*?) ?\, ?(.*?) ?\)$/ ) {
 
         # rgb(r,g,b) can be expressed as values 0-255 or percentages 0%-100%,
         # numbers outside this range are allowed and should be clipped into
@@ -2001,14 +2034,16 @@ sub parse_css_color
 
         ($r, $g, $b) = ($1, $2, $3);
 
-        my $ispercent;
+        my $ispercent = 0;
 
-        my $value_re = qr/^-?(\d+)$/;
-        my $percent_re = qr/^(\d+)%$/;
+        my $value_re = qr/^((-[1-9]\d*)|([1-9]\d*|0))$/;
+        my $percent_re = qr/^([1-9]\d+|0)%$/;
 
         my ($r_temp, $g_temp, $b_temp);
 
-        if ((($r_temp) = ($r =~ $percent_re)) && (($g_temp) = ($g =~ $percent_re)) && (($b_temp) = ($b =~ $percent_re)) ) {
+        if (( ($r_temp) = ($r =~ $percent_re) ) &&   # PROFILE BLOCK START
+            ( ($g_temp) = ($g =~ $percent_re) ) &&
+            ( ($b_temp) = ($b =~ $percent_re) )) { # PROFILE BLOCK STOP
 
             $ispercent = 1;
 
@@ -2021,7 +2056,14 @@ sub parse_css_color
             $r = int((($r_temp / 100) * 255) + .5);
             $g = int((($g_temp / 100) * 255) + .5);
             $b = int((($b_temp / 100) * 255) + .5);
-        } elsif ( ($r =~ $value_re) && ($g =~ $value_re) && ( $b =~ $value_re) ) {
+
+            $found = 1;
+        }
+
+        if ( ( $r =~ $value_re ) &&   # PROFILE BLOCK START
+             ( $g =~ $value_re ) &&
+             ( $b =~ $value_re ) ) { # PROFILE BLOCK STOP
+
             $ispercent = 0;
 
             #clip to 0-255
@@ -2032,16 +2074,19 @@ sub parse_css_color
             $g = 255 if ($g >= 255);
             $b = 0   if ($b <= 0);
             $b = 255 if ($b >= 255);
-        } else {
+
+            $found = 1;
+        }
+
+        if (!$found) {
             # here we have a combination of percentages and integers or some other oddity
             $ispercent = 0;
-            ($r, $g, $b) = (0,0,0);
-            $error = 1;
+            $error = 1
         }
 
         print "        CSS rgb($r, $g, $b) percent: $ispercent\n" if ( $self->{debug__} );
-
-    } elsif ( $color =~ /^#(([0-9a-f]{3})|([0-9a-f]{6}))$/i ) {
+    }
+    if ( $color =~ /^#(([0-9a-f]{3})|([0-9a-f]{6}))$/i ) {
 
         # #rgb or #rrggbb
         print "        CSS numeric form: $color\n" if $self->{debug__};
@@ -2049,35 +2094,38 @@ sub parse_css_color
         $color = $2 || $3;
 
         if (defined($2)) {
-            
+
             # in 3 value form, the value is computed by doubling each digit
 
-            ($r, $g, $b)  = (hex($1 . $1), hex($2 . $2), hex($3 . $3)) if ($color =~ /^(.)(.)(.)$/);
+            ( $r, $g, $b )  = ( hex( $1 . $1 ), hex( $2 . $2 ), hex( $3 . $3 ) ) if ($color =~ /^(.)(.)(.)$/);
         } else {
-            ($r, $b, $g) = (hex($1), hex($2), hex($3)) if ($color =~ /^(..)(..)(..)/);
+            ( $r, $g, $b ) = ( hex( $1 ), hex( $2 ), hex( $3 ) ) if ($color =~ /^(..)(..)(..)$/);
         }
+        $found = 1;
 
-    } elsif ($color =~ /^(aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow)$/i ) {
+    }
+    if ($color =~ /^(aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow)$/i ) {
         # these are the only CSS defined colours
-        
+
         print "       CSS textual color form: $color\n" if $self->{debug__};
-        
+
         my $new_color = map_color( $self, $color );
-        
+
         # our color map may have failed
         $error = 1 if ($new_color eq $color);
         ($r, $g, $b) = (hex($1), hex($2), hex($3)) if ( $new_color =~ /^(..)(..)(..)$/);
-    } else {
-        $error = 1;
+        $found = 1;
     }
 
-    if ( defined($r) && ( 0 <= $r) && ($r <= 255) &&
+    $found = 0 if ($error);
+
+    if ( defined($r) && ( 0 <= $r) && ($r <= 255) && # PROFILE BLOCK START
          defined($g) && ( 0 <= $g) && ($g <= 255) &&
          defined($b) && ( 0 <= $b) && ($b <= 255) &&
-         !$error ) {
+         $found ) {                                 # PROFILE BLOCK STOP
         if (wantarray) {
-            return ($r, $g, $b);
-        } else {            
+            return ( $r, $g, $b );
+        } else {
             $color = sprintf('%1$02x%2$02x%3$02x', $r, $g, $b);
             return $color;
         }
@@ -2086,7 +2134,7 @@ sub parse_css_color
             return (-1,-1,-1);
         } else {
             return "error";
-        }        
+        }
     }
 }
 
