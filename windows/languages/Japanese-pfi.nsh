@@ -59,7 +59,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_1        "POPFile のリリースノートを表示しますか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2        "アップグレードの場合は「Yes」を推奨します(アップグレードの前にバックアップを取ることをお勧めします)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2        "アップグレードの場合は「Yes」を推奨します。(アップグレードの前にバックアップを取ることを推奨します。)"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
@@ -76,21 +76,21 @@
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_TITLE       "POPFile インストールオプション"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_SUBTITLE    "これらのオプションは必要でない限り変更しないで下さい"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_SUBTITLE    "これらのオプションは必要でない限り変更しないで下さい。"
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3     "POP3 接続に使用するデフォルトポート番号を選んで下さい (推奨値:110)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "「ユーザーインターフェース」に使用するデフォルトポート番号を選んで下さい (推奨値:8080)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "Windows の起動時に POPFile を自動的に起動する (バックグラウンドで起動)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3     "POP3 接続に使用するデフォルトポート番号を選んで下さい。(推奨値:110)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "「ユーザーインターフェース」に使用するデフォルトポート番号を選んで下さい。(推奨値:8080)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "Windows の起動時に POPFile を自動的に起動する。(バックグラウンドで起動)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING  "重要な警告"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "POPFile のアップグレードの場合 --- インストーラーは現在のバージョンをシャットダウンします"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "POPFile のアップグレードの場合 --- インストーラーは現在のバージョンをシャットダウンします。"
 
 ; Message Boxes used when validating user's selections
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_1    "次の場所に以前にインストールされた POPFile が見つかりました:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_2    "アンインストールしますか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_3    "「Yes」を推奨します"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_3    "「Yes」を推奨します。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_1    "無効な POP3 ポート番号:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2    "ポート番号には 1 から 65535 までの番号を選んで下さい。"
@@ -100,7 +100,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_2     "ポート番号には 1 から 65535 までの番号を選んで下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_3     "「ユーザーインターフェース」ポート番号を変更して下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1    "POP3 ポート番号は「ユーザーインターフェース」ポート番号とは違う番号を選んで下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1    "POP3 ポート番号には「ユーザーインターフェース」ポート番号と異なる番号を選んで下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2    "ポート番号を変更して下さい。"
 
 ; Banner message displayed whilst uninstalling old version
@@ -119,8 +119,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "最小バージョンの Perl をインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "POPFile のショートカットを作成中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "POPFile のスキンファイルをインストール中..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "POPFile UI Languages ファイルをインストール中..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "「次へ」をクリックして続行して下さい"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "POPFile UI 言語ファイルをインストール中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "「次へ」をクリックして続行して下さい。"
 
 ; Installation Log Messages
 
@@ -130,13 +130,13 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_1          "以前にインストールされたファイルを検出しました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2          "アップデートしてもよろしいですか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3          "アップデートするには「Yes」をクリックして下さい。(古いファイルは次の名前で保存されます:"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4          "古いファイルを残すには「No」をクリックして下さい。(新しいファイルは次の名前で保存されます:"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3          "アップデートするには「Yes」をクリックして下さい。古いファイルは次の名前で保存されます:"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4          "古いファイルを残すには「No」をクリックして下さい。新しいファイルは次の名前で保存されます:"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1           "次のファイルのバックアップ:"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2           "は既に存在します"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2           "は既に存在します。"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3           "上書きしてもよろしいですか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4           "上書きするには「Yes」、バックアップをスキップするなら「No」をクリックしてください"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4           "上書きするには「Yes」、バックアップをスキップするなら「No」をクリックしてください。"
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Classification Bucket Creation
@@ -145,11 +145,11 @@
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_TITLE           "POPFile の分類用のバケツ作成"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUBTITLE        "POPFile は、電子メールを分類するのに最低二つのバケツを必要とします"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUBTITLE        "POPFile は、電子メールを分類するのに最低二つのバケツを必要とします。"
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO        "インストールの後でも、必要に応じて簡単にバケツの数も名前も変更することができます。\r\n\r\nバケツの名前にはアルファベットの小文字、0 から 9 の数字、- または _ からなる単語を使用して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO        "インストール終了後も、必要に応じて簡単にバケツの数も名前も変更することができます。\r\n\r\nバケツの名前にはアルファベットの小文字、0 から 9 の数字、- または _ からなる単語を使用して下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE       "以下のリストより選ぶか、適当な名前を入力して新しいバケツを作成して下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE       "一つかそれ以上のバケツをリストより削除するには、対応する「削除」ボックスにチェックを入れて「続行」ボタンをクリックして下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_LISTHDR      "POPFile に使用するバケツ"
@@ -158,32 +158,32 @@
 
 ; Text strings used for status messages under the bucket list
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1        "もうこれ以上のバケツは必要ありません"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2        "最低二つのバケツを定義して下さい"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3        "最低もう一つのバケツが必要です"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1        "もうこれ以上のバケツは必要ありません。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2        "最低二つのバケツを作成して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3        "最低もう一つのバケツが必要です。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_4        "インストーラーは、"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_5        "個以上のバケツを作ることはできません"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_5        "個以上のバケツを作ることはできません。"
 
 ; Message box text strings
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_1      "バケツ"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_2      "は既に定義されています。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_2      "は既に作成されています。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_3      "新しいバケツには違う名前を選んで下さい。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_1      "インストーラーが作成できるバケツは"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_2      "個"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_3      "インストール後に現在の個数以上のバケツを作成できます。現在のバケツの個数:"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_2      "個です。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_3      "インストール終了後にもバケツを作成できます。現在のバケツの個数:"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_1      "バケツ名:"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_2      "は無効な名前です。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_3      "バケツの名前には a から z の小文字、0 から 9 の数字、- または _ を使用して下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_4      "新しいバケツには違う名前を選んで下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1     "POPFile は、電子メールを分類するのに最低二つのバケツを必要とします"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1     "POPFile は電子メールを分類するのに最低二つのバケツを必要とします"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2     "作成するバケツの名前を入力して下さい。$\r$\n$\r$\nドロップダウンリストの例より選択するか、$\r$\n$\r$\n適当な名前を入力して下さい。"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3     "POPFile のインストールを続行するには、最低二つのバケツを定義しなければなりません。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3     "POPFile のインストールを続行するには、最低二つのバケツを作成しなければなりません。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1        "個のバケツが POPFile 用に定義されました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1        "個のバケツが POPFile 用に作成されました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_2        "これらのバケツを使うよう POPFile を設定してもよろしいですか？"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_3        "バケツの選択を変更するには「No」をクリックして下さい。"
 
@@ -199,16 +199,16 @@
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_TITLE         "Outlook Express の設定変更"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_SUBTITLE      "POPFile は Outlook Express の設定を変更することができます"
+!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_SUBTITLE      "POPFile は Outlook Express の設定を変更することができます。"
 
 ; Text displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_INTRO      "POPFile は以下の Outlook Express メールアカウントを検出しました。POPFile が使用できるように自動的に設定することができます。"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_CHECKBOX   "POPFile が使用できるようにこのアカウントの設定を変更する"
+!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_CHECKBOX   "POPFile が使用できるようにこのアカウントの設定を変更する。"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_EMAIL      "メールアドレス:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_SERVER     "POP3 サーバー:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_USERNAME   "POP3 ユーザーネーム:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_RESTORE    "POPFile をアンインストールすれば元の設定に戻ります"
+!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_RESTORE    "POPFile をアンインストールすれば元の設定に戻ります。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_1     "アカウントの"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_2     "アイデンティティ"
@@ -220,17 +220,17 @@
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_TITLE        "POPFile の起動"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_SUBTITLE     "ユーザーインターフェースは POPFile を起動しないと使えません"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_SUBTITLE     "ユーザーインターフェースは POPFile を起動しないと使えません。"
 
 ; Text displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_INTRO     "POPFile を起動しますか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO        "いいえ(「ユーザーインターフェース」は POPFile を起動しないと使えません)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO        "いいえ(「ユーザーインターフェース」は POPFile を起動しないと使えません。)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX    "POPFile を起動(コンソール)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND   "POPFile をバックグランドで起動(コンソールなし)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1    "POPFile を起動すれば以下の方法で「ユーザーインターフェース」が使えます"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1    "POPFile を起動すれば以下の方法で「ユーザーインターフェース」を使用できます。"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2    "(a) システムトレイ中の POPFile アイコンをダブルクリックするか、"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3    "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3    "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択します。"
 
 ; Banner message displayed whilst waiting for POPFile to start
 
@@ -257,16 +257,16 @@
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_3             "復元"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_4             "クローズ"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_5             "POPFile ディレクトリ以下の全てのファイルを削除中"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_6             "注意: POPFile ディレクトリ以下の全てのファイルを削除できませんでした"
+!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_6             "注意: POPFile ディレクトリ以下の全てのファイルを削除できませんでした。"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "POPFile は次のディレクトリにはインストールされていないようです:"
+!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "POPFile は次のディレクトリにインストールされていないようです:"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "それでも続行しますか(推奨できません)？"
 
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "アンインストールはユーザーより中止されました"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい)"
+!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
 
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "注意"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "は削除できませんでした。"
