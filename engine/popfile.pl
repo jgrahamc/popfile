@@ -942,6 +942,7 @@ sub pretty_number
 sub bucket_page 
 {
     my $body = "<h2>Detail for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p><table><tr><td><b>Bucket word count</b><td>&nbsp;<td align=right>". pretty_number($classifier->{total}{$form{showbucket}});
+    $body .= "<td>(" . pretty_number( $classifier->{unique}{$form{showbucket}}) . " unique)";
     $body .= "<tr><td><b>Total word count</b><td>&nbsp;<td align=right>" . pretty_number($classifier->{full_total});
     my $percent = "0%";
     if ( $classifier->{full_total} > 0 ) 
@@ -949,7 +950,7 @@ sub bucket_page
         $percent = int( 10000 * $classifier->{total}{$form{showbucket}} / $classifier->{full_total} ) / 100;
         $percent = "$percent%";
     }
-    $body .= "<tr><td><hr><b>Percentage of total</b><td>&nbsp;<td align=right><hr>$percent</table>";
+    $body .= "<td><tr><td><hr><b>Percentage of total</b><td><hr>&nbsp;<td align=right><hr>$percent<td></table>";
  
     $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p>Colored words have been used for classification in this POPFile session.<p><table>";
     for my $i (@{$classifier->{matrix}{$form{showbucket}}})
@@ -1099,7 +1100,7 @@ sub corpus_page
     }    
     
     
-    my $body = "<table width=75%><tr><td valign=top><h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td align=right><b>Total Words</b><td width=50>&nbsp;<td><b>Subject Modification</b><td width=50>&nbsp;<td align=left><b>Change Color</b>";
+    my $body = "<h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td width=10>&nbsp;<td align=right><b>Word Count</b><td width=10>&nbsp;<td align=right><b>Unique Words</b><td width=10>&nbsp;<td align=center><b>Subject Modification</b><td width=20>&nbsp;<td align=left><b>Change Color</b>";
 
     my @buckets = sort keys %{$classifier->{total}};
     my $stripe = 0;
@@ -1107,16 +1108,17 @@ sub corpus_page
     foreach my $bucket (@buckets)
     {
         my $number = pretty_number( $classifier->{total}{$bucket} );
+        my $unique = pretty_number( $classifier->{unique}{$bucket} );
         $body .= "<tr";
         if ( $stripe == 1 ) 
         {
             $body .= " bgcolor=$stripe_color";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td align=right>$number<td>&nbsp;";
+        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td width=10>&nbsp;<td align=right>$number<td width=10>&nbsp;<td align=right>$unique<td width=10>&nbsp;";
         if ( $configuration{subject} == 1 ) 
         {
-            $body .= "<td>";
+            $body .= "<td align=center>";
             if ( $classifier->{parameters}{$bucket}{subject} == 0 ) 
             {
                 $body .= "<b>Off</b> <a href=/buckets?session=$session_key&bucket=$bucket&subject=2>On</a>";            
@@ -1154,7 +1156,7 @@ sub corpus_page
         $accuracy .= "%";
     } 
 
-    $body .= "<tr><td><hr><b>Total</b><td align=right><hr><b>$number</b><td><td></table><td width=25% valign=top><h2>Statistics</h2><table width=100% cellspacing=0 cellpadding=0><tr><td>Messages classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy<td></table></table>";
+    $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><h2>Statistics</h2><table cellspacing=0 cellpadding=0><tr><td>Messages classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy<td></table>";
 
     $body .= "<p><hr><h2>Maintenance</h2>";
     $body .= "<p><form action=/buckets><b>Create bucket with name:</b> <br><input name=name type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
@@ -1365,6 +1367,10 @@ sub history_page
 
         foreach my $word (keys %{$classifier->{parser}->{words}})
         {
+            if ( $words{word} == 0 ) 
+            {
+                $classifier->{unique}{$form{shouldbe}} += 1;
+            }
             $words{$word}                         += $classifier->{parser}->{words}{$word};
             $classifier->{total}{$form{shouldbe}} += $classifier->{parser}->{words}{$word};
             $classifier->{full_total}             += $classifier->{parser}->{words}{$word};

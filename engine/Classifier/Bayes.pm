@@ -29,6 +29,9 @@ sub new
     
     # Total number of words in each bucket
     $self->{total}             = {};          
+
+    # Total number of unique words in each bucket
+    $self->{unique}            = {};          
     
     # Total number of words in all buckets
     $self->{full_total}        = 0;     
@@ -278,6 +281,7 @@ sub load_word_matrix
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
                 $self->{total}{$bucket}        += $value;
+                $self->{unique}{$bucket}       += 1;
                 $self->{full_total}            += $value;
                 set_value( $self, $bucket, $word, $value );
             }
