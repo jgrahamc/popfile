@@ -33,7 +33,7 @@ table.head {
   padding-left: 5px;
 }
 
-.shell {
+.shell, .shellTop {
   border: 2px #cccccc solid;
   background-color: #ffffff;
   color: #000000;
@@ -122,19 +122,19 @@ tr.rowHighlighted {
   color: #666666;
 }
 
-table.stabColor01 {
+table.settingsTable {
   border: 1px solid #cccccc;
   padding: 3px;
   margin: 0px;
 }
 
-table.stabColor03 {
+table.openMessageTable, table.lookupResultsTable {
   border: 2px solid Black;
   padding: 2px;
   margin: 0px;
 }
 
-td.stabColor01 {
+td.settingsPanel {
   border: 1px solid #cccccc;
   padding: 3px;
   margin: 0px;
@@ -192,41 +192,47 @@ td.openMessageCloser {
 }
 
 .historyLabel {
+  font-weight: normal;
   font-size: 9pt;
   text-decoration: none;
   padding-left: 1px;
   padding-right: 2px;
 }
 
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
 a.historyLabel:hover {
   text-decoration: underline;
 }
 
-span.bucketsLabel {
+.bucketsLabel {
   font-weight: bold;
 }
 
-span.magnetsLabel {
+.magnetsLabel {
   font-weight: bold;
 }
 
-span.securityLabel {
+.securityLabel {
   font-weight: bold;
 }
 
-span.configurationLabel {
+.configurationLabel {
   font-weight: normal;
 }
 
-span.advancedLabel {
+.advancedLabel {
   font-weight: bold;
 }
 
-span.passwordLabel {
+.passwordLabel {
   font-weight: bold;
 }
 
-span.sessionLabel {
+.sessionLabel {
   font-weight: bold;
 }
 
@@ -241,12 +247,12 @@ table.historyWidgetsTop td {
   font-weight: bold;
 }
 
-table.historyButtonsBottom {
+table.historyWidgetsBottom {
   width: 100%;
   border-bottom: 2px solid #cccccc;
 }
 
-table.historyButtonsBottom td {
+table.historyWidgetsBottom td {
   padding-left: 20px;
   font-weight: bold;
 }
@@ -277,7 +283,7 @@ td.footerBody {
   color: #000000;
 }
 
-input, button, select {
+input, .submit, select {
   font-family: tahoma, sans-serif;
   font-size: 8pt;
   font-weight: normal;
@@ -301,13 +307,4 @@ span.configWidgetState {
 
 span.securityWidgetState {
 	font-weight: bold;
-}
-
-.historyLabel {
-	font-weight: normal;
-}
-
-.historyLabel em {
-	font-weight: bold;
-	font-style: normal;
 }
