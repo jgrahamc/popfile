@@ -2417,7 +2417,7 @@ sub history_page
                     next;
                 }
 
-                my %addresses = ( 'from' => 1, 'to' => 2 , 'cc' => 4 );
+                my %addresses = ( 'from' => 1, 'to' => 2 , 'cc' => 3 );
 
                  if ( defined( $addresses{$header} ) ) {
                      $col_data{History_Cell_Title} =$$row[$addresses{$header}];
