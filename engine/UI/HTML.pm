@@ -1651,6 +1651,13 @@ sub load_history_cache
                 open MAIL, "<messages/$history_files[$i]";
                 while (<MAIL>)  {
                     if ( /[A-Z0-9]/i )  {
+                        if ( /^From:(.*)/i ) {
+                            my $from = $1;
+                            if ( $from =~ /\Q$search\E/i )  {
+                                $found = 1;
+                                last;
+                            }
+                        }
                         if ( /^Subject:(.*)/i ) {
                             my $subject = $1;
                             if ( $subject =~ /\Q$search\E/i )  {
@@ -1854,6 +1861,17 @@ sub history_page
         $self->{history_invalid} = 1;
     }
 
+    if ( defined($self->{form}{remove}) ) {
+        my $mail_file = $self->{form}{remove};
+        my $class_file = $mail_file;
+        $class_file =~ s/msg$/cls/;
+        unlink("messages/$mail_file");
+        unlink("messages/$class_file");
+        $self->{history_invalid} = 1;        
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}");
+        return;
+    }
+    
     # Handle clearing the history files
 
     if ( defined($self->{form}{clearall}) ) {
@@ -1996,7 +2014,12 @@ sub history_page
         }
         
         $body .= "<table width=\"100%\">\n<tr valign=\"bottom\">\n<td>\n</td>\n" ;
-        $body .= "<td>\n<b>$self->{language}{From}</b>\n<td>\n<b>$self->{language}{Subject}</b>\n" ;
+        $body .= "<td>\n<form action=\"/history\">";
+        $body .= "<input type=hidden name=filter value=\"$self->{form}{filter}\">" ;
+        $body .= "<input type=hidden name=session value=\"$self->{session_key}\">" ;
+        $body .= "<b>$self->{language}{History_SearchMessage}:&nbsp;</b>" ;
+        $body .= "<input type=\"text\" name=\"search\"> " ;
+        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\"></form>\n<b>$self->{language}{From}</b>\n<td>\n<b>$self->{language}{Subject}</b>\n" ;
         $body .= "<td>\n<form action=\"/history\">\n" ;
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n" ;
         $body .= "<select name=\"filter\"><option value=\"__filter__all\">&lt;$self->{language}{History_ShowAll}&gt;</option>\n";
@@ -2010,7 +2033,7 @@ sub history_page
         $body .= "<option value=\"__filter__magnet\">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
         $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
         $body .= "</form>\n<b>$self->{language}{Classification}</b>\n" ;
-        $body .= "<td>\n<b>$self->{language}{History_ShouldBe}</b>\n" ;
+        $body .= "<td>\n<b>$self->{language}{History_ShouldBe}</b>\n<td><b>$self->{language}{Remove}</b>" ;
 
         my $stripe = 0;
 
@@ -2147,7 +2170,7 @@ sub history_page
                 }
             }
 
-            $body .= "</td>";
+            $body .= "</td><td><a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message&amp;remove=$mail_file>[$self->{language}{Remove}]</a></td>";
             $body .= "</form>" if ( $drop_down );
 
             # Check to see if we want to view a message
@@ -2209,12 +2232,7 @@ sub history_page
         $body .= "<input type=submit class=submit name=clearpage value=\"$self->{language}{History_RemovePage}\">\n" ;
         $body .= "<input type=hidden name=session value=\"$self->{session_key}\">\n" ;
         $body .= "<input type=hidden name=start_message value=\"$start_message\">\n</form>\n" ;
-        $body .= "<table width=\"100%\">\n<tr>\n<td align=\"left\"><form action=\"/history\">" ;
-        $body .= "<input type=hidden name=filter value=\"$self->{form}{filter}\">" ;
-        $body .= "<input type=hidden name=session value=\"$self->{session_key}\">" ;
-        $body .= "<b>$self->{language}{History_SearchMessage}:&nbsp;</b>" ;
-        $body .= "<input type=\"text\" name=\"search\"> " ;
-        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\"></form></td>" ;
+        $body .= "<table width=\"100%\">\n<tr>\n<td align=\"left\"></td>" ;
         $body .= "<td align=right>";
         $body .= get_history_navigator( $self, $start_message, $stop_message ) if ( $self->{configuration}->{configuration}{page_size} <= history_size( $self ) );
         $body .= "</table>";
@@ -2354,8 +2372,8 @@ sub handle_url
     }
     
     if ( $url eq '/jump_to_message' )  {
-        $self->{form}{session} = $self->{session_key};
-        $url = '/history';
+        $self->http_redirect( $client, "/history?session=$self->{session_key}&start_message=0&view=$self->{form}{view}#$self->{form}{view}" );
+        return 1;
     }
 
     if ( $url =~ /\/(.+\.gif)/ ) {

@@ -114,7 +114,7 @@ History_Already                         Already reclassified as <font color=%s>%
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
 History_Remove                          To remove entries in the history click
-History_SearchMessage                   Search Subject
+History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages
 History_ShowMagnet                      Magnetized
 History_Magnet                          &nbsp;(just showing magnet classified messages)
