@@ -2280,7 +2280,7 @@ sub history_page
         }
 
         $self->{history_invalid} = 1;        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&start_message=$self->{form}{start_message}");
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&filter=$self->{form}{filter}&start_message=$self->{form}{start_message}");
         return;
     }
 
