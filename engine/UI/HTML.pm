@@ -844,7 +844,9 @@ sub html_common_bottom
     $result .= "/manual.html\">\n";
     $result .= "$self->{language__}{Footer_Manual}</a><br>\n";
 
-    $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions\">FAQ</a><br>\n";
+    my $faq_prefix = ( $self->config_( 'language' ) eq 'Nihongo' )?'JP_':'';
+
+    $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/cgi-bin/wiki.pl?$faq_prefix" . "FrequentlyAskedQuestions\">FAQ</a><br>\n";
 
     $result .= "</td><td class=\"footerBody\">\n<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\"><img src=\"otto.gif\" border=\"0\" alt=\"\"></a><br>$self->{version_}<br>($time - $self->{last_login__})</td>\n";
 
