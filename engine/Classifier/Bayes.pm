@@ -251,7 +251,7 @@ sub start
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
         use POSIX qw( locale_h );
-        setlocale( LC_COLLATE, 'C' ); 
+        setlocale( LC_COLLATE, 'C' );
     }
 
     # Pass in the current interface language for language specific parsing
@@ -599,7 +599,7 @@ sub db_connect__
 
     $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(                        # PROFILE BLOCK START
 	   'replace into bucket_params ( bucketid, btid, val ) values ( ?, ?, ? );' );  # PROFILE BLOCK STOP
-                                             
+
     $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(                # PROFILE BLOCK START
              'select bucket_template.def from bucket_template
                   where bucket_template.id = ?;' );                                     # PROFILE BLOCK STOP
@@ -883,13 +883,13 @@ sub upgrade_bucket__
     }
 
     # Pre v0.21.0 POPFile had GLOBAL parameters for subject modification,
-    # XTC and XPL insertion.  To make the upgrade as clean as possible 
+    # XTC and XPL insertion.  To make the upgrade as clean as possible
     # check these parameters so that if they were OFF we set the equivalent
     # per bucket to off
 
     foreach my $gl ( 'subject', 'xtc', 'xpl' ) {
         $self->log_( "Checking deprecated parameter GLOBAL_$gl for $bucket\n" );
-        my $val = $self->{configuration__}->deprecated_parameter( "GLOBAL_$gl" ); 
+        my $val = $self->{configuration__}->deprecated_parameter( "GLOBAL_$gl" );
         if ( defined( $val ) && ( $val == 0 ) ) {
             $self->log_( "GLOBAL_$gl is 0 for $bucket, overriding $gl\n" );
             $self->set_bucket_parameter( $session, $bucket, $gl, 0 );
@@ -2165,7 +2165,7 @@ sub classify_and_modify
                     # causing the XPL and XTC headers to be inserted in places some clients
                     # can't detect
 
-                    if ( $line =~ /^([ \t]|([A-Z\-_]+:))/i ) {
+                    if ( $line =~ /^([ \t]|([A-Z0-9\-_]+:))/i ) {
                         if ( !defined($msg_subject) )  {
                             $msg_head_before .= $msg_head_q . $line;
                         } else {
