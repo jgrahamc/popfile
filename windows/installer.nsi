@@ -104,7 +104,7 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0 (CVS)"
+  !define MUI_VERSION   "0.20.0 (CVS BerkeleyDB)"
 
   !define C_README        "v0.19.1.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -169,9 +169,9 @@
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
 
   !ifndef ENGLISH_ONLY
-    VIAddVersionKey "Build" "Multi-Language (CVS)"
+    VIAddVersionKey "Build" "Multi-Language (CVS BerkeleyDB)"
   !else
-    VIAddVersionKey "Build" "English-Only (CVS)"
+    VIAddVersionKey "Build" "English-Only (CVS BerkeleyDB)"
   !endif
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
@@ -738,6 +738,23 @@ update_config:
 
   SetOutPath $INSTDIR\warnings
   File "${C_PERL_DIR}\lib\warnings\register.pm"
+  
+  ; Install BerkeleyDB Perl modules and libraries
+  
+  SetOutPath $INSTDIR
+  File "${C_PERL_DIR}\site\lib\BerkeleyDB.pm"
+  File "${C_PERL_DIR}\lib\UNIVERSAL.pm"
+  
+  SetOutPath $INSTDIR\BerkeleyDB
+  File "${C_PERL_DIR}\site\lib\BerkeleyDB\Btree.pm"
+  File "${C_PERL_DIR}\site\lib\BerkeleyDB\Hash.pm"
+
+  SetOutPath $INSTDIR\auto\BerkeleyDB
+  File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\autosplit.ix"
+  File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.bs"
+  File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.dll"
+  File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.exp"
+  File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.lib"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
@@ -2203,6 +2220,7 @@ remove_perl:
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\Text"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\warnings"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\Win32"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\BerkeleyDB"
 
   StrCmp ${L_UPGRADE} "yes" Removed
 
