@@ -866,7 +866,7 @@ sub classify_and_modify
                                                                          ( $self->{parameters}{$classification}{quarantine} == 0 ) );
 
     # Add the XPL header
-    $temp_file =~ s/messages\/(.*)/$1/;
+    $temp_file =~ s/.*\/([^\/]+)/$1/;
 
     my $xpl = '';
 
