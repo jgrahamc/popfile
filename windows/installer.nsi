@@ -258,9 +258,9 @@ Function .onInit
   
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${RELEASE_NOTES}" "release.txt"
   
+  SearchPath ${NOTEPAD} notepad.exe
   MessageBox MB_YESNO "Display POPFile Release Notes ?$\r$\n$\r$\n\
       'Yes' recommended if you are upgrading." IDNO exit
-  SearchPath ${NOTEPAD} notepad.exe
   StrCmp ${NOTEPAD} "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
   GoTo exit
