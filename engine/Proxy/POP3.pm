@@ -185,6 +185,7 @@ sub child__
 
     # Compile some configurable regexp's once
 
+    my $transparent  = '^USER ([^:])+$';
     my $user_command = 'USER ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+)(:([^:]+))?';
     my $apop_command = 'APOP ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+) (.*?)';
 
@@ -221,6 +222,20 @@ sub child__
         # POPFile will use SSL for the connection to the remote, note
         # that the user can say host:username:ssl,apop if both are
         # needed
+
+        if ( $command =~ /$transparent/ ) {
+            if ( $self->config_( 'secure_server' ) ne '' )  {
+                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
+                    last if ($self->echo_response_($mail, $client, $command) == 2 );
+                } else {
+                    next;
+                }
+            } else {
+                $self->tee_(  $client, "-ERR No secure server specified$eol" );
+            }
+
+            next;
+        }
 
         if ( $command =~ /$user_command/io ) {
             if ( $1 ne '' )  {
