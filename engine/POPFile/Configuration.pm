@@ -72,16 +72,8 @@ sub new
 
     # Local copies of POPFILE_ROOT and POPFILE_USER
 
-    $self->{popfile_root__} = $ENV{POPFILE_ROOT};
-    $self->{popfile_user__} = $ENV{POPFILE_USER};
-
-    if ( !defined( $self->{popfile_root__} ) ) {
-        $self->{popfile_root__} = './';
-    }
-
-    if ( !defined( $self->{popfile_user__} ) ) {
-        $self->{popfile_user__} = './';
-    }
+    $self->{popfile_root__} = $ENV{POPFILE_ROOT} || './';
+    $self->{popfile_user__} = $ENV{POPFILE_USER} || './';
 
     bless $self, $type;
 
@@ -556,7 +548,7 @@ sub path_join__
 {
     my ( $self, $left, $right ) = @_;
 
-    if ( ( $right =~ /^\// ) || ( $right =~ /^[A-Z]:[\/\\]/ ) ) {
+    if ( ( $right =~ /^\// ) || ( $right =~ /^[A-Za-z]:[\/\\]/ ) ) {
         return $right;
     }
 

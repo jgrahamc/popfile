@@ -97,7 +97,7 @@ sub test_report__
     # get the stack frame one level up from where we are now (i.e. the caller of
     # our caller).
 
-    my ( $package, $file, $line ) = caller(1);  
+    my ( $package, $file, $line ) = caller(4);  
 
     spin( $line );
 

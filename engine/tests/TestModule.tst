@@ -291,4 +291,101 @@ test_assert( !defined( $m->slurp_buffer_( \*TEMP, 0 ) ) );
 test_assert( !defined( $m->slurp_buffer_( \*TEMP, 10 ) ) );
 close TEMP;
 
+# flush_extra_
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "LF\012LF2\n";
+close TEMP;
+
+open TEMP2, ">slurp2.tmp";
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "LF\012" );
+$m->flush_extra_( \*TEMP, \*TEMP2, 0 );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+close TEMP2;
+open TEMP2, "<slurp2.tmp";
+test_assert_equal( <TEMP2>, "LF2\n" );
+close TEMP2;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "LF\012LF2\n";
+close TEMP;
+
+open TEMP2, ">slurp2.tmp";
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "LF\012" );
+$m->flush_extra_( \*TEMP, \*TEMP2, 1 );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+close TEMP2;
+open TEMP2, "<slurp2.tmp";
+test_assert( !defined(<TEMP2>) );
+close TEMP2;
+
+open TEMP, ">slurp.tmp";
+print TEMP "RF\nRF2\n";
+close TEMP;
+
+open TEMP2, ">slurp2.tmp";
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+$m->flush_extra_( \*TEMP, \*TEMP2, 0 );
+close TEMP;
+close TEMP2;
+open TEMP2, "<slurp2.tmp";
+my $line = <TEMP2>;
+test_assert_equal( $line, "RF\n" );
+my $line = <TEMP2>;
+test_assert_equal( $line, "RF2\n" );
+close TEMP2;
+
+open TEMP, ">slurp.tmp";
+print TEMP "LF\nLF2\n";
+close TEMP;
+
+open TEMP2, ">slurp2.tmp";
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+$m->flush_extra_( \*TEMP, \*TEMP2, 1 );
+close TEMP;
+close TEMP2;
+open TEMP2, "<slurp2.tmp";
+test_assert( !defined(<TEMP2>) );
+close TEMP2;
+
+# get_user_path_ (note Makefile sets POPFILE_USER to ../tests/)
+
+test_assert_equal( $m->get_user_path_( 'foo' ), '../tests/foo' );
+test_assert_equal( $m->get_user_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_user_path_( 'foo/' ), '../tests/foo/' );
+$m->{configuration__}->{popfile_user__} = './';
+test_assert_equal( $m->get_user_path_( 'foo' ), './foo' );
+test_assert_equal( $m->get_user_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_user_path_( 'foo/' ), './foo/' );
+$m->{configuration__}->{popfile_user__} = '.';
+test_assert_equal( $m->get_user_path_( 'foo' ), './foo' );
+test_assert_equal( $m->get_user_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_user_path_( 'foo/' ), './foo/' );
+$m->{configuration__}->{popfile_user__} = '../tests/';
+
+# get_root_path_ (note Makefile sets POPFILE_ROOT to ../)
+
+test_assert_equal( $m->get_root_path_( 'foo' ), '../foo' );
+test_assert_equal( $m->get_root_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_root_path_( 'foo/' ), '../foo/' );
+$m->{configuration__}->{popfile_root__} = './';
+test_assert_equal( $m->get_root_path_( 'foo' ), './foo' );
+test_assert_equal( $m->get_root_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_root_path_( 'foo/' ), './foo/' );
+$m->{configuration__}->{popfile_root__} = '.';
+test_assert_equal( $m->get_root_path_( 'foo' ), './foo' );
+test_assert_equal( $m->get_root_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_root_path_( 'foo/' ), './foo/' );
+$m->{configuration__}->{popfile_root__} = '../';
+
 1;

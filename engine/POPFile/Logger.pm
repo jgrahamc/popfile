@@ -211,8 +211,6 @@ sub debug
                 binmode DEBUG;
                 print DEBUG $msg;
                 close DEBUG;
-            } else {
-                print "Can't write to log file $self->{debug_filename__}\n";
             }
         }
 

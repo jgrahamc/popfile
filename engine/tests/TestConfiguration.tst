@@ -355,5 +355,64 @@ open OUTPUT, "<stdout.tmp";
 my $line = <OUTPUT>;
 close OUTPUT;
 test_assert_regexp( $line, 'Unknown option: doesnotexist' );
+@ARGV = ( '--set', 'baz' );
+open (STDERR, ">stdout.tmp");
+test_assert( !$c->parse_command_line() );
+close STDERR;
+open OUTPUT, "<stdout.tmp";
+<OUTPUT>;
+my $line = <OUTPUT>;
+close OUTPUT;
+test_assert_regexp( $line, 'Bad option: baz' );
+@ARGV = ( '--', 'baz' );
+open (STDERR, ">stdout.tmp");
+test_assert( !$c->parse_command_line() );
+close STDERR;
+open OUTPUT, "<stdout.tmp";
+<OUTPUT>;
+my $line = <OUTPUT>;
+close OUTPUT;
+test_assert_regexp( $line, 'Expected a command line option and got baz' );
+
+# path_join__
+
+test_assert_equal( $c->path_join__( 'foo', '/root' ), '/root' );
+test_assert_equal( $c->path_join__( 'foo', '/' ), '/' );
+test_assert_equal( $c->path_join__( 'foo', 'c:\\root' ), 'c:\\root' );
+test_assert_equal( $c->path_join__( 'foo', 'c:\\' ), 'c:\\' );
+test_assert_equal( $c->path_join__( '/foo', 'bar' ), '/foo/bar' );
+test_assert_equal( $c->path_join__( '/foo/', 'bar' ), '/foo/bar' );
+test_assert_equal( $c->path_join__( 'foo/', 'bar' ), 'foo/bar' );
+test_assert_equal( $c->path_join__( 'foo', 'bar' ), 'foo/bar' );
+
+# get_user_path (note Makefile sets POPFILE_USER to ../tests/)
+
+test_assert_equal( $c->get_user_path( 'foo' ), '../tests/foo' );
+test_assert_equal( $c->get_user_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_user_path( 'foo/' ), '../tests/foo/' );
+$c->{popfile_user__} = './';
+test_assert_equal( $c->get_user_path( 'foo' ), './foo' );
+test_assert_equal( $c->get_user_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_user_path( 'foo/' ), './foo/' );
+$c->{popfile_user__} = '.';
+test_assert_equal( $c->get_user_path( 'foo' ), './foo' );
+test_assert_equal( $c->get_user_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_user_path( 'foo/' ), './foo/' );
+$c->{popfile_user__} = '../tests/';
+
+# get_root_path (note Makefile sets POPFILE_ROOT to ../)
+
+test_assert_equal( $c->get_root_path( 'foo' ), '../foo' );
+test_assert_equal( $c->get_root_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_root_path( 'foo/' ), '../foo/' );
+$c->{popfile_root__} = './';
+test_assert_equal( $c->get_root_path( 'foo' ), './foo' );
+test_assert_equal( $c->get_root_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_root_path( 'foo/' ), './foo/' );
+$c->{popfile_root__} = '.';
+test_assert_equal( $c->get_root_path( 'foo' ), './foo' );
+test_assert_equal( $c->get_root_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_root_path( 'foo/' ), './foo/' );
+$c->{popfile_root__} = '../';
 
 1;

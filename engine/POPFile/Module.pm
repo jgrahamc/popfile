@@ -504,9 +504,9 @@ sub flush_slurp_data__
             # This unpleasant boolean is to handle the case where we are slurping
             # a non-socket stream under Win32
 
-            if ( ( !($handle =~ /socket/i) && ($^O eq 'MSWin32' ) ) ||
-                 defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) {
-
+            if ( ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) ) ||        # PROFILE BLOCK START
+                 defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) { # PROFILE BLOCK STOP
+                                                                               
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );
                 if ( $retcode == 1 ) {
@@ -678,7 +678,7 @@ sub flush_extra_
     # If slurp has any data, we want it
     if ( $self->slurp_data_size__($mail) ) {
 
-        print $client $slurp_data__{"$mail"}{data} if ( $discard != 1);
+        print $client $slurp_data__{"$mail"}{data} if ( $discard != 1 );
         $slurp_data__{"$mail"}{data} = '';
     }
 
@@ -689,22 +689,22 @@ sub flush_extra_
 
     if (($^O eq 'MSWin32') && !($mail =~ /socket/i) ) {
         # select only works reliably on IO::Sockets in Win32, so we always read files
-        # on MSWin32
-        # (sysread returns 0 for eof)
-
-        $always_read = 1;
+        # on MSWin32 (sysread returns 0 for eof)
+                          
+        $always_read = 1; # PROFILE PLATFORM START MSWin32
+                          # PROFILE PLATFORM STOP
     } else {
 
         # in all other cases, a selector is used to decide whether to read
 
-        $selector   = new IO::Select( $mail );
+        $selector    = new IO::Select( $mail );
         $always_read = 0;
     }
 
     my $ready;
 
     my $buf        = '';
-    my $full_buf = '';
+    my $full_buf   = '';
     my $max_length = 8192;
     my $n;
 
@@ -714,8 +714,10 @@ sub flush_extra_
         if ( $n > 0 ) {
             print $client $buf if ( $discard != 1 );
             $full_buf .= $buf;
-        } elsif ($n == 0) {
-            last;
+        } else {
+            if ($n == 0) {
+                last;
+	    }
         }
     }
 

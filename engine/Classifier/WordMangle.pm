@@ -130,9 +130,9 @@ sub mangle
 
     # Stop words are ignored
 
-    return '' if ( ( ( $self->{stop__}{$lcword} ) ||
+    return '' if ( ( ( $self->{stop__}{$lcword} ) ||   # PROFILE BLOCK START
                      ( $self->{stop__}{$word} ) ) &&
-                   ( !defined( $ignore_stops ) ) );
+                   ( !defined( $ignore_stops ) ) );    # PROFILE BLOCK STOP
 
     # Remove characters that would mess up a Perl regexp and replace with .
 
