@@ -254,7 +254,6 @@
   Var G_PFIFLAG            ; Multi-purpose variable:
                             ; (1) used to indicate if banner was shown before the 'WELCOME' page
                             ; (2) used to avoid unnecessary Install/Upgrade button text updates
-                            ; (3) used when determining if '/nouser' debug option supplied
 
   Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
 
@@ -826,6 +825,20 @@ Section "POPFile" SecPOPFile
 
   StrCpy $G_ROOTDIR   "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
+
+  IfFileExists "$G_ROOTDIR\*.*" rootdir_exists
+  ClearErrors
+  CreateDirectory "$G_ROOTDIR"
+  IfErrors 0 rootdir_exists
+  SetDetailsPrint both
+  DetailPrint "Fatal error: unable to create folder for the POPFile program files"
+  SetDetailsPrint listonly
+  MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Error: Unable to create folder for the POPFile program files\
+      ${MB_NL}${MB_NL}\
+      ($G_ROOTDIR)"
+  Abort
+
+rootdir_exists:
 
   ; If we are installing over a previous version, ensure that version is not running
 
@@ -2473,10 +2486,6 @@ FunctionEnd
 
 Function InstallUserData
 
-  Call GetParameters
-  Pop $G_PFIFLAG
-  StrCmp $G_PFIFLAG "/nouser" continue
-
   ; For this build we skip our own FINISH page and disable the wizard's language selection
   ; dialog to make the wizard appear as an extension of the main 'setup.exe' installer.
   ; [Future builds may pass more than just a command-line switch to the wizard]
@@ -2489,7 +2498,6 @@ special_case:
   Exec '"$G_ROOTDIR\adduser.exe" /installreboot'
   Abort
 
-continue:
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -3223,9 +3231,9 @@ Section "un.Uninstall End" UnSecEnd
   Delete "$G_ROOTDIR\Uninstall.exe"
   RMDir "$G_ROOTDIR"
 
-  ; if $INSTDIR was removed, skip these next ones
+  ; if the installation folder ($G_ROOTDIR) was removed, skip these next ones
 
-  IfFileExists "$INSTDIR\*.*" 0 exit
+  IfFileExists "$G_ROOTDIR\*.*" 0 exit
 
   ; If 'User Data' uninstaller still exists, we cannot offer to remove the remaining files
   ; (some email settings have not been restored and the user wants to try again later or
@@ -3235,12 +3243,12 @@ Section "un.Uninstall End" UnSecEnd
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO exit
   DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
-  Delete "$INSTDIR\*.*"
-  RMDir /r $INSTDIR
-  IfFileExists "$INSTDIR\*.*" 0 exit
+  Delete "$G_ROOTDIR\*.*"
+  RMDir /r $G_ROOTDIR
+  IfFileExists "$G_ROOTDIR\*.*" 0 exit
   DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
+      "$(PFI_LANG_UN_MBREMERR_1): $G_ROOTDIR $(PFI_LANG_UN_MBREMERR_2)"
 
 exit:
   SetDetailsPrint both
