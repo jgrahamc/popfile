@@ -1113,28 +1113,17 @@ sub advanced_page
     my $add_message = '';
     my $deletemessage = '';
     if ( defined($self->{form_}{newword}) ) {
-        $self->{form_}{newword} = lc($self->{form_}{newword});
-        if ( defined($self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{newword}}) ) {
-            $add_message = "<blockquote><div class=\"error02\"><b>". sprintf( $self->{language__}{Advanced_Error1}, $self->{form_}{newword} ) . "</b></div></blockquote>";
-        } else {
-            if ( $self->{form_}{newword} =~ /[^[:alpha:][0-9]\._\-@]/ ) {
-                $add_message = "<blockquote><div class=\"error02\"><b>$self->{language__}{Advanced_Error2}</b></div></blockquote>";
-            } else {
-                $self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{newword}} = 1;
-                $self->{classifier__}->{parser}->{mangle}->save_stop_words();
-                $add_message = "<blockquote>" . sprintf( $self->{language__}{Advanced_Error3}, $self->{form_}{newword} ) . "</blockquote>";
-            }
+        my $result = $self->{classifier__}->add_stopword( $self->{form_}{newword} );
+        if ( $result == 0 ) {
+            $add_message = "<blockquote><div class=\"error02\"><b>$self->{language__}{Advanced_Error2}</b></div></blockquote>";
         }
     }
 
     if ( defined($self->{form_}{word}) ) {
-        $self->{form_}{word} = lc($self->{form_}{word});
-        if ( !defined($self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{word}}) ) {
-            $deletemessage = "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Advanced_Error4} , $self->{form_}{word} ) . "</b></div></blockquote>";
-        } else {
-            delete $self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{word}};
-            $self->{classifier__}->{parser}->{mangle}->save_stop_words();
-            $deletemessage = "<blockquote>" . sprintf( $self->{language__}{Advanced_Error5}, $self->{form_}{word} ) . "</blockquote>";
+      $self->log_($self->{form_}{word} );
+        my $result = $self->{classifier__}->remove_stopword( $self->{form_}{word} );
+        if ( $result == 0 ) {
+            $deletemessage = "<blockquote><div class=\"error02\"><b>$self->{language__}{Advanced_Error2}</b></div></blockquote>";
         }
     }
 
@@ -1148,7 +1137,7 @@ sub advanced_page
     my $groupCounter = 0;
     my $groupSize = 5;
     my $firstRow = 1;
-    for my $word (sort keys %{$self->{classifier__}->{parser}->{mangle}->{stop}}) {
+    for my $word (sort keys %{$self->{classifier__}->get_stop_word_list()}) {
         $word =~ /^(.)/;
         if ( $1 ne $last )  {
             if (! $firstRow) {
@@ -1361,18 +1350,20 @@ sub bucket_page
 {
     my ( $self, $client ) = @_;
 
+    my $bucket_count = $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} );
+
     my $body = "<h2 class=\"buckets\">";
     $body .= sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}</font>");
     $body .= "</h2>\n<table summary=\"\">\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_WordCount}</th>\n";
     $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n";
-    $body .= pretty_number( $self, $self->{classifier__}->get_bucket_word_count($self->{form_}{showbucket}));
+    $body .= pretty_number( $self, $bucket_count);
     $body .= "</td>\n<td>\n(" . sprintf( $self->{language__}{SingleBucket_Unique}, pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count($self->{form_}{showbucket})) ). ")";
     $body .= "</td>\n</tr>\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_TotalWordCount}</th>\n";
     $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n" . pretty_number( $self, $self->{classifier__}->get_word_count());
 
     my $percent = "0%";
     if ( $self->{classifier__}->get_word_count() > 0 )  {
-        $percent = int( 10000 * $self->{classifier__}->get_bucket_word_count($self->{form_}{showbucket}) / $self->{classifier__}->get_word_count() ) / 100;
+        $percent = int( 10000 * $bucket_count / $self->{classifier__}->get_word_count() ) / 100;
         $percent = "$percent%";
     }
     $body .= "</td>\n<td></td>\n</tr>\n<tr><td colspan=\"3\"><hr /></td></tr>\n";
@@ -1382,36 +1373,45 @@ sub bucket_page
     $body .= "<h2 class=\"buckets\">";
     $body .= sprintf( $self->{language__}{SingleBucket_WordTable},  "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}" ) ;
     $body .= "</font>\n</h2>\n$self->{language__}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Bucket_WordListTableSummary}\">\n";
+    $body .= "<tr><td colspan=2>";
 
     for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})}) {
-        if ( defined($i) )  {
+        if ( defined($i) ) {
             my $j = $i;
-
-            # Split the entries on the double bars, get rid of any extra bars, then grab a copy of the first char
-
-            $j =~ s/\|\|/, /g;
-            $j =~ s/\|//g;
-            $j =~ /^(.)/;
+            $j =~ /^\|(.)/;
             my $first = $1;
 
-            # Highlight any words used this session
+            if ( defined( $self->{form_}{showletter} ) && ( $first eq $self->{form_}{showletter} ) ) {
+                # Split the entries on the double bars
 
-            $j =~ s/([^ ]+) (L\-[\.\d]+)/\*$1 $2<\/font>/g;
-            $j =~ s/L(\-[\.\d]+)/int( $self->{classifier__}->get_bucket_word_count($self->{form_}{showbucket}) * exp($1) + 0.5 )/ge;
+                my %temp;
 
-            # Add the link to the corpus lookup
+                while ( $j =~ m/\G\|(.*?) L?\-?[\.\d]+\|/g ) {
+                    my $word = $1;
+                    $temp{$word} = int( exp( $self->{classifier__}->get_value_( $self->{form_}{showbucket}, $word ) ) * $bucket_count + 1 );
+		}
 
-            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/"<a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=" . url_encode_($self,$1) . "#Lookup\">$1<\/a> $2"/ge;
+                $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
 
-            # Add the bucket color if this word was used this session. IMPORTANT: this regex relies
-            # on the fact that Classifier::WordMangle (mangle) removes astericks from all corpus words
-            # and therefore assumes that any asterick was placed the by the highlight regex several
-            # lines above.
+                my $count = 0;
 
-# TODO            $j =~ s/([\*])/<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$1/g;
-            $body .= "<tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n$j</td>\n</tr>\n";
+                for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
+		    $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
+                    $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=$word#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
+                    $count += 1;
+		}
+
+                $body .= "</tr></table></td>\n</tr>\n<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>";
+
+	    } else {
+                $j = '';
+
+                $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=$first><b>$first</b></a>\n";
+            }
         }
     }
+
+    $body .= "</td></tr>";
     $body .= "</table>\n";
 
     http_ok($self, $client,$body,1);
@@ -2480,12 +2480,12 @@ sub history_page
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
-    
+
     # Information from submit buttons isn't always preserved if the buttons aren't
     # pressed. This compares values in some fields and sets the button-values as
     # though they had been pressed
-    
-    # Set setsearch if search changed and setsearch is undefined    
+
+    # Set setsearch if search changed and setsearch is undefined
     $self->{form_}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && ($self->{form_}{search} ne '') ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form_}{search} ) ) ) && !defined($self->{form_}{setsearch} ) );
     $self->{old_search__} = $self->{form_}{search};
 

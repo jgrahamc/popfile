@@ -132,6 +132,25 @@ sub increment_word
 
 # ---------------------------------------------------------------------------------------------
 #
+# update_pseudoword
+#
+# Updates the word frequency for a pseudoword, note that this differs from update_word
+# because it does no word mangling
+#
+# $prefix       The pseudoword prefix (e.g. header)
+# $word         The pseudoword (e.g. Mime-Version)
+#
+# ---------------------------------------------------------------------------------------------
+
+sub update_pseudoword
+{
+    my ( $self, $prefix, $word ) = @_;
+
+    $self->increment_word( "$prefix:$word" );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # update_word
 #
 # Updates the word frequency for a word
@@ -433,6 +452,11 @@ sub update_tag
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlfontcolor__} = map_color($self, $value);
 			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
+        }
+
+        # Font sizes
+        if ( ( $attribute =~ /^size$/i ) && ( $tag =~ /^font$/i ) ) {
+            $self->update_pseudoword( 'html', "fontsize$value" );
         }
 
         # Tags with background colors
@@ -741,10 +765,10 @@ sub parse_stream
     # Contains the encoding for the current block in a mime message
 
     my $encoding = '';
-    
+
     # Variables to save header information to while parsing headers
-    
-    my $header;    
+
+    my $header;
     my $argument;
 
     # Clear the word hash
@@ -820,7 +844,7 @@ sub parse_stream
                 }
 
                 $splitline =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
-                    
+
                 $self->{ut__} .= $splitline;
             }
 
@@ -829,36 +853,36 @@ sub parse_stream
                 # Check for blank line signifying end of headers
 
                 if ( $line =~ /^(\r\n|\r|\n)/) {
-                    
+
                      # Parse the last header
-                                         
+
                     ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
-                    
+
                     # Clear the saved headers
                     $header   = '';
-                    $argument = '';          
-                                 
+                    $argument = '';
+
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug};
-                }                
+                }
 
                 # If we have an email header then just keep the part after the :
 
                 if ( $line =~ /^([A-Za-z-]+):[ \t]*([^\n\r]*)/ )  {
-                    
+
                     # Parse the last header
-                    
+
                     ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
-                    
+
                     # Save the new information for the current header
-                    
+
                     $header   = $1;
-                    $argument = $2;                
+                    $argument = $2;
                 }
-                
+
                 # Append to argument if the next line begins with whitespace (isn't a new header)
-                
-                if ( $line =~ /^[\t ](.*?)(\r\n|\r|\n)/ ) {                    
+
+                if ( $line =~ /^[\t ](.*?)(\r\n|\r|\n)/ ) {
                     $argument .= $1;
                 }
                 next;
@@ -1077,6 +1101,13 @@ sub parse_header
     my ($self, $header, $argument, $mime, $encoding ) = @_;
 
     print "Header ($header) ($argument)\n" if ($self->{debug});
+
+    # After a discussion with Tim Peters and some looking at emails
+    # I'd received I discovered that the header names (case sensitive) are
+    # very significant in identifying different types of mail, for example
+    # much spam uses MIME-Version, MiME-Version and Mime-Version
+
+    $self->update_pseudoword( 'header', $header );
 
     # Handle the From, To and Cc headers and extract email addresses
     # from them and treat them as words

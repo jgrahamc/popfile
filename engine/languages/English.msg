@@ -224,7 +224,7 @@ SingleBucket_WordCount                  Bucket word count
 SingleBucket_TotalWordCount             Total word count
 SingleBucket_Percentage                 Percentage of total
 SingleBucket_WordTable                  Word Table for %s
-SingleBucket_Message1                   Starred (*) words have been used for classification in this POPFile session.  Click any word to lookup its probability for all buckets.
+SingleBucket_Message1                   Click a letter in the index to see the list of words that start with that letter.  Click any word to lookup its probability for all buckets.
 SingleBucket_Unique                     %s unique
 
 Session_Title                           POPFile Session Expired

@@ -430,7 +430,7 @@ sub load_bucket_
             }
 
             if ( /([^\s]+) (\d+)/ ) {
-                my $word = $self->{mangler__}->mangle($1,1);
+                my $word  = $1;
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {
@@ -932,6 +932,25 @@ sub get_bucket_word_count
 
     return $self->{total__}{$bucket};
 }
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_word_list
+#
+# Returns a list of bucket entries, each entry corresponds to all the words with the
+# same leading character
+#
+# $bucket      The name of the bucket for which the word count is desired
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_bucket_word_list
+{
+    my ( $self, $bucket ) = @_;
+
+    return $self->{matrix__}{$bucket};
+}
+
 # ---------------------------------------------------------------------------------------------
 #
 # get_word_count
@@ -1360,6 +1379,47 @@ sub delete_magnet
 
     delete $self->{magnets__}{$bucket}{$type}{$text};
     $self->save_magnets__();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_stop_word_list
+#
+# Gets the complete list of stop words
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_stop_word_list
+{
+    my ( $self ) = @_;
+
+    return $self->{parser__}->{mangle__}->stopwords();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# add_stopword, remove_stopword
+#
+# Adds or removes a stop word
+#
+# $stopword    The word to add or remove
+#
+# Return 0 for a bad stop word, and 1 otherwise
+#
+# ---------------------------------------------------------------------------------------------
+
+sub add_stopword
+{
+    my ( $self, $stopword ) = @_;
+
+    return $self->{parser__}->{mangle__}->add_stopword( $stopword );
+}
+
+sub remove_stopword
+{
+    my ( $self, $stopword ) = @_;
+
+    return $self->{parser__}->{mangle__}->remove_stopword( $stopword );
 }
 
 1;
