@@ -18,10 +18,31 @@ use MIME::QuotedPrint;
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
 
-my %entityhash;
-
-@entityhash{'amp', 'nbsp','iexcl','cent','pound','curren','yen','brvbar','sect','uml','copy','ordf','laquo','not','shy','reg','macr','deg','plusmn','sup2','sup3','acute','micro','para','middot','cedil','sup1','ordm','raquo','frac14','frac12','frac34','iquest','Agrave','Aacute','Acirc','Atilde','Auml','Aring','AElig','Ccedil','Egrave','Eacute','Ecirc','Euml','Igrave','Iacute','Icirc','Iuml','ETH','Ntilde','Ograve','Oacute','Ocirc','Otilde','Ouml','times','Oslash','Ugrave','Uacute','Ucirc','Uuml','Yacute','THORN','szlig','agrave','aacute','acirc','atilde','auml','aring','aelig','ccedil','egrave','eacute','ecirc','euml','igrave','iacute','icirc','iuml','eth','ntilde','ograve','oacute','ocirc','otilde','ouml','divide','oslash','ugrave','uacute','ucirc','uuml','yacute','thorn','yuml'} = ( 38, 160,161,162,163,164,165,166,167,168,169,170,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255 );
-
+my %entityhash = ('aacute'  => 224,     'Aacute'  => 202,     'Acirc'   => 203,     'acirc'   => 225,
+                  'acute'   => 189,     'AElig'   => 207,     'aelig'   => 229,     'Agrave'  => 201,
+                  'agrave'  => 223,     'amp'     => 38,      'Aring'   => 206,     'aring'   => 228,
+                  'atilde'  => 226,     'Atilde'  => 204,     'Auml'    => 196,     'auml'    => 228,
+                  'brvbar'  => 166,     'ccedil'  => 230,     'Ccedil'  => 208,     'cedil'   => 193,
+                  'cent'    => 162,     'copy'    => 169,     'curren'  => 164,     'deg'     => 185,
+                  'divide'  => 246,     'Eacute'  => 210,     'eacute'  => 232,     'ecirc'   => 233,
+                  'Ecirc'   => 211,     'Egrave'  => 209,     'egrave'  => 231,     'ETH'     => 217,
+                  'eth'     => 239,     'Euml'    => 212,     'euml'    => 234,     'frac12'  => 198,
+                  'frac14'  => 197,     'frac34'  => 199,     'iacute'  => 236,     'Iacute'  => 214,
+                  'icirc'   => 237,     'Icirc'   => 215,     'iexcl'   => 161,     'igrave'  => 235,
+                  'Igrave'  => 213,     'iquest'  => 200,     'iuml'    => 238,     'Iuml'    => 216,
+                  'laquo'   => 180,     'macr'    => 184,     'micro'   => 190,     'middot'  => 192,
+                  'nbsp'    => 160,     'not'     => 181,     'ntilde'  => 240,     'Ntilde'  => 218,
+                  'oacute'  => 242,     'Oacute'  => 210,     'Ocirc'   => 211,     'ocirc'   => 243,
+                  'Ograve'  => 219,     'ograve'  => 241,     'ordf'    => 170,     'ordm'    => 195,
+                  'oslash'  => 247,     'Oslash'  => 215,     'Otilde'  => 212,     'otilde'  => 244,
+                  'Ouml'    => 214,     'ouml'    => 246,     'para'    => 191,     'plusmn'  => 186,
+                  'pound'   => 163,     'raquo'   => 196,     'reg'     => 183,     'sect'    => 167,
+                  'shy'     => 182,     'sup1'    => 194,     'sup2'    => 187,     'sup3'    => 188,
+                  'szlig'   => 223,     'thorn'   => 253,     'THORN'   => 221,     'times'   => 214,
+                  'Uacute'  => 217,     'uacute'  => 249,     'ucirc'   => 250,     'Ucirc'   => 218,
+                  'ugrave'  => 248,     'Ugrave'  => 216,     'uml'     => 168,     'Uuml'    => 220,
+                  'uuml'    => 252,     'Yacute'  => 220,     'yacute'  => 252,     'yen'     => 165,
+                  'yuml'    => 254); 
 #----------------------------------------------------------------------------
 # new
 #
