@@ -459,6 +459,30 @@ sub connect_folders__
 
 # ---------------------------------------------------------------------------------------------
 #
+# disconnect_folders__
+#
+#   The test suite needs a way to disconnect all the folders after one test is
+#   done and the next test needs to be done with different settings.
+#
+# ---------------------------------------------------------------------------------------------
+
+sub disconnect_folders__
+{
+    my ( $self ) = @_;
+
+    foreach my $folder ( keys %{$self->{folders__}} ) {
+
+        # We may already have a valid connection for this folder:
+        if ( exists $self->{folders__}{$folder}{imap} ) {
+            $self->logout( $folder );
+        }
+    }
+    %{$self->{folders__}} = ();
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
 # scan_folder
 #
 #   This function scans a folder on the IMAP server.
