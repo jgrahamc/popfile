@@ -84,7 +84,7 @@ sub service
 {
     my ( $self ) = @_;
 
-    remove_debug_files();
+    remove_debug_files( $self );
 
     return 1;
 }
