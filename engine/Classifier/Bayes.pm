@@ -306,8 +306,23 @@ sub forked
 {
     my ( $self, $writer ) = @_;
 
-    $self->db_cleanup__();
     $self->SUPER::forked( $writer );
+    $self->db_prepare__();
+}
+
+#----------------------------------------------------------------------------
+#
+# childexit
+#
+# Called when POPFile a child process is about to exit
+#
+#----------------------------------------------------------------------------
+sub childexit
+{
+    my ( $self ) = @_;
+
+    $self->db_cleanup__();
+    $self->SUPER::childexit();
 }
 
 #----------------------------------------------------------------------------
