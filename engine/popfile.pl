@@ -948,12 +948,13 @@ sub bucket_page
     {
         if ( $i ne '' ) 
         {
-            $i =~ s/\|\|/, /g;
-            $i =~ s/\|//g;
-            $i =~ s/([^ ]+) (L\-[\.\d]+)/<font color=red>\1 \2<\/font>/g;
-            $i =~ s/L(\-[\.\d]+)/int(exp(eval(\1)))/ge;
-            $i =~ /^(.)/;
-            $body .= "<tr><td valign=top><b>$1</b><td valign=top>$i";
+            my $j = $i;
+            $j =~ s/\|\|/, /g;
+            $j =~ s/\|//g;
+            $j =~ s/([^ ]+) (L\-[\.\d]+)/<font color=red>\1 \2<\/font>/g;
+            $j =~ s/L(\-[\.\d]+)/int(exp(eval(\1)))/ge;
+            $j =~ /^(.)/;
+            $body .= "<tr><td valign=top><b>$1</b><td valign=top>$j";
         }
     }
     $body .= "</table>";
