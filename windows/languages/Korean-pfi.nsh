@@ -170,8 +170,8 @@
 # General purpose banner text (also suitable for page titles/subtitles)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "이전 버전 제거 중"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "몇초 정도 걸릴 수 있습니다..."
+!insertmacro PFI_LANG_STRING PFI_LANG_BE_PATIENT           "이전 버전 제거 중"
+!insertmacro PFI_LANG_STRING PFI_LANG_TAKE_A_FEW_SECONDS   "몇초 정도 걸릴 수 있습니다..."
 
 #--------------------------------------------------------------------------
 # Message displayed when 'Add User' does not seem to be part of the current version
@@ -275,7 +275,7 @@
 
 ; Installation Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_1           "이전 버전의 POPFile을 종료 중 - 포트:"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_SHUTDOWN    "이전 버전의 POPFile을 종료 중 - 포트:"
 
 ; Message Box text strings
 
@@ -520,26 +520,26 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "POPFile 종료 중..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "'시작' 메뉴 중 POPFile 항목을 삭제 중..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "POPFile 핵심 파일을 삭제 중..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "아웃룩 익스프레스 설정을 복원 중..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "POPFile 스킨 파일 삭제 중..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Perl 최소 설치 파일 삭제 중..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_7        "Restoring Outlook settings..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_8        "Restoring Eudora settings..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHUTDOWN     "POPFile 종료 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHORT        "'시작' 메뉴 중 POPFile 항목을 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CORE         "POPFile 핵심 파일을 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTEXPRESS   "아웃룩 익스프레스 설정을 복원 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SKINS        "POPFile 스킨 파일 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Perl 최소 설치 파일 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Restoring Outlook settings..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Restoring Eudora settings..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "POPFile을 종료 중 - 포트:"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "열림"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "복원됨"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "닫힘"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "POPFile 디렉토리의 모든 파일을 제거 중."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "참고: POPFile 디렉토리로부터 모든 파일을 제거할 수 없습니다."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_7             "Data problems"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_8             "Removing all files from POPFile 'User Data' directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_9             "Note: unable to remove all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_SHUTDOWN      "POPFile을 종료 중 - 포트:"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OPENED        "열림"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_RESTORED      "복원됨"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_CLOSED        "닫힘"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTDIR    "POPFile 디렉토리의 모든 파일을 제거 중."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "참고: POPFile 디렉토리로부터 모든 파일을 제거할 수 없습니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Data problems"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Removing all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DElUSERERR    "Note: unable to remove all files from POPFile 'User Data' directory"
 
 ; Message Box text strings
 

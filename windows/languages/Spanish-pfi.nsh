@@ -170,8 +170,8 @@
 # General purpose banner text (also suitable for page titles/subtitles)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Aguarde por favor."
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "Tardará unos pocos segundos..."
+!insertmacro PFI_LANG_STRING PFI_LANG_BE_PATIENT           "Aguarde por favor."
+!insertmacro PFI_LANG_STRING PFI_LANG_TAKE_A_FEW_SECONDS   "Tardará unos pocos segundos..."
 
 #--------------------------------------------------------------------------
 # Message displayed when 'Add User' does not seem to be part of the current version
@@ -275,7 +275,7 @@
 
 ; Installation Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_1           "Cerrando versión anterior de POPFile usando puerto"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_SHUTDOWN    "Cerrando versión anterior de POPFile usando puerto"
 
 ; Message Box text strings
 
@@ -520,26 +520,26 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "Cerrando POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "Borrando elementos del 'Menu de Inicio' para POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "Borrando archivos esenciales de POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "Recuperando valores de Outlook Express..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "Borrando skins de POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Borrando archivos minimos de Perl..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_7        "Restoring Outlook settings..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_8        "Restoring Eudora settings..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHUTDOWN     "Cerrando POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHORT        "Borrando elementos del 'Menu de Inicio' para POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CORE         "Borrando archivos esenciales de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTEXPRESS   "Recuperando valores de Outlook Express..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SKINS        "Borrando skins de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Borrando archivos minimos de Perl..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Restoring Outlook settings..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Restoring Eudora settings..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "Cerrando POPFile usando puerto"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "Abierto"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "Recuperado"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "Cerrado"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Eliminando todos los archivos de la carpeta de POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Nota: incapaz de eliminar todos los archivos de la carpeta de POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_7             "Data problems"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_8             "Removing all files from POPFile 'User Data' directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_9             "Note: unable to remove all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_SHUTDOWN      "Cerrando POPFile usando puerto"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OPENED        "Abierto"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_RESTORED      "Recuperado"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_CLOSED        "Cerrado"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTDIR    "Eliminando todos los archivos de la carpeta de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Nota: incapaz de eliminar todos los archivos de la carpeta de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Data problems"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Removing all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DElUSERERR    "Note: unable to remove all files from POPFile 'User Data' directory"
 
 ; Message Box text strings
 

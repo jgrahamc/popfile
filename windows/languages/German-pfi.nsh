@@ -170,8 +170,8 @@
 # General purpose banner text (also suitable for page titles/subtitles)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Bitte haben Sie einen Moment Geduld."
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "Dies kann einige Sekunden dauern..."
+!insertmacro PFI_LANG_STRING PFI_LANG_BE_PATIENT           "Bitte haben Sie einen Moment Geduld."
+!insertmacro PFI_LANG_STRING PFI_LANG_TAKE_A_FEW_SECONDS   "Dies kann einige Sekunden dauern..."
 
 #--------------------------------------------------------------------------
 # Message displayed when 'Add User' does not seem to be part of the current version
@@ -275,7 +275,7 @@
 
 ; Installation Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_1           "Beende ältere POPFile Version am Port"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_SHUTDOWN    "Beende ältere POPFile Version am Port"
 
 ; Message Box text strings
 
@@ -520,26 +520,26 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "POPFile beenden..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "Startmenü-Einträge von POPFile löschen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "Kernkomponenten löschen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "Outlook Express Einstellungen wiederherstellen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "Skins löschen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Minimal-Perl-Umgebung löschen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_7        "Outlook Einstellungen wiederherstellen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_8        "Eudora Einstellungen wiederherstellen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHUTDOWN     "POPFile beenden..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHORT        "Startmenü-Einträge von POPFile löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CORE         "Kernkomponenten löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTEXPRESS   "Outlook Express Einstellungen wiederherstellen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SKINS        "Skins löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Minimal-Perl-Umgebung löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Outlook Einstellungen wiederherstellen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Eudora Einstellungen wiederherstellen..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "Beende POPFile am Port"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "Geöffnet"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "Wiederhergestellt"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "Geschlossen"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Alle Dateien im POPFile-Verzeichnis löschen"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Hinweis: Es konnten nicht alle Dateien im POPFile-Verzeichnis gelöscht werden"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_7             "Datenprobleme"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_8             "Lösche alle Dateien aus dem POPFile Benutzerdaten-VerzeichnisRemoving all files from POPFile 'User Data' directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_9             "HINWEIS: Nicht alle Dateien konnten aus den Benutzerdaten-Verzeichnis gelöscht werden"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_SHUTDOWN      "Beende POPFile am Port"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OPENED        "Geöffnet"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_RESTORED      "Wiederhergestellt"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_CLOSED        "Geschlossen"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTDIR    "Alle Dateien im POPFile-Verzeichnis löschen"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Hinweis: Es konnten nicht alle Dateien im POPFile-Verzeichnis gelöscht werden"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Datenprobleme"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Lösche alle Dateien aus dem POPFile Benutzerdaten-VerzeichnisRemoving all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DElUSERERR    "HINWEIS: Nicht alle Dateien konnten aus den Benutzerdaten-Verzeichnis gelöscht werden"
 
 ; Message Box text strings
 
