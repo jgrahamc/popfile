@@ -503,23 +503,14 @@
 ; string set to a space (" ") [using "" here will generate compiler warnings]
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_DOWNLOADING   "Downloading %s"
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_CONNECTING    "Connecting ..."
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_SECOND        "second"
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_MINUTE        "minute"
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_HOUR          "hour"
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_PLURAL        "s"
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_PROGRESS      "%dkB (%d%%) of %dkB @ %d.%01dkB/s"
-;!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_REMAINING     " (%d %s%s remaining)"
-
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_DOWNLOADING   "Downloading %s from the Internet"
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_CONNECTING    "Connecting to the web site..."
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_SECOND        "SECOND"
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_MINUTE        "MINUTE"
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_HOUR          "HOUR"
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_PLURAL        "S"
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_PROGRESS      "%d kilbobyte (%d%%) of %dkilobyte @ %d.%01dkB/s"
-!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_REMAINING     " (%d %s%s to go for this file)"
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_DOWNLOADING   "Downloading %s"
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_CONNECTING    "Connecting ..."
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_SECOND        "second"
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_MINUTE        "minute"
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_HOUR          "hour"
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_PLURAL        "s"
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_PROGRESS      "%dkB (%d%%) of %dkB @ %d.%01dkB/s"
+!insertmacro PFI_LANG_STRING PFI_LANG_NSISDL_REMAINING     " (%d %s%s remaining)"
 
 ###########################################################################
 ###########################################################################
