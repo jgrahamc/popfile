@@ -209,10 +209,11 @@ sub parse_form__
         my $arg = $1;
         $self->{form_}{$arg} = $2;
 
+        $self->{form_}{$arg} =~ s/\+/ /g;
+
         # Expand %7E (hex) escapes in the form data
 
         $self->{form_}{$arg} =~ s/%([0-9A-F][0-9A-F])/chr hex $1/gie;
-        $self->{form_}{$arg} =~ s/\+/ /g;
 
         # Push the value onto an array to allow for multiple values of the same name
 
