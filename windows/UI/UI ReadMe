@@ -2,17 +2,17 @@
 NOTES ON HOW THE CUSTOMISED UI FILES FOR THE POPFILE INSTALLER WERE CREATED
 =============================================================================
 
-Last updated: 19 November 2003 (23:41 GMT)
+Last updated: 16 August 2004 (17:24 GMT)
 
 =============================================================================
 INTRODUCTION
 =============================================================================
 
-The NSIS "Modern User Interface" (MUI) provides a range of general purpose
-User Interface (UI) files offering a variety of interface formats. Soon after
-work started on modifying the POPFile installer to work with languages other
-than English, it was found that these default UI files did not provide enough
-room for some of the non-English language strings.
+The NSIS "Modern User Interface" (MUI) provides a range of general purpose User
+Interface (UI) files offering a variety of interface formats. Soon after work
+started on modifying the POPFile installer to work with languages other than
+English, it was found that these default UI files did not provide enough room
+for some of the non-English language strings.
 
 To solve this problem, the following customised UI files have been created:
 
@@ -34,12 +34,22 @@ create these customised versions of the NSIS MUI UI files.
 'PFI_MODERN.EXE' NOTES
 =============================================================================
 
-This UI file contains the resource used to display the banner which appears
-when POPFile is being started by the installer and also when an uninstall is
-performed during an upgrade installation. The banner's icon has been moved to
+Changes [1] to [3]:
+
+This UI file contains the resource used to display the banner used when a time
+consuming task is being performed during which there will be no screen activity
+(e.g. starting POPFile in the background). The banner's icon has been moved to
 the left to allow the width of the two text areas to be increased.
 
-'pfi_modern.exe' v1.2 was created by modifying 'modern.exe', NSIS CVS v1.37
+Changes [4] to [6]:
+
+In some cases the default button size does not suit the customised text (e.g.
+the Japanese text for "Upgrade" is truncated) so the 'Back, 'Next' and 'Cancel'
+buttons at the foot of the page have been increased in width.
+
+Details:
+
+'pfi_modern.exe' v1.3 was created by modifying 'modern.exe', NSIS CVS v1.37
 (dated 24-Oct-2003), as follows:
 
 [1] Dialog 111, Control 103 (the icon image)
@@ -63,9 +73,32 @@ the left to allow the width of the two text areas to be increased.
 
        (i.e left edge moved 5 units to left, width increased by 5 units)
 
+[4] Dialog 105, Control 3 (the left-hand button, normally 'Back')
+
+       Left/Top/Width/Height changed from "166, 201, 50, 14"
+                                       to "136, 201, 60, 14"
+
+       (i.e left edge moved 30 units to left, width increased by 10 units)
+
+[5] Dialog 105, Control 1 (the middle button, normally 'Next')
+
+       Left/Top/Width/Height changed from "216, 201, 50, 14"
+                                       to "196, 201, 60, 14"
+
+       (i.e left edge moved 20 units to left, width increased by 10 units)
+
+[6] Dialog 105, Control 2 (the right-hand button, normally 'Cancel')
+
+       Left/Top/Width/Height changed from "273, 201, 50, 14"
+                                       to "263, 201, 60, 14"
+
+       (i.e left edge moved 10 units to left, width increased by 10 units)
+
 =============================================================================
 'PFI_HEADERBMP.EXE' AND 'PFI_HEADERBMPR.EXE' NOTES
 =============================================================================
+
+Changes [1] to [3]:
 
 The standard NSIS "Modern User Interface" (MUI) supports 150 x 57 pixel
 bitmaps, placed at the left of the header area (using 'modern_headerbmp.exe')
@@ -73,17 +106,23 @@ or at the right (using 'modern_headerbmpr.exe').
 
 The POPFile installer uses a small 'hdr-common.bmp' bitmap logo which is only
 90 x 57 pixels. This means more space can be made available in the header area
-for the Title and SubTitle text.
+for the Title and SubTitle text. Some translations need this extra space.
 
 The default 150 pixel width is equivalent to 100 dialog units, so a 90 pixel
 width is assumed to be 60 dialog units. The bitmap width is reduced to 60
 units, leaving 40 units available to increase the width of the two text areas.
 
+Changes [4] to [6]:
+
+In some cases the default button size does not suit the customised text (e.g.
+the Japanese text for "Upgrade" is truncated) so the 'Back, 'Next' and 'Cancel'
+buttons at the foot of the page have been increased in width.
+
 =============================================================================
 'PFI_HEADERBMP.EXE' CHANGES (bitmap appears at the left of the header area)
 =============================================================================
 
-'pfi_headerbmp.exe' v1.2 was created by modifying 'modern_headerbmp.exe',
+'pfi_headerbmp.exe' v1.3 was created by modifying 'modern_headerbmp.exe',
 NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
 
 [1] Dialog 105, Control 1037 (the TITLE text area)
@@ -107,11 +146,32 @@ NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
 
        (i.e. width reduced by 40 units)
 
+[4] Dialog 105, Control 3 (the left-hand button, normally 'Back')
+
+       Left/Top/Width/Height changed from "166, 201, 50, 14"
+                                       to "136, 201, 60, 14"
+
+       (i.e left edge moved 30 units to left, width increased by 10 units)
+
+[5] Dialog 105, Control 1 (the middle button, normally 'Next')
+
+       Left/Top/Width/Height changed from "216, 201, 50, 14"
+                                       to "196, 201, 60, 14"
+
+       (i.e left edge moved 20 units to left, width increased by 10 units)
+
+[6] Dialog 105, Control 2 (the right-hand button, normally 'Cancel')
+
+       Left/Top/Width/Height changed from "273, 201, 50, 14"
+                                       to "263, 201, 60, 14"
+
+       (i.e left edge moved 10 units to left, width increased by 10 units)
+
 =============================================================================
 'PFI_HEADERBMPR.EXE' CHANGES (bitmap appears at the right of the header area)
 =============================================================================
 
-'pfi_headerbmpr.exe' v1.2 was created by modifying 'modern_headerbmpr.exe',
+'pfi_headerbmpr.exe' v1.3 was created by modifying 'modern_headerbmpr.exe',
 NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
 
 [1] Dialog 105, Control 1037 (the TITLE text area)
@@ -134,6 +194,27 @@ NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
                                        to "271, 0,  60, 35"
 
        (i.e. left edge moved 40 units to right, width reduced by 40 units)
+
+[4] Dialog 105, Control 3 (the left-hand button, normally 'Back')
+
+       Left/Top/Width/Height changed from "166, 201, 50, 14"
+                                       to "136, 201, 60, 14"
+
+       (i.e left edge moved 30 units to left, width increased by 10 units)
+
+[5] Dialog 105, Control 1 (the middle button, normally 'Next')
+
+       Left/Top/Width/Height changed from "216, 201, 50, 14"
+                                       to "196, 201, 60, 14"
+
+       (i.e left edge moved 20 units to left, width increased by 10 units)
+
+[6] Dialog 105, Control 2 (the right-hand button, normally 'Cancel')
+
+       Left/Top/Width/Height changed from "273, 201, 50, 14"
+                                       to "263, 201, 60, 14"
+
+       (i.e left edge moved 10 units to left, width increased by 10 units)
 
 =============================================================================
 (end)
