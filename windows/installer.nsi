@@ -74,6 +74,8 @@ Section "POPFile"
   SetOutPath $SMPROGRAMS\POPFile
   WriteINIStr "$SMPROGRAMS\POPFile\POPFile User Interface.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:8080/"
+  WriteINIStr "$SMPROGRAMS\POPFile\Shutdown POPFile.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:8080/shutdown"
   SetOutPath $SMPROGRAMS\POPFile\Support
   WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
