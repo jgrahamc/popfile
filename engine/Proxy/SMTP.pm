@@ -205,7 +205,7 @@ sub child__
                     # support of BDAT requires extensive changes to POPFile's internals and
                     # will not be implemented at this time
 
-                    $unsupported .= "CHUNKING|BINARYMIME";
+                    $unsupported .= "CHUNKING|BINARYMIME|XEXCH50";
 
                     # append unsupported ESMTP extensions to $unsupported here, important to maintain
                     # format of OPTION|OPTION2|OPTION3
