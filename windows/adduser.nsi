@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.2"
+  !define C_PFI_VERSION  "0.1.3"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -906,7 +906,7 @@ update_config:
   ; (b) if the user ticked the relevant checkbox then a 'Run POPFile' shortcut is placed in the
   ;     current user's StartUp folder.
   ; (c) if the user did not tick the relevant checkbox then the 'Run POPFile' shortcut is
-  ;     removed from the current user's StartUp folder if the user does not have 'Admin' rights
+  ;     removed from the current user's StartUp folder
 
   ReadRegStr $G_ROOTDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
 
@@ -950,14 +950,13 @@ skip_rel_notes:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
-  SetOutPath $SMSTARTUP
-  SetOutPath $G_ROOTDIR
   StrCmp $G_STARTUP "1" set_autostart_set
-  StrCmp $G_WINUSERTYPE "Admin" end_autostart_set
   Delete "$SMSTARTUP\Run POPFile.lnk"
   Goto end_autostart_set
 
 set_autostart_set:
+  SetOutPath $SMSTARTUP
+  SetOutPath $G_ROOTDIR
   CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$G_ROOTDIR\runpopfile.exe" "/startup"
 
 end_autostart_set:
