@@ -91,7 +91,7 @@
 
   Name                   "POPFile SSL Setup"
 
-  !define C_PFI_VERSION  "0.0.10"
+  !define C_PFI_VERSION  "0.0.11"
 
   ; Mention the wizard's version number in the window title
 
@@ -621,8 +621,9 @@ error_timestamp:
 
 check_bs_file:
 
-  ; The current 'untgz' plugin (v1.0.5) does not extract empty files (i.e. file size is 0 bytes)
-  ; so we cheat a little to ensure all $G_MPLIBDIR\auto\Net\SSLeay\SSLeay.* files are extracted
+  ; 'untgz' versions earlier than 1.0.6 (released 28 November 2004) are unable to extract
+  ; empty files so this script creates the empty 'SSLeay.bs' file if necessary
+  ; (to ensure all of the $G_MPLIBDIR\auto\Net\SSLeay\SSLeay.* files exist)
 
   IfFileExists "$G_PLS_FIELD_1\SSLeay.bs" done
   File "/oname=$G_PLS_FIELD_1\SSLeay.bs" "zerobyte.file"
