@@ -274,16 +274,21 @@ sub load_word_matrix
         print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
 
-
-    foreach my $bucket (keys %{$self->{total}})
+    if ( $self->{full_total} != 0 )
     {
-        $self->{bucket_start}{$bucket} = log( $self->{total}{$bucket} / $self->{full_total} );
+        foreach my $bucket (keys %{$self->{total}})
+        {
+            if ( $self->{total}{$bucket} != 0 ) 
+            {
+                $self->{bucket_start}{$bucket} = log( $self->{total}{$bucket} / $self->{full_total} );
+            }
+        }
+
+        # The probability used for words that are not present in the corpus
+
+        $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
     }
-
-    # The probability used for words that are not present in the corpus
-
-    $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
-
+    
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
     
     print "    ... $self->{full_total} words\n";
