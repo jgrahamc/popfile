@@ -202,7 +202,7 @@ History_Remove                          Um Einträge im Verlauf zu löschen, klick
 History_SearchMessage                   Nach Absender/Betreff suchen
 History_NoMessages                      keine Nachrichten
 History_ShowMagnet                      magnetisiert
-History_ShowNoMagnet                    unmagnetisiert
+History_Negate_Search                   Filter invertieren
 History_Magnet                          &nbsp;(zeige nur durch Magnet eingestufte Nachrichten)
 History_NoMagnet                        &nbsp;(zeige nicht durch Magnet eingestufte Nachrichten)
 History_ResetSearch                     Zurücksetzen
