@@ -1115,6 +1115,12 @@ update_config_ports:
   Delete "$G_USERDIR\uninstalluser.exe"
   WriteUninstaller "$G_USERDIR\uninstalluser.exe"
 
+  ; Delete obsolete START MENU entries
+
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url"
+
   ; Create the START MENU entries
 
   SetDetailsPrint textonly
@@ -1171,10 +1177,6 @@ skip_rel_notes:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://${C_UI_URL}:$G_GUI/shutdown"
-
-  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" NORMAL
-  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" \
-              "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" NORMAL
 
@@ -1738,6 +1740,11 @@ Section "-MakeBatchFile" SecMakeBatch
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_MAKEBAT)"
   SetDetailsPrint listonly
+
+  ; Make a backup copy in case the user has customised the one we made earlier
+  ; (or in case we have now changed to a different POPFile installation)
+
+  !insertmacro PFI_BACKUP_123_DP "$G_USERDIR" "pfi-run.bat"
 
   Call PFI_GetDateTimeStamp
   Pop ${L_TIMESTAMP}
