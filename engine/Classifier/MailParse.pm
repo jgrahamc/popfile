@@ -1817,49 +1817,61 @@ sub clear_out_base64
 # quoted printable encoding
 # ----------------------------------------------------------------------------
 sub decode_string
-{
-    # I choose not to use "$mystring = MIME::Base64::decode( $1 );"
+{    # I choose not to use "$mystring = MIME::Base64::decode( $1 );"
     # because some spam mails have subjects like: "Subject: adjpwpekm
-    # =?ISO-8859-1?Q?=B2=E1=A4=D1=AB=C7?= dopdalnfjpw".  Therefore, it
-    # will be better to store the decoded text in a temporary variable
-    # and substitute the original string with it later. Thus, this
-    # subroutine returns the real decoded result.
+    # =?ISO-8859-1?Q?=B2=E1=A4=D1=AB=C7?= dopdalnfjpw".  Therefore we
+    # proceed along the string, from left to right, building a new
+    # string from the decoded and non-decoded parts
 
     my ( $self, $mystring, $lang ) = @_;
-
-    my $decode_it = '';
+    
     my $charset = '';
 
     $lang = $self->{lang__} if ( !defined( $lang ) || ( $lang eq '' ) );
-
-    while ( $mystring =~ /=\?([\w-]+)\?(B|Q)\?(.*?)\?=/ig ) {
-        if ($2 eq "B" || $2 eq "b") {
-            $charset = $1;
-            $decode_it = decode_base64( $3 );
-
-            # for Japanese header
-            if ($lang eq 'Nihongo') {
-                $decode_it = convert_encoding( $decode_it, $charset, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
-            }
-
-            $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
-        } else {
-            if ($2 eq "Q" || $2 eq "q") {
-                $decode_it = $3;
-                $decode_it =~ s/\_/=20/g;
-                $decode_it = decode_qp( $decode_it );
-
+    
+    my $output = '';
+    my $last_is_encoded = 0;
+    my $post = $mystring;
+    
+    
+    while ( $mystring =~ m/(.*?)(=\?([\w-]+)\?(B|Q)\?(.*?)\?=)/igc ) {
+        my ($pre, $atom, $encoding, $value);
+        ($pre, $atom, $charset, $encoding, $value, $post) = ($1, $2, $3, $4, $5, $6);
+        
+        $output .= $pre unless ($last_is_encoded && defined($atom) # Per RFC 2047 section 6.2
+                                    && $pre =~ /^[\t ]+$/);
+        
+        if (defined($atom)) {
+            if ($encoding eq "B" || $encoding eq "b") {
+                        
+                $value = decode_base64( $value );
+    
                 # for Japanese header
                 if ($lang eq 'Nihongo') {
-                    $decode_it = convert_encoding( $decode_it, $charset, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
+                    $value = convert_encoding( $value, $charset, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
                 }
-
-                $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
+                $last_is_encoded = 1;
             }
+            elsif ($encoding eq "Q" || $encoding eq "q") {
+                $value =~ s/\_/=20/g;
+                $value = decode_qp( $value );
+    
+                # for Japanese header
+                if ($lang eq 'Nihongo') {
+                    $value = convert_encoding( $value, $charset, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
+                }
+                $last_is_encoded = 1;
+            }
+        } else {
+            $last_is_encoded = 0;
         }
+        $output .= $value || '';
     }
-
-    return $mystring;
+    
+    # grab the unmatched tail (thanks to /gc and \G)
+    $output .= $1 if ($mystring =~ m/\G(.*)/g);
+    
+    return $output;
 }
 
 # ----------------------------------------------------------------------------

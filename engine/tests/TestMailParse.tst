@@ -460,8 +460,13 @@ $cl->{color__} = '';
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo?="), "foo");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?="), "foo bar");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo=20bar?="), "foo bar");
-test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?= =?ISO-8859-1?Q?foo_bar?="), "foo bar foo bar");
-test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?="), "Aladdin:open sesame Aladdin:open sesame");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?= =?ISO-8859-1?Q?foo_bar?="), "foo barfoo bar");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?="), "Aladdin:open sesameAladdin:open sesame");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= aaa"), "Aladdin:open sesameAladdin:open sesame aaa");
+test_assert_equal($cl->decode_string("abba =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= aaa"), "abba Aladdin:open sesameAladdin:open sesame aaa");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= a =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= aaa"), "Aladdin:open sesame a Aladdin:open sesame aaa");
+
+
 
 # test get_header
 
