@@ -66,6 +66,8 @@ Word                                    単語
 Count                                   カウント
 Update                                  更新
 Refresh                                 最新の状態に更新
+FAQ                                     FAQ 初心者・初学者向けのQ&A集
+ID                                      ID
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile コントロールセンター
@@ -186,6 +188,7 @@ Password_Error1                         パスワードが間違っています
 Security_Error1                         認証ポート番号は1から65535までにしてください。
 Security_Stealth                        ステルスモード/サーバーオペレーション
 Security_NoStealthMode                  いいえ (ステルスモード)
+Security_StealthMode                    (ステルスモード)
 Security_ExplainStats                   (POPFile は毎日一回、以下の三つのデータを www.usethesource.com 上のスクリプトに送ります。: bc (バケツの総数)、mc (POPFile が分類したメッセージの総数)、ec (分類エラーの総数)。これらはファイルに記録され、POPFile がどのように使用され、どの程度の効果をあげているのかを示す統計情報として公開させていただきます。使用しています Web サーバーはこれらのログファイルを約五日間保存したあと、削除します。これらの統計値を IP アドレスと関連付けて保存したりはいっさいいたしません。)
 Security_ExplainUpdate                  (POPFile は毎日一回、以下の三つのデータを www.usethesource.com 上のスクリプトに送ります。: ma (インストールされている POPFile のメジャーバージョン番号)、mi (インストールされている POPFile のマイナーバージョン番号)、bn (インストールされている POPFile のビルド番号)。新しいバージョンがリリースされると、POPFile はその情報を受けてページの上部にグラフィックを表示してお知らせします。使用しています Web サーバーはこれらのログファイルを約五日間保存したあと、削除します。これらの更新チェックに使用したデータを IP アドレスと関連付けて保存したりはいっさいいたしません。)
 Security_PasswordTitle                  ユーザーインターフェースパスワード
