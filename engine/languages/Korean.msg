@@ -18,17 +18,17 @@
 #
 
 # Identify the language and character set used for the interface
-LanguageCode                            kr
+LanguageCode                            ko
 LanguageCharset                         euc-kr
 LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
-ManualLanguage                          en
+ManualLanguage                          kr
 
 # Common words that are used on their own all over the interface
 Apply                                   적용
 On                                      사용 중
-Off                                     사용않는 중
+Off                                     사용 않음
 TurnOn                                  사     용
 TurnOff                                 사용 안함
 Add                                     추가
@@ -37,8 +37,12 @@ Previous                                이전
 Next                                    다음
 From                                    발신자
 Subject                                 제목 
+Cc                                      참조
 Classification                          분류
 Reclassify                              재분류
+Probability                             확률
+Scores                                  점수
+QuickMagnets                            빠른 자석
 Undo                                    취소
 Close                                   닫기
 Find                                    찾기
@@ -58,6 +62,10 @@ Frequency                               빈도
 Probability                             확률
 Score                                   점수
 Lookup                                  검색
+Word                                    단어
+Count                                   수
+Update                                  수정
+Refresh                                 경신
 
 # The header and footer that appear on every UI page
 Header_Title                            팝파일 제어 센터
@@ -82,10 +90,22 @@ Configuration_Error3                    POP3 포트는 반드시 1부터 65535 사이의 숫
 Configuration_Error4                    페이지 크기는 반드시 1부터 1000 사이의 숫자여야 합니다.
 Configuration_Error5                    히스토리의 보존 기간은 반드시 1부터 366 사이의 숫자여야 합니다. 
 Configuration_Error6                    TCP 타임아웃은 반드시 10부터 300 사이의 숫자여야 합니다. The TCP timeout must be a number between 10 and 300
+Configuration_Error7                    XML RPC 리슨 포트는 반드시 1부터 65535 사이의 숫자여야 합니다.
 Configuration_POP3Port                  POP3 포트
-Configuration_POP3Update                %s로 포트를 변경했습니다. 팝파일을 재시작하기 전까지는 적용되지 않습니다.
-Configuration_Separator                 구분글자
-Configuration_SepUpdate                 구분글자를 %s로 변경했습니다.
+Configuration_POP3Update                %s로 포트를 변경했습니다. 이것은 팝파일을 재시작하기 전까지는 적용되지 않습니다.
+Configuration_XMLRPCUpdate              XML-RPC 포트를 %s 로 경신하였습니다. 이것은 팝파일을 재기동하여야 적용됩니다.
+Configuration_XMLRPCPort                XML-RPC 리슨 포트
+Configuration_SMTPPort                  SMTP 리슨 포트
+Configuration_SMTPUpdate                SMTP 포트를 %s로 경신하였습니다. 이것은 팝파일을 재시작하기 전까지는 적용되지 않습니다.
+Configuration_NNTPPort                  NNTP 리슨 포트
+Configuration_NNTPUpdate                NNTP 리슨 포트를 %s로 경신하였습니다. 이것은 팝파일을 재시작하기 전까지는 적용되지 않습니다.
+Configuration_POPFork                   POP3 동시 연결 허용
+Configuration_SMTPFork                  SMTP 동시 연결 허용
+Configuration_NNTPFork                  NNTP 동시 연결 허용
+Configuration_POP3Separator             POP3 host:port:user 구분글자
+Configuration_NNTPSeparator             NNTP host:port:user 구분글자
+Configuration_POP3SepUpdate             POP3 구분글자를 %s로 경신하였습니다.
+Configuration_NNTPSepUpdate             NNTP 구분글자를 %s로 경신하였습니다.
 Configuration_UI                        사용자 인터페이스 웹 포트
 Configuration_UIUpdate                  사용자 인터페이스 웹 포트를 %s로 변경했습니다. 팝파일을 재시작하기 전까지는 적용되지 않습니다.
 Configuration_History                   페이지당 이메일 갯수
@@ -115,6 +135,7 @@ Configuration_LoggerOutput              로그 출력
 Configuration_GeneralSkins              스킨
 Configuration_SmallSkins                작은 스킨
 Configuration_TinySkins                 아주 작은 스킨
+Configuration_CurrentLogFile            &lt;현재 로그 파일&gt;
 
 Advanced_Error1                         '%s' 는 이미 무시되는 단어로 등록된 듯
 Advanced_Error2                         무시되는 단어는 알파벳, 숫자,., _, -, 또는 @ 만을 쓸 수 있습니다.
@@ -125,9 +146,13 @@ Advanced_StopWords                      무시되는 단어들
 Advanced_Message1                       팝파일은 다음의 자주 사용되는 단어를 무시합니다:
 Advanced_AddWord                        단어 추가
 Advanced_RemoveWord                     단어 제거
+Advanced_AllParameters                  모든 팝파일 파라미터
+Advanced_Parameter                      파라미터
+Advanced_Value                          값
+Advanced_Warning                        이것은 팝파일의 모든 파라미터입니다. 고급사용자용입니다. 어느 항목이든 변경할 수 있으며 변경 후에 경신 버튼을 누르십시오. 제대로 변경했는가에 대한 검사는 제공되지 않습니다.
 
 History_Filter                          &nbsp;(다음 버킷만을 보임:<font color="%s">%s</font>)
-History_FilterBy                        필터됨:
+History_FilterBy                        걸러낼 기준
 History_Search                          &nbsp;(발신/제목으로 검색: %s)
 History_Title                           최근 메일
 History_Jump                            메일로 가기
@@ -137,6 +162,7 @@ History_NoFrom                          발신자 없음
 History_NoSubject                       제목 없음
 History_ClassifyAs                      다음으로 분류함:
 History_MagnetUsed                      사용된 자석
+History_MagnetBecause                   <b>자석 사용됨</b><p><font color="%s">%s</font>(으)로 분류됨. 자석 %s 때문임. </p>
 History_ChangedTo                       다음으로 변경됨:<font color="%s">%s
 History_Already                         현재 분류:<font color="%s">%s</font>
 History_RemoveAll                       모두 제거
@@ -145,7 +171,9 @@ History_Remove                          히스토리로부터 제거하기 위해서는 클릭하�
 History_SearchMessage                   발신/제목으로부터 검색
 History_NoMessages                      메일 없음
 History_ShowMagnet                      자석으로 분류됨
+History_ShowNoMagnet                    자석으로 분류되지 않음
 History_Magnet                          &nbsp;(자석으로 분류된 것만 보임)
+History_NoMagnet                        &nbsp;(자석으로 분류되지 않은 것만 보임)
 History_ResetSearch                     초기화
 
 Password_Title                          비밀번호
@@ -166,16 +194,23 @@ Security_SecureServer                   보안 서버
 Security_SecureServerUpdate             보안 서버를 %s로 변경했습니다. 팝파일을 다시 시작할때 적용됩니다.
 Security_SecurePort                     보안 포트
 Security_SecurePortUpdate               포트를 %s로 변경했습니다. 팝파일을 다시 시작할때 적용됩니다.
-Security_POP3                           원격지로부터 POP3 연결을 허용(팝파일 재시작 필요)
-Security_UI                             원격지로부터 HTTP (사용자 웹 인터페이스)연결을 허용(팝파일 재시작 필요)
+Security_SMTPServer                     SMTP 체인 서버
+Security_SMTPServerUpdate               SMTP 체인 서버를 %s로 변경했습니다. 팝파일을 다시 시작할때 적용됩니다.
+Security_SMTPPort                       SMTP 체인 포트
+Security_SMTPPortUpdate                 SMTP 체인 포트를 %s로 변경했습니다. 팝파일을 다시 시작할때 적용됩니다.
+Security_POP3                           원격 기계로부터의 POP3 연결을 허용(팝파일 재시작 필요)
+Security_SMTP                           원격 기계로부터의 SMTP 연결을 허용(팝파일 재시작 필요)
+Security_NNTP                           원격 기계로부터의 NNTP 연결을 허용(팝파일 재시작 필요)
+Security_UI                             원격 기계로부터의 HTTP (유저 인터페이스 화면) 연결을 허용(팝파일 재시작 필요)
+Security_XMLRPC                         원격 기계로부터의 XML-RPC 연결을 허용(팝파일 재시작 필요)
 Security_UpdateTitle                    자동 업데이트 체크
 Security_Update                         팝파일 최신 버전을 매일 체크함
 Security_StatsTitle                     통계 보고
 Security_Stats                          매일 통계를 보냄
 
 Magnet_Error1                           자석 '%s' 는 이미 버킷 '%s'에 존재합니다.
-Magnet_Error2                           새 자석 '%s'는 '%s'자석과 충돌함(버킷:'%s'). 따라서 혼동의 우려가 있으므로 새 자석은 추가되지 않았습니다.
-Magnet_Error3                           새 자석인 '%s'을 버킷 '%s'에 생성
+Magnet_Error2                           새 자석 '%s' 는 '%s' 자석과 충돌함(버킷:'%s'). 따라서 혼동의 우려가 있으므로 새 자석은 추가되지 않았습니다.
+Magnet_Error3                           새 자석인 '%s' 을 버킷 '%s' 에 생성
 Magnet_CurrentMagnets                   현재 자석
 Magnet_Message1                         다음 자석은 지정된 버킷으로 메일이 항상 분류되도록 합니다.
 Magnet_CreateNew                        새 자석 생성
@@ -183,12 +218,13 @@ Magnet_Explanation                      세 종류의 자석이 가능합니다:</b> <ul><li
 Magnet_MagnetType                       자석 종류
 Magnet_Value                            값
 Magnet_Always                           항상 다음 버킷으로
+Magnet_Jump                             자석 페이지로
 
 Bucket_Error1                           영어 소문자와 - 와 _만을 사용하실 수 있습니다.
 Bucket_Error2                           %s(이)라는 이름의 버킷은 이미 있습니다.
 Bucket_Error3                           %s(이)라는 이름으로 버킷을 생성
 Bucket_Error4                           공백이 아닌 단어를 입력하십시오.
-Bucket_Error5                           %s 버킷을 %s로 변경하였습니다.
+Bucket_Error5                           %s 버킷을 %s 로 변경하였습니다.
 Bucket_Error6                           삭제된 버킷 %s
 Bucket_Title                            요약
 Bucket_BucketName                       버킷 이름
@@ -204,6 +240,8 @@ Bucket_EmailsClassifiedUpper            분류된 이메일
 Bucket_ClassificationErrors             분류 오류
 Bucket_Accuracy                         정확도
 Bucket_ClassificationCount              분류 수
+Bucket_ClassificationFP                 잘못 포함시킴
+Bucket_ClassificationFN                 잘못 제외시킴
 Bucket_ResetStatistics                  통계 초기화
 Bucket_LastReset                        마지막 초기화
 Bucket_CurrentColor                     %s의 현재 색상은 %s입니다.
@@ -215,8 +253,8 @@ Bucket_RenameBucket                     다음 이름의 버킷 이름 변경
 Bucket_Lookup                           검색
 Bucket_LookupMessage                    버킷에서 다음 단어를 검색
 Bucket_LookupMessage2                   다음 단어에 대한 검색 결과
-Bucket_LookupMostLikely                 <b>%s</b>는 <font color="%s">%s</font>에 나타날 확률이 가장 높습니다.
-Bucket_DoesNotAppear                    <p><b>%s</b>는 어느 버킷에도 나타나지 않습니다.
+Bucket_LookupMostLikely                 <b>%s</b> 는 <font color="%s">%s</font>에 나타날 확률이 가장 높습니다.
+Bucket_DoesNotAppear                    <p><b>%s</b> 는 어느 버킷에도 나타나지 않습니다.
 Bucket_DisabledGlobally                 적용안함
 Bucket_To                               =>
 Bucket_Quarantine                       격리
@@ -228,9 +266,20 @@ SingleBucket_Percentage                 전체의 비율
 SingleBucket_WordTable                  %s의 단어 표
 SingleBucket_Message1                   별표 붙은(*) 단어들은 이번 팝파일 세션에서 분류에 사용되었습니다. 단어를 클릭하시면 버킷에 포함될 확률을 화면 아래 오른쪽에서 보실 수 있습니다.
 SingleBucket_Unique                     %s : 유일
+SingleBucket_ClearBucket                모든 단어 제거
 
 Session_Title                           팝파일 세션이 만료되었습니다.
 Session_Error                           팝파일 세션이 만료되었습니다. 팝파일을 종료 후 재시작 했기 때문일 것이며, 위의 링크 중 하나를 누르시면 계속하실 수 있습니다. 
+
+View_Title                              메일 자세히 보기
+View_ShowFrequencies                    단어 빈도 보기
+View_ShowProbabilities                  단어 확률 보기
+View_ShowScores                         단어 점수 보기
+View_WordMatrix                         단어 표
+
+Windows_TrayIcon                        팝파일 아이콘을 윈도우즈 시스템 트레이에 표시하시겠습니까?
+Windows_Console                         팝파일 메시지를 콘솔창에 표시하시겠습니까?
+Windows_NextTime                        <p><font color="red">이 변경은 다음번 팝파일 실행시부터 적용됩니다.</font>
 
 Header_MenuSummary                      이것은 제어센터의 각기 다른 페이지를 접근할 수 있는 메뉴입니다.
 History_MainTableSummary                이것은 최근 수신된 메일의 발신인과 제목을 보여주며 재검토하고 재분류할 수 있도록 해주는 메뉴입니다. 제목 라인을 클릭하시면 메일 내용을 보실 수 있으며 아울러, 분류가 된 이유를 보실 수 있습니다. 맞는 분류 칸에서는 메일이 어느 버킷에 속하는지 지정하시거나 분류를 취소하실 수 있습니다. '삭제' 칸에서는 특정 메시지를 히스토리로부터 지울 수 있습니다.
@@ -247,3 +296,5 @@ Configuration_MainTableSummary          이것은 팝파일의 설정을 조절하기 위한 여�
 Configuration_InsertionTableSummary     이것은 이메일 프로그램(아웃룩 등등)에 메일을 넘겨주기 전에 헤더나 제목란을 변경할 것인지 설정할 버튼을 보여줍니다.
 Security_MainTableSummary               이것은 팝파일의 전체 구성의 보안에 영향을 주는 제어 항목을 제공합니다. 즉, 자동적으로 업데이트를 체크할 것인가, 개발에 참고하기 위해 팝파일의 성능에 대한 통계를 프로그램 제작자의 웹사이트로 전송할 것인가를 정할 수 있습니다.
 Advanced_MainTableSummary               이것은 팝파일이 메일을 분류할때 무시하는 단어(너무 흔한 단어) 목록을 제공합니다. 단어들은 첫 글자에 의해 정렬되어 있습니다.
+
+

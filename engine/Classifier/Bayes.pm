@@ -786,7 +786,10 @@ sub classify
             # Sorting Japanese with "use locale" is memory and time consuming,
             # and may cause perl crash.
 
-            if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+            # Disable the locale in Korean mode, too.
+
+            if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
+                 $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
                 no locale;
                 for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
                     my $regex;
@@ -1569,7 +1572,15 @@ sub get_bucket_word_prefixes
         no locale;
         return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
     } else {
-        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+        if  ( $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
+    	    no locale;
+            my $ksc5601 = '(?:[\xA1-\xFE][\xA1-\xFE])';
+            my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])";
+
+            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+        } else {
+            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+        }
     }
 }
 
@@ -1887,7 +1898,9 @@ sub add_messages_to_bucket
        # Sorting Japanese with "use locale" is memory and time consuming,
        # and may cause perl crash.
 
-       if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+       # Disable the locale in Korean mode, too.
+       if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
+            $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
             no locale;
             foreach my $word (keys %{$self->{parser__}->{words__}}) {
                 $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
@@ -1950,7 +1963,9 @@ sub remove_message_from_bucket
     # Sorting Japanese with "use locale" is memory and time consuming,
     # and may cause perl crash.
 
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+    # Disable the locale in Korean mode, too.
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
+         $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
         no locale;
         foreach my $word (keys %{$self->{parser__}->{words__}}) {
             $self->set_value_( $bucket, $word, $self->get_base_value_( $bucket, $word ) - $self->{parser__}->{words__}{$word} );
@@ -2114,7 +2129,10 @@ sub get_magnets
     # Sorting Japanese with "use locale" is memory and time consuming,
     # and may cause perl crash.
 
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+    # Disable the locale in Korean mode, too.
+
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
+         $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
         no locale;
         return sort keys %{$self->{magnets__}{$bucket}{$type}};
     } else {

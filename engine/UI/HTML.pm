@@ -1394,37 +1394,73 @@ sub advanced_page
             }
         }
     } else {
-        for my $word (sort @words) {
-            $word =~ /^(.)/;
+        if ( $self->config_( 'language' ) eq 'Korean' ) {
+    	    # don't use locale in Korean mode. Every other code is same
+    	    no locale;
+            for my $word (sort @words) {
+                $word =~ /^(.)/;
 
-            if ( $1 ne $last )  {
-                if (! $firstRow) {
-                    $body .= "</td></tr>\n";
+                if ( $1 ne $last )  {
+                    if (! $firstRow) {
+                        $body .= "</td></tr>\n";
+                    } else {
+                        $firstRow = 0;
+                    }
+                    $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
+                    if ($groupCounter == $groupSize) {
+                        $body .= "GroupSpacing";
+                    }
+                    $body .= "\"><b>$1</b></th>\n";
+                    $body .= "<td class=\"advancedWords";
+                    if ($groupCounter == $groupSize) {
+                        $body .= "GroupSpacing";
+                        $groupCounter = 0;
+                    }
+                    $body .= "\">";
+
+                    $last = $1;
+                    $need_comma = 0;
+                    $groupCounter += 1;
+                }
+                if ( $need_comma == 1 ) {
+                    $body .= ", $word";
                 } else {
-                    $firstRow = 0;
+                    $body .= $word;
+                    $need_comma = 1;
                 }
-                $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
-                if ($groupCounter == $groupSize) {
-                    $body .= "GroupSpacing";
-                }
-                $body .= "\"><b>$1</b></th>\n";
-                $body .= "<td class=\"advancedWords";
-                if ($groupCounter == $groupSize) {
-                    $body .= "GroupSpacing";
-                    $groupCounter = 0;
-                }
-                $body .= "\">";
-
-
-                $last = $1;
-                $need_comma = 0;
-                $groupCounter += 1;
             }
-            if ( $need_comma == 1 ) {
-                $body .= ", $word";
-            } else {
-                $body .= $word;
-                $need_comma = 1;
+        } else {
+            for my $word (sort @words) {
+                $word =~ /^(.)/;
+
+                if ( $1 ne $last )  {
+                    if (! $firstRow) {
+                        $body .= "</td></tr>\n";
+                    } else {
+                        $firstRow = 0;
+                    }
+                    $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
+                    if ($groupCounter == $groupSize) {
+                        $body .= "GroupSpacing";
+                    }
+                    $body .= "\"><b>$1</b></th>\n";
+                    $body .= "<td class=\"advancedWords";
+                    if ($groupCounter == $groupSize) {
+                        $body .= "GroupSpacing";
+                        $groupCounter = 0;
+                    }
+                    $body .= "\">";
+
+                    $last = $1;
+                    $need_comma = 0;
+                    $groupCounter += 1;
+                }
+                if ( $need_comma == 1 ) {
+                    $body .= ", $word";
+                } else {
+                    $body .= $word;
+                    $need_comma = 1;
+                }
             }
         }
     }
@@ -2684,7 +2720,16 @@ sub new_history_file__
     if ( length($short_subject)>40 )  {
         $short_subject =~ s/=20/ /g;
         $short_subject =~ /(.{40})/;
-        $short_subject = "$1...";
+
+        # Do not truncate at 39 if the last char is the first byte of DBCS char(pair of two bytes).
+        # Truncate it 1 byte shorter.
+        if ( $self->config_( 'language' ) eq 'Korean' ) {
+            $short_subject = $1;
+            $short_subject =~ s/(([\x80-\xff].)*)[\x80-\xff]?$/$1/;
+            $short_subject .= "...";
+        } else {
+            $short_subject = "$1...";
+        }
     }
 
     $from =~ s/&/&amp;/g;

@@ -31,6 +31,12 @@ use Classifier::WordMangle;
 use MIME::Base64;
 use MIME::QuotedPrint;
 
+
+# Korean characters definition
+
+my $ksc5601 = '(?:[\xA1-\xFE][\xA1-\xFE])';
+my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])"; #extended ksc
+
 # These are used for Japanese support
 
 my $ascii = '[\x00-\x7F]'; # ASCII chars
@@ -510,19 +516,37 @@ sub add_line
                         update_word($self, $matched_word, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]'."|$symbol_euc_jp", $prefix);
                     }
                 }
-
             } else {
-                # Only care about words between 3 and 45 characters since short words like
-                # an, or, if are too common and the longest word in English (according to
-                # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+                if ( $self->{lang__} eq 'Korean' ) {
 
-                while ( $line =~ s/([[:alpha:]][[:alpha:]\']{1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
-                    if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
-                        $self->{first20count__} += 1;
-                        $self->{first20__} .= " $1";
+                    # In Korean mode, [[:alpha:]] in regular expression is changed to 2bytes chars
+                    # to support 2 byte characters.
+                    #
+                    # In Korean, 1 character(2 bytes) words are meaningful, so care about
+                    # words between 2 and 45 characters.
+
+                    while ( $line =~ s/(([A-Za-z]|$eksc)([A-Za-z\']|$eksc){1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
+                        if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
+                            $self->{first20count__} += 1;
+                            $self->{first20__} .= " $1";
+                        }
+
+                        update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 2);
+		    }
+                } else {
+
+                    # Only care about words between 3 and 45 characters since short words like
+                    # an, or, if are too common and the longest word in English (according to
+                    # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+
+                    while ( $line =~ s/([[:alpha:]][[:alpha:]\']{1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
+                        if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
+                            $self->{first20count__} += 1;
+                            $self->{first20__} .= " $1";
+                        }
+
+                       update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
                     }
-
-                    update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
                 }
             }
 
