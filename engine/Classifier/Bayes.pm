@@ -564,17 +564,6 @@ sub classify_file
         $wordprob{$word} = exp($wmax);
     }
 
-	# Because people treat spam as a very special case of email we need to be extra
-	# careful that we do not put something in a spam bucket that is not.  It is acceptable
-	# to most people to start getting spam in their inbox and then have to retrain but
-	# it is not acceptable the other way around.
-	#
-	# Halve the likelihood of getting in the spam bucket for each word
-
-	if ( defined( $score{spam} ) )  {
-		$score{spam} += log(0.5);
-	}
-
     # Now sort the scores to find the highest and return that bucket as the classification
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
