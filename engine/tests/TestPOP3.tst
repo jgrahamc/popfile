@@ -1016,7 +1016,7 @@ if ( $pid == 0 ) {
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
             $result =~ s/popfile2=28/popfile0=0/;
-            test_assert_equal( $result, $line, "[$result][$line]" );
+            test_assert_equal( $result, $line );
             if ( $headers == 0 ) {
                 $countdown -= 1;
 	    }
