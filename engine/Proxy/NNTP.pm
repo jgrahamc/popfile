@@ -147,6 +147,10 @@ sub start
                                          'nntp-security-local.thtml',
                                          $self );
 
+    if ( $self->config_( 'welcome_string' ) =~ /^NNTP POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK START
+        $self->config_( 'welcome_string', "NNTP POPFile ($self->{version_}) server ready" );        # PROFILE BLOCK STOP
+    }
+
     return $self->SUPER::start();; }
 
 # ----------------------------------------------------------------------------

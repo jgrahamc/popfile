@@ -135,6 +135,10 @@ sub start
                                          'smtp-chain-server-port.thtml',
                                          $self );
 
+    if ( $self->config_( 'welcome_string' ) =~ /^SMTP POPFile \(v\d+\.\d+\.\d+\) welcome$/ ) { # PROFILE BLOCK START
+        $self->config_( 'welcome_string', "SMTP POPFile ($self->{version_}) welcome" );        # PROFILE BLOCK STOP
+    }
+
     return $self->SUPER::start();;
 }
 
