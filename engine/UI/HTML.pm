@@ -320,6 +320,51 @@ sub url_handler__
         $content =~ s/[\r\n]//g;
         $self->parse_form_( $content );
     }
+    
+    # files in the skins directory load from the current skin if they exist
+    # if not, they load from the default skin
+    
+    if ( $url =~ /skins\/(.+)/ ) {
+    
+    
+	my %mime_extensions = qw( gif image/gif
+				  png image/png
+				  ico image/x-icon
+				  jpg image/jpeg
+				  jpeg image/jpeg
+				  css text/css
+				  html text/html );
+				  
+	my $filename = $1;
+
+	my $root = 'skins/' . $self->user_config_( 1, 'skin' ) . '/';
+	my $template_root = $root;
+	my $file = $self->get_root_path_( "$template_root$filename" );
+	if ( !( -e $file ) ) {
+		$template_root = 'skins/default/';
+		$file = $self->get_root_path_( "$template_root$filename" );
+	}
+
+	# some file types we don't want accessed directly
+	if ( $filename =~ /.*?(\.thtml)/ ) {
+		$self->log_( 0, "Direct access to $filename prevented" );
+		return 0;
+	}
+	
+	# determine mime type from extension -- crude, but we only expect a few mime types
+	
+	my $mime = "text/plain";
+	
+	if ( $file =~ /.*?([^\.]+)$/ ) {
+		$mime = $mime_extensions{$1} if ( defined( $1 ) )
+	}
+	
+	$self->http_file_( $client, $self->get_root_path_( $file ), $mime );
+        return 1;	
+    }
+    
+    
+
 
     if ( $url =~ /\/autogen_(.+)\.bmp/ ) {
         $self->bmp_file__( $client, $1 );
@@ -339,11 +384,6 @@ sub url_handler__
     if ( $url =~ /\/(.+\.ico)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ),
              'image/x-icon' );
-        return 1;
-    }
-
-    if ( $url =~ /(skins\/.+\.css)/ ) {
-        $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/css' );
         return 1;
     }
 
@@ -683,34 +723,30 @@ sub handle_history_bar__
     if ( defined( $self->{form_}{moveleft} ) ) {
         my $col = '+' . $self->{form_}{moveleft};
         my @cols = split( ',', $self->user_config_( 1, 'columns' ) );
-        my @disabled = grep( /^\-/, @cols );
-        my @enabled  = grep( /^\+/, @cols );
 
-        for my $i (1..$#enabled) {
-            if ( $enabled[$i] eq $col ) {
-                my $t = $enabled[$i];
-                $enabled[$i] = $enabled[$i-1];
-                $enabled[$i-1] = $t;
+        for my $i (1..$#cols) {
+            if ( $cols[$i] eq $col ) {
+                my $t = $cols[$i];
+                $cols[$i] = $cols[$i-1];
+                $cols[$i-1] = $t;
                 last;
             }
         }
-        $self->user_config_( 1, 'columns', join( ',',( @enabled, @disabled ) ) );
+        $self->user_config_( 1, 'columns', join( ',', @cols ) );
     }
     if ( defined( $self->{form_}{moveright} ) ) {
         my $col = '+' . $self->{form_}{moveright};
         my @cols = split( ',', $self->user_config_( 1, 'columns' ) );
-        my @disabled = grep( /^\-/, @cols );
-        my @enabled  = grep( /^\+/, @cols );
 
-        for my $i (0..$#enabled-1) {
-            if ( $enabled[$i] eq $col ) {
-                my $t = $enabled[$i];
-                $enabled[$i] = $enabled[$i+1];
-                $enabled[$i+1] = $t;
+        for my $i (0..$#cols-1) {
+            if ( $cols[$i] eq $col ) {
+                my $t = $cols[$i];
+                $cols[$i] = $cols[$i+1];
+                $cols[$i+1] = $t;
                 last;
             }
         }
-        $self->user_config_( 1, 'columns', join( ',',( @enabled, @disabled ) ) );
+        $self->user_config_( 1, 'columns', join( ',', @cols ) );
     }
 }
 
@@ -2325,16 +2361,16 @@ sub history_page
         # +, and then strip the +
 
         my @columns = split( ',', $self->user_config_( 1, 'columns' ) );
-        my @enabled = grep( /^\+/, @columns );
         my @header_data;
         my $colspan = 1;
         my $length = 90;
 
-        foreach my $header (@enabled) {
+        foreach my $header (@columns) {
             my %row_data;
+            $header =~ /^(.)/;
+            next if ( $1 eq '-' );
             $colspan++;
             $header =~ s/^.//;
-
             $row_data{History_Fields} =
                 $self->print_form_fields_(1,1,
                     ('filter','session','search','negate'));
@@ -2354,8 +2390,8 @@ sub history_page
             $row_data{History_If_Sorted_Ascending} =
                 ( $self->{form_}{sort} !~ /^-/ );
             $row_data{Session_Key} = $self->{session_key__};
-            $row_data{History_If_MoveLeft} = ( $header ne $enabled[0] );
-            $row_data{History_If_MoveRight} = ( $header ne $enabled[$#enabled] );
+            $row_data{History_If_MoveLeft} = ( $header ne $columns[0] );
+            $row_data{History_If_MoveRight} = ( $header ne $columns[$#columns] );
             $row_data{Localize_History_RemoveColumn} = $self->{language__}{History_RemoveColumn};
             $row_data{Localize_History_Click_To_Sort} = $self->{language__}{History_Click_To_Sort};
             $row_data{Localize_History_MoveLeft} = $self->{language__}{History_MoveLeft};
@@ -2417,7 +2453,7 @@ sub history_page
                     next;
                 }
 
-                my %addresses = ( 'from' => 1, 'to' => 2 , 'cc' => 3 );
+                my %addresses = ( 'from' => 1, 'to' => 2 , 'cc' => 4 );
 
                  if ( defined( $addresses{$header} ) ) {
                      $col_data{History_Cell_Title} =$$row[$addresses{$header}];
