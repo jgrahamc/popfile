@@ -69,8 +69,8 @@ sub initialize
     $self->config_( 'toptoo', 0 );
 
     # Start with no messages downloaded and no error
-    $self->config_( 'mcount', 0 );
-    $self->config_( 'ecount', 0 );
+    $self->global_config_( 'mcount', 0 );
+    $self->global_config_( 'ecount', 0 );
 
     # This counter is used when creating unique IDs for message stored
     # in the history.  The history message files have the format
@@ -115,7 +115,7 @@ sub flush_child_data__
             $class =~ s/[\r\n]//g;
 
 # TODO            $self->{classifier__}->{parameters}{$class}{count} += 1;
-            $self->config_( 'mcount' )  += 1;
+            $self->global_config_( 'mcount', $self->global_config_( 'mcount' ) + 1 );
             $stats_changed                                    = 1;
 
             $self->log_( "Incrementing $class for $kid" );
@@ -130,8 +130,8 @@ sub flush_child_data__
     }
 
     if ( $stats_changed ) {
-        $self->{ui}->invalidate_history_cache();
-        $self->{configuration}->save_configuration();
+        $self->{ui__}->invalidate_history_cache();
+        $self->{configuration__}->save_configuration();
         $self->{classifier__}->write_parameters();
     }
 }

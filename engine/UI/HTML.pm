@@ -387,7 +387,7 @@ sub http_ok
         if ( $self->config_( 'send_stats' ) ) {
             my @buckets = $self->{classifier__}->get_buckets();
             my $bc      = $#buckets + 1;
-            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=$self->config_( 'mcount' )&amp;ec=$self->config_( 'ecount' )\" />\n";
+            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=" . $self->global_config_( 'mcount' ) . "&amp;ec=" . $self->global_config_( 'ecount' ) . "\" />\n";
         }
 
         $self->config_( 'last_update_check', $self->{today}, 1 );
@@ -1580,8 +1580,8 @@ sub corpus_page
     my ( $self, $client ) = @_;
 
     if ( defined($self->{form__}{reset_stats}) ) {
-        $self->config_( 'mcount', 0 );
-        $self->config_( 'ecount', 0 );
+        $self->global_config_( 'mcount', 0 );
+        $self->global_config_( 'ecount', 0 );
         for my $bucket ($self->{classifier__}->get_buckets()) {
             $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 0 );
         }
@@ -1630,14 +1630,8 @@ sub corpus_page
 
     if ( ( defined($self->{form__}{delete}) ) && ( $self->{form__}{name} ne '' ) ) {
         $self->{form__}{name} = lc($self->{form__}{name});
-        unlink( $self->config_( 'corpus' ) . "/$self->{form__}{name}/table" );
-        unlink( $self->config_( 'corpus' ) . "/$self->{form__}{name}/params" );
-        unlink( $self->config_( 'corpus' ) . "/$self->{form__}{name}/magnets" );
-        unlink( $self->config_( 'corpus' ) . "/$self->{form__}{name}/color" );
-        rmdir( $self->config_( 'corpus' ) . "/$self->{form__}{name}" );
-
+	$self->{classifier__}->delete_bucket( $self->{form__}{name} );
         $deletemessage = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error6}, $self->{form__}{name} ) . "</b></blockquote>";
-        $self->{classifier__}->load_word_matrix();
     }
 
     if ( ( defined($self->{form__}{newname}) ) && ( $self->{form__}{oname} ne '' ) ) {
@@ -1646,9 +1640,8 @@ sub corpus_page
         } else {
             $self->{form__}{oname} = lc($self->{form__}{oname});
             $self->{form__}{newname} = lc($self->{form__}{newname});
-            rename($self->config_( 'corpus' ) . "/$self->{form__}{oname}" , $self->config_( 'corpus' ) . "/$self->{form__}{newname}");
+	    $self->{classifier__}->rename_bucket( $self->{form__}{oname}, $self->{form__}{newname} );            
             $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form__}{oname}, $self->{form__}{newname} ) . "</b></blockquote>";
-            $self->{classifier__}->load_word_matrix();
         }
     }
 
@@ -1753,12 +1746,12 @@ sub corpus_page
     # figure some performance numbers
 
     my $number = pretty_number( $self,  $self->{classifier__}->get_word_count() );
-    my $pmcount = pretty_number( $self,  $self->config_( 'mcount' ) );
-    my $pecount = pretty_number( $self,  $self->config_( 'ecount' ) );
+    my $pmcount = pretty_number( $self,  $self->global_config_( 'mcount' ) );
+    my $pecount = pretty_number( $self,  $self->global_config_( 'ecount' ) );
     my $accuracy = $self->{language__}{Bucket_NotEnoughData};
     my $percent = 0;
     if ( $self->config_( 'mcount' ) > 0 )  {
-        $percent = int( 10000 * ( $self->config_( 'mcount' ) - $self->config_( 'ecount' ) ) / $self->config_( 'mcount' ) ) / 100;
+        $percent = int( 10000 * ( $self->global_config_( 'mcount' ) - $self->global_config_( 'ecount' ) ) / $self->global_config_( 'mcount' ) ) / 100;
         $accuracy = "$percent%";
     }
 
@@ -2438,7 +2431,7 @@ sub history_reclassify
 
             if ( !$reclassified ) {
 		$self->{classifier__}->add_message_to_bucket( $self->global_config_( 'msgdir' ) . $mail_file, $newbucket );
-                # TODO $self->config_( 'ecount' ) += 1 if ( $newbucket ne $bucket );
+                $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) + 1 ) if ( $newbucket ne $bucket );
 
                 $self->{logger}->debug( "Reclassifying $mail_file from $bucket to $newbucket" );
 
@@ -2492,7 +2485,7 @@ sub history_undo
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 
                 if ( $bucket ne $usedtobe ) {
-                    $self->config_( 'ecount', $self->config_( 'ecount' ) - 1 ) if ( $self->config_( 'ecount' ) > 0 );
+                    $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) - 1 ) if ( $self->global_config_( 'ecount' ) > 0 );
 # TODO                    $self->{classifier__}->{parameters}{$bucket}{count}   -= 1;
 # TODO                    $self->{classifier__}->{parameters}{$usedtobe}{count} += 1;
                 }

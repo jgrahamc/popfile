@@ -1099,6 +1099,51 @@ sub create_bucket
 
 # ---------------------------------------------------------------------------------------------
 #
+# delete_bucket
+#
+# Deletes a bucket
+#
+# $bucket          Name of the bucket to delete
+#
+# ---------------------------------------------------------------------------------------------
+
+sub delete_bucket
+{
+    my ( $self, $bucket ) = @_;
+
+    my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
+
+    unlink( "$bucket_directory/table" );
+    unlink( "$bucket_directory/color" );
+    unlink( "$bucket_directory/params" );
+    unlink( "$bucket_directory/magnets" );
+    rmdir( $bucket_directory );
+
+    $self->load_word_matrix_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# rename_bucket
+#
+# Renames a bucket
+#
+# $old_bucket          The old name of the bucket
+# $new_bucket          The new name of the bucket
+#
+# ---------------------------------------------------------------------------------------------
+
+sub rename_bucket
+{
+    my ( $self, $old_bucket, $new_bucket ) = @_;
+
+    rename($self->config_( 'corpus' ) . "/$old_bucket" , $self->config_( 'corpus' ) . "/$new_bucket");
+
+    $self->load_word_matrix_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # add_message_to_bucket
 #
 # Parses a mail message and updates the statistics in the specified bucket
