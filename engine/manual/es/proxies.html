@@ -1,0 +1,129 @@
+<html><head><title>Documentaci&oacute;n de POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentaci&oacute;n de POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Primeros ajustes:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Paso 1<br><font size=+1><b>&nbsp;<a href="installing.html">Instalando</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Paso 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Definiendo Categor&iacute;as</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Paso 3<br><font size=+1><b>&nbsp;<a href="email.html">Lectores de Correo</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Paso 4<br><font size=+1><b>&nbsp;<a href="training.html">Entrenamiento</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Utilizando POPFile con:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Cortafuegos</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Autenticaci&oacute;n por Contrase&ntilde;a Segura</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Otros Proxis</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Varias Cuentas de Correo</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>Utilizando POPFile con otros proxis tales como esc&aacute;neres de virus</h2>
+
+<p>Si utilizas un proxy para escanear el correo que haya cambiado los valores de tu programa correo como hacen algunas versiones del Antivirus Norton, entonces POPFile no funcionar&aacute; tal cual: el proxy de correo se apoderar&aacute; de tus correos. Necesitas configurar POPFile para que se comunique con el esc&aacute;ner de correo. (Si tu escaner de virus no cambia los valores de tu servidor de correo POP3 entonces no hay necesidad de seguir estas instrucciones).</p>
+
+<p>(Asi que, basicamente, los correos los descarga el antivirus, los pasa a POPFile, y luego - finalmente - se envian a tu programa de correo.)</p>
+
+<p>Ahora bien, dado que diferentes marcas de esc&aacute;neres de correo funcionan de forma diferente, nosotros trabajaremos as&iacute;:
+
+<ol><li>Desactivar el esc&aacute;ner de correo y volver tus valores a los normales.
+<li>Decirle a POPFile que escuche las conexiones en un puerto diferente.
+<li>Decirle a tu programa de correo que se conecte a POPFile en un puerto diferente.
+<li>Re-activar el esc&aacute;ner de correo con los nuevos valores.</ol></p>
+
+<h3>Desactivando tu esc&aacute;ner de correo</h3>
+
+<p>Para ello siga las instrucciones de su fabricante.</p>
+
+<h3>Cambiar el puerto de POPFile</h3>
+
+<p>Dir&iacute;jase a la pesta&ntilde;a de Configuraci&oacute;n del Interface Web, y cambie su <b>Puerto de escucha POP3</b> a cualquier n&uacute;mero parecido - recomendamos 123. Clic Aplicar.</p>
+
+<h3>Cambiar el puerto en tu programa de correo</h3>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+Elija su programa de correo y siga en la columna inferior. Aunque estas instrucciones parezcan complicadas, en realidad tardaras dos minutos - y es  dificil equivocarse. (Solo por si acaso, anote sus valores originales en caso de que necesite volver a empezar.)
+</td></tr><tr>
+
+<td width=33% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>Vaya al menu Herramientas -> Cuentas de Correo.
+<li>Haga clic en Ver o cambiar cuentas de correo existentes y pinche en Siguiente.
+<li>Seleccione su cuenta, y haga clic en Cambiar.
+<li>Haga clic en el bot&oacute;n Mas Ajustes.
+<li>Pinche en la pesta&ntilde;a Avanzado.
+<li>Junto a Servidor de correo entrante (POP3), ponga el mismo n&uacute;mero que eligi&oacute; anteriormente (recomendamos 123).
+<li>Haga clic en OK, y repita el proceso para cada una de las cuentas que quiera utilizar con POPFile.
+</ul>
+
+</td><td width=34% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>Vaya a al menu Herramientas -> Cuentas.
+<li>Seleccione su cuenta y haga clic en Propiedades.
+<li>Haga clic en la pesta&ntilde;a Avanzado.
+<li>Junto a Correo Entrante (POP3), ponga el mismo n&uacute;mero que eligi&oacute; anteriormente (recomendamos 123).
+<li>Haga clic en OK, y repita el proceso para cada una de las cuentas que quiera utilizar con POPFile.
+</ul>
+
+</td><td width=33% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+<li>Los valores de puerto de Eudora est&aacute;n en sus ocultos, 'esotericos' settings.
+<li>Vaya a 'Mi Ordenador' y navegue hasta el directorio en el que est&aacute; instalado Eudora - normalmente es C:\Archivos de Programa\Qualcomm\Eudora
+<li>Haga clic en la carpeta 'extrastuff'.
+<li>Selecione el archivo 'esoteric.epi', y copielo mediante el menu Editar > Copiar.
+<li>Regrese al directorio principal de Eudora, y peguelo mediante Editar > Pegar.
+<li>Arranque Eudora.
+<li>Vaya al menu Tools -> Options.
+<li>Desplacese hasta el final de la lista opciones y elija 'Ports & Protocols'.
+<li>Junto a 'POP3', ponga el mismo n&uacute;mero que eligi&oacute; anteriormente (recomendamos 123).
+<li>Haga clic en OK. Ya est&aacute;.
+</ul>
+
+</td></tr></table>
+
+<h3>Re-active su esc&aacute;ner de correo.</h3>
+
+Reactive su esc&aacute;ner (consulte el manual de su esc&aacute;ner) y este debeber&iacute;a ajustar automaticamente todo. El correo debeber&iacute;a estar ya escaneado y ordenado.
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Enlaces Web:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Foros</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

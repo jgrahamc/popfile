@@ -1,0 +1,77 @@
+<html><head><title>Documentaci&oacute;n de POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentaci&oacute;n de POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Primeros ajustes:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Paso 1<br><font size=+1><b>&nbsp;<a href="installing.html">Instalando</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Paso 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Definiendo Categor&iacute;as</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Paso 3<br><font size=+1><b>&nbsp;<a href="email.html">Lectores de Correo</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Paso 4<br><font size=+1><b>&nbsp;<a href="training.html">Entrenamiento</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Utilizando POPFile con:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Cortafuegos</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Autenticaci&oacute;n por Contrase&ntilde;a Segura</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Otros Proxis</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Varias Cuentas de Correo</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>Utilizando POPFile con Autenticaci&oacute;n por Contrase&ntilde;a Segura (SPA)</h2>
+
+<p>Dir&iacute;jase a la pesta&ntilde;a de Seguridad del interface web, y ponga all&iacute; el nombre de servidor y el puerto de su servidor protegido por Autenticaci&oacute;n con Contrase&ntilde;a Segura. Una vez hecho, solo necesita cambiar el nombre de servidor en su programa de correo a 127.0.0.1  - no necesitar&aacute; cambiar el nombre de usuario.</p>
+
+<p>Por desgracia, de momento solo se puede tener una cuenta SPA con cada instalaci&oacute;n de POPFile.</p>
+
+<h2>Una nota sobre la Autenticaci&oacute;n por Contrase&ntilde;a Segura de MSN </h2>
+
+<ol>
+<li> Tendr&aacute; que iniciar popfile con el siguiente comando
+(escr&iacute;balo exactamente as&iacute;)
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
+110</b></blockquote>
+
+<li> En sus cuentas, pesta&ntilde;a servidor, aseg&uacute;rese de que tiene la siguiente informaci&oacute;n:
+<p>
+Servidor de correo entrante: 127.0.0.1<br>
+Nombre de la Cuenta: SOLO_SU_NOMBRE_DE_CUENTA_MSN
+<p>
+Compruebe que est&eacute; marcado "Iniciar sesion usando autenticaci&oacute;n de contrase&ntilde;a segura"
+<p>
+En la pesta&ntilde;a Avanzado, aseg&uacute;rese de que el puerto para su correo entrante
+est&eacute; puesto en 110 y el 'El servidor requiere una conexi&oacute;n segura (SSL)' est&aacute; SIN MARCAR.
+<p>
+<li> Usted debeber&iacute;a poder comprobar ahora su correo pinchando
+en el nombre de cuenta situado en el 'Icono de descarga de Correo'.
+</ol>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Enlaces Web:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Foros</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>
