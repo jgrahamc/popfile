@@ -25,84 +25,84 @@ test_assert_equal( $cl->map_color( '#FFfFFF' ), 'ffffff' );
 # Check line splitting into words
 $cl->{htmlbackcolor} = $cl->map_color( 'white' );
 $cl->{htmlfontcolor} = $cl->map_color( 'black' );
-$cl->{words}         = {};
+$cl->{words__}       = {};
 $cl->add_line( 'this is a test of,adding words: from a line of text!', 0, '' );
-test_assert_equal( $cl->{words}{test},   1 );
-test_assert_equal( $cl->{words}{adding}, 1 );
-test_assert_equal( $cl->{words}{words},  1 );
-test_assert_equal( $cl->{words}{line},   1 );
-test_assert_equal( $cl->{words}{text},   1 );
+test_assert_equal( $cl->{words__}{test},   1 );
+test_assert_equal( $cl->{words__}{adding}, 1 );
+test_assert_equal( $cl->{words__}{words},  1 );
+test_assert_equal( $cl->{words__}{line},   1 );
+test_assert_equal( $cl->{words__}{text},   1 );
 $cl->add_line( 'adding', 0, '' );
-test_assert_equal( $cl->{words}{adding}, 2 );
+test_assert_equal( $cl->{words__}{adding}, 2 );
 
 # Check that we correctly handle spaced out and dotted word
-$cl->{words}         = {};
+$cl->{words__}         = {};
 $cl->add_line( 'T H I S  T E X T  I S  S P A C E D alot', 0, '' );
-test_assert_equal( $cl->{words}{text},   1 );
-test_assert_equal( $cl->{words}{spaced}, 1 );
-test_assert_equal( $cl->{words}{alot},   1 );
-$cl->{words}         = {};
+test_assert_equal( $cl->{words__}{text},   1 );
+test_assert_equal( $cl->{words__}{spaced}, 1 );
+test_assert_equal( $cl->{words__}{alot},   1 );
+$cl->{words__}         = {};
 $cl->add_line( 'offer a full 90 day m.oney b.ack g.uarantee.  If any customer is not. C.lick b.elow f.or m.ore i.nformation, it\'s f.r.e.e.', 0, '' );
-test_assert_equal( $cl->{words}{offer},     1 );
-test_assert_equal( $cl->{words}{full},      1 );
-test_assert_equal( $cl->{words}{money},     1 );
-test_assert_equal( $cl->{words}{back},      1 );
-test_assert_equal( $cl->{words}{customer},  1 );
-test_assert_equal( $cl->{words}{'trick:dottedwords'}, 6 );
-test_assert_equal( $cl->{words}{click},     1 );
-test_assert_equal( $cl->{words}{below},     1 );
-test_assert_equal( $cl->{words}{more},      1 );
+test_assert_equal( $cl->{words__}{offer},     1 );
+test_assert_equal( $cl->{words__}{full},      1 );
+test_assert_equal( $cl->{words__}{money},     1 );
+test_assert_equal( $cl->{words__}{back},      1 );
+test_assert_equal( $cl->{words__}{customer},  1 );
+test_assert_equal( $cl->{words__}{'trick:dottedwords'}, 6 );
+test_assert_equal( $cl->{words__}{click},     1 );
+test_assert_equal( $cl->{words__}{below},     1 );
+test_assert_equal( $cl->{words__}{more},      1 );
 
 # Check discovery of font color
-$cl->{htmlfontcolor} = '';
+$cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color="white">' ), 0 );
-test_assert_equal( $cl->{htmlfontcolor}, $cl->map_color( 'white' ) );
-$cl->{htmlfontcolor} = '';
+test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'white' ) );
+$cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color=red>' ), 0 );
-test_assert_equal( $cl->{htmlfontcolor}, $cl->map_color( 'red' ) );
-$cl->{htmlfontcolor} = '';
+test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'red' ) );
+$cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color=#00ff00>' ), 0 );
-test_assert_equal( $cl->{htmlfontcolor}, $cl->map_color( 'green' ) );
-$cl->{htmlfontcolor} = '';
+test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'green' ) );
+$cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color=#00ff00></font>' ), 0 );
-test_assert_equal( $cl->{htmlfontcolor}, $cl->map_color( 'black' ) );
+test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'black' ) );
 
 # Check comment detection
-$cl->{words}         = {};
+$cl->{words__}         = {};
 test_assert_equal( $cl->parse_html( '<!-- foo -->' ), 0 );
 test_assert_equal( $cl->parse_html( '<!-- -->' ), 0 );
 test_assert_equal( $cl->parse_html( '<!---->' ), 0 );
-test_assert_equal( $cl->{words}{'html:comment'}, 3 );
+test_assert_equal( $cl->{words__}{'html:comment'}, 3 );
 # Check that we don't think the DOCTYPE is a comment
 test_assert_equal( $cl->parse_html( '<!DOCTYPE >' ), 0 );
-# test_assert_equal( $cl->{words}{'html:comment'}, 3 );
+# test_assert_equal( $cl->{words__}{'html:comment'}, 3 );
 
 # Check invisible ink detection
-$cl->{htmlfontcolor} = '';
-$cl->{words}         = {};
+$cl->{htmlfontcolor__} = '';
+$cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 test_assert_equal( $cl->parse_html( '<body bgcolor="#ffffff">hello<font color=white>invisible</font>visible</body>  ' ), 0 );
-test_assert_equal( $cl->{words}{hello},     1 );
-test_assert_equal( $cl->{words}{visible},   1 );
-test_assert_equal( defined( $cl->{words}{invisible} ), '' );
-$cl->{htmlfontcolor} = '';
-$cl->{words}         = {};
+test_assert_equal( $cl->{words__}{hello},     1 );
+test_assert_equal( $cl->{words__}{visible},   1 );
+test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
+$cl->{htmlfontcolor__} = '';
+$cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 test_assert_equal( $cl->parse_html( '   <body bgcolor="#ffffff">  hello<font color=white>' ), 0 );
 test_assert_equal( $cl->parse_html( '  invisible </font>'                                ), 0 );
 test_assert_equal( $cl->parse_html( 'visible</body>'                                  ), 0 );
-test_assert_equal( $cl->{words}{hello},     1 );
-test_assert_equal( $cl->{words}{visible},   1 );
-test_assert_equal( defined( $cl->{words}{invisible} ), '' );
-$cl->{htmlfontcolor} = '';
-$cl->{words}         = {};
+test_assert_equal( $cl->{words__}{hello},     1 );
+test_assert_equal( $cl->{words__}{visible},   1 );
+test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
+$cl->{htmlfontcolor__} = '';
+$cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 test_assert_equal( $cl->parse_html( '<body bgcolor="#ffffff">hello  <font' ), 1 );
 test_assert_equal( $cl->parse_html( 'color=white>invisible </font>'       ), 0 );
 test_assert_equal( $cl->parse_html( 'visible    </body>'                     ), 0 );
-test_assert_equal( $cl->{words}{hello},     1 );
-test_assert_equal( $cl->{words}{visible},   1 );
-test_assert_equal( defined( $cl->{words}{invisible} ), '' );
+test_assert_equal( $cl->{words__}{hello},     1 );
+test_assert_equal( $cl->{words__}{visible},   1 );
+test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
 
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages 
 # to be parsed with the resulting values for the words hash in TestMailParse\d+.wrd
@@ -121,7 +121,7 @@ for my $parse_test (@parse_tests) {
     open WORDS, "<$words";
     while ( <WORDS> ) {
         if ( /(.+) (\d+)/ ) {
-            test_assert_equal( $cl->{words}{$1}, $2, "$words $1 $2" );
+            test_assert_equal( $cl->{words__}{$1}, $2, "$words $1 $2" );
         }
     }
     close WORDS;
