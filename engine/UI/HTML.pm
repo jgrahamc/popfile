@@ -3568,7 +3568,7 @@ sub view_page
     $body .= "<table align=left>";
     $body .= "<tr><td><font size=+1><b>$self->{language__}{From}</b>: </font></td><td><font size=+1>$self->{history__}{$mail_file}{from}</font></td></tr>";
     $body .= "<tr><td><font size=+1><b>$self->{language__}{Subject}</b>: </font></td><td><font size=+1>$self->{history__}{$mail_file}{subject}</font></td></tr>";
-    $body .= "<tr><td><font size=+1><b>$self->{language__}{Classification}</b>: </font></td><td><font size=+1><font color=\"$color\">$self->{history__}{$mail_file}{bucket}</font></font></td></tr>";
+    $body .= "<tr><td><font size=+1><b>$self->{language__}{Classification}</b>: </font></td><td><font size=+1><font color=\"$color\">$self->{history__}{$mail_file}{bucket}</font></font><!--changed classification--></td></tr>";
 
     $body .= "<tr><td colspan=2><font size=+1>";
 
@@ -3613,7 +3613,16 @@ sub view_page
         # Build the scores by classifying the message, since get_html_colored_message has parsed the message
         # for us we do not need to parse it again and hence we pass in undef for the filename
 
-        $self->{classifier__}->classify( $self->{api_session__}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ), $self, \%matrix, \%idmap );
+        my $current_class = $self->{classifier__}->classify( $self->{api_session__}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ), $self, \%matrix, \%idmap );
+
+        # Check whether the original classfication is still valid.
+        # If not, add a note at the top of the page:
+
+        if ( $current_class ne $self->{history__}{$mail_file}{bucket} ) {
+            my $index = index $body, "<!--changed classification-->";
+            my $new_color = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $current_class );
+            substr( $body, $index, 29 ) = "<font size=+1>&nbsp;&nbsp;<b>$self->{language__}{History_ChangedClass}</b>: </font><font size=+1><font color=\"$new_color\">$current_class</font></font>";
+        }
 
         # Disable, print, and clear saved word-scores
 
