@@ -1,3 +1,5 @@
+# Copyright (c) 2001-2003 John Graham-Cumming
+
 # This is used to get the appropriate subdirectory for the manual
 LanguageCode                            fr
 LanguageCharset                         ISO-8859-1

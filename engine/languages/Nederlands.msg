@@ -1,3 +1,5 @@
+# Copyright (c) 2001-2003 John Graham-Cumming
+
 LanguageCode                            en
 LanguageCharset                         ISO-8859-1
  
