@@ -408,4 +408,11 @@ sub version
     return $self->{version_};
 }
 
+sub last_ten_log_entries
+{
+    my ( $self ) = @_;
+
+    return $self->{logger__}->last_ten();
+}
+
 1;
