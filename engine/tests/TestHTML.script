@@ -675,14 +675,14 @@ GET /magnets
 MATCH
 Jump to magnet page:
 <b>1</b>
-[<a href="/magnets?start_magnet=3&amp;session=$sk">2]
+[<a href="/magnets?start_magnet=3&amp;session=$sk">2</a>]
 [<a href="/magnets?start_magnet=3&amp;session=$sk">Next</a>]
 ENDMATCH
 GET /magnets?start_magnet=3&amp;session=$sk
 MATCH
 Jump to magnet page:
 [<a href="/magnets?start_magnet=0&amp;session=$sk">Previous</a>]
-[<a href="/magnets?start_magnet=0&amp;session=$sk">1]
+[<a href="/magnets?start_magnet=0&amp;session=$sk">1</a>]
 <b>2</b>
 ENDMATCH
 GET /configuration

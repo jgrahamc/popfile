@@ -2519,11 +2519,13 @@ sub classify_and_modify
 
     $xpl .= "http://";
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
-    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot$crlf";
+    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot";
 
     if ( $self->config_( 'xpl_angle' ) ) {
         $xpl .= '>';
     }
+
+    $xpl .= "$crlf";
 
     if ( $xpl_insertion && ( $quarantine == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;

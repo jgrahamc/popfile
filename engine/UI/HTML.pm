@@ -1737,8 +1737,9 @@ sub corpus_page
         $templ->param( 'Corpus_Delete_Message' => sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) );
     }
 
-    if ( ( defined($self->{form_}{newname}) ) && ( $self->{form_}{oname} ne '' ) ) {
-        if ( ( $self->{form_}{newname} eq '' ) && 
+    if ( ( defined($self->{form_}{newname}) ) &&
+         ( $self->{form_}{oname} ne '' ) ) {
+        if ( ( $self->{form_}{newname} eq '' ) ||
              ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) )  {
             $templ->param( 'Corpus_If_Rename_Error' => 1 );
         } else {
@@ -2933,7 +2934,7 @@ sub load_language
 
             if ( /([^\t ]+)[ \t]+(.+)/ ) {
                 my ( $id, $value )  = ( $1, $2 );
-                if ( $value =~ /\"(.+)\"/ ) {
+                if ( $value =~ /^\"(.+)\"$/ ) {
                     $value = $1;
                 }
                 my $msg = ($self->config_( 'test_language' )) ? $id : $value;
