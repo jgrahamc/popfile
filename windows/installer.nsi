@@ -1991,8 +1991,11 @@ skip_corpus:
   Delete $INSTDIR\stopwords
   Delete $INSTDIR\stopwords.bak
   Delete $INSTDIR\stopwords.default
+
+  StrCmp ${L_UPGRADE} "yes" remove_perl
   !insertmacro SafeRecursiveRMDir "$INSTDIR\messages"
 
+remove_perl:
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_6)"
   SetDetailsPrint listonly
