@@ -1,0 +1,162 @@
+.content
+  {
+  font-size: 8pt;
+  font-weight : normal;
+  }
+
+.content th
+  {
+  font-size: 8pt;
+  font-weight : normal;
+  }
+
+.footer
+  {
+  font-size: 8pt;
+  font-weight : normal;
+  }
+
+.head
+  {
+  font-size: 10pt;
+  font-weight: bold;
+  }
+
+.head a
+  {
+  font-size: 8pt;
+  font-weight: bold;
+  }
+
+.main
+  {
+  font-size: 8pt;
+  font-weight: bold;
+  }
+
+.menu
+  {
+  font-size: 10pt;
+  font-weight: bold;
+  }
+
+.menu_selected
+  {
+  background-color: #cccc99;
+  font-size: 8pt;
+  font-weight: bold;
+  width: 150px;
+  }
+
+.menu_spacer
+  {
+  width: 1px;
+  }
+
+.menu_standard
+  {
+  background-color: #ededca;
+  font-size: 8pt;
+  font-weight: normal;
+  width: 150px;
+  }
+
+.row_even
+  {
+  background-color: #ededca;
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+.row_odd
+  {
+  background-color: #dfdfaf;
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+.shell
+  {
+  background-color: #ededca;
+  border: 3px #cccc99 solid;
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+a.dash:link
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+a.dash:visited
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+a:link
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+a:visited
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+body
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+h1, h2
+  {
+  font-size: 8pt;
+  font-weight: bold;
+  }
+
+h3, h4, h5, h6
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+input
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+p
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+select
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+submit
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+td
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+tr
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
