@@ -527,8 +527,8 @@ insert into user_template ( name, def, form ) values ( 'html_column_characters',
 -- concerning bucket setup and training. The bucket item
 -- is displayed by default, when it is turned off, the
 -- training item is shown.
-insert into user_template ( name, def, form ) values ( 'html_show_bucket_help', 0, '%d' );
-insert into user_template ( name, def, form ) values ( 'html_show_training_help', 1, '%d' );
+insert into user_template ( name, def, form ) values ( 'html_show_bucket_help', 1, '%d' );
+insert into user_template ( name, def, form ) values ( 'html_show_training_help', 0, '%d' );
 
 -- TODO Deal with IMAP module
 
