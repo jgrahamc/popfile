@@ -6,13 +6,12 @@ body {
 
 a {
     color: white;
-    text-decoration: none;
 }
 
 
 input, select, submit {
   color: black;
-  background-color: #999999;
+  background-color: #C1C1C1;
   border: 1px white outset;
   font-size: 9pt;
   font-weight: normal;
