@@ -18,7 +18,7 @@
 #--------------------------------------------------------------------------
 
   !define MUI_PRODUCT "POPFile"
-  !define MUI_VERSION "0.19.0RC3"
+  !define MUI_VERSION "0.19.0RC4"
   !define RELEASE_NOTES "..\engine\v0.19.0.change"
   
   !include "MUI.nsh"
@@ -316,85 +316,85 @@ update_config:
   ; Install the Minimal Perl files
 
   SetOutPath $INSTDIR
-  File "C:\Perl58\bin\perl.exe"
-  File "C:\Perl58\bin\wperl.exe"
-  File "C:\Perl58\bin\perl58.dll"
-  File "C:\Perl58\lib\AutoLoader.pm"
-  File "C:\Perl58\lib\Carp.pm"
-  File "C:\Perl58\lib\Config.pm"
-  File "C:\Perl58\lib\DynaLoader.pm"
-  File "C:\Perl58\lib\Errno.pm"
-  File "C:\Perl58\lib\Exporter.pm"
-  File "C:\Perl58\lib\IO.pm"
-  File "C:\Perl58\lib\integer.pm"
-  File "C:\Perl58\lib\locale.pm"
-  File "C:\Perl58\lib\POSIX.pm"
-  File "C:\Perl58\lib\SelectSaver.pm"
-  File "C:\Perl58\lib\Socket.pm"
-  File "C:\Perl58\lib\strict.pm"
-  File "C:\Perl58\lib\Symbol.pm"
-  File "C:\Perl58\lib\vars.pm"
-  File "C:\Perl58\lib\warnings.pm"
-  File "C:\Perl58\lib\XSLoader.pm"
+  File "C:\Perl\bin\perl.exe"
+  File "C:\Perl\bin\wperl.exe"
+  File "C:\Perl\bin\perl58.dll"
+  File "C:\Perl\lib\AutoLoader.pm"
+  File "C:\Perl\lib\Carp.pm"
+  File "C:\Perl\lib\Config.pm"
+  File "C:\Perl\lib\DynaLoader.pm"
+  File "C:\Perl\lib\Errno.pm"
+  File "C:\Perl\lib\Exporter.pm"
+  File "C:\Perl\lib\IO.pm"
+  File "C:\Perl\lib\integer.pm"
+  File "C:\Perl\lib\locale.pm"
+  File "C:\Perl\lib\POSIX.pm"
+  File "C:\Perl\lib\SelectSaver.pm"
+  File "C:\Perl\lib\Socket.pm"
+  File "C:\Perl\lib\strict.pm"
+  File "C:\Perl\lib\Symbol.pm"
+  File "C:\Perl\lib\vars.pm"
+  File "C:\Perl\lib\warnings.pm"
+  File "C:\Perl\lib\XSLoader.pm"
 
   SetOutPath $INSTDIR\Carp
-  File "C:\Perl58\lib\Carp\*"
+  File "C:\Perl\lib\Carp\*"
 
   SetOutPath $INSTDIR\Exporter
-  File "C:\Perl58\lib\Exporter\*"
+  File "C:\Perl\lib\Exporter\*"
 
   SetOutPath $INSTDIR\MIME
-  File "C:\Perl58\lib\MIME\*"
+  File "C:\Perl\lib\MIME\*"
 
   SetOutPath $INSTDIR\Win32
-  File "C:\Perl58\site\lib\Win32\API.pm"
+  File "C:\Perl\site\lib\Win32\API.pm"
 
   SetOutPath $INSTDIR\Win32\API
-  File "C:\Perl58\site\lib\Win32\API\*.pm"
+  File "C:\Perl\site\lib\Win32\API\*.pm"
 
   SetOutPath $INSTDIR\auto\Win32\API
-  File "C:\Perl58\site\lib\auto\Win32\API\*"
+  File "C:\Perl\site\lib\auto\Win32\API\*"
 
   SetOutPath $INSTDIR\IO
-  File "C:\Perl58\lib\IO\*"
+  File "C:\Perl\lib\IO\*"
 
   SetOutPath $INSTDIR\Sys
-  File "C:\Perl58\lib\Sys\*"
+  File "C:\Perl\lib\Sys\*"
 
   SetOutPath $INSTDIR\Text
-  File "C:\Perl58\lib\Text\ParseWords.pm"
+  File "C:\Perl\lib\Text\ParseWords.pm"
 
   SetOutPath $INSTDIR\IO\Socket
-  File "C:\Perl58\lib\IO\Socket\*"
+  File "C:\Perl\lib\IO\Socket\*"
 
   SetOutPath $INSTDIR\auto\DynaLoader
-  File "C:\Perl58\lib\auto\DynaLoader\*"
+  File "C:\Perl\lib\auto\DynaLoader\*"
 
   SetOutPath $INSTDIR\auto\File\Glob
-  File "C:\Perl58\lib\auto\File\Glob\*"
+  File "C:\Perl\lib\auto\File\Glob\*"
 
   SetOutPath $INSTDIR\auto\MIME\Base64
-  File "C:\Perl58\lib\auto\MIME\Base64\*"
+  File "C:\Perl\lib\auto\MIME\Base64\*"
 
   SetOutPath $INSTDIR\auto\IO
-  File "C:\Perl58\lib\auto\IO\*"
+  File "C:\Perl\lib\auto\IO\*"
 
   SetOutPath $INSTDIR\auto\Socket
-  File "C:\Perl58\lib\auto\Socket\*"
+  File "C:\Perl\lib\auto\Socket\*"
 
   SetOutPath $INSTDIR\auto\Sys\Hostname
-  File "C:\Perl58\lib\auto\Sys\Hostname\*"
+  File "C:\Perl\lib\auto\Sys\Hostname\*"
 
   SetOutPath $INSTDIR\auto\POSIX
-  File "C:\Perl58\lib\auto\POSIX\POSIX.dll"
-  File "C:\Perl58\lib\auto\POSIX\autosplit.ix"
-  File "C:\Perl58\lib\auto\POSIX\load_imports.al"
+  File "C:\Perl\lib\auto\POSIX\POSIX.dll"
+  File "C:\Perl\lib\auto\POSIX\autosplit.ix"
+  File "C:\Perl\lib\auto\POSIX\load_imports.al"
 
   SetOutPath $INSTDIR\File
-  File "C:\Perl58\lib\File\Glob.pm"
+  File "C:\Perl\lib\File\Glob.pm"
 
   SetOutPath $INSTDIR\warnings
-  File "C:\Perl58\lib\warnings\register.pm"
+  File "C:\Perl\lib\warnings\register.pm"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
