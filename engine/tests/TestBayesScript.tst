@@ -84,3 +84,5 @@ foreach my $word (keys %words) {
 foreach my $word (keys %output) {
     test_assert_equal( $words{$word}, $output{$word}, $word );
 }
+
+1;

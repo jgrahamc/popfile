@@ -156,7 +156,8 @@ sub server
                  open FILE, "<$messages[$index]";
                  binmode FILE;
                  while ( <FILE> ) {
-                     print $client $_;
+                     s/\r|\n//g;
+                     print $client "$_$eol";
                      if ( $goslow ) {
                          select( undef, undef, undef, 3 );
 		     }
@@ -180,14 +181,17 @@ sub server
                  open FILE, "<$messages[$index]";
                  binmode FILE;
                  while ( <FILE> ) {
-                     print $client $_;
+                     my $line = $_;
+                     s/\r|\n//g;
+                     print $client "$_$eol";
 
-                     if ( /^[\r\n]+$/ ) {
+                     if ( $line =~ /^[\r\n]+$/ ) {
                          last;
 		     }
 		 }
                  while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
-                     print $client $line;
+                     $line =~ s/\r|\n//g;
+                     print $client "$line$eol";
                      $countdown -= 1;
 		 }
                  close FILE;
@@ -450,7 +454,7 @@ if ( $pid == 0 ) {
 
         my $client = IO::Socket::INET->new(
                         Proto    => "tcp",
-                        PeerAddr => 'localhost',
+                        PeerAddr => '127.0.0.1',
                         PeerPort => $port );
 
         test_assert( defined( $client ) );
@@ -570,6 +574,8 @@ if ( $pid == 0 ) {
             my $line = $_;
             $result = <$client>;
             $result =~ s/popfile1=1/popfile0=0/;
+            $result =~ s/\r|\n//g;
+            $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
 	}
         close FILE;
@@ -984,6 +990,8 @@ if ( $pid == 0 ) {
                 }
 	    }
             $result =~ s/popfile3=1/popfile0=0/;
+            $result =~ s/\r|\n//g;
+            $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
 	}
         close FILE;
@@ -1243,3 +1251,5 @@ if ( $pid == 0 ) {
         $b->stop();
     }
 }
+
+1;

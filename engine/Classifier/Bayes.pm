@@ -162,7 +162,7 @@ sub forked
 {
     my ( $self ) = @_;
 
-    $self->load_word_matrix_();
+    $self->load_word_matrix_( 1 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ sub postfork
 {
     my ( $self ) = @_;
 
-    $self->load_word_matrix_();
+    $self->load_word_matrix_( 0 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -239,8 +239,13 @@ sub start
     # Pass in the current interface language for language specific parsing
 
     $self->{parser__}->{lang__}  = $self->module_config_( 'html', 'language' );
+    $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
-    return $self->load_word_matrix_();
+    # When starting clean up a previous BerkeleyDB environment
+
+    unlink $self->get_user_path_( $self->config_( 'corpus' ) ) . '__db.*';
+
+    return $self->load_word_matrix_( 0 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -484,10 +489,12 @@ sub update_constants_
 #
 # Fills the matrix with the word frequencies from all buckets and builds the bucket total
 #
+# $child           Set to 1 if this is happening in a child process
+#
 # ---------------------------------------------------------------------------------------------
 sub load_word_matrix_
 {
-    my ($self) = @_;
+    my ( $self, $child ) = @_;
     my $c      = 0;
 
     $self->close_database__();
@@ -497,7 +504,8 @@ sub load_word_matrix_
    	                   -Home      => $self->get_user_path_( $self->config_( 'corpus' ) ),
  	                   -ErrFile   => $self->get_user_path_( 'bdb_error' ),
                            -Verbose   => 1,
- 	                   -Flags     => DB_INIT_LOG | DB_INIT_LOCK | DB_INIT_MPOOL | DB_CREATE or return 0;
+ 	                   -Flags     => DB_INIT_LOG | 
+                                         DB_INIT_LOCK | DB_INIT_MPOOL | DB_CREATE or return 0;
 
     $self->{magnets__}      = {};
     $self->{full_total__}   = 0;
@@ -543,7 +551,7 @@ sub load_word_matrix_
             close COLOR;
         }
 
-        return 0 if ( !$self->load_bucket_( $bucket ) );
+        return 0 if ( !$self->load_bucket_( $bucket, $child ) );
 
         $bucket =~ /([[:alpha:]0-9-_]+)$/;
         $bucket =  $1;
@@ -587,14 +595,16 @@ sub load_word_matrix_
 # and $self->{matrix__} for the bucket.
 #
 # $bucket            The bucket name
+# $rdonly            Whether to be read only
 #
 # ---------------------------------------------------------------------------------------------
 sub tie_bucket__
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $bucket, $rdonly ) = @_;
 
     $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
                                  -Filename  => "$bucket/table.db",
+                                 -Flags     => $rdonly?DB_RDONLY:DB_CREATE,
                                  -Env       => $self->{dbenv__};                                 # PROFILE BLOCK STOP
 
     # Check to see if the tie worked, if it failed then POPFile is about to fail
@@ -641,11 +651,12 @@ sub untie_bucket__
 # Loads an individual bucket
 #
 # $bucket            The bucket name
+# $child             1 if happening in a child process
 #
 # ---------------------------------------------------------------------------------------------
 sub load_bucket_
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $bucket, $child ) = @_;
 
     $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
@@ -717,7 +728,7 @@ sub load_bucket_
     # flat file used by POPFile for corpus storage) then create the new
     # tied hash from it thus performing an automatic upgrade.
 
-    $self->tie_bucket__( $bucket );
+    $self->tie_bucket__( $bucket, $child );
 
     if ( -e $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) ) {
         $self->log_( "Performing automatic upgrade of $bucket corpus from flat file to BerkeleyDB" );
@@ -765,7 +776,7 @@ sub load_bucket_
 	}
 
         $self->untie_bucket__( $bucket );
-        $self->tie_bucket__( $bucket );
+        $self->tie_bucket__( $bucket, $child );
 
         if ( open WORDS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
             my $wc = 1;
@@ -1968,9 +1979,9 @@ sub create_bucket
     mkdir( $self->config_( 'corpus' ) );
     mkdir( $self->config_( 'corpus' ) . "/$bucket" );
 
-    $self->tie_bucket__( $bucket );
+    $self->tie_bucket__( $bucket, 0 );
     $self->untie_bucket__( $bucket );
-    $self->load_word_matrix_();
+    $self->load_word_matrix_( 0 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1992,7 +2003,7 @@ sub delete_bucket
 
     $self->close_database__();
     $self->delete_bucket_files__( $bucket );
-    $self->load_word_matrix_();
+    $self->load_word_matrix_( 0 );
 
     return 1;
 }
@@ -2053,7 +2064,7 @@ sub rename_bucket
 
     rename($self->config_( 'corpus' ) . "/$old_bucket" , $self->config_( 'corpus' ) . "/$new_bucket");
 
-    $self->load_word_matrix_();
+    $self->load_word_matrix_( 0 );
 
     return 1;
 }
@@ -2107,9 +2118,7 @@ sub add_messages_to_bucket
         $self->add_words_to_bucket__( $bucket, 1 );
     }
 
-    $self->load_word_matrix_();
-
-    return 1;
+    return $self->load_word_matrix_( 0 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2155,9 +2164,7 @@ sub remove_message_from_bucket
     $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
 
     $self->add_words_to_bucket__( $bucket, -1 );
-    $self->load_word_matrix_();
-
-    return 1;
+    return $self->load_word_matrix_( 0 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2272,7 +2279,7 @@ sub clear_bucket
     $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}      = 0;
     $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
 
-    $self->load_word_matrix_();
+    return $self->load_word_matrix_( 0 );
 }
 
 # ---------------------------------------------------------------------------------------------

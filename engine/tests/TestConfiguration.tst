@@ -235,3 +235,4 @@ my $line = <OUTPUT>;
 close OUTPUT;
 test_assert_regexp( $line, 'Unknown option: doesnotexist' );
 
+1;

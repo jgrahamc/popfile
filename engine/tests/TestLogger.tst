@@ -136,3 +136,4 @@ $exists = ( -e $file );
 test_assert( !$exists, "checking that debug file was deleted" );
 `date --set='3 days ago'`;
 
+1;

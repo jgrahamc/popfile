@@ -115,3 +115,5 @@ $m->name( 'newname' );
 test_assert_equal( $m->name(), 'newname' );
 $m->version( 'vt.t.t' );
 test_assert_equal( $m->version(), 'vt.t.t' );
+
+1;

@@ -1,5 +1,5 @@
-header:x-spam-level 1
-header:x-spam-status 1
+header:X-Spam-Level 1
+header:X-Spam-Status 1
 spamassassinlevel:spam 3
 testing 1
 priority 2

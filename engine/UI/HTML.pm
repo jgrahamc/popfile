@@ -307,6 +307,8 @@ sub stop
 
     $self->copy_pre_cache__();
     $self->save_disk_cache__();
+
+    $self->SUPER::stop();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2618,6 +2620,9 @@ sub new_history_file__
     my $from    = '';
     my $subject = '';
     my $long_header = '';
+
+    $magnet       = '' if ( !defined( $magnet ) );
+    $reclassified = '' if ( !defined( $reclassified ) );
 
     if ( open MAIL, '<'. $self->get_user_path_( $self->global_config_( 'msgdir' ) . $file ) ) {
         while ( <MAIL> )  {

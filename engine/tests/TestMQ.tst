@@ -123,3 +123,4 @@ test_assert_equal( $messages[1][0], 'MSG1' );
 test_assert_equal( $messages[1][1], 'message1' );
 test_assert_equal( $messages[1][2], 'param1' );
 
+1;

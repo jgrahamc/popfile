@@ -42,6 +42,7 @@ my @messages = glob '*.msg';
 my $count = 0;
 my $dl    = 0;
 foreach my $msg (@messages) {
+    next if ( $msg =~ /TestMailParse026/ );
     my $name = "messages/popfile$dl" . "=" . "$count";
     test_assert( `cp $msg $name.msg` == 0 );
     $msg =~ s/\.msg$/\.cls/;
@@ -129,6 +130,7 @@ sub pipeready
 }
 
 use Classifier::Bayes;
+use Classifier::WordMangle;
 use UI::HTML;
 use POPFile::Configuration;
 use POPFile::MQ;
@@ -139,10 +141,17 @@ my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
+my $w = new Classifier::WordMangle;
 
 $b->configuration( $c );
 $b->mq( $mq );
 $b->logger( $l );
+
+$w->configuration( $c );
+$w->mq( $mq );
+$w->logger( $l );
+
+$b->{parser__}->mangle( $w );
 
 $c->configuration( $c );
 $c->mq( $mq );
@@ -159,6 +168,9 @@ $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
 
+$w->initialize();
+$w->start();
+
 my $p = new Proxy::POP3;
 
 $p->configuration( $c );
@@ -167,6 +179,9 @@ $p->classifier( $b );
 $p->logger( $l );
 $p->version( 'vtest.suite.ver' );
 $p->initialize();
+$p->config_( 'port', 9110 );
+$p->config_( 'force_fork', 0 );
+$p->start();
 
 test_assert(1);
 
@@ -191,6 +206,9 @@ our $version = $h->version();
 test_assert(1);
 
 our $sk = $h->session_key();
+
+test_assert( defined( $sk ) );
+test_assert( $sk ne '' );
 
 $mq->service();
 
@@ -278,8 +296,8 @@ if ( $pid == 0 ) {
                 next;
 	    }
 
-            if ( $command =~ /^__SETCONFIG (.+) (.+)/ ) {
-                $c->parameter( $1, $2 );
+            if ( $command =~ /^__SETCONFIG (.+) (.+)?/ ) {
+                $c->parameter( $1, defined($2)?$2:'' );
                 print $uwriter "OK\n";
                 next;
 	    }
@@ -332,10 +350,12 @@ if ( $pid == 0 ) {
     use LWP::Simple;
     use LWP::UserAgent;
     use URI::URL;
-    use String::Interpolate 'interpolate';
+    use String::Interpolate;
 
     my $ua = new LWP::UserAgent;
     my $line_number = 0;
+
+    my $in = new String::Interpolate { sk => \$sk, port => \$port, version => \$version };
 
     our $url;
     our $content;
@@ -352,7 +372,8 @@ if ( $pid == 0 ) {
             next;
 	}
 
-        $line = interpolate( $line );
+        $in->( $line );
+        $line = "$in";
 
         if ( $line =~ /^GET +(.+)$/ ) {
             $url = url( "http://127.0.0.1:$port$1" );
@@ -486,7 +507,8 @@ if ( $pid == 0 ) {
                 $line =~ s/^[\t ]+//g;
                 $line =~ s/[\r\n\t ]+$//g;
 
-                $line = interpolate( $line );
+                $in->( $line );
+                $line = "$in";
 
 	        if ( $line =~ /^ENDMATCH$/ ) {
                     last;
@@ -541,4 +563,6 @@ if ( $pid == 0 ) {
 }
 
 $b->stop();
+$p->stop();
 
+1;

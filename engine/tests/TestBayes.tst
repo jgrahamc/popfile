@@ -885,7 +885,9 @@ if ( $have_text_kakasi ) {
   test_assert( $b->remove_message_from_bucket( 'gomi', 'TestMailParse026.kks' ) );
   test_assert_equal( $b->get_bucket_word_count( 'gomi' ), 0 );
 } else {
-    print "Warning: Japanese tests skipped because Text::Kakasi was not found\n";
+    print "\nWarning: Japanese tests skipped because Text::Kakasi was not found\n";
 }
 
 $b->stop();
+
+1;

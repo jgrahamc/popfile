@@ -32,7 +32,7 @@
 use strict;
 use locale;
 
-use lib $ENV{POPFILE_ROOT};   
+use lib defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';   
 
 use POPFile::Loader;
 

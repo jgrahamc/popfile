@@ -1638,7 +1638,7 @@ sub parse_header
         $sa_keywords =~ s/ //g;
 
         foreach ( split /,/, $sa_keywords ) {
-            $self->update_pseudoword( 'spamassassin', $_, 0, lc($argument) );
+            $self->update_pseudoword( 'spamassassin', lc($_), 0, $argument );
         }
     }
 

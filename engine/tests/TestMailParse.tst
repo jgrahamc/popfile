@@ -321,3 +321,5 @@ test_assert_equal( $cl->{words__}{'html:imgwidth42'}, 1 );
 test_assert_equal( $cl->{words__}{'html:imgheight41'}, 1 );
 
 $b->stop();
+
+1;

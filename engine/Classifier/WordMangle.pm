@@ -85,6 +85,8 @@ sub load_stopwords
         }
 
         close STOPS;
+    } else { 
+        $self->log_( "Failed to open stopwords file" );
     }
 }
 

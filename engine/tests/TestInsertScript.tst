@@ -99,6 +99,8 @@ $c->configuration( $c );
 $c->mq( $mq );
 $c->logger( $l );
 
+$c->initialize();
+
 $l->configuration( $c );
 $l->mq( $mq );
 $l->logger( $l );
@@ -125,5 +127,6 @@ foreach my $word (keys %words) {
 
 $b->stop();
 
+1;
 
 

@@ -55,7 +55,6 @@ open CAM, "<$output_file";
 while ( <TEMP> ) {
     my $output_line = $_;
     my $cam_line    = <CAM>;
-    $cam_line = <CAM> if ( $cam_line =~ /X\-POPFile\-Link/ ); # No XPL in piped messages
     $cam_line =~ s/[\r\n]+/\n/g; # This tests that the network EOL has been removed
     next if ( $output_line =~ /X\-POPFile\-Timeout\-Prevention/ );
     test_assert_equal( $output_line, $cam_line, $modify_file );
@@ -64,3 +63,4 @@ while ( <TEMP> ) {
 close CAM;
 close TEMP;
 
+1;

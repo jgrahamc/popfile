@@ -7,4 +7,3 @@ src="http://www.usstaffing.com/2pressherePicture1.gif"
 width=430 border=0></A></P></CENTER>
 
 <iframe src="http://www.spamsite.com/goo">
-

@@ -116,3 +116,5 @@ $w->start();
 my @stopwords = $w->stopwords();
 test_assert_equal( $#stopwords, 0 );
 test_assert_equal( $stopwords[0], 'anotherbigword' );
+
+1;
