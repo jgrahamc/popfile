@@ -231,6 +231,76 @@ exit:
 
 FunctionEnd
 
+
+#--------------------------------------------------------------------------
+# Installer Function: SetConsoleMode
+#
+# Used to set required console mode in 'popfile.cfg'
+#
+# Inputs:
+#         (top of stack)     - required console mode (0 = disabled, 1 = enabled)
+#
+# Outputs:
+#         none
+#
+# Usage:
+#         Push "1"
+#         Call SetConsoleMode
+#
+#--------------------------------------------------------------------------
+
+Function SetConsoleMode
+
+  !define L_NEW_CFG     $R9   ; file handle used for clean copy
+  !define L_OLD_CFG     $R8   ; file handle for old version
+  !define L_LNE         $R7   ; a line from the popfile.cfg file
+  !define L_MODE        $R6   ; new console mode
+  !define L_PARAM       $R5
+
+  Exch ${L_MODE}
+  Push ${L_NEW_CFG}
+  Push ${L_OLD_CFG}
+  Push ${L_LNE}
+  Push ${L_PARAM}
+
+  ClearErrors
+  FileOpen  ${L_OLD_CFG} "$INSTDIR\popfile.cfg" r
+  FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
+
+loop:
+  FileRead   ${L_OLD_CFG} ${L_LNE}
+  IfErrors copy_done
+
+  StrCpy ${L_PARAM} ${L_LNE} 16
+  StrCmp ${L_PARAM} "windows_console " got_console
+  FileWrite ${L_NEW_CFG} ${L_LNE}
+  Goto loop
+ 
+got_console:
+  FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
+  Goto loop
+  
+copy_done:
+  FileClose ${L_OLD_CFG}
+  FileClose ${L_NEW_CFG}
+  
+  Delete "$INSTDIR\popfile.cfg"
+  Rename "$PLUGINSDIR\new.cfg" "$INSTDIR\popfile.cfg"
+  
+  Pop ${L_PARAM}
+  Pop ${L_LNE}
+  Pop ${L_OLD_CFG}
+  Pop ${L_NEW_CFG}
+  Pop ${L_MODE}
+
+  !undef L_NEW_CFG
+  !undef L_OLD_CFG
+  !undef L_LNE
+  !undef L_MODE
+  !undef L_PARAM
+
+FunctionEnd
+
 #--------------------------------------------------------------------------
 # Installer Function: StrStripLZS
 #
@@ -680,26 +750,26 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 Function un.GetParent
-  Exch $R0
+  Exch $R0              ; old $R0 is on top of stack
   Push $R1
   Push $R2
-
-  StrCpy $R1 -1
+  Push $R3
+  StrLen $R3 $R0
 
 loop:
-  StrCpy $R2 $R0 1 $R1
-  StrCmp $R2 "" exit
-  StrCmp $R2 "\" exit
   IntOp $R1 $R1 - 1
+  IntCmp $R1 -$R3 exit exit
+  StrCpy $R2 $R0 1 $R1
+  StrCmp $R2 "\" exit
   Goto loop
 
 exit:
   StrCpy $R0 $R0 $R1
+  Pop $R3
   Pop $R2
   Pop $R1
-  Exch $R0
+  Exch $R0              ; put $R0 on top of stack, restore $R0 to original value
 FunctionEnd
-
 
 #==============================================================================================
 #
@@ -947,11 +1017,83 @@ FunctionEnd
 
 
 #--------------------------------------------------------------------------
-# Macro: WaitUntilUnlocked
+# Macro: CheckIfLocked
 #
 # The installation process and the uninstall process both use a function which checks if
-# either '$INSTDIR\wperl.exe' or $INSTDIR\perl.exe' is being used. It may take a little
-# while for POPFile to shutdown so the installer/uninstaller calls this function which
+# a particular executable file (an EXE file) is being used (the EXE file to be checked depends
+# upon the version of POPFile in use and upon how it has been configured. If the specified EXE
+# file is no longer in use, this function returns an empty string (otherwise it returns the
+# input parameter unchanged).
+#
+# Inputs:
+#         (top of stack)     - the full path of the EXE file to be checked
+#
+# Outputs:
+#         (top of stack)     - if file is no longer in use, an empty string ("") is returned
+#                              otherwise the input string is returned
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push "$INSTDIR\wperl.exe"
+#         Call CheckIfLocked
+#         Pop $R0
+#
+#        (if the file is no longer in use, $R0 will be "")
+#        (if the file is still being used, $R0 will be "$INSTDIR\wperl.exe")
+#--------------------------------------------------------------------------
+
+!macro CheckIfLocked UN
+  Function ${UN}CheckIfLocked
+    !define L_EXE           $R9   ; full path to the EXE file which is to be monitored
+    !define L_FILE_HANDLE   $R8
+
+    Exch ${L_EXE}
+    Push ${L_FILE_HANDLE}
+
+    IfFileExists "${L_EXE}" 0 unlocked_exit
+    SetFileAttributes "${L_EXE}" NORMAL
+
+    ClearErrors
+    FileOpen ${L_FILE_HANDLE} "${L_EXE}" a
+    FileClose ${L_FILE_HANDLE}
+    IfErrors exit
+    
+  unlocked_exit:
+    StrCpy ${L_EXE} ""
+
+   exit:
+    Pop ${L_FILE_HANDLE}
+    Exch ${L_EXE}
+
+    !undef L_EXE
+    !undef L_FILE_HANDLE
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckIfLocked
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro CheckIfLocked ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.CheckIfLocked
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro CheckIfLocked "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: WaitUntilUnlocked
+#
+# The installation process and the uninstall process both use a function which waits until
+# a particular executable file (an EXE file) is no longer in use (the EXE file to be checked
+# depends upon the version of POPFile in use and upon how it has been configured. It may take
+# a little while for POPFile to shutdown so the installer/uninstaller calls this function which
 # waits in a loop until the specified EXE file is no longer in use. A timeout counter
 # is used to avoid an infinite loop.
 #
