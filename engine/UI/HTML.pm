@@ -1582,7 +1582,8 @@ sub load_history_cache
         my $reclassified;
         
         # Something may have happened to the class file, this avoids errors
-        if ( defined open CLASS, "<messages/$class_file" ) {
+
+        if ( open CLASS, "<messages/$class_file" ) {
             $bucket = <CLASS>;
             if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
                 $bucket = $1;
@@ -1599,15 +1600,11 @@ sub load_history_cache
             close CLASS;
             $bucket =~ s/[\r\n]//g;
         } else {
+
             # This means the CLASS file failed to open -- we don't know what to do with this file
             # Give it the "classfileerror" bucket for now
             
             $bucket = "classfileerror";
-            
-            # Another option is to reclassify the message immediately. This will be intensive.
-            
-            # A third option is to give the message the "unclassified" bucket.
-            
         }
         
         if ( ( $filter eq '' ) || ( $bucket eq $filter ) || ( ( $filter eq '__filter__magnet' ) && ( $magnet ne '' ) ) ) {
@@ -1785,33 +1782,35 @@ sub history_page
         my $class_file = "messages/$self->{form}{undo}";
         $class_file =~ s/msg$/cls/;
         
-        # Some forward declarations for scope
+        # The bucket the message was reclassified to
+
         my $usedtobe;
+
+        # The bucket the message was classified from
+
         my $classification;
         
         # Load the class file to compare the old classification
+
         open CLASS, "<$class_file";        
-        # Discard this (eq RECLASSIFIED)
+
         my $bucket = <CLASS>;
-        if ( defined $bucket && $bucket =~ /RECLASSIFIED/ ) {
-            # The bucket the message was reclassified to
-            $bucket = <CLASS>;
-            # The bucket the message was classified from
+        if ( ( defined( $bucket ) ) && ( $bucket =~ /RECLASSIFIED/ ) ) {
+            $bucket   = <CLASS>;
             $usedtobe = <CLASS>;
+            $bucket   =~ s/[\r\n]//g; 
+            $usedtobe =~ s/[\r\n]//g; 
         }
         close CLASS;
         
-        # If the read failed, or file was unexpected, use information from the form to approximate
-        if ( !defined $bucket || $bucket ne $usedtobe ) {
-            # None of this is neccesary if the old and new buckets match
-            $classification = $usedtobe;
+        $classification = $usedtobe;
+
+        if ( $bucket ne $usedtobe ) {
             $self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
-            $self->{classifier}->{parameters}{$self->{form}{badbucket}}{count} -= 1;
-            $self->{classifier}->{parameters}{$classification}{count} += 1;
+            $self->{classifier}->{parameters}{$bucket}{count}   -= 1;
+            $self->{classifier}->{parameters}{$usedtobe}{count} += 1;
             $self->{classifier}->write_parameters();
-        } else {
-            $classification = $bucket;
-        }      
+        }
           
         open CLASS, ">$class_file";
         print CLASS "$classification$eol";
@@ -1821,8 +1820,11 @@ sub history_page
     }
 
     # Handle clearing the history files
+
     if ( ( defined($self->{form}{clear}) ) && ( $self->{form}{clear} eq 'Remove All' ) ) {
+
         # If the history cache is empty then we need to reload it now
+
         load_history_cache( $self, $self->{form}{filter}, '') if ( history_cache_empty( $self ) );
 
         foreach my $i (keys %{$self->{history}}) {
@@ -1839,7 +1841,9 @@ sub history_page
     }
 
     if ( ( defined($self->{form}{clear}) ) && ( $self->{form}{clear} eq 'Remove Page' ) ) {
+
         # If the history cache is empty then we need to reload it now
+
         load_history_cache( $self, $self->{form}{filter}, '') if ( history_cache_empty( $self ) );
         
         foreach my $i ( $self->{form}{start_message} .. $self->{form}{start_message} + $self->{configuration}->{configuration}{page_size} - 1 ) {
@@ -1860,9 +1864,11 @@ sub history_page
 
     # If we just changed the number of mail files on the disk (deleted some or added some)
     # or the history is empty then reload the history
+
     load_history_cache( $self, $self->{form}{filter}, '') if ( ( remove_mail_files( $self ) ) || ( $self->{history_invalid} ) || ( history_cache_empty( $self ) ) || ( defined($self->{form}{setfilter}) ) );
 
     # Handle the reinsertion of a message file
+
     if ( ( defined($self->{form}{shouldbe} ) ) && ( $self->{form}{shouldbe} ne '' ) ) {
         my %temp_words;
         
