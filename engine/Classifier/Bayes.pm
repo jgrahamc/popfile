@@ -296,10 +296,7 @@ sub close_database__
     my ( $self ) = @_;
 
     for my $bucket (keys %{$self->{matrix__}})  {
-        undef $self->{db__}{$bucket};
-        delete $self->{db__}{$bucket};
-        untie %{$self->{matrix__}{$bucket}};
-        delete $self->{matrix__}{$bucket};
+        $self->untie_bucket__( $bucket );
     }
 }
 
@@ -546,6 +543,50 @@ sub load_word_matrix_
 
 # ---------------------------------------------------------------------------------------------
 #
+# tie_bucket__
+#
+# Ties an individual bucket (creating it if necessary to a BerkeleyDB file called
+# table.db.  This function has the side effect of creating entries in $self->{db__}
+# and $self->{matrix__} for the bucket.
+#
+# $bucket            The bucket name
+#
+# ---------------------------------------------------------------------------------------------
+sub tie_bucket__
+{
+    my ( $self, $bucket ) = @_;
+
+    $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
+                                 -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
+                                 -Flags    => DB_CREATE;                                         # PROFILE BLOCK STOP
+
+    if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} ) ) {
+        $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}  = 0;
+        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} = 0;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# tie_bucket__
+#
+# Unties the matrix__ hash from the BerkeleyDB
+#
+# $bucket            The bucket name
+#
+# ---------------------------------------------------------------------------------------------
+sub untie_bucket__
+{
+    my ( $self, $bucket ) = @_;
+
+    undef $self->{db__}{$bucket};
+    delete $self->{db__}{$bucket};
+    untie %{$self->{matrix__}{$bucket}};
+    delete $self->{matrix__}{$bucket};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # load_bucket_
 #
 # Loads an individual bucket
@@ -627,13 +668,7 @@ sub load_bucket_
     # flat file used by POPFile for corpus storage) then create the new
     # tied hash from it thus performing an automatic upgrade.
 
-    $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
-                                 -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
-                                 -Flags    => DB_CREATE;                                         # PROFILE BLOCK STOP
-
-    if ( !defined( $self->get_bucket_word_count( $bucket ) ) ) {
-        $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} = 0;
-    }
+    $self->tie_bucket__( $bucket );
 
     if ( -e $self->config_( 'corpus' ) . "/$bucket/table" ) {
         $self->log_( "Performing automatic upgrade of $bucket corpus from flat file to BerkeleyDB" );
@@ -677,6 +712,9 @@ sub load_bucket_
                 return 0;
 	    }
 	}
+
+        $self->untie_bucket__( $bucket );
+        $self->tie_bucket__( $bucket );
 
         if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
             my $wc = 1;
@@ -728,10 +766,7 @@ sub load_bucket_
 		}
 
                 if ( $upgrade_failed ) {
-                    undef $self->{db__}{$bucket};
-                    delete $self->{db__}{$bucket};
-                    untie %{$self->{matrix__}{$bucket}};
-                    delete $self->{matrix__}{$bucket};
+                    $self->untie_bucket__( $bucket );
                     unlink( $self->config_( 'corpus' ) . "/$bucket/table.db" );
                     return 0;
 		}
@@ -1841,10 +1876,8 @@ sub create_bucket
     mkdir( $self->config_( 'corpus' ) );
     mkdir( $self->config_( 'corpus' ) . "/$bucket" );
 
-    tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",                 # PROFILE BLOCK START
-            -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
-            -Flags    => DB_CREATE;                                        # PROFILE BLOCK STOP
-
+    $self->tie_bucket__( $bucket );
+    $self->untie_bucket__( $bucket );
     $self->load_word_matrix_();
 }
 
