@@ -85,18 +85,18 @@
 #-------------------------------------------------------------------------------------------
 
   Name    "POPFile Wrapper Utility"
-  !define VERSION   "0.3.0"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.3.1"     ; see 'VIProductVersion' comment below for format details
 
   ; The default NSIS caption is "Name Setup" so we override it here
 
   !ifdef BACKGROUND
-          Caption "POPFile Wrapper Utility (Background mode)"
+          Caption "POPFile Wrapper v${C_VERSION} (Background mode)"
           OutFile wrapperb.exe
   !else ifdef FOREGROUND
-          Caption "POPFile Wrapper Utility (Foreground mode)"
+          Caption "POPFile Wrapper v${C_VERSION} (Foreground mode)"
           OutFile wrapperf.exe
   !else
-          Caption "POPFile Wrapper Utility"
+          Caption "POPFile Wrapper Utility v${C_VERSION}"
           OutFile wrapper.exe
   !endif
 
@@ -113,14 +113,14 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "${VERSION}.1"
+  VIProductVersion "${C_VERSION}.1"
 
   VIAddVersionKey "ProductName" "POPFile Wrapper Utility"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName" "The POPFile Project"
   VIAddVersionKey "LegalCopyright" "© 2003-2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "Start POPFile (with environment variables)"
-  VIAddVersionKey "FileVersion" "${VERSION}"
+  VIAddVersionKey "FileVersion" "${C_VERSION}"
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
   VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
@@ -198,8 +198,6 @@ pf_ok:
   ; Use current directory for POPFile configuration data
   
   StrCpy ${L_POPFILE_USER} ${L_DATA}
-
-got_new_ud_path:
   WriteINIStr ".\Wrapper.ini" "Configuration" "UserDataFolder" "${L_POPFILE_USER}"
 
 got_ud_path:
