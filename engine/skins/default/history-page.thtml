@@ -36,6 +36,16 @@
 
 </form>
 
+<table>
+        <tr>
+        <td colspan="<TMPL_VAR NAME="History_Colspan">">
+            <!-- the following html was history-search-filter-widget.thtml -->
+            <TMPL_INCLUDE NAME="history-search-filter-widget.thtml">
+            <!-- end of history-search-filter-widget.thtml content -->
+        </td>
+        </tr>
+</table>
+
 <form id="HistoryMainForm" action="/history" method="POST">
     <input type="hidden" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
     <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
@@ -44,16 +54,6 @@
     <input type="hidden" name="filter" value="<TMPL_VAR NAME="History_Field_Filter">" />
 
     <table class="historyTable" width="100%" summary="<TMPL_VAR NAME="Localize_History_MainTableSummary">">
-        <tr>
-        <td colspan="<TMPL_VAR NAME="History_Colspan">">
-            <!-- the following html was history-search-filter-widget.thtml -->
-            <TMPL_INCLUDE NAME="history-search-filter-widget.thtml">
-            <!-- end of history-search-filter-widget.thtml content -->
-        </td>
-        </tr>
-        <tr>        
-        <td colspan="<TMPL_VAR NAME="History_Colspan">">&nbsp;</td>
-        </tr>
         <tr valign="bottom">
 
             <th></th>
