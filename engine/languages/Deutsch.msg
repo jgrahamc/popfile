@@ -223,7 +223,7 @@ SingleBucket_WordCount                  Anzahl Worte in dieser Kategorie
 SingleBucket_TotalWordCount             Anzahl Worte insgesamt
 SingleBucket_Percentage                 Anteil an der Gesamtzahl
 SingleBucket_WordTable                  Worttabelle für %s
-SingleBucket_Message1                   Mit (*) gekennzeichnete Wörter wurden in dieser POPFile Sitzung zur Sortierung benutzt. Klicken Sie auf ein beliebiges Wort, um die Wahrscheinlichkeit seines Erscheinens für alle Kategorien anzusehen.
+SingleBucket_Message1                   Klicken Sie auf einen Buchstaben, um eine Liste der Wörter aufzurufen, die mit diesem beginnen. Klicken Sie auf ein beliebiges Wort, um die Wahrscheinlichkeit seines Erscheinens für alle Kategorien anzusehen.
 SingleBucket_Unique                     %s verschiedene
 
 Session_Title                           POPFile Sitzung abgelaufen
