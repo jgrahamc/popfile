@@ -2191,7 +2191,7 @@ sub classify
                     # draw a chart
 
                     if ( $self->{wmformat__} eq 'score' ) {
-                        $chart{$$idmap{$id}} = $score[0] - $score[1];
+                        $chart{$$idmap{$id}} = $score[0] - ($score[1]||0);
                     }
 
                     push ( @word_data, \%row_data );
@@ -2199,49 +2199,59 @@ sub classify
             }
             $templ->param( 'View_Score_Loop_Words' => \@word_data );
 
-            # Draw a chart that shows how the decision between the top
-            # two buckets was made.
-
-            my @words = sort { $chart{$b} <=> $chart{$a} } keys %chart;
-
-            my @chart_data;
-            my $max_chart = $chart{$words[0]};
-            my $min_chart = $chart{$words[$#words]};
-            my $scale = ( $max_chart > $min_chart )?400 / ( $max_chart - $min_chart ):0;
-            my $width = 400 / $#words;
-            my $color = $self->get_bucket_color( $session, $ranking[0] );
-            foreach my $word (@words) {
-                my %row_data;
-
-                next if ( $chart{$word} == 0 );
-
-                $row_data{View_If_Bar} = ( $chart{$word} > 0 );
-                if ( $chart{$word} > 0 ) {
-                    $row_data{View_Height} = $chart{$word} * $scale;
+            if ( $self->{wmformat__} eq 'score' ) {
+                # Draw a chart that shows how the decision between the top
+                # two buckets was made.
+    
+                my @words = sort { $chart{$b} <=> $chart{$a} } keys %chart;
+    
+                my @chart_data;
+                my $max_chart = $chart{$words[0]};
+                my $min_chart = $chart{$words[$#words]};
+                my $scale = ( $max_chart > $min_chart )?400 / ( $max_chart - $min_chart ):0;
+                my $width = int( 400 / $#words );
+                if ( $width < 1 ) {
+                    $width = 1;
                 }
-                $row_data{View_Chart_Word} = $word;
-                $row_data{View_Width} = $width;
-                $row_data{View_Color} = $color;
-                push ( @chart_data, \%row_data );
-            }
-            $templ->param( 'View_Loop_Chart1' => \@chart_data );
-            my @chart_data2;
-            $color = $self->get_bucket_color( $session, $ranking[1] );
-            foreach my $word (@words) {
-                my %row_data;
-
-                next if ( $chart{$word} == 0 );
-
-                $row_data{View_If_Bar} = ( $chart{$word} < 0 );
-                if ( $chart{$word} < 0 ) {
-                    $row_data{View_Height} = -$chart{$word} * $scale;
+                my $color = $self->get_bucket_color( $session, $ranking[0] );
+                foreach my $word (@words) {
+                    my %row_data;
+    
+                    next if ( $chart{$word} == 0 );
+    
+                    $row_data{View_If_Bar} = ( $chart{$word} > 0 );
+                    if ( $chart{$word} > 0 ) {
+                        $row_data{View_Height} = int( $chart{$word} * $scale + .5 );
+                    }
+                    $row_data{View_Chart_Word} = $word;
+                    $row_data{View_Width} = $width;
+                    $row_data{View_Color} = $color;
+                    push ( @chart_data, \%row_data );
                 }
-                $row_data{View_Chart_Word} = $word;
-                $row_data{View_Width} = $width;
-                $row_data{View_Color} = $color;
-                push ( @chart_data2, \%row_data );
+                $templ->param( 'View_Loop_Chart1' => \@chart_data );
+                my @chart_data2;
+                $color = $self->get_bucket_color( $session, $ranking[1] );
+                foreach my $word (@words) {
+                    my %row_data;
+    
+                    next if ( $chart{$word} == 0 );
+    
+                    $row_data{View_If_Bar} = ( $chart{$word} < 0 );
+                    if ( $chart{$word} < 0 ) {
+                        $row_data{View_Height} = - ( int( $chart{$word} * $scale +.5 ) );
+                    }
+                    $row_data{View_Chart_Word} = $word;
+                    $row_data{View_Width} = $width;
+                    $row_data{View_Color} = $color;
+                    push ( @chart_data2, \%row_data );
+                }
+                $templ->param( 'View_Loop_Chart2' => \@chart_data2 );
+                $templ->param( 'If_chart' => 1 );
             }
-            $templ->param( 'View_Loop_Chart2' => \@chart_data2 );
+            else {
+                $templ->param( 'If_chart' => 0 );
+            }
+            
         }
     }
 
