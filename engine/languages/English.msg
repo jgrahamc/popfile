@@ -37,7 +37,7 @@ Previous                                Previous
 Next                                    Next
 From                                    From
 Subject                                 Subject
-Cc                                      Cc 
+Cc                                      Cc
 Classification                          Bucket
 Reclassify                              Reclassify
 Probability                             Probability
@@ -360,6 +360,10 @@ Imap_UpdateError2                       Failed to connect to server. Please chec
 Imap_UpdateError3                       Please configure the connection details first.
 Imap_NoConnectionMessage                Please configure the connection details first. After you have done that, more options will be available on this page.
 Imap_WatchMore                          a folder to list of watched folders
-Imap_WatchedFolder                      Watched folder no 
+Imap_WatchedFolder                      Watched folder no
 
 Shutdown_Message                        POPFile has shut down
+
+Help_Training                           When you first use POPFile, it knows nothing and will need some training. POPFile requires training on messages for each bucket, training occours when you reclassify a message POPFile missclassified to the correct bucket. You must also setup your mail client to filter messages based on POPFile's classification. Information on setting up your client filtering can be found at the <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Documentation Project</a>.
+Help_Bucket_Setup                       POPFile requires at least two buckets in addition to the unclassified pseudo-bucket. What makes POPFile unique is that it can classify email more than that, you can have any number of buckets. A simple setup would be a "spam", "personal", and a "work" bucket.
+Help_No_More                            Don't show me this again.

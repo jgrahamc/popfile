@@ -214,6 +214,13 @@ sub initialize
 
     $self->config_( 'column_characters', 0 );
 
+    # Two variables that tell us whether to show help items
+    # concerning bucket setup and training. Both items are
+    # displayed by default
+
+    $self->config_( 'show_training_help', 1 );
+    $self->config_( 'show_bucket_help', 1 );
+
     # Load skins
 
     $self->load_skins__();
@@ -541,6 +548,15 @@ sub url_handler__
         print $client $http_header . $text;
         return 0;
     }
+
+    if ( exists $self->{form_}{nomore_bucket_help} && $self->{form_}{nomore_bucket_help} ) {
+        $self->config_( 'show_bucket_help', 0 );
+    }
+
+    if ( exists $self->{form_}{nomore_training_help} && $self->{form_}{nomore_training_help} ) {
+        $self->config_( 'show_training_help', 0 );
+    }
+
 
     # The url table maps URLs that we might receive to pages that we
     # display, the page table maps the pages to the functions that
@@ -2640,7 +2656,9 @@ sub load_template__
                    'Session_Key'             => $self->{session_key__},
                    'Common_Bottom_Date'      => $self->pretty_date__( $now ),
                    'Common_Bottom_LastLogin' => $self->{last_login__},
-                   'Common_Bottom_Version'   => $self->version() );
+                   'Common_Bottom_Version'   => $self->version(),
+                   'If_Show_Bucket_Help'     => $self->config_( 'show_bucket_help' ),
+                   'If_Show_Training_Help'   => $self->config_( 'show_training_help' ) );
 
     foreach my $fixup (keys %fixups) {
         if ( $templ->query( name => $fixup ) ) {

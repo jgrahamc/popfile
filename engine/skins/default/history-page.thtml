@@ -1,6 +1,34 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
+<TMPL_IF NAME="If_Show_Bucket_Help">
+
+<div class="error01">
+    <p>
+        <form method="post" action="/history">
+            <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
+            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+            <input type="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
+        </form>
+    </p>
+</div>
+
+</TMPL_IF>
+
+<TMPL_IF NAME="If_Show_Training_Help">
+
+<div class="error01">
+    <p>
+        <form method="post" action="/history">
+            <TMPL_VAR NAME="Localize_Help_Training">
+            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+            <input type="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
+        </form>
+    </p>
+</div>
+
+</TMPL_IF>
+
 <TMPL_IF NAME="History_If_Some_Messages">
 
 <form class="HistoryMainForm" action="/history" method="post">
