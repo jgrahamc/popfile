@@ -52,7 +52,7 @@
 
 <form action="/buckets" method="post">
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-    <input type="hidden" name="showbucket" value="<TMPL_VAR NAME="Bucket_Bucket_Name">" />
+    <input type="hidden" name="showbucket" value="<TMPL_VAR NAME="Bucket_Bucket">" />
     <input type="submit" name="clearbucket" class="submit" value="<TMPL_VAR NAME="Localize_SingleBucket_ClearBucket">" />
 </form>
 

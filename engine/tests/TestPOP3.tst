@@ -321,8 +321,10 @@ my $h = new POPFile::History;
 sub forker
 {
     pipe my $reader, my $writer;
+    $l->log_( 2, "Created pipe pair $reader and $writer" );
     $b->prefork();
     $mq->prefork();
+    $h->prefork();
     my $pid = fork();
 
     if ( !defined( $pid ) ) {
@@ -334,6 +336,7 @@ sub forker
     if ( $pid == 0 ) {
         $b->forked( $writer );
         $mq->forked( $writer );
+        $h->forked( $writer );
         close $reader;
 
         use IO::Handle;
@@ -342,8 +345,11 @@ sub forker
         return (0, $writer);
     }
 
+    $l->log_( 2, "Child process has pid $pid" );
+
     $b->postfork( $pid, $reader );
     $mq->postfork( $pid, $reader );
+    $h->postfork( $pid, $reader );
     close $writer;
     return ($pid, $reader);
 }
@@ -369,6 +375,7 @@ $w->start();
 $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
+$mq->pipeready( \&pipeready );
 
 $b->configuration( $c );
 $b->mq( $mq );
@@ -390,6 +397,32 @@ $b->config_( 'hostname', '127.0.0.1' );
 $b->{parser__}->mangle( $w );
 $b->start();
 $h->start();
+
+        my $p = new Proxy::POP3;
+
+        $p->configuration( $c );
+        $p->mq( $mq );
+        $p->logger( $l );
+        $p->classifier( $b );
+
+        $p->forker( \&forker );
+        $p->pipeready( \&pipeready );
+
+        $p->{version_} = 'test suite';
+        $p->initialize();
+
+        my $port = 9000 + int(rand(1000));
+
+        $p->config_( 'port', $port );
+        $p->config_( 'force_fork', 0 );
+        $p->global_config_( 'timeout', 1 );
+
+        $p->config_( 'enabled', 0 );
+        test_assert_equal( $p->start(), 2 );
+        $p->config_( 'enabled', 1 );
+        test_assert_equal( $p->start(), 1 );
+        $p->{api_session__} = $b->get_session_key( 'admin', '' );
+        $p->history( $h );
 
 # some tests require this directory to be present
 mkdir( 'messages' );
@@ -454,8 +487,6 @@ if ( $pid == 0 ) {
     exit(0);
 } else {
 
-    my $port = 9000 + int(rand(1000));
-
     # This pipe is used to send signals to the child running
     # the proxy to change its state, the following commands can
     # be sent
@@ -485,27 +516,6 @@ if ( $pid == 0 ) {
         close $ureader;
 
         $uwriter->autoflush(1);
-
-        my $p = new Proxy::POP3;
-
-        $p->configuration( $c );
-        $p->mq( $mq );
-        $p->logger( $l );
-        $p->classifier( $b );
-
-        $p->forker( \&forker );
-        $p->pipeready( \&pipeready );
-
-        $p->{version_} = 'test suite';
-        $p->initialize();
-        $p->config_( 'port', $port );
-        $p->config_( 'force_fork', 1 );
-        $p->global_config_( 'timeout', 1 );
-
-        $p->config_( 'enabled', 0 );
-        test_assert_equal( $p->start(), 2 );
-        $p->config_( 'enabled', 1 );
-        test_assert_equal( $p->start(), 1 );
 
         while ( 1 ) {
             last if !$p->service();
@@ -559,6 +569,8 @@ if ( $pid == 0 ) {
         close $userverwriter;
         $dserverwriter->autoflush(1);
 
+        select(undef,undef,undef,5);
+
         my $client = IO::Socket::INET->new(
                         Proto    => "tcp",
                         PeerAddr => '127.0.0.1',
@@ -566,6 +578,13 @@ if ( $pid == 0 ) {
 
         test_assert( defined( $client ) );
         test_assert( $client->connected );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         # Make sure that POPFile sends an appropriate banner
 
@@ -598,6 +617,13 @@ if ( $pid == 0 ) {
         print $client "PASS secret$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Now logged in$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         # Test that the catch all code works for connected servers
 
@@ -666,9 +692,6 @@ if ( $pid == 0 ) {
 
         # Now get a message that actually exists
 
-        unlink( 'messages/popfile1=1.msg' );
-        unlink( 'messages/popfile1=1.cls' );
-
         print $client "RETR 1$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK " . ( -s $messages[0] ) . "$eol" );
@@ -680,7 +703,7 @@ if ( $pid == 0 ) {
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
-            $result =~ s/popfile1=1/popfile0=0/;
+            $result =~ s/view=1/view=popfile0=0.msg/;
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
@@ -695,14 +718,19 @@ if ( $pid == 0 ) {
         # rest here while Windows wakes from its afternoon nap and writes
         # the files to disk
 
-        select( undef, undef, undef, 0.1 );
+        my $slot_file = $h->get_slot_file( 1 );
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
-        test_assert( -e 'messages/popfile1=1.msg' );
-        test_assert( -e 'messages/popfile1=1.cls' );
+        test_assert( -e $slot_file );
 
         test_assert( open FILE, "<$messages[0]" );
         binmode FILE;
-        test_assert( open HIST, "<messages/popfile1=1.msg" );
+        test_assert( open HIST, "<$slot_file" );
         binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
@@ -714,17 +742,13 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $reclassified, $bucket, $usedtobe, $magnet ) =
-            $b->history_read_class( 'popfile1=1.msg' );
-        test_assert( !$reclassified );
+        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 1 );
+        test_assert_equal( $usedtobe, 0 );
         test_assert_equal( $bucket, 'spam' );
-        test_assert( !defined( $usedtobe ) );
-        test_assert_equal( $magnet, '' );
+        test_assert_equal( $hdr_from, 'blank' );
+        test_assert_equal( $magnet, 0 );
 
        # Now get a message that has an illegal embedded CRLF.CRLF
-
-        unlink( 'messages/popfile1=28.msg' );
-        unlink( 'messages/popfile1=28.cls' );
 
         print $client "RETR 28$eol";
         $result = <$client>;
@@ -736,12 +760,10 @@ if ( $pid == 0 ) {
         binmode FILE;
         while ( <FILE> ) {
             my $line = $_;
-            $b->log_( "Got $_" );
             $result = <$client>;
             my $logline = "File [$_], $client [$result]";
             $logline =~ s/[\r\n]//g;
-            $b->log_( $logline );
-            $result =~ s/popfile1=28/popfile0=0/;
+            $result =~ s/view=2/view=popfile0=0.msg/;
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
@@ -758,12 +780,19 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        test_assert( -e 'messages/popfile1=28.msg' );
-        test_assert( -e 'messages/popfile1=28.cls' );
+        my $slot_file = $h->get_slot_file( 2 );
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        test_assert( -e $slot_file );
 
         test_assert( open FILE, "<$messages[27]" );
         binmode FILE;
-        test_assert( open HIST, "<messages/popfile1=28.msg" );
+        test_assert( open HIST, "<$slot_file" );
         binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
@@ -775,12 +804,10 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) =
-            $b->history_read_class( 'popfile1=28.msg' );
-        test_assert( !$reclassified );
+        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 2 );
         test_assert_equal( $bucket, 'spam' );
-        test_assert( !defined( $usedtobe ) );
-        test_assert_equal( $magnet, '' );
+        test_assert_equal( $usedtobe, 0 );
+        test_assert_equal( $magnet, 0 );
 
         # Try an unsuccessful delete
 
@@ -816,9 +843,6 @@ if ( $pid == 0 ) {
 
         # Check the basic TOP command
 
-        unlink( 'messages/popfile1=5.msg' );
-        unlink( 'messages/popfile1=5.cls' );
-
         my $countdown = 2;
         print $client "TOP 5 $countdown$eol";
         $result = <$client>;
@@ -851,14 +875,8 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        test_assert( !(-e 'messages/popfile1=5.msg') );
-        test_assert( !(-e 'messages/popfile1=5.cls') );
-
         # Check that TOP x 99999999 is the same as RETR x for fetchmail
         # compatibility
-
-        test_assert( !(-e 'messages/popfile1=7.msg') );
-        test_assert( !(-e 'messages/popfile1=7.cls') );
 
         print $client "TOP 7 99999999$eol";
         $result = <$client>;
@@ -871,7 +889,7 @@ if ( $pid == 0 ) {
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
-            $result =~ s/popfile1=7/popfile0=0/;
+            $result =~ s/view=3/view=popfile0=0.msg/;
             test_assert( $result =~ /\015/ );
             $result =~ s/\015//;
             test_assert_equal( $result, $line );
@@ -888,12 +906,19 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        test_assert( -e 'messages/popfile1=7.msg' );
-        test_assert( -e 'messages/popfile1=7.cls' );
+        my $slot_file = $h->get_slot_file( 3 );
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        test_assert( -e $slot_file );
 
         test_assert( open FILE, "<$messages[6]" );
         binmode FILE;
-        test_assert( open HIST, "<messages/popfile1=7.msg" );
+        test_assert( open HIST, "<$slot_file" );
         binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
@@ -905,18 +930,23 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) =
-            $b->history_read_class( 'popfile1=7.msg' );
-        test_assert( !$reclassified );
+        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 3 );
         test_assert_equal( $bucket, 'spam' );
-        test_assert( !defined( $usedtobe ) );
-        test_assert_equal( $magnet, '' );
+        test_assert_equal( $usedtobe, 0 );
+        test_assert_equal( $magnet, 0 );
 
         # Check that we echo the remote servers QUIT response
 
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -942,6 +972,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Welcome gooduser$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         $countdown = 2;
         print $client "TOP 8 $countdown$eol";
         $result = <$client>;
@@ -954,7 +991,7 @@ if ( $pid == 0 ) {
         $headers   = 1;
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
-            $result =~ s/popfile2=8/popfile0=0/;
+            $result =~ s/view=4/view=popfile0=0.msg/;
             test_assert( $result =~ /\015/ );
             $result =~ s/\015//;
             test_assert_equal( $result, $line, "[$result][$line]" );
@@ -970,12 +1007,19 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
-        test_assert( -e 'messages/popfile2=8.msg' );
-        test_assert( -e 'messages/popfile2=8.cls' );
+        my $slot_file = $h->get_slot_file( 4 );
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        test_assert( -e $slot_file );
 
         test_assert( open FILE, "<$messages[7]" );
         binmode FILE;
-        test_assert( open HIST, "<messages/popfile2=8.msg" );
+        test_assert( open HIST, "<$slot_file" );
         binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
@@ -987,18 +1031,16 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) =
-            $b->history_read_class( 'popfile2=8.msg' );
-        test_assert( !$reclassified );
+        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 4 );
         test_assert_equal( $bucket, 'spam' );
-        test_assert( !defined( $usedtobe ) );
-        test_assert_equal( $magnet, '' );
+        test_assert_equal( $usedtobe, 0 );
+        test_assert_equal( $magnet, 0 );
 
         # Test RETR after TOP comes from cache
 
         print $client "RETR 8$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=8.msg' ) .
+        test_assert_equal( $result, "+OK " . ( -s $messages[7] ) .
             " bytes from POPFile cache$eol" );
 
         $cam = $messages[7];
@@ -1007,12 +1049,10 @@ if ( $pid == 0 ) {
         binmode FILE;
         $headers   = 1;
         while ( my $line = <FILE> ) {
-            $b->log_( "RETR 8 after TOP 8 got line [$line]" );
             $line =~ s/[\r\n]//g;
             $result = <$client>;
-            $b->log_( "RETR 8 after TOP 8 got from client [$result]" );
             $result =~ s/[\r\n]//g;
-            $result =~ s/popfile2=8/popfile0=0/;
+            $result =~ s/view=4/view=popfile0=0.msg/;
             test_assert_equal( $result, $line );
         }
         close FILE;
@@ -1033,7 +1073,7 @@ if ( $pid == 0 ) {
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
-            $result =~ s/popfile2=9/popfile0=0/;
+            $result =~ s/view=5/view=popfile0=0.msg/;
             test_assert( $result =~ /\015/ );
             $result =~ s/\015//;
             test_assert_equal( $result, $line );
@@ -1045,12 +1085,19 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        test_assert( -e 'messages/popfile2=9.msg' );
-        test_assert( -e 'messages/popfile2=9.cls' );
+        my $slot_file = $h->get_slot_file( 5 );
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        test_assert( -e $slot_file );
 
         test_assert( open FILE, "<$messages[8]" );
         binmode FILE;
-        test_assert( open HIST, "<messages/popfile2=9.msg" );
+        test_assert( open HIST, "<$slot_file" );
         binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
@@ -1062,16 +1109,14 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) =
-            $b->history_read_class( 'popfile2=9.msg' );
-        test_assert( !$reclassified );
+        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 5 );
         test_assert_equal( $bucket, 'spam' );
-        test_assert( !defined( $usedtobe ) );
-        test_assert_equal( $magnet, '' );
+        test_assert_equal( $usedtobe, 0 );
+        test_assert_equal( $magnet, 0 );
 
         print $client "RETR 9$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) .
+        test_assert_equal( $result, "+OK " . ( -s $messages[8] ) .
             " bytes from POPFile cache$eol" );
 
         $cam = $messages[8];
@@ -1083,7 +1128,7 @@ if ( $pid == 0 ) {
             $line =~ s/[\r\n]//g;
             $result = <$client>;
             $result =~ s/[\r\n]//g;
-            $result =~ s/popfile2=9/popfile0=0/;
+            $result =~ s/view=5/view=popfile0=0.msg/;
             test_assert_equal( $result, $line );
         }
         close FILE;
@@ -1091,13 +1136,9 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
-        # TODO Test RETR after TOP/RETR with correct CLS file
-
-        unlink( 'messages/popfile2=9.cls' );
-
         print $client "RETR 9$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) .
+        test_assert_equal( $result, "+OK " . ( -s $messages[8] ) .
             " bytes from POPFile cache$eol" );
 
         $cam = $messages[8];
@@ -1109,7 +1150,7 @@ if ( $pid == 0 ) {
             $line =~ s/[\r\n]//g;
             $result = <$client>;
             $result =~ s/[\r\n]//g;
-            $result =~ s/popfile2=9/popfile0=0/;
+            $result =~ s/view=5/view=popfile0=0.msg/;
             test_assert_equal( $result, $line );
         }
         close FILE;
@@ -1131,7 +1172,7 @@ if ( $pid == 0 ) {
         $headers   = 1;
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
-            $result =~ s/popfile2=28/popfile0=0/;
+            $result =~ s/view=6/view=popfile0=0.msg/;
             test_assert( $result =~ /\015/ );
             $result =~ s/\015//;
             test_assert_equal( $result, $line );
@@ -1147,12 +1188,19 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
-        test_assert( -e 'messages/popfile2=28.msg' );
-        test_assert( -e 'messages/popfile2=28.cls' );
+        my $slot_file = $h->get_slot_file( 6 );
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        test_assert( -e $slot_file );
 
         test_assert( open FILE, "<$messages[27]" );
         binmode FILE;
-        test_assert( open HIST, "<messages/popfile2=28.msg" );
+        test_assert( open HIST, "<$slot_file" );
         binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
@@ -1163,18 +1211,16 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) =
-            $b->history_read_class( 'popfile2=28.msg' );
-        test_assert( !$reclassified );
+        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 6 );
         test_assert_equal( $bucket, 'spam' );
-        test_assert( !defined( $usedtobe ) );
-        test_assert_equal( $magnet, '' );
+        test_assert_equal( $usedtobe, 0 );
+        test_assert_equal( $magnet, 0 );
 
         # Test RETR after TOP comes from cache with illegal CRLF.CRLF
 
         print $client "RETR 28$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=28.msg' ) 
+        test_assert_equal( $result, "+OK " . ( -s $slot_file )
             . " bytes from POPFile cache$eol" );
 
         $cam = $messages[27];
@@ -1186,7 +1232,7 @@ if ( $pid == 0 ) {
             $line =~ s/[\r\n]//g;
             $result = <$client>;
             $result =~ s/[\r\n]//g;
-            $result =~ s/popfile2=28/popfile0=0/;
+            $result =~ s/view=6/view=popfile0=0.msg/;
             test_assert_equal( $result, $line );
         }
         close FILE;
@@ -1199,6 +1245,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -1219,6 +1272,13 @@ if ( $pid == 0 ) {
         print $client "USER 127.0.0.1:8110:goslow$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Welcome goslow$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         print $client "RETR 1$eol";
         $result = <$client>;
@@ -1243,7 +1303,7 @@ if ( $pid == 0 ) {
                     last;
                 }
             }
-            $result =~ s/popfile3=1/popfile0=0/;
+            $result =~ s/view=7/view=popfile0=0.msg/;
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
@@ -1256,6 +1316,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -1277,6 +1344,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Welcome slowlf$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         print $client "RETR 1$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK " . ( -s $messages[0] ) . "$eol" );
@@ -1288,7 +1362,7 @@ if ( $pid == 0 ) {
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
-            $result =~ s/popfile4=1/popfile0=0/;
+            $result =~ s/view=8/view=popfile0=0.msg/;
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
             test_assert_equal( $result, $line );
@@ -1297,6 +1371,13 @@ if ( $pid == 0 ) {
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -1317,6 +1398,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK goodbye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -1341,6 +1429,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK goodbye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -1377,6 +1472,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK goodbye$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         close $client;
 
         $client = IO::Socket::INET->new(
@@ -1409,6 +1511,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK goodbye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -1443,6 +1552,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         close $client;
 
         # Good user/pass
@@ -1467,6 +1583,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK hello gooduser$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         print $client "PASS secret$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK password ok$eol" );
@@ -1474,6 +1597,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
         
@@ -1505,6 +1635,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         close $client;
         
         # Good user, bad pass
@@ -1534,6 +1671,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
 
@@ -1566,6 +1710,13 @@ if ( $pid == 0 ) {
         print $client "QUIT$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK goodbye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         close $client;
                 
@@ -1613,6 +1764,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK goodbye$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         close $client;
 
         # Test SPA/AUTH tests with good server
@@ -1649,6 +1807,13 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         close $client;
 
         $client = IO::Socket::INET->new(
@@ -1680,8 +1845,16 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Bye$eol" );
 
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
         close $client;
 
+done:
         # Send the remote server a special message that makes it die
 
         $client = IO::Socket::INET->new(
@@ -1699,6 +1872,13 @@ if ( $pid == 0 ) {
         print $client "USER 127.0.0.1:8110:gooduser$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Welcome gooduser$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
 
         print $client "__QUIT__$eol";
         $result = <$client>;

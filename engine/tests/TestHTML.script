@@ -183,12 +183,11 @@ GET /history
 NOTMATCH Testing Refresh
 MATCH (<a class="history" href="/history?session=$sk">Refresh</a>)
 NEWMSG 1
-STOP
-GET /history?session=$sk&amp;setfilter=
+GET /history?session=$sk
 MATCH John
 MATCH Testing Refresh
 MATCH personal
-MATCH popfile10000=1
+STOP
 
 # Check magnet classified mails
 
@@ -199,7 +198,6 @@ GET /history?session=$sk&amp;setfilter=
 MATCH foo-magnet\@magnetmania.com
 MATCH Magnetic Attraction for Ferrous Females
 MATCH personal
-MATCH popfile10002=1
 MATCH Magnet used: from: foo
 
 GET /view?view=popfile10002=1.msg&amp;start_message=0&amp;session=$sk

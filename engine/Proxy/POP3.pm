@@ -455,7 +455,7 @@ sub child__
 
                         my ( $class, $slot ) =
                              $self->{classifier__}->classify_and_modify(
-                                 $session, $mail, $client, 0, '', 0 );
+                                 $session, $mail, $client, 0, '', 0, 0 );
 
                         $downloaded{$count} = $slot;
 
@@ -474,7 +474,7 @@ sub child__
                             # saving, echoing to client
 
                             $self->{classifier__}->classify_and_modify(
-                                $session, $mail, $client, 1, $class, 1 );
+                                $session, $mail, $client, 1, $class, $slot, 1 );
                         }
                     }
                 } else {
@@ -571,7 +571,7 @@ sub child__
                     # echo file, inserting known classification,
                     # without saving
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, $bucket );
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, $bucket, $downloaded{$count} );
                     print $client ".$eol";
 
                 } else {
@@ -579,7 +579,7 @@ sub child__
                     # If the class wasn't saved properly, classify
                     # from disk normally
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, '' );
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, '', 0 );
                     print $client ".$eol";
                 }
 
@@ -598,7 +598,7 @@ sub child__
                 last if ( $response == 2 );
                 if ( $response == 0 ) {
                     my $slot;
-                    ( $class, $slot ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, 0, '' );
+                    ( $class, $slot ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, 0, '', 0 );
 
                     # Note locally that file has been retrieved if the
                     # full thing has been saved to disk

@@ -2284,6 +2284,7 @@ sub classify
 # $client   - an open stream to write the modified email to 
 # $nosave   - set to 1 indicates that this should not save to history
 # $class    - if we already know the classification
+# $slot     - Must be defined if $class is set
 # $echo     - 1 to echo to the client, 0 to supress, defaults to 1
 # $crlf     - The sequence to use at the end of a line in the output,
 #   normally this is left undefined and this method uses $eol (the
@@ -2298,7 +2299,7 @@ sub classify
 #----------------------------------------------------------------------------
 sub classify_and_modify
 {
-    my ( $self, $session, $mail, $client, $nosave, $class, $echo, $crlf ) = @_;
+    my ( $self, $session, $mail, $client, $nosave, $class, $slot, $echo, $crlf ) = @_;
 
     $echo = 1    unless (defined $echo);
     $crlf = $eol unless (defined $crlf);
@@ -2335,12 +2336,16 @@ sub classify_and_modify
 
     my $getting_headers = 1;
 
-    my ( $slot, $msg_file ) = $self->{history__}->reserve_slot();
+    my $msg_file;
 
     # If we don't yet know the classification then start the parser
 
+    $class = '' if ( !defined( $class ) );
     if ( $class eq '' ) {
         $self->{parser__}->start_parse();
+        ( $slot, $msg_file ) = $self->{history__}->reserve_slot();
+    } else {
+        $msg_file = $self->{history__}->get_slot_file( $slot );
     }
 
     # We append .TMP to the filename for the MSG file so that if we are in
@@ -2623,10 +2628,12 @@ sub classify_and_modify
         $self->flush_extra_( $mail, $client, $echo?0:1);
     }
 
-    if ( $nosave ) {
-        $self->{history__}->release_slot( $slot );
-    } else {
-        $self->{history__}->commit_slot( $session, $slot, $classification, $self->{magnet_detail__} );
+    if ( $class eq '' ) {
+        if ( $nosave ) {
+            $self->{history__}->release_slot( $slot );
+        } else {
+            $self->{history__}->commit_slot( $session, $slot, $classification, $self->{magnet_detail__} );
+        }
     }
 
     return ( $classification, $slot, $self->{magnet_used__} );

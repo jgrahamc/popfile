@@ -120,10 +120,12 @@ sub service
 
     for my $type (sort keys %{$self->{queue__}}) {
          while ( my $ref = shift @{$self->{queue__}{$type}} ) {
-             for my $waiter (@{$self->{waiters__}{$type}}) {
-                my @message   = @$ref;
+             my @message = @$ref;
+             my $flat = join(':', @message);
 
-                my $flat = join(':', @message);
+             $self->log_( 2, "Message $type ($flat) ready for delivery" );
+
+             for my $waiter (@{$self->{waiters__}{$type}}) {
                 $self->log_( 2, "Delivering message $type ($flat) to " .
                     $waiter->name() );
 
@@ -324,8 +326,6 @@ sub flush_child_data_
 {
     my ( $self, $handle ) = @_;
 
-    $self->log_( 2, "flush_child_data_ $handle" );
-
     my $stats_changed = 0;
     my $message;
 
@@ -378,11 +378,16 @@ sub post
     # otherwise write it up the pipe.
 
     if ( $$ == $self->{pid__} ) {
-        $self->log_( 2, "queuing post $type ($flat)" );
-        push @{$self->{queue__}{$type}}, \@message;
+        if ( exists( $self->{waiters__}{$type} ) ) {
+            $self->log_( 2, "queuing post $type ($flat)" );
+            push @{$self->{queue__}{$type}}, \@message;
+            $self->log_( 2, "$type queue length now " . $#{$self->{queue__}{$type}} );
+        } else {
+            $self->log_( 2, "dropping post $type ($flat)" );
+        }
     } else {
         my $pipe = $self->{writer__};
-        $self->log_( 2, "sending post $type ($flat) to parent" );
+        $self->log_( 2, "sending post $type ($flat) to parent $pipe" );
         print $pipe "$type:$flat\n";
     }
 }

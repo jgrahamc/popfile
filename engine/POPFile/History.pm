@@ -332,6 +332,9 @@ sub reserve_slot
                  "select id from history where committed = $r limit 1;");
 
     my $slot = $result->[0];
+
+    $self->log_( 2, "reserve_slot returning slot id $slot" );
+
     return ( $slot, $self->get_slot_file( $slot ) );
 }
 
@@ -650,7 +653,7 @@ sub delete_slot
     $self->log_( 2, "delete_slot called for slot $slot, file $file" );
 
     if ( $archive && $self->config_( 'archive' ) ) {
-        my $path = $self->get_user_path_( $self->config_( 'archive_dir' ) );
+        my $path = $self->get_user_path_( $self->config_( 'archive_dir' ), 0 );
 
         $self->make_directory__( $path );
 
@@ -721,7 +724,7 @@ sub get_slot_file
     my $hex_slot = sprintf( '%8.8x', $slot );
     my $path = $self->get_user_path_(
                    $self->global_config_( 'msgdir' ) .
-                       substr( $hex_slot, 0, 2 ) . '/' );
+                       substr( $hex_slot, 0, 2 ) . '/', 0 );
 
     $self->make_directory__( $path );
     $path .= substr( $hex_slot, 2, 2 ) . '/';
@@ -1116,7 +1119,7 @@ sub upgrade_history_files__
     # upgrade them by placing them in the database
 
     my @msgs = sort compare_mf__ glob $self->get_user_path_(
-        $self->global_config_( 'msgdir' ) . 'popfile*.msg' );
+        $self->global_config_( 'msgdir' ) . 'popfile*.msg', 0 );
 
     if ( $#msgs != -1 ) {
         my $session = $self->{classifier__}->get_session_key( 'admin', '' );
@@ -1153,7 +1156,7 @@ sub upgrade_history_files__
         $self->commit_history__();
         $self->{classifier__}->release_session_key( $session );
 
-        unlink $self->get_user_path_( 'history_cache' );
+        unlink $self->get_user_path_( 'history_cache', 0 );
     }
 }
 

@@ -312,7 +312,7 @@ sub child__
 
                     my ( $class, $history_file ) =
                         $self->{classifier__}->classify_and_modify( $session,
-                            $news, $client, 0, '' );
+                            $news, $client, 0, '', 0 );
                 }
 
                 next;

@@ -853,7 +853,7 @@ $b->set_bucket_parameter( $session, 'spam', 'quarantine', 1 );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 1 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0, 1 );
 close CLIENT;
 close MAIL;
 
@@ -879,7 +879,7 @@ unlink( 'messages/popfile0=0.cls' );
 unlink( 'messages/popfile0=0.msg' );
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 1, '', 1 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 1, '', 0, 1 );
 close CLIENT;
 close MAIL;
 
@@ -890,7 +890,7 @@ test_assert( !(-e $h->get_slot_file( $slot ) ) );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0, 0 );
 close CLIENT;
 close MAIL;
 
@@ -903,7 +903,7 @@ test_assert_equal( ( -s 'temp.tmp' ), 0 );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 'other', 1 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 'other', 0, 1 );
 close CLIENT;
 close MAIL;
 
@@ -953,7 +953,7 @@ if ( $have_text_kakasi ) {
 
   open CLIENT, ">temp.tmp";
   open MAIL, "<TestMailParse026.msg";
-  my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 1 );
+  my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0, 1 );
   close CLIENT;
   close MAIL;
 
