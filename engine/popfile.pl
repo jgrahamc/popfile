@@ -252,6 +252,12 @@ foreach my $name (keys %{$components{proxy}}) {
 	$components{proxy}{$name}->{classifier} = $components{classifier}{classifier};
 }
 
+# All UI components need access to the classifier
+
+foreach my $name (keys %{$components{ui}}) {
+	$components{ui}{$name}->{classifier} = $components{classifier}{classifier};
+}
+
 print "\n    Initializing... ";
 
 # Tell each module to initialize itself
