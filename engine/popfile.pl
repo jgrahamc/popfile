@@ -1040,6 +1040,26 @@ sub history_page
         $configuration{last_count} = 0;
     }
 
+    if ( $form{clear} eq 'Remove+Page' )
+    {
+        my @mail_files = glob "messages/popfile*.msg";
+
+        foreach my $mail_file (@mail_files)
+        {
+            my $class_file = $mail_file;
+            $class_file =~ s/msg$/cls/;
+            $mail_file =~ /popfile(.*)_(.*)\.msg/;
+            my $an = $2;
+            if ( ( $an >= $form{start_message} ) && ( $an <= $form{start_message} + $configuration{page_size} ) )  
+            {
+                unlink($mail_file);
+                unlink($class_file);
+            }
+        }
+        
+        $form{start_message} = 0;
+    }
+
     my @mail_files = glob "messages/popfile*.msg";
 
     foreach my $i ( 0 .. $#mail_files )
@@ -1265,8 +1285,8 @@ sub history_page
         }
     }
 
-    $body .= "</table><form action=/history><b>To remove all entries in the history click here: <input type=submit name=clear value='Remove All'></form>";
-    
+    $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
+    $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=start_message value=$start_message></form>";
     
     if ( $configuration{page_size} < $#mail_files )
     {
