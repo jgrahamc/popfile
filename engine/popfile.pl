@@ -299,7 +299,7 @@ sub debug
         # account information
         if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ ) 
         {
-#            $message = "$`$1$3 XXXXXX$4";
+            $message = "$`$1$3 XXXXXX$4";
         }
         
         chomp $message;
@@ -2265,7 +2265,10 @@ sub run_popfile
                 {
                     if ( echo_response( $mail, $client, $command ) )
                     {
-                        echo_to_dot( $mail, $client );
+                        if ( $1 ne '' ) 
+                        {
+                            echo_to_dot( $mail, $client );
+                        }
                     }
 
                     flush_extra( $mail, $client );
