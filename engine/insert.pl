@@ -24,112 +24,40 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
-use locale;
-use Classifier::MailParse;
+use Classifier::Bayes;
+use POPFile::Configuration;
+use POPFile::MQ;
+use POPFile::Logger;
 
-my %words;
+if ( $#ARGV > 0 ) {
+    my $c = new POPFile::Configuration;
+    my $mq = new POPFile::MQ;
+    my $l = new POPFile::Logger;
+    my $b = new Classifier::Bayes;
 
-# ---------------------------------------------------------------------------------------------
-#
-# load_word_table
-#
-# $bucket    The name of the bucket we are loading words for
-#
-# Fills the words hash with the word frequencies for word loaded from the appropriate bucket
-#
-# ---------------------------------------------------------------------------------------------
-sub load_word_table
-{
-    my ($bucket) = @_;
+    $c->configuration( $c );
+    $c->mq( $mq );
+    $c->logger( $l );
 
-    # Make sure that the bucket mentioned exists, if it doesn't the create an empty
-    # directory and word table
+    $l->configuration( $c );
+    $l->mq( $mq );
+    $l->logger( $l );
 
-    mkdir("corpus");
-    mkdir("corpus/$bucket");
+    $l->initialize();
 
-    print "Loading word table for bucket '$bucket'...\n";
+    $mq->configuration( $c );
+    $mq->mq( $mq );
+    $mq->logger( $l );
 
-    open WORDS, "<corpus/$bucket/table";
+    $b->configuration( $c );
+    $b->mq( $mq );
+    $b->logger( $l );
 
-    # Each line in the word table is a word and a count
+    $b->initialize();
 
-    while (<WORDS>) {
-        if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-            if ( $1 != 1 ) {
-                print "Incompatible corpus version in $bucket\n";
-                return;
-            }
+    $c->load_configuration();
 
-            next;
-        }
-
-        if ( /(.+) (.+)/ ) {
-            $words{$1} = $2;
-        }
-    }
-
-    close WORDS;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# save_word_table
-#
-# $bucket    The name of the bucket we are loading words for
-#
-# Writes the words hash out to a bucket
-#
-# ---------------------------------------------------------------------------------------------
-
-sub save_word_table
-{
-    my ($bucket) = @_;
-
-    print "Saving word table for bucket '$bucket'...\n";
-
-    open WORDS, ">corpus/$bucket/table";
-    print WORDS "__CORPUS__ __VERSION__ 1\n";
-
-    # Each line in the word table is a word and a count
-
-    foreach my $word (keys %words) {
-        print WORDS "$word $words{$word}\n";
-    }
-
-    close WORDS;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# split_mail_message
-#
-# $message    The name of the file containing the mail message
-#
-# Splits the mail message into valid words and updated the words hash
-#
-# ---------------------------------------------------------------------------------------------
-
-sub split_mail_message
-{
-    my ($message) = @_;
-    my $parser   = new Classifier::MailParse;
-    my $word;
-
-    print "Parsing message '$message'...\n";
-
-    $parser->parse_file($message);
-
-    foreach $word (keys %{$parser->{words__}}) {
-        $words{$word} += $parser->{words__}{$word};
-    }
-}
-
-# main
-
-if ( $#ARGV >= 1 )
-{
-    load_word_table($ARGV[0]);
+    $b->start();
 
     my @files;
 
@@ -139,16 +67,15 @@ if ( $#ARGV >= 1 )
         @files   = map { glob } @ARGV[1 .. $#ARGV];
     }
 
-    foreach my $file (@files) {
-        split_mail_message($file);
+    if ( !$b->add_messages_to_bucket( $ARGV[0], @files ) ) {
+        print "Bucket $ARGV[0] does not exist\n";
+    } else {
+        print "Added ", $#files+1, " files to $ARGV[0]\n";
     }
-
-    save_word_table($ARGV[0]);
-
-    print "done.\n";
 } else {
     print "insert.pl - insert mail messages into a specific bucket\n\n";
     print "Usage: insert.pl <bucket> <messages>\n";
     print "       <bucket>           The name of the bucket\n";
     print "       <messages>         Filename of message(s) to insert\n";
 }
+
