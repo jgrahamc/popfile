@@ -60,7 +60,9 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.44"
+  !define C_VERSION   "0.0.48"
+
+  !define C_OUTFILE   "pfidiag.exe"
 
   ;--------------------------------------------------------------------------
   ; The default NSIS caption is "$(^Name) Setup" so we override it here
@@ -95,6 +97,7 @@
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "PFI Diagnostic Utility"
   VIAddVersionKey "FileVersion"      "${C_VERSION}"
+  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
 
   VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
   VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
@@ -108,6 +111,79 @@
   !define PFIDIAG
 
   !include "..\pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+# Macros used to simplify many of the tests
+#--------------------------------------------------------------------------
+
+  ;---------------------------------------------------------------
+  ; Differentiate between non-existent and empty registry strings
+  ;---------------------------------------------------------------
+
+  !macro CHECK_REG_ENTRY VALUE ROOT_KEY SUB_KEY NAME MESSAGE
+
+      !insertmacro PFI_UNIQUE_ID
+
+      ClearErrors
+      ReadRegStr "${VALUE}" ${ROOT_KEY} "${SUB_KEY}" "${NAME}"
+      StrCmp "${VALUE}" "" 0 show_value_${PFI_UNIQUE_ID}
+      IfErrors 0 show_value_${PFI_UNIQUE_ID}
+      DetailPrint "${MESSAGE}= ><"
+      Goto continue_${PFI_UNIQUE_ID}
+
+    show_value_${PFI_UNIQUE_ID}:
+      DetailPrint "${MESSAGE}= < ${VALUE} >"
+
+    continue_${PFI_UNIQUE_ID}:
+  !macroend
+
+  ;---------------------------------------------------------------------
+  ; Check registry strings used for the "0.21 Test Installer"
+  ;---------------------------------------------------------------------
+
+  !macro CHECK_TESTMRI_ENTRY VALUE ROOT_KEY NAME MESSAGE
+    !insertmacro CHECK_REG_ENTRY "${VALUE}" \
+                "${ROOT_KEY}" "Software\POPFile Project\POPFileTest\MRI" "${NAME}" "${MESSAGE}"
+  !macroend
+
+  ;---------------------------------------------------------------------
+  ; Check registry strings used for the current "PFI Testbed" which tests installer translations
+  ;---------------------------------------------------------------------
+
+  !macro CHECK_TESTBED_ENTRY VALUE ROOT_KEY NAME MESSAGE
+    !insertmacro CHECK_REG_ENTRY "${VALUE}" \
+                "${ROOT_KEY}" "Software\POPFile Project\PFI Testbed\MRI" "${NAME}" "${MESSAGE}"
+  !macroend
+
+  ;---------------------------------------------------------------------
+  ; Check registry strings used for the "real" POPFile installer (0.21.0 or later)
+  ;---------------------------------------------------------------------
+
+  !macro CHECK_MRI_ENTRY VALUE ROOT_KEY NAME MESSAGE
+    !insertmacro CHECK_REG_ENTRY "${VALUE}" \
+                "${ROOT_KEY}" "Software\POPFile Project\POPFile\MRI" "${NAME}" "${MESSAGE}"
+  !macroend
+
+  ;---------------------------------------------------------------------------
+  ; Differentiate between non-existent and empty environment variable strings
+  ;---------------------------------------------------------------------------
+
+  !macro CHECK_ENVIRONMENT REGISTER ENV_VARIABLE MESSAGE
+
+      !insertmacro PFI_UNIQUE_ID
+
+      ClearErrors
+      ReadEnvStr "${REGISTER}" "${ENV_VARIABLE}"
+      StrCmp "${REGISTER}" "" 0 show_value_${PFI_UNIQUE_ID}
+      IfErrors 0 show_value_${PFI_UNIQUE_ID}
+      DetailPrint "${MESSAGE}= ><"
+      Goto continue_${PFI_UNIQUE_ID}
+
+    show_value_${PFI_UNIQUE_ID}:
+      DetailPrint "${MESSAGE}= < ${REGISTER} >"
+
+    continue_${PFI_UNIQUE_ID}:
+  !macroend
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -204,7 +280,7 @@
 
   ; Specify EXE filename and icon for the utility
 
-  OutFile "pfidiag.exe"
+  OutFile "${C_OUTFILE}"
 
   ; Ensure details are shown
 
@@ -285,6 +361,10 @@ start_report:
   DetailPrint "------------------------------------------------------------"
   DetailPrint "POPFile $(^Name) v${C_VERSION} (${L_DIAG_MODE} mode)"
   DetailPrint "------------------------------------------------------------"
+  DetailPrint "string not found              :  ><"
+  DetailPrint "empty string found            :  <  >"
+  DetailPrint "string with 'xyz' value found :  < xyz >"
+  DetailPrint "------------------------------------------------------------"
   DetailPrint ""
 
   DetailPrint "Current UserName  = ${L_WINUSERNAME} (${L_WINUSERTYPE})"
@@ -322,39 +402,30 @@ start_report:
   DetailPrint "[1] Pre-0.21 Data:"
   DetailPrint ""
 
-  ReadRegStr ${L_REGDATA} HKLM "Software\POPFile" "InstallLocation"
-  DetailPrint "Pre-0.21 POPFile  = < ${L_REGDATA} >"
-
-  ReadRegStr ${L_REGDATA} HKLM "Software\POPFile Testbed" "InstallLocation"
-  DetailPrint "Pre-0.21 Testbed  = < ${L_REGDATA} >"
+  !insertmacro CHECK_REG_ENTRY "${L_REGDATA}" \
+      "HKLM" "Software\POPFile" "InstallLocation" "Pre-0.21 POPFile  "
+  !insertmacro CHECK_REG_ENTRY "${L_REGDATA}" \
+      "HKLM" "Software\POPFile Testbed" "InstallLocation" "Pre-0.21 Testbed  "
   DetailPrint ""
 
   DetailPrint "[2] 0.21 Test Installer Data:"
   DetailPrint ""
 
-  ReadRegStr ${L_REGDATA} HKLM "Software\POPFile Project\POPFileTest\MRI" "RootDir_LFN"
-  DetailPrint "HKLM: RootDir_LFN = < ${L_REGDATA} >"
-  ReadRegStr ${L_REGDATA} HKLM "Software\POPFile Project\POPFileTest\MRI" "RootDir_SFN"
-  DetailPrint "HKLM: RootDir_SFN = < ${L_REGDATA} >"
+  !insertmacro CHECK_TESTMRI_ENTRY "${L_REGDATA}" "HKLM" "RootDir_LFN" "HKLM: RootDir_LFN "
+  !insertmacro CHECK_TESTMRI_ENTRY "${L_REGDATA}" "HKLM" "RootDir_SFN" "HKLM: RootDir_SFN "
   DetailPrint ""
 
-  ReadRegStr ${L_REGDATA} HKCU "Software\POPFile Project\POPFileTest\MRI" "RootDir_LFN"
-  DetailPrint "HKCU: RootDir_LFN = < ${L_REGDATA} >"
-  ReadRegStr ${L_REGDATA} HKCU "Software\POPFile Project\POPFileTest\MRI" "RootDir_SFN"
-  DetailPrint "HKCU: RootDir_SFN = < ${L_REGDATA} >"
-  ReadRegStr ${L_REGDATA} HKCU "Software\POPFile Project\POPFileTest\MRI" "UserDir_LFN"
-  DetailPrint "HKCU: UserDir_LFN = < ${L_REGDATA} >"
-  ReadRegStr ${L_REGDATA} HKCU "Software\POPFile Project\POPFileTest\MRI" "UserDir_SFN"
-  DetailPrint "HKCU: UserDir_SFN = < ${L_REGDATA} >"
+  !insertmacro CHECK_TESTMRI_ENTRY "${L_REGDATA}" "HKCU" "RootDir_LFN" "HKCU: RootDir_LFN "
+  !insertmacro CHECK_TESTMRI_ENTRY "${L_REGDATA}" "HKCU" "RootDir_SFN" "HKCU: RootDir_SFN "
+  !insertmacro CHECK_TESTMRI_ENTRY "${L_REGDATA}" "HKCU" "UserDir_LFN" "HKCU: UserDir_LFN "
+  !insertmacro CHECK_TESTMRI_ENTRY "${L_REGDATA}" "HKCU" "UserDir_SFN" "HKCU: UserDir_SFN "
   DetailPrint ""
 
   DetailPrint "[3] Current PFI Testbed Data:"
   DetailPrint ""
 
-  ReadRegStr ${L_REGDATA} HKCU "Software\POPFile Project\PFI Testbed\MRI" "InstallPath"
-  DetailPrint "MRI PFI Testbed   = < ${L_REGDATA} >"
-  ReadRegStr ${L_REGDATA} HKCU "Software\POPFile Project\PFI Testbed\MRI" "UserDataPath"
-  DetailPrint "MRI PFI Testdata  = < ${L_REGDATA} >"
+  !insertmacro CHECK_TESTBED_ENTRY "${L_REGDATA}" "HKCU" "InstallPath"  "MRI PFI Testbed   "
+  !insertmacro CHECK_TESTBED_ENTRY "${L_REGDATA}" "HKCU" "UserDataPath" "MRI PFI Testdata  "
   DetailPrint ""
 
   DetailPrint "------------------------------------------------------------"
@@ -381,14 +452,18 @@ start_report:
   StrCpy ${L_REGDATA} ${L_REGDATA}${L_TEMP}
   DetailPrint "HKLM: MRI Version = < ${L_REGDATA} >"
 
-  ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "InstallPath"
-  DetailPrint "HKLM: InstallPath = < ${L_REGDATA} >"
-  ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
-  DetailPrint "HKLM: RootDir_LFN = < ${L_REGDATA} >"
+  !insertmacro CHECK_MRI_ENTRY "${L_REGDATA}" "HKLM" "InstallPath" "HKLM: InstallPath "
+  !insertmacro CHECK_MRI_ENTRY "${L_REGDATA}" "HKLM" "RootDir_LFN" "HKLM: RootDir_LFN "
   Push ${L_REGDATA}
   Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
+  ClearErrors
   ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
+  IfErrors 0 check_HKLM_root_data
+  DetailPrint "HKLM: RootDir_SFN = ><"
+  Goto end_HKLM_root
+
+check_HKLM_root_data:
   StrCmp ${L_REGDATA} "Not supported" 0 short_HKLM_root
   Push ${L_EXPECTED_ROOT}
   Call CheckForSpaces
@@ -411,9 +486,7 @@ end_HKLM_root:
 
   ; Check HKCU data
 
-  ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "Owner"
-  DetailPrint "HKCU: Data Owner  = < ${L_REGDATA} >"
-
+  !insertmacro CHECK_MRI_ENTRY "${L_REGDATA}" "HKCU" "Owner" "HKCU: Data Owner  "
   ReadRegStr ${L_TEMP} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "POPFile Major Version"
   StrCpy ${L_REGDATA} ${L_TEMP}
   ReadRegStr ${L_TEMP} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "POPFile Minor Version"
@@ -424,8 +497,7 @@ end_HKLM_root:
   StrCpy ${L_REGDATA} ${L_REGDATA}${L_TEMP}
   DetailPrint "HKCU: MRI Version = < ${L_REGDATA} >"
 
-  ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
-  DetailPrint "HKCU: RootDir_LFN = < ${L_REGDATA} >"
+  !insertmacro CHECK_MRI_ENTRY "${L_REGDATA}" "HKCU" "RootDir_LFN" "HKCU: RootDir_LFN "
   Push ${L_REGDATA}
   Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
@@ -434,7 +506,13 @@ end_HKLM_root:
   StrCpy ${L_STATUS_ROOT} "not "
 
 root_sfn:
+  ClearErrors
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
+  IfErrors 0 check_HKCU_root_data
+  DetailPrint "HKCU: RootDir_SFN = ><"
+  Goto end_HKCU_root
+
+check_HKCU_root_data:
   StrCmp ${L_REGDATA} "Not supported"  0 short_HKCU_root
   Push ${L_EXPECTED_ROOT}
   Call CheckForSpaces
@@ -455,8 +533,7 @@ short_HKCU_root:
 end_HKCU_root:
   DetailPrint ""
 
-  ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_LFN"
-  DetailPrint "HKCU: UserDir_LFN = < ${L_REGDATA} >"
+  !insertmacro CHECK_MRI_ENTRY "${L_REGDATA}" "HKCU" "UserDir_LFN" "HKCU: UserDir_LFN "
   Push ${L_REGDATA}
   Call CheckForTrailingSlash
   StrCpy ${L_POPFILE_USER} ${L_REGDATA}
@@ -466,7 +543,13 @@ end_HKCU_root:
   StrCpy ${L_STATUS_USER} "not "
 
 user_sfn:
+  ClearErrors
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_SFN"
+  IfErrors 0 check_HKCU_user_data
+  DetailPrint "HKCU: UserDir_SFN = ><"
+  Goto end_HKCU_user
+
+check_HKCU_user_data:
   StrCmp ${L_REGDATA} "Not supported" 0 short_HKCU_user
   Push ${L_EXPECTED_USER}
   Call CheckForSpaces
@@ -584,8 +667,7 @@ folder_found:
   Goto quiet_exit
 
 simple_HKCU_locns:
-  ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
-  DetailPrint "Program folder    = < ${L_REGDATA} >"
+  !insertmacro CHECK_MRI_ENTRY "${L_REGDATA}" "HKCU" "RootDir_LFN" "Program folder    "
   Push ${L_REGDATA}
   Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
@@ -594,7 +676,13 @@ simple_HKCU_locns:
   StrCpy ${L_STATUS_ROOT} "not "
 
 simple_root_sfn:
+  ClearErrors
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
+  IfErrors 0 check_simple_root_data
+  DetailPrint "SFN equivalent    = ><"
+  Goto end_simple_root
+
+check_simple_root_data:
   StrCmp ${L_REGDATA} "Not supported" 0 short_simple_root
   Push ${L_EXPECTED_ROOT}
   Call CheckForSpaces
@@ -615,8 +703,7 @@ short_simple_root:
 end_simple_root:
   DetailPrint ""
 
-  ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_LFN"
-  DetailPrint "User Data folder  = < ${L_REGDATA} >"
+  !insertmacro CHECK_MRI_ENTRY "${L_REGDATA}" "HKCU" "UserDir_LFN" "User Data folder  "
   Push ${L_REGDATA}
   Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_USER} ${L_REGDATA}
@@ -625,7 +712,13 @@ end_simple_root:
   StrCpy ${L_STATUS_USER} "not "
 
 simple_user_sfn:
+  ClearErrors
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_SFN"
+  IfErrors 0 check_simple_user_data
+  DetailPrint "SFN equivalent    = ><"
+  Goto end_simple_user
+
+check_simple_user_data:
   StrCmp ${L_REGDATA} "Not supported" 0 short_simple_user
   Push ${L_EXPECTED_USER}
   Call CheckForSpaces
@@ -650,20 +743,12 @@ end_simple_user:
   DetailPrint ""
 
 check_env_vars:
-
-  ; Check current environment variables
-
-  ReadEnvStr ${L_POPFILE_ROOT}   "POPFILE_ROOT"
-  ReadEnvStr ${L_POPFILE_USER}   "POPFILE_USER"
-  ReadEnvStr ${L_ITAIJIDICTPATH} "ITAIJIDICTPATH"
-  ReadEnvStr ${L_KANWADICTPATH}  "KANWADICTPATH"
-
   DetailPrint "------------------------------------------------------------"
   DetailPrint "POPFile Environment Variables"
   DetailPrint "------------------------------------------------------------"
   DetailPrint ""
 
-  DetailPrint "'POPFILE_ROOT'    = < ${L_POPFILE_ROOT} >"
+  !insertmacro CHECK_ENVIRONMENT "${L_POPFILE_ROOT}" "POPFILE_ROOT" "'POPFILE_ROOT'    "
   StrCmp ${L_WIN_OS_TYPE} "1" compare_root_var
   StrCmp ${L_POPFILE_ROOT} "" check_user
 
@@ -683,7 +768,7 @@ compare_root_var:
   DetailPrint ""
 
 check_user:
-  DetailPrint "'POPFILE_USER'    = < ${L_POPFILE_USER} >"
+  !insertmacro CHECK_ENVIRONMENT "${L_POPFILE_USER}" "POPFILE_USER" "'POPFILE_USER'    "
   StrCmp ${L_WIN_OS_TYPE} "1" compare_user_var
   StrCmp ${L_POPFILE_USER} "" check_vars
 
@@ -739,11 +824,10 @@ blank_line:
   DetailPrint ""
 
 check_kakasi:
-  StrCmp ${L_DIAG_MODE} "simple" exit
-
-  DetailPrint "'ITAIJIDICTPATH'  = < ${L_ITAIJIDICTPATH} >"
-  DetailPrint "'KANWADICTPATH'   = < ${L_KANWADICTPATH} >"
+  !insertmacro CHECK_ENVIRONMENT "${L_ITAIJIDICTPATH}" "ITAIJIDICTPATH" "'ITAIJIDICTPATH'  "
+  !insertmacro CHECK_ENVIRONMENT "${L_KANWADICTPATH}"  "KANWADICTPATH"  "'KANWADICTPATH'   "
   DetailPrint ""
+  StrCmp ${L_DIAG_MODE} "simple" exit
   StrCmp ${L_ITAIJIDICTPATH} "" check_other_kakaksi
   StrCpy ${L_TEMP} ""
   IfFileExists "${L_ITAIJIDICTPATH}" display_itaiji_result
@@ -917,7 +1001,6 @@ exit:
   !undef L_TEMP
 
 FunctionEnd
-
 
 #--------------------------------------------------------------------------
 # End of 'pfidiag.nsi'
