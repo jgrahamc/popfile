@@ -63,7 +63,7 @@
   color: black;
   }
 
-.shell
+.shell, .shellTop
   {
   background-color: #ededca;
   border: 3px #cccc99 solid;
@@ -109,7 +109,7 @@ select
   font-weight: normal;
   }
 
-submit
+.submit
   {
   font-size: 8pt;
   font-weight: normal;
@@ -127,15 +127,15 @@ tr
   font-weight: normal;
   }
 
-table.stabColor01 {
+table.settingsTable {
 	border: 1px solid Black;
 }
 
-table.stabColor03 {
+table.openMessageTable, table.lookupResultsTable {
 	border: 3px solid Black;
 }
 
-td.stabColor01 {
+td.settingsPanel {
 	border: 1px solid Black;
 }
 
@@ -212,31 +212,31 @@ span.graphFont {
 	font-size: x-small;
 }
 
-span.bucketsLabel {
+.bucketsLabel {
 	font-weight: bold;
 }
 
-span.magnetsLabel {
+.magnetsLabel {
 	font-weight: bold;
 }
 
-span.securityLabel {
+.securityLabel {
 	font-weight: bold;
 }
 
-span.configurationLabel {
+.configurationLabel {
 	font-weight: bold;
 }
 		
-span.advancedLabel {
+.advancedLabel {
 	font-weight: bold;
 }
 		
-span.passwordLabel {
+.passwordLabel {
 	font-weight: bold;
 }
 
-span.sessionLabel {
+.sessionLabel {
 	font-weight: bold;
 }
 
@@ -265,10 +265,10 @@ span.securityWidgetState {
 }
 
 .historyLabel {
-	font-weight: normal;
+  font-weight: normal;
 }
 
 .historyLabel em {
-	font-weight: bold;
-	font-style: normal;
+  font-weight: bold;
+  font-style: normal;
 }

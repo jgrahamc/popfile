@@ -27,7 +27,7 @@ font-weight : bold;
 font-family : "bookman old style", "new century schoolbook", times, serif; 
 font-size : 175%; 
 } 
-.shell {
+.shell, .shellTop {
 border-bottom : 3px solid #aaaaaa; 
 border-left : 3px solid #eeeeee; 
 border-right : 3px solid #aaaaaa; 
@@ -138,7 +138,7 @@ td.footerBody {
 	padding-right: 5%;
 }
 
-submit {
+.submit {
 margin-left : 3px; 
 margin-right : 3px; 
 color : #0000ff; 
@@ -177,15 +177,15 @@ font-size : 100%;
 font-family : courier, monospace; 
 } 
 
-table.stabColor01 {
+table.settingsTable {
 	border: 1px solid Black;
 }
 
-table.stabColor03 {
+table.openMessageTable, table.lookupResultsTable {
 	border: 3px solid Black;
 }
 
-td.stabColor01 {
+td.settingsPanel {
 	border: 1px solid Black;
 }
 
@@ -233,31 +233,31 @@ span.graphFont {
 	font-size: x-small;
 }
 
-span.bucketsLabel {
+.bucketsLabel {
 	font-weight: bold;
 }
 
-span.magnetsLabel {
+.magnetsLabel {
 	font-weight: bold;
 }
 
-span.securityLabel {
+.securityLabel {
 	font-weight: bold;
 }
 
-span.configurationLabel {
+.configurationLabel {
 	font-weight: bold;
 }
 		
-span.advancedLabel {
+.advancedLabel {
 	font-weight: bold;
 }
 		
-span.passwordLabel {
+.passwordLabel {
 	font-weight: bold;
 }
 
-span.sessionLabel {
+.sessionLabel {
 	font-weight: bold;
 }
 
@@ -268,7 +268,7 @@ table.historyWidgetsTop {
 	margin-bottom: 1.0em;
 }
 
-table.historyButtonsBottom {
+table.historyWidgetsBottom {
 	width: 100%;
 	margin-top: 0.6em;
 }
@@ -307,10 +307,10 @@ span.securityWidgetState {
 }
 
 .historyLabel {
-	font-weight: normal;
+  font-weight: normal;
 }
 
 .historyLabel em {
-	font-weight: bold;
-	font-style: normal;
+  font-weight: bold;
+  font-style: normal;
 }

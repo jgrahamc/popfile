@@ -14,7 +14,7 @@ a {
 }
 
 
-input, select, submit {
+input, select, .submit {
   color: black;
   background-color: #C1C1C1;
   border: 1px white outset;
@@ -22,7 +22,7 @@ input, select, submit {
   font-weight: normal;
 }
 
-.shell {
+.shell, .shellTop {
    background-color: #344FB2;
    border: 1px black outset;
    width: 98%;
@@ -48,7 +48,7 @@ table.head a {
   width: 100%;
 }
 
-.menu a {
+.menuLink {
    color: white;
    text-decoration: none;
 	background-color: transparent;
@@ -110,15 +110,15 @@ table.footer {
 	margin-top: 1em;
 }
 
-table.stabColor01 {
+table.settingsTable {
 	border: 1px solid #6B76A1;
 }
 
-table.stabColor03 {
+table.openMessageTable, table.lookupResultsTable {
 	border: 1px solid #6B76A1;
 }
 
-td.stabColor01 {
+td.settingsPanel {
 	border: 1px solid #6B76A1;
 }
 
@@ -166,31 +166,31 @@ span.graphFont {
 	font-size: x-small;
 }
 
-span.bucketsLabel {
+.bucketsLabel {
 	font-weight: bold;
 }
 
-span.magnetsLabel {
+.magnetsLabel {
 	font-weight: bold;
 }
 
-span.securityLabel {
+.securityLabel {
 	font-weight: bold;
 }
 
-span.configurationLabel {
+.configurationLabel {
 	font-weight: bold;
 }
 		
-span.advancedLabel {
+.advancedLabel {
 	font-weight: bold;
 }
 		
-span.passwordLabel {
+.passwordLabel {
 	font-weight: bold;
 }
 
-span.sessionLabel {
+.sessionLabel {
 	font-weight: bold;
 }
 
@@ -201,7 +201,7 @@ table.historyWidgetsTop {
 	margin-bottom: 1.0em;
 }
 
-table.historyButtonsBottom {
+table.historyWidgetsBottom {
 	width: 100%;
 	margin-top: 0.6em;
 }
@@ -247,10 +247,10 @@ span.securityWidgetState {
 }
 
 .historyLabel {
-	font-weight: normal;
+  font-weight: normal;
 }
 
 .historyLabel em {
-	font-weight: bold;
-	font-style: normal;
+  font-weight: bold;
+  font-style: normal;
 }
