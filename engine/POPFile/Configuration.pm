@@ -1,5 +1,8 @@
 # POPFILE LOADABLE MODULE
-package POPFile::Configuration;  
+package POPFile::Configuration;
+
+use POPFile::Module;
+@ISA = ( "POPFile::Module" );
 
 #----------------------------------------------------------------------------
 #

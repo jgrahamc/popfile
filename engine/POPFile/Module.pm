@@ -7,7 +7,7 @@ package POPFile::Module;
 # selected ones need be overriden by subclasses
 #
 # POPFile is constructed from a collection of classes which all have special
-# interface functions:
+# PUBLIC interface functions:
 #
 # initialize() - called after the class is created to set default values for internal
 #                variables and global configuration information
@@ -30,16 +30,28 @@ package POPFile::Module;
 #                through the %components hash.  The name returned here will be the name
 #                used as the key for this module in %components
 #
+# The following methods are PROTECTED and should be accessed by sub classes:
+#
+# log_()       - sends a string to the logger
+#
+# config_()    - gets or sets a configuration parameter for this module
+#
 # A note on the naming
 #
-# A method or variable that ends with an underscore is PRIVATE and should not be accessed
-# from outside the class (or subclass; in C++ its protected), to access a PRIVATE variable
+# A method or variable that ends with an underscore is PROTECTED and should not be accessed
+# from outside the class (or subclass; in C++ its protected), to access a PROTECTED variable
 # you will find an equivalent getter/setter method with no underscore.
+#
+# Truly PRIVATE variables are indicated by a double underscore at the end of the name and
+# should not be accessed outside the class without going through a getter/setter and may
+# not be directly accessed by a subclass.
 #
 # For example
 #
-# $c->foo_() is a private method
-# $c->{foo_} is a private variable
+# $c->foo__() is a private method
+# $c->{foo__} is a private variable
+# $c->foo_() is a protected method
+# $c->{foo_} is a protected variable
 # $c->foo() is a public method that modifies $c->{foo_} it always returns the current
 # value of the variable it is referencing and if passed a value sets that corresponding
 # variable
@@ -56,24 +68,28 @@ package POPFile::Module;
 #   anything so that you know that they exists
 #
 #----------------------------------------------------------------------------
-sub new 
+sub new
 {
     my $type = shift;
     my $self;
-    
+
     # A reference to the POPFile::Configuration module, every module is
     # able to get configuration information through this, note that it
     # is valid when initialize is called, however, the configuration is not
     # read from disk until after initialize has been called
-    
-    $self->{configuration_}  = 0;
+
+    $self->{configuration__} = 0; # PRIVATE
 
     # A reference to the POPFile::Logger module
-    
-    $self->{logger_}         = 0;
+
+    $self->{logger__}        = 0; # PRIVATE
+
+    # The name of this module
+
+    $self->{name__}          = ''; # PRIVATE
 
     # Used to tell any loops to terminate
-    
+
     $self->{alive_}          = 1;
 
     # This is a reference to the pipeready() function in popfile.pl that it used
@@ -83,9 +99,9 @@ sub new
 
     # This is a reference to a function (forker) in popfile.pl that performs a fork
     # and informs modules that a fork has occurred
-    
+
     $self->{forker_}         = 0;
-    
+
     return bless $self, $type;
 }
 
@@ -125,7 +141,7 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
-    
+
     return 1;
 }
 
@@ -140,28 +156,6 @@ sub start
 sub stop
 {
     my ( $self ) = @_;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# name
-#
-# Called to get the simple name for this module, this is the name use to hook various
-# module's together in popfile.pl and should be a simple lower case name.  This is the only
-# pure abstract function in POPFile::Module and will abort POPFile immediately if ever
-# called.
-#
-# It should return a string containing the proposed name
-#
-# ---------------------------------------------------------------------------------------------
-sub name
-{
-    my ( $self ) = @_;
-
-    # Pure virtual
-
-    print "\nPOPFile::Module::name called; this function is pure virtual";
-    exit(1);
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -213,6 +207,69 @@ sub forked
     my ( $self ) = @_;
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# log_
+#
+# Called by a subclass to send a message to the logger, the logged message will be prefixed
+# by the name of the module in use
+#
+# $message           The message to log
+#
+# There is no return value from this method
+#
+# ---------------------------------------------------------------------------------------------
+sub log_
+{
+    my ( $self, $message ) = @_;
+
+    $self->{logger__}->debug( $self->{name__} . ':' . $message );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# config_
+#
+# Called by a subclass to get or set a configuration parameter
+#
+# $name              The name of the parameter (e.g. 'port')
+# $value             (optional) The value to set
+# $short_name        1 if the $name should be registered in short form as well
+#
+# If called with just a $name then config_() will return the current value
+# of the configuration parameter.  
+#
+# Short vs Long Names.  All configuration parameters are identified by their
+# long name which consists of the individual parameter name preceded by the
+# module name (underscore is used as the separator).  For compatbility with
+# older versions of POPFile the configuration module will also recognize some
+# short names (i.e. without the preceding name and underscore) and map automaticall
+# to the long name
+#
+# Example: POP3 registers a parameter for its listen port call port, this is stored
+# in the configuration as pop3_port.  POP3 also registers for the short name version
+# which is simply port.  When loading the configuration either will be accepted.
+#
+# Note NO NEW PARAMETERS should use short form
+#
+# ---------------------------------------------------------------------------------------------
+sub config_
+{
+    my ( $self, $name, $value, $short_name ) = @_;
+
+    my $long_name = $self->{name__} . '_' . $name;
+
+    if ( defined( $value ) ) {
+	$self->{configuration__}->{configuration}{$long_name} = $value;
+
+	if ( defined( $short_name ) ) {
+	    $self->{configuration__}->{configuration}{$name} = $value;
+	}
+    }
+
+    return $self->{configuration__}->{configuration}{$long_name};
+}
+
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they
 # are non-trivial since the documentation would be a waste of space
 #
@@ -222,11 +279,11 @@ sub forked
 #   sub foo
 #   {
 #       my ( $self, $value ) = @_;
-#       
+#
 #       if ( defined( $value ) ) {
 #           $self->{foo_} = $value;
 #       }
-#       
+#
 #       return $self->{foo_};
 #   }
 #
@@ -236,56 +293,67 @@ sub forked
 sub configuration
 {
     my ( $self, $value ) = @_;
-    
+
     if ( defined( $value ) ) {
-        $self->{configuration_} = $value;
+        $self->{configuration__} = $value;
     }
-    
-    return $self->{configuration_};
+
+    return $self->{configuration__};
 }
 
 sub forker
 {
     my ( $self, $value ) = @_;
-    
+
     if ( defined( $value ) ) {
         $self->{forker_} = $value;
     }
-    
+
     return $self->{forker_};
 }
 
 sub logger
 {
     my ( $self, $value ) = @_;
-    
+
     if ( defined( $value ) ) {
-        $self->{logger_} = $value;
+        $self->{logger__} = $value;
     }
-    
-    return $self->{logger_};
+
+    return $self->{logger__};
 }
 
 sub pipeready
 {
     my ( $self, $value ) = @_;
-    
+
     if ( defined( $value ) ) {
         $self->{pipeready_} = $value;
     }
-    
+
     return $self->{pipeready_};
 }
 
 sub alive
 {
     my ( $self, $value ) = @_;
-    
+
     if ( defined( $value ) ) {
         $self->{alive_} = $value;
     }
-    
+
     return $self->{alive_};
+}
+
+sub name
+{
+    my ( $self, $value ) = @_;
+
+    if ( defined( $value ) ) {
+        $self->{name__} = $value;
+    }
+
+    return $self->{name__};
 }
 
 1;

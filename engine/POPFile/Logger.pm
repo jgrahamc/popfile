@@ -1,6 +1,9 @@
 # POPFILE LOADABLE MODULE
 package POPFile::Logger;
 
+use POPFile::Module;
+@ISA = ("POPFile::Module");
+
 #----------------------------------------------------------------------------
 #
 # This module handles POPFile's logger.  It is used to save debugging 

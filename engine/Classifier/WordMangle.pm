@@ -23,7 +23,7 @@ sub new
     my $type = shift;
     my $self;
 
-    $self->{stop} = {
+    $self->{stop__} = {
           'all', 1, 'also', 1, 'and', 1, 'any', 1, 'are', 1, 'ask', 1, 'but', 1, 'can', 1, 'com', 1, 'did', 1, 'edu', 1, 'etc', 1, 'for', 1, 'from', 1, 'had', 1, 'has', 1,
           'have', 1, 'her', 1, 'him', 1, 'his', 1, 'inc', 1, 'its', 1, 'it\'s', 1, 'ltd', 1, 'may', 1, 'not', 1, 'off', 1, 'our', 1, 'out', 1, 'she', 1, 'the', 1, 'this',
           1, 'yes', 1, 'yet', 1, 'you', 1, 'http', 1, 'https', 1, 'mailto', 1, 'com',  1, 'with',  1, 'your',  1, 'that',  1, 'org',  1, 'cgi',  1, 'net',  1, 'www',  1,
@@ -53,14 +53,14 @@ sub new
 sub load_stop_words
 {
     my ($self) = @_;
-    
+
     if ( open STOPS, "<stopwords" ) {
-        delete $self->{stop};
+        delete $self->{stop__};
         while ( <STOPS> ) {
             s/[\r\n]//g;
-            $self->{stop}{$_} = 1;
+            $self->{stop__}{$_} = 1;
         }
-        
+
         close STOPS;
     }
 }
@@ -68,12 +68,12 @@ sub load_stop_words
 sub save_stop_words
 {
     my ($self) = @_;
-    
+
     if ( open STOPS, ">stopwords" ) {
-        for my $word (keys %{$self->{stop}}) {
+        for my $word (keys %{$self->{stop__}}) {
             print STOPS "$word\n";
         }
-        
+
         close STOPS;
     }
 }
@@ -98,23 +98,23 @@ sub mangle
     my ($self, $word, $allow_colon) = @_;
 
     # All words are treated as lowercase
-    
+
     $word = lc($word);
 
     # Stop words are ignored
-    
-    return '' if ( $self->{stop}{$word} );
+
+    return '' if ( $self->{stop__}{$word} );
 
     # Remove characters that would mess up a Perl regexp and replace with .
-    
+
     $word =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\./g;
 
     # Long words are ignored also
-    
+
     return '' if ( length($word) > 45 );
 
     # Ditch long hex numbers
-    
+
     return '' if ( $word =~ /^[A-F0-9]{8,}$/i );
 
     # Colons are forbidden inside words, we should never get passed a word

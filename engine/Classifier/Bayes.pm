@@ -1,6 +1,9 @@
 # POPFILE LOADABLE MODULE
 package Classifier::Bayes;
 
+use POPFile::Module;
+@ISA = ("POPFile::Module");
+
 # ---------------------------------------------------------------------------------------------
 #
 # Bayes.pm --- Naive Bayes text classifier
@@ -19,7 +22,7 @@ use Classifier::WordMangle;
 # in a cross platform way
 use Sys::Hostname;
 
-# A handy variable containing the value of an EOL for Unix systems
+# A handy variable containing the value of an EOL for networks
 my $eol = "\015\012";
 
 #----------------------------------------------------------------------------
@@ -32,65 +35,65 @@ sub new
     my $type = shift;
     my $self;
 
-    # Set this to 1 to get debugging information
-    $self->{debug}             = 0;
-
     # Set this to 1 to get scores for individual words in message detail
-    $self->{wordscores}        = 1;
-
-    # Assume we are still alive
-    $self->{alive}             = 1;
+    $self->{wordscores__}        = 1;
 
     # Just our hostname
-    $self->{hostname}        = '';
+    $self->{hostname__}        = '';
 
     # Matrix of buckets, words and the word counts
-    $self->{matrix}            = {};
+    $self->{matrix__}            = {};
 
     # Total number of words in each bucket
-    $self->{total}             = {};
+    $self->{total__}             = {};
 
     # Total number of unique words in each bucket
-    $self->{unique}            = {};
+    $self->{unique__}            = {};
 
     # Total number of words in all buckets
-    $self->{full_total}        = 0;
+    $self->{full_total__}        = 0;
 
     # Used to mangle the corpus when loaded
-    $self->{mangler}           = new Classifier::WordMangle;
+    $self->{mangler__}           = new Classifier::WordMangle;
 
     # Used to parse mail messages
-    $self->{parser}            = new Classifier::MailParse;
+    $self->{parser__}            = new Classifier::MailParse;
 
     # Colors assigned to each bucket
-    $self->{colors}            = {};
+    $self->{colors__}            = {};
 
     # The possible colors for buckets
-    $self->{possible_colors} = [ 'red',  'green',      'blue',      'brown',     'orange',     'purple',      'magenta',  'gray',        'plum',     'silver',
+    $self->{possible_colors__} = [ 'red',  'green',      'blue',      'brown',     'orange',     'purple',      'magenta',  'gray',        'plum',     'silver',
                    'pink', 'lightgreen', 'lightblue', 'lightcyan', 'lightcoral', 'lightsalmon', 'lightgrey', 'darkorange', 'darkcyan', 'feldspar' ];
 
     # Precomputed per bucket probabilities
-    $self->{bucket_start}      = {};
+    $self->{bucket_start__}      = {};
 
     # A very unlikely word
-    $self->{not_likely}        = 0;
+    $self->{not_likely__}        = 0;
 
     # The expected corpus version
-    $self->{corpus_version}    = 1;
+    $self->{corpus_version__}    = 1;
 
     # Per bucket parameters
-    $self->{parameters}        = {};
+    $self->{parameters__}        = {};
 
     # The magnets that cause attraction to certain buckets
-    $self->{magnets}           = {};
+    $self->{magnets__}           = {};
 
     # The unclassified cutoff probability
-    $self->{unclassified}      = 0.5;
+    $self->{unclassified__}      = 0.5;
 
     # Used to tell the caller whether a magnet was used in the last
     # mail classification
-    $self->{magnet_used}       = 0;
-    $self->{magnet_detail}     = '';
+    $self->{magnet_used__}       = 0;
+    $self->{magnet_detail__}     = '';
+
+    # Must call bless before attempting to call any methods
+
+    bless $self, $type;
+
+    $self->name( 'bayes' );
 
     return bless $self, $type;
 }
@@ -107,13 +110,13 @@ sub initialize
     my ( $self ) = @_;
 
     # No default unclassified probability
-    $self->{configuration}->{configuration}{unclassified_probability} = 0;
+    $self->config_( 'unclassified_probability', 0, 1 );
 
     # The corpus is kept in the 'corpus' subfolder of POPFile
-    $self->{configuration}->{configuration}{corpus}                   = 'corpus';
+    $self->config_( 'corpus', 'corpus', 1 );
 
     # Get the hostname for use in the X-POPFile-Link header
-    $self->{hostname} = hostname;
+    $self->{hostname__} = hostname;
 
     return 1;
 }
@@ -129,11 +132,11 @@ sub start
 {
     my ( $self ) = @_;
 
-    if ( $self->{configuration}->{configuration}{unclassified_probability} != 0 )  {
-        $self->{unclassified} = $self->{configuration}->{configuration}{unclassified_probability};
+    if ( $self->config_( 'unclassified_probability' ) != 0 )  {
+        $self->{unclassified__} = $self->config_( 'unclassified_probability' );
     }
 
-    load_word_matrix( $self );
+    $self->load_word_matrix_();
 
     return 1;
 }
@@ -149,57 +152,7 @@ sub stop
 {
     my ( $self ) = @_;
 
-    write_parameters( $self );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# service
-#
-# ---------------------------------------------------------------------------------------------
-sub service
-{
-    my ( $self ) = @_;
-
-    return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# forked
-#
-# Called when someone forks POPFile
-#
-# ---------------------------------------------------------------------------------------------
-sub forked
-{
-    my ( $self ) = @_;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# name
-#
-# Called to get the simple name for this module
-#
-# ---------------------------------------------------------------------------------------------
-sub name
-{
-    my ( $self ) = @_;
-
-    return 'classifier';
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# reaper
-#
-# Called to reap our dead children
-#
-# ---------------------------------------------------------------------------------------------
-sub reaper
-{
-    my ( $self ) = @_;
+    $self->write_parameters();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -213,10 +166,10 @@ sub write_parameters
 {
     my ($self) = @_;
 
-    for my $bucket (keys %{$self->{total}})  {
-        open PARAMS, ">$self->{configuration}->{configuration}{corpus}/$bucket/params";
-        for my $param (keys %{$self->{parameters}{$bucket}}) {
-            print PARAMS "$param $self->{parameters}{$bucket}{$param}\n";
+    for my $bucket (keys %{$self->{total__}})  {
+        open PARAMS, '>' . $self->config_( 'corpus' ) . "/$bucket/params";
+        for my $param (keys %{$self->{parameters__}{$bucket}}) {
+            print PARAMS "$param $self->{parameters__}{$bucket}{$param}\n";
         }
         close PARAMS;
     }
@@ -224,27 +177,27 @@ sub write_parameters
 
 # ---------------------------------------------------------------------------------------------
 #
-# get_color
+# get_color_
 #
 # Retrieves the color for a specific word, color is the most likely bucket
 #
 # $word     Word to get the color of
 #
 # ---------------------------------------------------------------------------------------------
-sub get_color
+sub get_color_
 {
     my ($self, $word) = @_;
 
     my $max   = -10000;
     my $color = 'black';
 
-    for my $bucket (keys %{$self->{total}}) {
-        my $prob = get_value( $self, $bucket, $word);
+    for my $bucket (keys %{$self->{total__}}) {
+        my $prob = get_value_( $self, $bucket, $word);
 
         if ( $prob != 0 )  {
             if ( $prob > $max )  {
                 $max   = $prob;
-                $color = $self->{colors}{$bucket};
+                $color = $self->{colors__}{$bucket};
             }
         }
     }
@@ -263,20 +216,20 @@ sub get_color
 # TODO: replace the word matrix hash with Berkeley DB tie
 #
 # ---------------------------------------------------------------------------------------------
-sub get_value
+sub get_value_
 {
     my ($self, $bucket, $word) = @_;
     $word =~ /^(.)/;
     my $i = ord($1);
 
-    if ( defined($self->{matrix}{$bucket}[$i]) ) {
-        return $1 if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 );
+    if ( defined($self->{matrix__}{$bucket}[$i]) ) {
+        return $1 if ( ( $self->{matrix__}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 );
     }
 
-    if ( defined($self->{matrix}{$bucket}[$i]) ) {
-        if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 )  {
-            my $newvalue = log($1 / $self->{total}{$bucket});
-            set_value( $self, $bucket, $word, "L$newvalue" );
+    if ( defined($self->{matrix__}{$bucket}[$i]) ) {
+        if ( ( $self->{matrix__}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 )  {
+            my $newvalue = log($1 / $self->{total__}{$bucket});
+            set_value_( $self, $bucket, $word, "L$newvalue" );
             return $newvalue;
         }
     }
@@ -284,7 +237,7 @@ sub get_value
     return 0;
 }
 
-sub set_value
+sub set_value_
 {
     my ($self, $bucket, $word, $value) = @_;
 
@@ -292,30 +245,30 @@ sub set_value
         $word =~ /^(.)/;
         my $i = ord($1);
 
-        $self->{matrix}{$bucket}[$i] = '' if ( !defined($self->{matrix}{$bucket}[$i]) );
-        $self->{matrix}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
+        $self->{matrix__}{$bucket}[$i] = '' if ( !defined($self->{matrix__}{$bucket}[$i]) );
+        $self->{matrix__}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix__}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
     }
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# update_constants
+# update_constants_
 #
 # Updates not_likely and bucket_start
 #
 # ---------------------------------------------------------------------------------------------
-sub update_constants
+sub update_constants_
 {
     my ($self) = @_;
 
-    if ( $self->{full_total} > 0 )  {
-        $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
+    if ( $self->{full_total__} > 0 )  {
+        $self->{not_likely__} = log( 1 / ( 10 * $self->{full_total__} ) );
 
-        foreach my $bucket (keys %{$self->{total}}) {
-            if ( $self->{total}{$bucket} != 0 ) {
-                $self->{bucket_start}{$bucket} = log($self->{total}{$bucket} / $self->{full_total});
+        foreach my $bucket (keys %{$self->{total__}}) {
+            if ( $self->{total__}{$bucket} != 0 ) {
+                $self->{bucket_start__}{$bucket} = log($self->{total__}{$bucket} / $self->{full_total__});
             } else {
-                $self->{bucket_start}{$bucket} = 0;
+                $self->{bucket_start__}{$bucket} = 0;
             }
         }
     }
@@ -323,39 +276,37 @@ sub update_constants
 
 # ---------------------------------------------------------------------------------------------
 #
-# load_word_matrix
+# load_word_matrix_
 #
 # Fills the matrix with the word frequencies from all buckets and builds the bucket total
 #
 # ---------------------------------------------------------------------------------------------
-sub load_word_matrix
+sub load_word_matrix_
 {
     my ($self) = @_;
     my $c      = 0;
 
-    $self->{matrix}     = {};
-    $self->{total}      = {};
-    $self->{magnets}    = {};
-    $self->{full_total} = 0;
+    $self->{matrix__}     = {};
+    $self->{total__}      = {};
+    $self->{magnets__}    = {};
+    $self->{full_total__} = 0;
 
-    print "Loading the corpus ($self->{configuration}->{configuration}{corpus})...\n" if $self->{debug};
-
-    my @buckets = glob "$self->{configuration}->{configuration}{corpus}/*";
+    my @buckets = glob $self->config_( 'corpus' ) . '/*';
 
     foreach my $bucket (@buckets) {
         my $color = '';
 
         # See if there's a color file specified
-        if ( open COLOR, "<$bucket/color" ) {
+        if ( open COLOR, '<' . "$bucket/color" ) {
             $color = <COLOR>;
-            
+
             # Someone (who shall remain nameless) went in an manually created
             # empty color files in their corpus directories which would cause
             # $color at this point to be undefined and hence you'd get warnings
             # about undefined variables below.  So this little test is to deal
             # with that user and to make POPFile a little safer which is always
             # a good thing
-            
+
             if ( !defined( $color ) ) {
                 $color = '';
             } else {
@@ -364,73 +315,69 @@ sub load_word_matrix
             close COLOR;
         }
 
-        load_bucket( $self, $bucket );
+        $self->load_bucket_( $bucket );
         $bucket =~ /([[:alpha:]0-9-_]+)$/;
         $bucket =  $1;
-        $self->{full_total} += $self->{total}{$bucket};
+        $self->{full_total__} += $self->{total__}{$bucket};
 
         if ( $color eq '' )  {
-            if ( $c < $#{$self->{possible_colors}} ) {
-                $self->{colors}{$bucket} = $self->{possible_colors}[$c];
+            if ( $c <= $#{$self->{possible_colors__}} ) {
+                $self->{colors__}{$bucket} = $self->{possible_colors__}[$c];
             } else {
-                $self->{colors}{$bucket} = 'black';
+                $self->{colors__}{$bucket} = 'black';
             }
         } else {
-            $self->{colors}{$bucket} = $color;
+            $self->{colors__}{$bucket} = $color;
         }
 
         $c += 1;
     }
 
-    update_constants($self);
+    $self->update_constants_();
 
     # unclassified will always have the color black, note that unclassified is not
-    # actually a bucket 
-    
-    $self->{colors}{unclassified} = 'black';
-    
-    print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
+    # actually a bucket
+
+    $self->{colors__}{unclassified} = 'black';
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# load_bucket
+# load_bucket_
 #
 # Loads an individual bucket
 #
 # ---------------------------------------------------------------------------------------------
 
-sub load_bucket
+sub load_bucket_
 {
     my ($self, $bucket) = @_;
-
-    print "Loading $bucket..." if $self->{debug};
 
     $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
 
-    $self->{parameters}{$bucket}{subject}    = 1;
-    $self->{parameters}{$bucket}{count}      = 0;
-    $self->{parameters}{$bucket}{quarantine} = 0;
+    $self->{parameters__}{$bucket}{subject}    = 1;
+    $self->{parameters__}{$bucket}{count}      = 0;
+    $self->{parameters__}{$bucket}{quarantine} = 0;
 
-    $self->{total}{$bucket}  = 0;
-    $self->{unique}{$bucket} = 0;
-    $self->{matrix}{$bucket} = ();
-    $self->{magnets}{$bucket} = {};
+    $self->{total__}{$bucket}  = 0;
+    $self->{unique__}{$bucket} = 0;
+    $self->{matrix__}{$bucket} = ();
+    $self->{magnets__}{$bucket} = {};
 
     # See if there's a color file specified
-    if ( open PARAMS, "<$self->{configuration}->{configuration}{corpus}/$bucket/params" ) {
+    if ( open PARAMS, '<' . $self->config_( 'corpus' ) . "/$bucket/params" ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
             if ( /^([[:lower:]]+) ([^\r\n\t ]+)$/ )  {
-                $self->{parameters}{$bucket}{$1} = $2;
+                $self->{parameters__}{$bucket}{$1} = $2;
             }
         }
         close PARAMS;
     }
 
     # See if there are magnets defined
-    if ( open MAGNETS, "<$self->{configuration}->{configuration}{corpus}/$bucket/magnets" ) {
+    if ( open MAGNETS, '<' . $self->config_( 'corpus' ) . "/$bucket/magnets" ) {
         while ( <MAGNETS> )  {
             s/[\r\n]//g;
 
@@ -451,7 +398,7 @@ sub load_bucket
                 $value =~ s/[ \t]+$//g;
 
                 $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
-                $self->{magnets}{$bucket}{$type}{$value} = 1;
+                $self->{magnets__}{$bucket}{$type}{$value} = 1;
             } else {
 
                 # This branch is used to catch the original magnets in an
@@ -461,7 +408,7 @@ sub load_bucket
                 if ( /^(.+)$/ ) {
                     my $value = $1;
                     $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
-                    $self->{magnets}{$bucket}{from}{$1} = 1;
+                    $self->{magnets__}{$bucket}{from}{$1} = 1;
                 }
             }
         }
@@ -469,12 +416,12 @@ sub load_bucket
     }
 
     # Each line in the word table is a word and a count
-    $self->{total}{$bucket} = 0;
+    $self->{total__}{$bucket} = 0;
 
-    if ( open WORDS, "<$self->{configuration}->{configuration}{corpus}/$bucket/table" )  {
+    if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
         while (<WORDS>) {
             if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                if ( $1 != $self->{corpus_version} )  {
+                if ( $1 != $self->{corpus_version__} )  {
                     print "Incompatible corpus version in $bucket\n";
                     return;
                 }
@@ -483,21 +430,19 @@ sub load_bucket
             }
 
             if ( /([^\s]+) (\d+)/ ) {
-                my $word = $self->{mangler}->mangle($1,1);
+                my $word = $self->{mangler__}->mangle($1,1);
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {
-                    $self->{total}{$bucket}        += $value;
-                    $self->{unique}{$bucket}       += 1;
-                    set_value( $self, $bucket, $word, $value );
+                    $self->{total__}{$bucket}        += $value;
+                    $self->{unique__}{$bucket}       += 1;
+                    set_value_( $self, $bucket, $word, $value );
                 }
             }
         }
 
         close WORDS;
     }
-
-    print " $self->{total}{$bucket} words\n" if $self->{debug};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -511,11 +456,11 @@ sub save_magnets
 {
     my ($self) = @_;
 
-    for my $bucket (keys %{$self->{total}}) {
-        open MAGNET, ">$self->{configuration}->{configuration}{corpus}/$bucket/magnets";
+    for my $bucket (keys %{$self->{total__}}) {
+        open MAGNET, '>' . $self->config_( 'corpus' ). "/$bucket/magnets";
 
-        for my $type (keys %{$self->{magnets}{$bucket}})  {
-            for my $from (keys %{$self->{magnets}{$bucket}{$type}})  {
+        for my $type (keys %{$self->{magnets__}{$bucket}})  {
+            for my $from (keys %{$self->{magnets__}{$bucket}{$type}})  {
                 print MAGNET "$type $from\n";
             }
         }
@@ -539,22 +484,18 @@ sub classify_file
     my ($self, $file) = @_;
     my $msg_total = 0;
 
-    $self->{magnet_used}   = 0;
-    $self->{magnet_detail} = 0;
+    $self->{magnet_used__}   = 0;
+    $self->{magnet_detail__} = 0;
 
-    print "Parsing message '$file'..." if $self->{debug};
-
-    $self->{parser}->parse_stream($file);
+    $self->{parser__}->parse_stream($file);
 
     # Check to see if this email should be classified based on a magnet
-    print " $self->{parser}->{msg_total} words\n" if $self->{debug};
-
     # Get the list of buckets
 
-    my @buckets = keys %{$self->{total}};
+    my @buckets = keys %{$self->{total__}};
 
-    for my $bucket (sort keys %{$self->{magnets}})  {
-        for my $type (sort keys %{$self->{magnets}{$bucket}}) {
+    for my $bucket (sort keys %{$self->{magnets__}})  {
+        for my $type (sort keys %{$self->{magnets__}{$bucket}}) {
 
         # You cannot use @ or $ inside a \Q\E regular expression and hence
         # we have to change the $magnet and the text we are comparing against
@@ -562,19 +503,19 @@ sub classify_file
 
             my $noattype;
 
-            $noattype = $self->{parser}->{$type};
+            $noattype = $self->{parser__}->{$type};
             $noattype =~ s/[@\$]/\./g;
 
-        for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}}) {
+        for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
                 my $regex;
 
                 $regex = $magnet;
                 $regex =~ s/[@\$]/\./g;
 
                 if ( $noattype =~ m/\Q$regex\E/i ) {
-                    $self->{scores}        = "<b>Magnet Used</b><p>Classified to <font color=\"$self->{colors}{$bucket}\">$bucket</font> because of magnet $type: $magnet</p>";
-                    $self->{magnet_used}   = 1;
-                    $self->{magnet_detail} = "$type: $magnet";
+                    $self->{scores__}        = "<b>Magnet Used</b><p>Classified to <font color=\"$self->{colors__}{$bucket}\">$bucket</font> because of magnet $type: $magnet</p>";
+                    $self->{magnet_used__}   = 1;
+                    $self->{magnet_detail__} = "$type: $magnet";
 
                     return $bucket;
                 }
@@ -596,7 +537,7 @@ sub classify_file
     my %wbprob;
 
     for my $bucket (@buckets) {
-        $score{$bucket} = $self->{bucket_start}{$bucket};
+        $score{$bucket} = $self->{bucket_start__}{$bucket};
     }
 
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
@@ -618,33 +559,33 @@ sub classify_file
 
     # Switching from using *= to += and using the log of every probability instead
 
-    foreach my $word (keys %{$self->{parser}->{words}}) {
+    foreach my $word (keys %{$self->{parser__}->{words}}) {
         my $wmax = -10000;
-        if ($self->{wordscores})  {
+        if ($self->{wordscores__})  {
             $wtprob{$word} = 0;
             $wbprob{$word} = {};
         }
 
         foreach my $bucket (@buckets) {
-            my $probability = get_value( $self, $bucket, $word );
+            my $probability = get_value_( $self, $bucket, $word );
 
-            $probability = $self->{not_likely} if ( $probability == 0 );
+            $probability = $self->{not_likely__} if ( $probability == 0 );
             $wmax = $probability if ( $wmax < $probability );
 
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
-            $score{$bucket} += ( $probability * $self->{parser}{words}{$word} );
-            if ($self->{wordscores})  {
+            $score{$bucket} += ( $probability * $self->{parser__}{words}{$word} );
+            if ($self->{wordscores__})  {
                 $wtprob{$word} += exp($probability);
                 $wbprob{$word}{$bucket} = exp($probability);
             }
         }
 
-        if ($wmax > $self->{not_likely}) {
-            $correction += ($wmax - $logbuck) * $self->{parser}{words}{$word};
+        if ($wmax > $self->{not_likely__}) {
+            $correction += ($wmax - $logbuck) * $self->{parser__}{words}{$word};
         } else {
-            $correction += $wmax * $self->{parser}{words}{$word};
+            $correction += $wmax * $self->{parser__}{words}{$word};
         }
         $wordprob{$word} = exp($wmax);
     }
@@ -653,7 +594,7 @@ sub classify_file
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
     my @wordrank;
-    if ($self->{wordscores}) {
+    if ($self->{wordscores__}) {
         @wordrank = sort {($wordprob{$b} / $wtprob{$b}) <=> ($wordprob{$a} / $wtprob{$a})} keys %wordprob;
     }
 
@@ -671,9 +612,9 @@ sub classify_file
         $total += exp($score{$b}) if ($score{$b} > 54 * log(0.5));
     }
 
-    $self->{scores} = "<b>Scores</b><p>\n<table class=\"top20Buckets\">\n<tr>\n<th scope=\"col\">Bucket</th>\n<th>&nbsp;</th>\n";
-    $self->{scores} .= "<th scope=\"col\">Probability</th></tr>\n";
-    print "Bucket              Raw score      Normalized     Estimated prob\n\n" if $self->{debug};
+    $self->{scores__} = "<b>Scores</b><p>\n<table class=\"top20Buckets\">\n<tr>\n<th scope=\"col\">Bucket</th>\n<th>&nbsp;</th>\n";
+    $self->{scores__} .= "<th scope=\"col\">Probability</th></tr>\n";
+
     foreach my $b (@ranking) {
          my $prob = exp($score{$b})/$total;
          my $probstr;
@@ -682,15 +623,14 @@ sub classify_file
          } else {
              $probstr = sprintf("%17.6e", $prob);
          }
-         $self->{scores} .= "<tr>\n<td><font color=\"$self->{colors}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
-         printf("%-15s%15.6f%15.6f %s\n", $b, ($raw_score{$b} - $correction)/$logbuck, ($score{$b} - log($total))/$logbuck + 1, $probstr) if $self->{debug};
+         $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
     }
-    $self->{scores} .= "</table>";
+    $self->{scores__} .= "</table>";
 
-    if ($self->{wordscores}) {
-        $self->{scores} .= "<table class=\"top20Words\">\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n";
-        $self->{scores} .= "<tr>\n<th scope=\"col\">Word</th><th scope=\"col\">Prob</th>\n<th>&nbsp;</th>\n";
-        $self->{scores} .= "<th scope=\"col\">\n<font color=\"$self->{colors}{$ranking[0]}\">$ranking[0]</font>\n</th>\n</tr>\n";
+    if ($self->{wordscores__}) {
+        $self->{scores__} .= "<table class=\"top20Words\">\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n";
+        $self->{scores__} .= "<tr>\n<th scope=\"col\">Word</th><th scope=\"col\">Prob</th>\n<th>&nbsp;</th>\n";
+        $self->{scores__} .= "<th scope=\"col\">\n<font color=\"$self->{colors__}{$ranking[0]}\">$ranking[0]</font>\n</th>\n</tr>\n";
         my $wi = 0;
         foreach my $word (@wordrank) {
             if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
@@ -700,28 +640,28 @@ sub classify_file
                     $wordstr =~ /(.{12})/;
                     $wordstr = "$1...";
                 }
-                my $wordcolor = get_color($self, $word);
+                my $wordcolor = get_color_($self, $word);
                 my $wordprobstr = sprintf("%12.4f", $wordprob{$word} / $wtprob{$word});
                 my $otherprobstr = sprintf("%12.4f", $wbprob{$word}{$ranking[0]} / $wtprob{$word});
-                $self->{scores} .= "<tr>\n<td><font color=\"$wordcolor\"><a title=\"$long\">$wordstr</a></font></td>\n";
-                $self->{scores} .= "<td><font color=\"$wordcolor\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
-                $self->{scores} .= "<td><font color=\"$self->{colors}{$ranking[0]}\">$otherprobstr</font></td>\n</tr>\n";
+                $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\"><a title=\"$long\">$wordstr</a></font></td>\n";
+                $self->{scores__} .= "<td><font color=\"$wordcolor\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
+                $self->{scores__} .= "<td><font color=\"$self->{colors__}{$ranking[0]}\">$otherprobstr</font></td>\n</tr>\n";
             }
             $wi += 1;
         }
 
-        $self->{scores} .= "</table></p>";
+        $self->{scores__} .= "</table></p>";
     }
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
     my $class = 'unclassified';
 
-    if ( ( $total != 0 ) && ( $score{$ranking[0]} > log($self->{unclassified} * $total) ) ) {
+    if ( ( $total != 0 ) && ( $score{$ranking[0]} > log($self->{unclassified__} * $total) ) ) {
         $class = $ranking[0];
     }
 
-    if ( $self->{wordscores} ) {
-        $self->{scores} .= "<p>(<b>$class</b>)</p>";
+    if ( $self->{wordscores__} ) {
+        $self->{scores__} .= "<p>(<b>$class</b>)</p>";
     }
 
     return $class;
@@ -772,8 +712,8 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file  = "$self->{configuration}->{configuration}{msgdir}popfile$dcount" . "=$mcount.msg";
-    my $class_file = "$self->{configuration}->{configuration}{msgdir}popfile$dcount" . "=$mcount.cls";
+    my $temp_file  = "$self->config_( 'msgdir' )popfile$dcount" . "=$mcount.msg";
+    my $class_file = "$self->config_( 'msgdir' )popfile$dcount" . "=$mcount.cls";
 
     open TEMP, ">$temp_file";
 
@@ -783,17 +723,17 @@ sub classify_and_modify
 
         $line = $_;
 
-        # This is done so that we remove the network style end of line CR LF 
+        # This is done so that we remove the network style end of line CR LF
         # and allow Perl to decide on the local system EOL which it will expand
         # out of \n when this gets written to the temp file
-        
+
         $fileline = $line;
         $fileline =~ s/[\r\n]//g;
         $fileline .= "\n";
 
         # Check for an abort
 
-        last if ( $self->{alive} == 0 );
+        last if ( $self->{alive_} == 0 );
 
         # The termination of a message is a line consisting of exactly .CRLF so we detect that
         # here exactly
@@ -851,11 +791,11 @@ sub classify_and_modify
 
     # Add the Subject line modification or the original line back again
     if ( $classification ne 'unclassified' ) {
-        if ( $self->{configuration}->{configuration}{subject} ) {
+        if ( $self->config_( 'subject' ) ) {
             # Don't add the classification unless it is not present
-            if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) && 
-                 ( $self->{parameters}{$classification}{subject} == 1 ) &&
-                 ( $self->{parameters}{$classification}{quarantine} == 0 ) )  {
+            if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
+                 ( $self->{parameters__}{$classification}{subject} == 1 ) &&
+                 ( $self->{parameters__}{$classification}{quarantine} == 0 ) )  {
                 $msg_subject = " [$classification]$msg_subject";
             }
         }
@@ -869,8 +809,8 @@ sub classify_and_modify
     }
 
     # Add the XTC header
-    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->{configuration}->{configuration}{xtc}          ) &&
-                                                                         ( $self->{parameters}{$classification}{quarantine} == 0 ) );
+    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->config_( 'xtc' )          ) &&
+                                                                         ( $self->{parameters__}{$classification}{quarantine} == 0 ) );
 
     # Add the XPL header
     $temp_file =~ s/.*\/([^\/]+)/$1/;
@@ -878,10 +818,10 @@ sub classify_and_modify
     my $xpl = '';
 
     $xpl .= "<http://";
-    $xpl .= $self->{configuration}->{configuration}{localpop}?"127.0.0.1":$self->{hostname};
-    $xpl .= ":$self->{configuration}->{configuration}{ui_port}/jump_to_message?view=$temp_file>$eol";
+    $xpl .= $self->config_( 'localpop' )?"127.0.0.1":$self->{hostname__};
+    $xpl .= ":$self->config_( 'ui_port' )/jump_to_message?view=$temp_file>$eol";
 
-    if ( $self->{configuration}->{configuration}{xpl} && ( $self->{parameters}{$classification}{quarantine} == 0 ) ) {
+    if ( $self->config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
@@ -895,27 +835,27 @@ sub classify_and_modify
         # information from POPFile and wrapping the original message in a MIME encoding
 
         if ( $classification ne 'unclassified' ) {
-            if ( $self->{parameters}{$classification}{quarantine} == 1 ) {
-                print $client "From: $self->{parser}->{from}$eol";
-                print $client "To: $self->{parser}->{to}$eol";
-                print $client "Date: $self->{parser}->{date}$eol";
-                if ( $self->{configuration}->{configuration}{subject} ) {
+            if ( $self->{parameters__}{$classification}{quarantine} == 1 ) {
+                print $client "From: $self->{parser__}->{from}$eol";
+                print $client "To: $self->{parser__}->{to}$eol";
+                print $client "Date: $self->{parser__}->{date}$eol";
+                if ( $self->config_( 'subject' ) ) {
                     # Don't add the classification unless it is not present
-                    if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) && 
-                         ( $self->{parameters}{$classification}{subject} == 1 ) ) {
+                    if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
+                         ( $self->{parameters__}{$classification}{subject} == 1 ) ) {
                         $msg_subject = " [$classification]$msg_subject";
                     }
                 }
                 print $client "Subject:$msg_subject$eol";
-                print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );
-                print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );
+                print $client "X-Text-Classification: $classification$eol" if ( $self->config_( 'xtc' ) );
+                print $client 'X-POPFile-Link: ' . $xpl if ( $self->config_( 'xpl' ) );
                 print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
                 print $client "Content-Type: text/plain$eol$eol";
                 print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
                 print $client "Quarantined Message Detail$eol$eol";
-                print $client "Original From: $self->{parser}->{from}$eol";
-                print $client "Original Subject: $self->{parser}->{subject}$eol";
-                print $client "Original To: $self->{parser}->{to}$eol$eol";
+                print $client "Original From: $self->{parser__}->{from}$eol";
+                print $client "Original Subject: $self->{parser__}->{subject}$eol";
+                print $client "Original To: $self->{parser__}->{to}$eol$eol";
                 print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
                 print $client "--$temp_file$eol";
                 print $client "Content-Type: message/rfc822$eol$eol";
@@ -935,10 +875,10 @@ sub classify_and_modify
 
     if ( !$nosave ) {
         open CLASS, ">$class_file";
-        if ( $self->{magnet_used} == 0 )  {
+        if ( $self->{magnet_used__} == 0 )  {
             print CLASS "$classification\n";
         } else {
-            print CLASS "$classification MAGNET $self->{magnet_detail}\n";
+            print CLASS "$classification MAGNET $self->{magnet_detail__}\n";
         }
         close CLASS;
     }
@@ -946,31 +886,141 @@ sub classify_and_modify
     return $classification;
 }
 
+# GETTER/SETTERS
+
 # ---------------------------------------------------------------------------------------------
 #
-# echo_to_dot
+# get_buckets
 #
-# $mail     The stream (created with IO::) to send the message to (the remote mail server)
-# $client   The local mail client (created with IO::) that needs the response
-#
-# echo all information from the $mail server until a single line with a . is seen
+# Returns a list containing all the bucket names sorted into alphabetic order
 #
 # ---------------------------------------------------------------------------------------------
-sub echo_to_dot
+
+sub get_buckets
 {
-    my ( $self, $mail, $client ) = @_;
+    my ( $self ) = @_;
 
-    while ( <$mail> ) {
-        # Check for an abort
-        last if ( $self->{alive} == 0 );
+    return sort keys %{$self->{total__}};
+}
 
-        print $client $_;
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_word_count
+#
+# Returns the total word count (including duplicates) for the passed in bucket
+#
+# $bucket      The name of the bucket for which the word count is desired
+#
+# ---------------------------------------------------------------------------------------------
 
-        # The termination has to be a single line with exactly a dot on it and nothing
-        # else other than line termination characters.  This is vital so that we do
-        # not mistake a line beginning with . as the end of the block
-        last if ( /^\.(\r\n|\r|\n)$/ );
-    }
+sub get_bucket_word_count
+{
+    my ( $self, $bucket ) = @_;
+
+    return $self->{total__}{$bucket};
+}
+# ---------------------------------------------------------------------------------------------
+#
+# get_word_count
+#
+# Returns the total word count (including duplicates)
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_word_count
+{
+    my ( $self ) = @_;
+
+    return $self->{full_total__};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_unique_count
+#
+# Returns the unique word count (excluding duplicates) for the passed in bucket
+#
+# $bucket      The name of the bucket for which the word count is desired
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_bucket_unique_count
+{
+    my ( $self, $bucket ) = @_;
+
+    return $self->{unique__}{$bucket};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_color
+#
+# Returns the color associated with a bucket
+#
+# $bucket      The name of the bucket for which the color is requested
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_bucket_color
+{
+    my ( $self, $bucket ) = @_;
+
+    return $self->{colors__}{$bucket};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# set_bucket_color
+#
+# Returns the color associated with a bucket
+#
+# $bucket      The name of the bucket for which the color is requested
+# $color       The new color
+#
+# ---------------------------------------------------------------------------------------------
+
+sub set_bucket_color
+{
+    my ( $self, $bucket, $color ) = @_;
+
+    $self->{colors__}{$bucket} = $color;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_parameter
+#
+# Returns the value of a per bucket parameter
+#
+# $bucket      The name of the bucket
+# $parameter   The name of the parameter
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_bucket_parameter
+{
+    my ( $self, $bucket, $parameter ) = @_;
+
+    return $self->{parameters__}{$bucket}{$parameter};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# set_bucket_parameter
+#
+# Sets the value associated with a bucket specific parameter
+#
+# $bucket      The name of the bucket
+# $parameter   The name of the parameter
+# $value       The new value
+#
+# ---------------------------------------------------------------------------------------------
+
+sub set_bucket_parameter
+{
+    my ( $self, $bucket, $parameter, $value ) = @_;
+
+    $self->{parameters__}{$bucket}{$parameter} = $value;
 }
 
 1;
