@@ -26,10 +26,10 @@
 #-------------------------------------------------------------------------------------------
 #
 # This version of the script has been tested with the "NSIS 2" compiler (final),
-# released 7 February 2004, with no patches applied.
+# released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
 #
 #--------------------------------------------------------------------------
-# Optional run-time command-line switch (used by 'runpopfile.exe')
+# Optional run-time command-line switches (used by 'runpopfile.exe')
 #--------------------------------------------------------------------------
 #
 # /startup
@@ -42,12 +42,37 @@
 # This switch is intended for use in the Start Menu's 'StartUp' folder when all users share the
 # same StartUp folder (to avoid unexpected 'Add POPFile User' activity if some users do not use
 # (or have not yet used) POPFile). The switch can be in uppercase or lowercase.
+#
+# This switch cannot be combined with the '/config' switch.
+#
+# ---------------------------------------------------------------------------------------
+#
+# /config=path to a folder containing popfile.cfg
+# (either a full path or one relative to the folder containing runpopfile.exe)
+#
+# Normally the utility sets the POPFILE_ROOT and POPFILE_USER environment variables to the
+# user-specific values found in the registry. This switch is intended for use when a particular
+# user has more than one configuration (one for POP3 work and one for NNTP work, perhaps) and
+# wishes to easily switch between them.
+#
+# If the following conditions are met the utility will temporarily make POPFILE_ROOT point to
+# the folder containing the utility and POPFILE_USER point to the specified user data folder:
+#
+# (1) this utility is stored in the same folder as the 'popfile.exe' program, and
+# (2) this command-line switch is present, and
+# (3) the path supplied is valid (i.e. it points to a folder which contains popfile.cfg), and
+# (4) the path supplied does not contain spaces if short file name support has been disabled
+#
+# These temporary changes will override any existing values in these environment variables.
+#
+# This switch cannot be combined with the '/startup' switch.
+#
 #-------------------------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.5
+  !define C_PFI_VERSION   0.1.6
 
   Name    "Run POPFile"
-  Caption "Run POPFile"
+  Caption "Run POPFile (enhanced)"
 
   Icon "POPFileIcon\popfile.ico"
 
@@ -68,23 +93,39 @@
   !include WinMessages.nsh
 
 #--------------------------------------------------------------------------
-# Version Information settings (for the installer EXE and uninstaller EXE)
+# Version Information settings (for runpopfile.exe)
 #--------------------------------------------------------------------------
 
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "${C_PFI_VERSION}.0"
+  VIProductVersion                  "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName" "Run POPFile"
-  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
-  VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "Simple front-end for the POPFile starter program"
-  VIAddVersionKey "FileVersion" "${C_PFI_VERSION}"
+  VIAddVersionKey "ProductName"     "Run POPFile"
+  VIAddVersionKey "Comments"        "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "CompanyName"     "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"  "© 2004  John Graham-Cumming"
+  VIAddVersionKey "FileDescription" "Enhanced front-end for POPFile starter program"
+  VIAddVersionKey "FileVersion"     "${C_PFI_VERSION}"
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"    "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+
+#--------------------------------------------------------------------------
+# Include private library functions and macro definitions
+#--------------------------------------------------------------------------
+
+  ; Avoid compiler warnings by disabling the functions and definitions we do not use
+
+  !define RUNPOPFILE
+
+  !include "pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+# Language strings used by the POPFile Windows installer
+#--------------------------------------------------------------------------
+
+  !include "languages\English-pfi.nsh"
 
 #--------------------------------------------------------------------------
 # A simple front-end for POPFile's starter program (popfile.exe)
@@ -93,24 +134,146 @@
 Section default
 
   !define L_EXEFILE       $R9   ; where we expect to find popfile.exe and (perhaps) adduser.exe
-  !define L_POPFILE_ROOT  $R8   ; path to the POPFile program (popfile.pl, and other files)
-  !define L_POPFILE_USER  $R7   ; path to user's popfile.cfg file
-  !define L_TEMP          $R6
-  !define L_WINOS_FLAG    $R5   ; 1 = modern Windows system, 0 = Win9x system
-  !define L_WINUSERNAME   $R4   ; Windows login name used to confirm validity of HKCU data
+  !define L_PARAMS        $R8   ; command-line parameters (everything after 'runpopfile' part)
+  !define L_PFI_ROOT      $R7   ; path to the POPFile program (popfile.pl, and other files)
+  !define L_PFI_USER      $R6   ; path to user's popfile.cfg file
+  !define L_TEMP          $R5
+  !define L_WINOS_FLAG    $R4   ; 1 = modern Windows system, 0 = Win9x system
+  !define L_WINUSERNAME   $R3   ; Windows login name used to confirm validity of HKCU data
 
   !define L_RESERVED      $0    ; used in system.dll calls
+
+  ; Need to be able to confirm ownership when accessing the HKCU data
 
 	ClearErrors
 	UserInfo::GetName
 	IfErrors default_name
 	Pop ${L_WINUSERNAME}
-  StrCmp ${L_WINUSERNAME} "" 0 check_registry
+  StrCmp ${L_WINUSERNAME} "" 0 find_popfile
 
 default_name:
   StrCpy ${L_WINUSERNAME} "UnknownUser"
 
-check_registry:
+find_popfile:
+  ReadRegStr ${L_EXEFILE} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+  IfFileExists "${L_EXEFILE}\popfile.exe" found_popfile
+
+  ReadRegStr ${L_EXEFILE} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+  IfFileExists "${L_EXEFILE}\popfile.exe" found_popfile
+
+not_compatible:
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_COMPAT_NOTFOUND)"
+  Goto exit
+
+found_popfile:
+  Call GetParameters
+  Pop ${L_PARAMS}
+  StrCmp ${L_PARAMS} "" use_reg_dirdata
+  StrCmp ${L_PARAMS} "/startup" use_reg_dirdata
+  StrCpy ${L_TEMP} ${L_PARAMS} 8
+  StrCmp ${L_TEMP} "/config=" extract_config_path
+  MessageBox MB_OK|MB_ICONSTOP "Error: Unknown option supplied !\
+      $\r$\n$\r$\n\
+      (${L_PARAMS})"
+  Goto exit
+
+extract_config_path:
+  StrCpy ${L_PARAMS} ${L_PARAMS} "" 8
+  StrCpy ${L_TEMP} ${L_PARAMS} 1
+  StrCmp ${L_TEMP} '"' strip_quotes
+  StrCmp ${L_TEMP} "'" strip_quotes check_config
+
+strip_quotes:
+  StrCpy ${L_PARAMS} ${L_PARAMS} "" 1
+  StrCpy ${L_PARAMS} ${L_PARAMS} -1
+
+check_config:
+  StrCmp ${L_PARAMS} "" path_missing
+
+  ; If runpopfile.exe is in same folder as popfile.exe then use $EXEDIR for POPFILE_ROOT value
+
+  IfFileExists "$EXEDIR\popfile.exe" 0 ignore_config
+  StrCpy ${L_EXEFILE} $EXEDIR
+
+  ; Allow '/config' to specify either the full path or a path relative to $EXEDIR
+
+  Push ${L_EXEFILE}
+  Push ${L_PARAMS}
+  Call GetDataPath
+  Pop ${L_PFI_USER}
+  IfFileExists "${L_PFI_USER}\popfile.cfg" config_found
+  MessageBox MB_OK|MB_ICONSTOP "Error: Unable to find popfile.cfg !\
+      $\r$\n$\r$\n\
+      '/config=${L_PARAMS}' is not valid\
+      $\r$\n$\r$\n\
+      ('${L_PFI_USER}\popfile.cfg' does not exist)"
+  Goto exit
+
+path_missing:
+  MessageBox MB_OK|MB_ICONSTOP "Error: /config=${L_PARAMS} is not valid\
+      $\r$\n$\r$\n\
+      (no 'User Data' path supplied)"
+  Goto exit
+
+config_found:
+
+  ; Current version of POPFile does not work properly if POPFILE_ROOT or POPFILE_USER contain
+  ; spaces, so we normally use short file name format for these values. NTFS-based systems may
+  ; not support short file names (for performance reasons) so we need to be able to handle this.
+  ; We assume that the POPFile installer has checked the short file name support, updated the
+  ; registry accordingly and ensured that POPFile has been installed in a suitable folder.
+
+  ReadRegStr ${L_TEMP} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
+  StrCmp ${L_TEMP} "" try_HKLM_sfn
+  StrCmp ${L_TEMP} "Not supported" check_for_spaces get_temp_sfn
+
+try_HKLM_sfn:
+  ReadRegStr ${L_TEMP} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
+  StrCmp ${L_TEMP} "" not_compatible
+  StrCmp ${L_TEMP} "Not supported" check_for_spaces
+
+get_temp_sfn:
+  GetFullPathName /SHORT ${L_PFI_ROOT} ${L_EXEFILE}
+  GetFullPathName /SHORT ${L_PFI_USER} ${L_PFI_USER}
+  Goto set_temp_vars_now
+
+check_for_spaces:
+  Push ${L_PFI_USER}
+  Push ' '
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" config_is_valid
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Current configuration does not support short file names\
+      $\r$\n$\r$\n\
+      '/config=${L_PARAMS}' is not valid\
+      $\r$\n$\r$\n\
+      ('${L_PFI_USER}' contains spaces)"
+  Goto exit
+
+config_is_valid:
+  StrCpy ${L_PFI_ROOT} ${L_EXEFILE}
+
+set_temp_vars_now:
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_ROOT", "${L_PFI_ROOT}").r0'
+  StrCmp ${L_RESERVED} 0 0 set_temp_user_now
+  MessageBox MB_OK|MB_ICONSTOP "Error: Unable to set an environment variable (POPFILE_ROOT)"
+  Goto exit
+
+set_temp_user_now:
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_USER", "${L_PFI_USER}").r0'
+  StrCmp ${L_RESERVED} 0 0 start_popfile
+  MessageBox MB_OK|MB_ICONSTOP "Error: Unable to set an environment variable (POPFILE_USER)"
+  Goto exit
+
+ignore_config:
+  MessageBox MB_OKCANCEL|MB_ICONQUESTION "Warning: the /config option will be ignored\
+      $\r$\n$\r$\n\
+      ('runpopfile.exe' not in same folder as 'popfile.exe')\
+      $\r$\n$\r$\n\
+      Click 'Yes' to continue or 'Cancel' to quit" IDCANCEL exit
+
+use_reg_dirdata:
   ReadRegStr ${L_EXEFILE} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
   IfFileExists "${L_EXEFILE}\popfile.exe" got_exe_path
 
@@ -119,25 +282,11 @@ check_registry:
 
   StrCpy ${L_EXEFILE} $EXEDIR
   IfFileExists "${L_EXEFILE}\popfile.exe" got_exe_path
-
-  ; Assume the minimal Perl is not available, so look for an alternative ActivePerl installation
-
-  SearchPath ${L_EXEFILE} perl.exe
-  StrCmp ${L_EXEFILE} "" perl_missing
-
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION "Warning: minimal Perl not found !\
-      $\r$\n$\r$\n\
-      Do you want to run POPFile using:\
-      $\r$\n$\r$\n\
-      ${L_EXEFILE}" IDNO exit
-  Goto got_exe_path
-
-perl_missing:
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start POPFile !\
       $\r$\n$\r$\n\
-      (POPFile start program not found:\
+      POPFile start program not found:\
       $\r$\n\
-      ${L_EXEFILE}\popfile.exe)"
+      ${L_EXEFILE}\popfile.exe"
   Goto exit
 
 got_exe_path:
@@ -147,73 +296,68 @@ got_exe_path:
   Goto add_user
 
 check_root:
-  ReadRegStr ${L_POPFILE_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
-  StrCmp ${L_POPFILE_ROOT} "" add_user
-  StrCmp ${L_POPFILE_ROOT} "Not supported" 0 check_root_data
-  ReadRegStr ${L_POPFILE_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+  ReadRegStr ${L_PFI_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
+  StrCmp ${L_PFI_ROOT} "" add_user
+  StrCmp ${L_PFI_ROOT} "Not supported" 0 check_root_data
+  ReadRegStr ${L_PFI_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
 
 check_root_data:
-  IfFileExists "${L_POPFILE_ROOT}\popfile.pl" 0 bad_root_error
+  IfFileExists "${L_PFI_ROOT}\popfile.pl" 0 bad_root_error
   ReadEnvStr ${L_TEMP} "POPFILE_ROOT"
-  StrCmp ${L_TEMP} ${L_POPFILE_ROOT} check_user
+  StrCmp ${L_TEMP} ${L_PFI_ROOT} check_user
   Call IsNT
   Pop ${L_WINOS_FLAG}
   StrCmp ${L_WINOS_FLAG} 0 set_root_now
-  WriteRegStr HKCU "Environment" "POPFILE_ROOT" ${L_POPFILE_ROOT}
+  WriteRegStr HKCU "Environment" "POPFILE_ROOT" ${L_PFI_ROOT}
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
 set_root_now:
-  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_ROOT", "${L_POPFILE_ROOT}").r0'
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_ROOT", "${L_PFI_ROOT}").r0'
   StrCmp ${L_RESERVED} 0 0 check_user
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to set an environment variable (POPFILE_ROOT)"
   Goto exit
 
 check_user:
-  ReadRegStr ${L_POPFILE_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN"
-  StrCmp ${L_POPFILE_USER} "" add_user
-  StrCmp ${L_POPFILE_USER} "Not supported" 0 check_user_data
-  ReadRegStr ${L_POPFILE_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
+  ReadRegStr ${L_PFI_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN"
+  StrCmp ${L_PFI_USER} "" add_user
+  StrCmp ${L_PFI_USER} "Not supported" 0 check_user_data
+  ReadRegStr ${L_PFI_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
 
 check_user_data:
-  IfFileExists "${L_POPFILE_USER}\*.*" 0 bad_user_error
+  IfFileExists "${L_PFI_USER}\*.*" 0 bad_user_error
   ReadEnvStr ${L_TEMP} "POPFILE_USER"
-  StrCmp ${L_TEMP} ${L_POPFILE_USER} start_popfile
+  StrCmp ${L_TEMP} ${L_PFI_USER} start_popfile
   Call IsNT
   Pop ${L_WINOS_FLAG}
   StrCmp ${L_WINOS_FLAG} 0 set_user_now
-  WriteRegStr HKCU "Environment" "POPFILE_USER" ${L_POPFILE_USER}
+  WriteRegStr HKCU "Environment" "POPFILE_USER" ${L_PFI_USER}
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
 set_user_now:
-  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_USER", "${L_POPFILE_USER}").r0'
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_USER", "${L_PFI_USER}").r0'
   StrCmp ${L_RESERVED} 0 0 start_popfile
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to set an environment variable (POPFILE_USER)"
   Goto exit
 
 start_popfile:
-  IfFileExists "${L_EXEFILE}\popfile.exe" use_minimal_perl
-  Exec '"${L_EXEFILE}" "${L_POPFILE_ROOT}\popfile.pl"'
-  Return
-
-use_minimal_perl:
   Exec '"${L_EXEFILE}\popfile.exe"'
-  Return
+  Goto exit
 
 bad_root_error:
   IfFileExists "${L_EXEFILE}\adduser.exe" can_add_root
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start POPFile !\
       $\r$\n$\r$\n\
-      (POPFile start file not found:\
+      POPFile start file not found:\
       $\r$\n\
-      ${L_POPFILE_ROOT}\popfile.pl)"
+      ${L_PFI_ROOT}\popfile.pl"
   Goto exit
 
 can_add_root:
   MessageBox MB_YESNO|MB_ICONQUESTION "Error: Unable to start POPFile !\
       $\r$\n$\r$\n\
-      (POPFile start file not found:\
+      POPFile start file not found:\
       $\r$\n\
-      ${L_POPFILE_ROOT}\popfile.pl)\
+      ${L_PFI_ROOT}\popfile.pl\
       $\r$\n$\r$\n\
       Click 'Yes' to reconfigure POPFile now" IDYES run_adduser
   Goto exit
@@ -222,17 +366,17 @@ bad_user_error:
   IfFileExists "${L_EXEFILE}\adduser.exe" can_add_user
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start POPFile !\
       $\r$\n$\r$\n\
-      (POPFile 'User Data' not found:\
+      POPFile 'User Data' not found:\
       $\r$\n\
-      ${L_POPFILE_USER})"
+      ${L_PFI_USER}"
   Goto exit
 
 can_add_user:
   MessageBox MB_YESNO|MB_ICONQUESTION "Error: Unable to start POPFile !\
       $\r$\n$\r$\n\
-      (POPFile 'User Data' not found:\
+      POPFile 'User Data' not found:\
       $\r$\n\
-      ${L_POPFILE_USER})\
+      ${L_PFI_USER}\
       $\r$\n$\r$\n\
       Click 'Yes' to reconfigure POPFile now" IDYES run_adduser
   Goto exit
@@ -240,74 +384,31 @@ can_add_user:
 no_adduser_error:
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start the 'Add User' wizard !\
       $\r$\n$\r$\n\
-      (POPFile wizard program not found:\
+      POPFile 'Add User' wizard not found:\
       $\r$\n\
-      ${L_EXEFILE}\adduser.exe)"
+      ${L_EXEFILE}\adduser.exe"
   Goto exit
 
 add_user:
-  Call GetParameters
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "/startup" exit
+  StrCmp ${L_PARAMS} "/startup" exit
   IfFileExists "${L_EXEFILE}\adduser.exe" 0 no_adduser_error
 
 run_adduser:
   Exec '"${L_EXEFILE}\adduser.exe"'
 
 exit:
+
+  !undef L_EXEFILE
+  !undef L_PARAMS
+  !undef L_PFI_ROOT
+  !undef L_PFI_USER
+  !undef L_TEMP
+  !undef L_WINOS_FLAG
+  !undef L_WINUSERNAME
+
+  !undef L_RESERVED
+
 SectionEnd
-
-#--------------------------------------------------------------------------
-# General Purpose Library Function: GetParameters
-#--------------------------------------------------------------------------
-#
-# Extracts the command-line parameters (if any)
-#
-# Inputs:
-#         (NSIS provides the command-line as $CMDLINE)
-#
-# Outputs:
-#         (top of stack)   - the command-line parameters supplied (if any)
-#
-#  Usage:
-#         Call GetParameters
-#         Pop $R0
-#
-#         ($R0 at this point is "" if no parameters were supplied)
-#
-#--------------------------------------------------------------------------
-
-Function GetParameters
-  Push $R0
-  Push $R1
-  Push $R2
-  Push $R3
-
-  StrCpy $R0 $CMDLINE 1
-  StrCpy $R1 '"'
-  StrCpy $R2 1
-  StrLen $R3 $CMDLINE
-  StrCmp $R0 '"' loop
-  StrCpy $R1 ' ' ; we're scanning for a space instead of a quote
-
-loop:
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 $R1 loop2
-  StrCmp $R2 $R3 loop2
-  IntOp $R2 $R2 + 1
-  Goto loop
-
-loop2:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 " " loop2
-  StrCpy $R0 $CMDLINE "" $R2
-
-  Pop $R3
-  Pop $R2
-  Pop $R1
-  Exch $R0
-FunctionEnd
 
 #--------------------------------------------------------------------------
 # Function: IsNT
