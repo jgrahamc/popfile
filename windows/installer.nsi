@@ -3620,6 +3620,9 @@ get_next_persona:
   StrCpy ${L_EMAIL} "*.*"
   StrCpy ${L_SERVER} "*.*"
   StrCpy ${L_USER} "*.*"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" ""
   Goto update_persona_details
 
 get_details:
