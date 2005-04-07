@@ -4,7 +4,7 @@ package Proxy::Proxy;
 #
 # This module implements the base class for all POPFile proxy Modules
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -58,10 +58,9 @@ sub new
 
     $self->{pipe_cache__} = {};
 
-    # This is where we keep the session with the Classifier::Bayes
-    # module
+    # Holds an administrator session
 
-    $self->{api_session__} = '';
+    $self->{api_session__} = undef;
 
     # This is the error message returned if the connection at any
     # time times out while handling a command
@@ -217,13 +216,6 @@ sub service
          ( $self->{alive_} ) ) {                            # PROFILE BLOCK STOP
         if ( my $client = $self->{server__}->accept() ) {
 
-            # Check to see if we have obtained a session key yet
-
-            if ( $self->{api_session__} eq '' ) {
-                $self->{api_session__} =                                    # PROFILE BLOCK START
-                    $self->classifier_()->get_session_key( 'admin', '' );   # PROFILE BLOCK STOP
-            }
-
             # Check that this is a connection from the local machine,
             # if it's not then we drop it immediately without any
             # further processing.  We don't want to act as a proxy for
@@ -241,6 +233,10 @@ sub service
                 # that will be used as if there was a child process
 
                 binmode( $client );
+
+                if ( !defined( $self->{api_session__} ) ) {
+                    $self->{api_session__} = $self->classifier_()->get_administrator_session_key();
+                }
 
                 if ( $self->config_( 'force_fork' ) ) {
                     my ( $pid, $pipe ) = &{$self->{forker_}};
@@ -467,16 +463,52 @@ sub echo_response_
 
 # ----------------------------------------------------------------------------
 #
+# get_session_key_
+#
+# Used by a proxy module to get a session key based on a token (usually an
+# account name)
+#
+# $token      The magic token
+#
+# Returns a session key if the token is associated with a user or undef
+#
+# ----------------------------------------------------------------------------
+sub get_session_key_
+{
+    my ( $self, $token ) = @_;
+
+    return $self->classifier_()->get_session_key_from_token( $self->{api_session__}, $self->name(), $token );
+}
+
+# ----------------------------------------------------------------------------
+#
+# release_session_key_
+#
+# Release a session key obtained with get_session_key_
+#
+# $session    The session key to release
+#
+# ----------------------------------------------------------------------------
+sub release_session_key_
+{
+    my ( $self, $session ) = @_;
+
+    $self->classifier_()->release_session_key( $session );
+}
+
+# ----------------------------------------------------------------------------
+#
 # verify_connected_
 #
 # $mail        The handle of the real mail server
 # $client      The handle to the mail client
 # $hostname    The host name of the remote server
 # $port        The port
-# $ssl         If set to 1 then the connection to the remote is established using SSL
+# $ssl         If set to 1 then the connection to the remote is established 
+#              using SSL
 #
-# Check that we are connected to $hostname on port $port putting the open handle in $mail.
-# Any messages need to be sent to $client
+# Check that we are connected to $hostname on port $port putting the
+# open handle in $mail.  Any messages need to be sent to $client
 #
 # ----------------------------------------------------------------------------
 sub verify_connected_
@@ -579,7 +611,8 @@ sub verify_connected_
 #
 # configure_item
 #
-#    $name            The name of the item being configured, was passed in by the call
+#    $name            The name of the item being configured, was passed in by
+#                     the call
 #                     to register_configuration_item
 #    $templ           The loaded template
 #

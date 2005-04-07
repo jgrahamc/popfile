@@ -9,7 +9,7 @@ use Digest::MD5;
 #
 # This module handles proxying the POP3 protocol for POPFile.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -155,15 +155,16 @@ sub start
 #
 # child__
 #
-# The worker method that is called when we get a good connection from a client
+# The worker method that is called when we get a good connection from
+# a client
 #
 # $client         - an open stream to a POP3 client
-# $session        - API session key
+# $admin_session  - administrator session
 #
 # ----------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $session ) = @_;
+    my ( $self, $client, $admin_session ) = @_;
 
     # Hash of indexes of downloaded messages mapped to their
     # slot IDs
@@ -173,6 +174,12 @@ sub child__
     # The handle to the real mail server gets stored here
 
     my $mail;
+
+    # Will hold the session key for the API, $token contains the
+    # string for the USER/APOP command that is used to get the key
+
+    my $session = undef;
+    my $token;
 
     $self->{apop_banner__} = undef;
     $self->{use_apop__} = 0;
@@ -230,6 +237,7 @@ sub child__
 
         if ( $command =~ /$transparent/ ) {
             if ( $self->config_( 'secure_server' ) ne '' )  {
+                $token = $self->config_( 'secure_server' ). ":$1";
                 if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
                     last if ($self->echo_response_($mail, $client, $command) == 2 );
                 } else {
@@ -245,6 +253,7 @@ sub child__
         if ( $command =~ /$user_command/i ) {
             if ( $1 ne '' )  {
                 my ( $host, $port, $user, $options ) = ($1, $3, $4, $6);
+                $token = "$host:$user";
 
                 $self->mq_post_( 'LOGIN', $user );
 
@@ -311,8 +320,8 @@ sub child__
             next;
         }
 
-        # User is issuing the APOP command to start a session with the
-        # remote server
+        # The PASS command.  Note how we only obtain a session key for
+        # the user if the authentication is successful.
 
         if ( ( $command =~ /PASS (.*)/i ) ) {
             if ( $self->{use_apop__} ) {
@@ -335,17 +344,26 @@ sub child__
                     # return password ok
 
                     $self->tee_( $client, "+OK password ok$eol" );
+                    $session = $self->get_session_key_( $token );
+                    if ( !defined( $session ) ) {
+                        last;
+                    }
                 } else {
-                    $self->tee_( $client, "$response" );
+                    $self->tee_( $client, $response );
                 }
              } else {
-               last if ($self->echo_response_($mail, $client, $command) == 2 );
+                 last if ($self->echo_response_($mail, $client,
+                              $command) == 2 );
+                 $session = $self->get_session_key_( $token );
+                 if ( !defined( $session ) ) {
+                     last;
+                 }
              }
              next;
         }
 
         # User is issuing the APOP command to start a session with the
-        # remote server We'd need a copy of the plaintext password to
+        # remote server. We'd need a copy of the plaintext password to
         # support this.
 
         if ( $command =~ /$apop_command/io ) {
@@ -495,7 +513,7 @@ sub child__
                             # saving, echoing to client
 
                             $self->classifier_()->classify_and_modify(
-                                $session, $mail, $client, 1, $class, $slot, 1 );
+                               $session, $mail, $client, 1, $class, $slot, 1 );
                         }
                     }
                 } else {
@@ -662,6 +680,10 @@ sub child__
     if ( defined( $mail ) ) {
         $self->done_slurp_( $mail );
         close $mail;
+    }
+
+    if ( defined( $session ) ) {
+        $self->release_session_key_( $session );
     }
 
     close $client;

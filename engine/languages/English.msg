@@ -29,6 +29,7 @@ ManualLanguage                          en
 FAQLink                                 FrequentlyAskedQuestions
 
 # Common words that are used on their own all over the interface
+Account                                 POP3 Account
 Apply                                   Apply
 ApplyChanges                            Apply Changes
 On                                      On
@@ -208,6 +209,12 @@ Users_Created_Not_Cloned                Created user '%s' but clone of '%s' fail
 Users_Removed                           Removed user '%s'
 Users_Removed_Failed                    Failed to remove user '%s'
 Users_Removed_Failed_Admin              Failed to remove user '%s': disable admin rights first
+Users_SingleUserMode                    Single user mode (POPFile Classic) 
+Users_Accounts                          Associated POP3 Accounts
+Users_AddAccount                        Add POP3 account (host:user)
+Users_Bad_Account                       The new account name must be in the form host:user
+Users_Duplicate_Account                 Failed to add the account because it is assigned to another user 
+Users_Failed_Account                    Failed to add the account
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
 History_FilterBy                        Filter By
@@ -376,6 +383,7 @@ Configuration_MainTableSummary          This table contains a number of forms to
 Configuration_InsertionTableSummary     This table contains buttons that determine whether or not certain modifications are made to the headers or subject line of the message before it is passed on to the message client.
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
 Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying message due to their relative frequency in message in general.  They are organized per row according to the first letter of the words.
+Users_AccountTableSummary               This table provides a list of POP3 accounts that are associated with the user being edited.
 
 Imap_Bucket2Folder                      Mail for bucket '<b>%s</b>' goes to folder
 Imap_MapError                           You cannot map more than one bucket to a single folder!

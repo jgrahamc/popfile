@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 6
+-- POPFILE SCHEMA 7
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
@@ -26,30 +26,31 @@
 -- An ASCII ERD (you might like to find the 'users' table first and work
 -- from there)
 --
---      +---------------+         +-----------------+
---      | user_template |         | bucket_template |
---      +---------------+         +-----------------+
---      |      id       |-----+   |       id        |---+
---      |     name      |     |   |      name       |   |
---      |     def       |     |   |       def       |   |
---      |     form      |     |   +-----------------+   |
---      +---------------+     |                         |
---                            |                         |
---      +---------------+     |     +---------------+   |
---      |  user_params  |     |     | bucket_params |   |
---      +---------------+     |     +---------------+   |
---      |      id       |     |     |      id       |   |
---  +---|    userid     |     | +---|   bucketid    |   |
---  |   |     utid      |-----+ |   |     btid      |---+
---  |   |     val       |       |   |     val       |
---  |   +---------------+       |   +---------------+
---  |                           |                      +----------+
---  |                           |                      |  matrix  |   +-------+
---  |                           |   +---------+        +----------+   | words |
---  |      +----------+         |   | buckets |        |    id    |   +-------+
---  |      |   users  |         |   +---------+        |  wordid  |---|  id   |
---  |      +----------+      /--+---|    id   |=====---| bucketid |   |  word |
---  +----==|    id    |-----(-------| userid  |     \  |  times   |   +-------+
+--      +---------------+                             +-----------------+
+--      | user_template |                             | bucket_template |
+--      +---------------+                             +-----------------+
+--      |      id       |-----\                       |       id        |---\
+--      |     name      |     |                       |      name       |   |
+--      |     def       |     |                       |       def       |   |
+--      |     form      |     |  +----------+         +-----------------+   |
+--      +---------------+     |  | accounts |                               |
+--                            |  +----------+                               |
+--      +---------------+     |  |    id    |         +---------------+     |
+--      |  user_params  |     |  |  userid  |-\       | bucket_params |     |
+--      +---------------+     |  | account  | |       +---------------+     |
+--      |      id       |     |  +----------+ |       |      id       |     |
+--  /---|    userid     |     |               |   /---|   bucketid    |     |
+--  |   |     utid      |-----/               |   |   |     btid      |-----/
+--  |   |     val       |                     |   |   |     val       |
+--  |   +---------------+ /-------------------/   |   +---------------+
+--  |                     |                       |
+--  |                     |     /-----------------/    +----------+
+--  |                     |     |                      |  matrix  |   +-------+
+--  |                     |     |   +---------+        +----------+   | words |
+--  |      +----------+   |     |   | buckets |        |    id    |   +-------+
+--  |      |   users  |   |     |   +---------+        |  wordid  |---|  id   |
+--  |      +----------+   |  /--+---|    id   |=====---| bucketid |   |  word |
+--  \----==|    id    |---+-(-------| userid  |     \  |  times   |   +-------+
 --      /  |   name   |     |       |  name   |     |  | lastseen |
 --      |  | password |     |       | pseudo  |     |  +----------+
 --      |  +----------+     |       +---------+     |
@@ -57,17 +58,17 @@
 --      |                   |        +-----------+  |
 --      |                   |        |  magnets  |  |
 --      |   +------------+  |        +-----------+  |     +--------------+
---      |   |   history  |  |     +--|    id     |  |     | magnet_types |
---      |   +------------+  |     |  | bucketid  |--+     +--------------+
+--      |   |   history  |  |     /--|    id     |  |     | magnet_types |
+--      |   +------------+  |     |  | bucketid  |--/     +--------------+
 --      |   |     id     |  |     |  |   mtid    |--------|      id      |
---      +---|   userid   |  |     |  |   val     |        |     mtype    |
+--      \---|   userid   |  |     |  |   val     |        |     mtype    |
 --          |   hdr_from |  |     |  |   seq     |        |    header    |
 --          |   hdr_to   |  |     |  +-----------+        +--------------+
 --          |   hdr_cc   |  |     |
 --          | hdr_subject|  |     |
 --          |  bucketid  |--+     |
 --          |  usedtobe  |--/     |
---          |  magnetid  |--------+
+--          |  magnetid  |--------/
 --          |  hdr_date  |
 --          | inserted   |
 --          |    hash    |
@@ -158,7 +159,8 @@ create table matrix( id integer primary key,   -- unique ID for this entry
                                                -- been seen
                      lastseen date,            -- last time the record was read
                                                -- or written
-                     unique (wordid, bucketid) -- each word appears once in a bucket 
+                     unique (wordid, bucketid) -- each word appears once in a
+                                               -- bucket 
                    );
 
 -- ---------------------------------------------------------------------------
@@ -219,6 +221,22 @@ create table bucket_template( id integer primary key,  -- unique ID for this
                               unique (name)            -- parameter names 
                                                        -- are unique 
                             );
+
+-- ---------------------------------------------------------------------------
+--
+-- accounts - the table of accounts (e.g. pop3:host:user) associated with
+--            each user that is used by POPFile's multi-user mode
+--
+-- ---------------------------------------------------------------------------
+
+create table accounts( id integer primary key,        -- unique ID for this
+                                                      -- entry
+                       userid integer,                -- User associated with
+                                                      -- this account
+                       account varchar(255),          -- Account token
+                       unique (account)               -- Each account appears
+                                                      -- once
+                     ); 
 
 -- ---------------------------------------------------------------------------
 --
@@ -547,8 +565,6 @@ insert into user_template ( name, def, form ) values ( 'imap_watched_folders', '
 
 -- Show the config bar at the bottom of each page defaults to on
 insert into user_template ( name, def, form ) values ( 'html_show_configbars', 1, '%d' );
-
-
 
 -- The adminisrator (user 1) can_admin
 

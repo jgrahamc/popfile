@@ -199,10 +199,6 @@ sub start
 {
     my ( $self ) = @_;
 
-    # Get a query session with the History object
-
-    $self->{q__} = $self->history_()->start_query();
-
     # Ensure that the messages subdirectory exists
 
     if ( !$self->history_()->make_directory__(
@@ -243,9 +239,8 @@ sub stop
 
     foreach my $session (keys %{$self->{sessions__}}) {
         $self->classifier_()->release_session_key( $session );
+        $self->history_()->stop_query( $self->{sessions__}{$session}{q} );
     }
-
-    $self->history_()->stop_query( $self->{q__} );
 
     $self->SUPER::stop();
 }
@@ -358,6 +353,7 @@ sub handle_cookie__
         $self->{sessions__}{$session}{filter} = '';
         $self->{sessions__}{$session}{search} = '';
         $self->{sessions__}{$session}{negate} = '';
+        $self->{sessions__}{$session}{q} = $self->history_()->start_query( $session );
 
         return $session;
     } else {
@@ -450,6 +446,20 @@ sub url_handler__
 
     if ( $cookie ne '' ) {
         $session = $self->handle_cookie__( $cookie, $client );
+    }
+
+    # In single user mode get the administrator key
+
+    if ( !defined( $session ) &&
+         $self->global_config_( 'single_user' ) ) {
+        $session = $self->classifier_()->get_administrator_session_key();
+        $self->{sessions__}{$session}{lastused} = time;
+        $self->{sessions__}{$session}{user} = 1;
+        $self->{sessions__}{$session}{sort} = '';
+        $self->{sessions__}{$session}{filter} = '';
+        $self->{sessions__}{$session}{search} = '';
+        $self->{sessions__}{$session}{negate} = '';
+        $self->{sessions__}{$session}{q} = $self->history_()->start_query( $session );
     }
 
     # See if there are any form parameters and if there are parse them
@@ -605,13 +615,15 @@ sub url_handler__
 
     # If we don't have a valid session key, then insist that the user
     # log in, or check the username and password for validity, if they
-    # are valid then create the session now
+    # are valid then create the session now.  In single user mode get
+    # the key 
 
     if ( !defined( $session ) ) {
         $session = $self->password_page( $client );
         if ( defined( $session ) ) {
             $self->http_redirect_( $client, '/', $session );
         }
+
         return 1;
     }
 
@@ -715,8 +727,14 @@ sub url_handler__
             return;
         }
 
-        &{$method}( $self, $client,
-                    $self->load_template__( $template, $url, $session ),
+        # No logout button in single user mode
+
+        my $templ = $self->load_template__( $template, $url, $session );
+        if ( $self->global_config_( 'single_user' ) ) {
+            $templ->param( 'Header_If_SingleUser' => 1 );
+        }
+
+        &{$method}( $self, $client, $templ,
                     $template, $url, $session );
         return 1;
     }
@@ -1318,6 +1336,13 @@ sub users_page
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
                                                     $page, $session );
 
+    # Handle single user mode
+
+    if ( defined( $self->{form_}{usermode} ) ) {
+        $self->global_config_( 'single_user', $self->{form_}{singleuser} );
+    }
+    $templ->param( 'Users_If_Single' => $self->global_config_( 'single_user' ) );
+
     # Handle user creation
 
     if ( exists( $self->{form_}{create} ) && ( $self->{form_}{newuser} ne '' ) ) {
@@ -1367,6 +1392,35 @@ sub users_page
         }
     }
 
+    # Handle adding an account to a user
+
+    if ( defined( $self->{form_}{addaccount} ) ) {
+        if ( ( $self->{form_}{newaccount} ne '' ) &&
+             ( $self->{form_}{newaccount} =~ /^.+:.+$/ ) )  {
+            my $id = $self->classifier_()->get_user_id( $session, $self->{form_}{editname} );
+            my $result = $self->classifier_()->add_account( $session, $id, 'pop3', $self->{form_}{newaccount} );
+            if ( $result == -1 ) {
+                $self->error_message__( $templ, $self->{language__}{Users_Duplicate_Account} );
+            } else {
+                if ( $result == 0 ) {
+                    $self->error_message__( $templ, $self->{language__}{Users_Failed_Account} );
+                }
+            }
+        } else {
+            $self->error_message__( $templ, $self->{language__}{Users_Bad_Account} );
+        }
+    }
+
+    # Handle removing accounts for a user
+
+    if ( defined( $self->{form_}{delete} ) ) {
+        foreach my $key (keys %{$self->{form_}}) {
+            if ( $key =~ /^remove_(.+)/ ) {
+                $self->classifier_()->remove_account( $session, 'pop3', $1 );
+            }
+        }
+    }
+
     my $users = $self->classifier_()->get_user_list( $session );
 
     my @user_loop;
@@ -1410,6 +1464,22 @@ sub users_page
         $templ->param( 'Users_Loop_Parameter' => \@parameter_list );
         $templ->param( 'Users_If_Editing_User' => 1 );
         $templ->param( 'Users_Edit_User_Name' => $self->{form_}{editname} );
+
+        # Handle POP3 account association
+
+        my @accounts = $self->classifier_()->get_accounts( $session, $id );
+
+        $templ->param( 'Users_If_Accounts' => ( $#accounts > -1 ) );
+        if ( $#accounts > -1 ) {
+             my @account_data;
+            for my $account (@accounts) {
+                my %row_data;
+                $account =~ s/[^:]+://;
+                $row_data{Account} = $account;
+                push( @account_data, \%row_data );
+            }
+            $templ->param( 'Users_Loop_Accounts' => \@account_data );
+        }
     }
 
     $self->http_ok( $client, $templ, 5, $session );
@@ -2360,10 +2430,11 @@ sub set_history_navigator__
     my $p = 1;
     my $dots = 0;
     my @nav_data;
-    while ( $i < $self->history_()->get_query_size( $self->{q__} ) ) {
+    my $q = $self->{sessions__}{$session}{q};
+    while ( $i < $self->history_()->get_query_size( $q ) ) {
         my %row_data;
         if ( ( $i == 0 ) ||
-             ( ( $i + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $self->history_()->get_query_size( $self->{q__} ) ) ||
+             ( ( $i + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $self->history_()->get_query_size( $q ) ) ||
              ( ( ( $i - 2 * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) <= $start_message ) &&
                ( ( $i + 2 * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $start_message ) ) ) {
             $row_data{History_Navigator_Page} = $p;
@@ -2389,7 +2460,7 @@ sub set_history_navigator__
     }
     $templ->param( 'History_Navigator_Loop' => \@nav_data );
 
-    if ( $start_message < ( $self->history_()->get_query_size( $self->{q__} ) - $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) )  {
+    if ( $start_message < ( $self->history_()->get_query_size( $q ) - $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) )  {
         $templ->param( 'History_Navigator_If_Next' => 1 );
         $templ->param( 'History_Navigator_Next'    => $start_message + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) );
     }
@@ -2537,7 +2608,8 @@ sub history_page
     if ( defined( $self->{form_}{gopage} ) ) {
         my $destination = ( $self->{form_}{jumptopage} - 1 ) *
                      $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
-        my $maximum = $self->history_()->get_query_size( $self->{q__} );
+        my $q = $self->{sessions__}{$session}{q};
+        my $maximum = $self->history_()->get_query_size( $q );
 
         if ( $destination <= $maximum && $destination > 0 ) {
             return $self->http_redirect_( $client, "/history?start_message=$destination&"
@@ -2681,14 +2753,16 @@ sub history_page
         $self->history_()->stop_deleting();
     }
 
+    my $q = $self->{sessions__}{$session}{q};
+
     # Handle clearing the history files, there are two options here,
     # clear the current page or clear all the files in the cache
 
     if ( defined( $self->{form_}{clearall} ) ) {
-        $self->history_()->delete_query( $self->{q__} );
+        $self->history_()->delete_query( $q );
     }
 
-    $self->history_()->set_query( $self->{q__},
+    $self->history_()->set_query( $q,
                                    $self->{form_}{filter},
                                    $self->{form_}{search},
                                    $self->{form_}{sort},
@@ -2708,7 +2782,7 @@ sub history_page
     $templ->param( 'History_If_Search'     => defined( $self->{form_}{search} ) );
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
-    $templ->param( 'History_If_MultiPage'  => $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) <= $self->history_()->get_query_size( $self->{q__} ) );
+    $templ->param( 'History_If_MultiPage'  => $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) <= $self->history_()->get_query_size( $q ) );
 
     my @buckets = $self->classifier_()->get_buckets( $session );
 
@@ -2738,7 +2812,7 @@ sub history_page
     $templ->param( 'History_Filter_Unclassified' => ($self->{form_}{filter} eq 'unclassified')?'selected':'' );
     $templ->param( 'History_Field_Not' => ($self->{form_}{negate} ne '')?'checked':'' );
 
-    my $c = $self->history_()->get_query_size( $self->{q__} );
+    my $c = $self->history_()->get_query_size( $q );
     if ( $c > 0 ) {
         $templ->param( 'History_If_Some_Messages' => 1 );
         $templ->param( 'History_Count' => $self->pretty_number( $c ) );
@@ -2755,7 +2829,7 @@ sub history_page
         $templ->param( 'History_Start_Message' => $start_message );
 
         my $stop_message  = $start_message + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) - 1;
-        $stop_message = $self->history_()->get_query_size( $self->{q__} ) - 1 if ( $stop_message >= $self->history_()->get_query_size( $self->{q__} ) );
+        $stop_message = $self->history_()->get_query_size( $q ) - 1 if ( $stop_message >= $self->history_()->get_query_size( $q ) );
 
         $self->set_history_navigator__( $templ, $start_message, $stop_message, $session );
 
@@ -2806,7 +2880,7 @@ sub history_page
         $templ->param( 'History_Colspan' => $colspan );
 
         my @rows = $self->history_()->get_query_rows(
-            $self->{q__}, $start_message+1,
+            $q, $start_message+1,
             $stop_message - $start_message + 1 );
 
         my @history_data;

@@ -1,6 +1,22 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
+<form action="/users" method="post">
+<table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%">
+    <tr>
+        <td class="settingsPanel" valign="top">
+
+<TMPL_IF NAME="Users_If_Single">
+    <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Users_SingleUserMode"><br /><TMPL_VAR NAME="Localize_Yes"></span>
+    <input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+<input type="hidden" name="singleuser" value="0">
+</td></tr></table></form>
+<TMPL_ELSE>
+    <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_Users_SingleUserMode"><br /><TMPL_VAR NAME="Localize_No"></span>
+    <input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+<input type="hidden" name="singleuser" value="1">
+</td></tr></table></form>
+
 <table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%">
     <tr>
         <td class="settingsPanel" valign="top">
@@ -51,12 +67,66 @@
             </select>
 
             <input type="submit" class="submit" name="edituser" value="<TMPL_VAR NAME="Localize_Edit">" />
+            </form>
              
-            <br />
             <TMPL_IF NAME="Users_If_Editing_User">
                 <br /><hr />
+<h3><TMPL_VAR NAME="Localize_Users_Accounts"> (<TMPL_VAR NAME="Users_Edit_User_Name">)</h3>
+
+        <form action="/users" method="post">
+    <TMPL_IF NAME="Users_If_Accounts">
+        <table width="75%" class="accountsTable" summary="<TMPL_VAR NAME="Localize_Users_AccountTableSummary">">
+        <tr>
+            <th class="usersLabel" scope="col" align="left">
+                <TMPL_VAR NAME="Localize_Account">
+            </th>
+            <th class="usersLabel" scope="col">
+                <TMPL_VAR NAME="Localize_Remove">
+            </th>
+        </tr>
+
+        <TMPL_LOOP NAME="Users_Loop_Accounts">
+
+        <TMPL_IF NAME="__odd__">
+        <tr class="rowOdd">
+        <TMPL_ELSE>
+        <tr class="rowEven">
+        </TMPL_IF>
+
+        <td>
+        <TMPL_VAR NAME="Account"> 
+        </td>
+        <td align="center">
+        <input type="checkbox" class="checkbox" name="remove_<TMPL_VAR NAME="Account">" />
+        <TMPL_VAR NAME="Localize_Remove">
+         </td>
+        </tr>
+
+        </TMPL_LOOP> <!-- Loop Accounts -->
+
+        <tr>
+            <td>
+            </td>
+            <td align="center">
+                <input type="submit" class="submit deleteButton" name="delete" value="<TMPL_VAR NAME="Localize_Remove">" />
+            </td>
+        </tr>
+        </table>
+<br />
+    </TMPL_IF>
+
+        <TMPL_VAR NAME="Localize_Users_AddAccount">:
+        <input type="text" value="" name="newaccount">
+        <input type="submit" name="addaccount" value="<TMPL_VAR NAME="Localize_Add">">
+
+        <input type="hidden" name="editname" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
+        <input type="hidden" name="edituser" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
+        </form>
+
+                <hr />
                 <h3><TMPL_VAR NAME="Localize_Users_Parameters"> (<TMPL_VAR NAME="Users_Edit_User_Name">)</h3>
                  
+            <form action="/users" method="post">
                 <table width="100%">
                     <tr>
                         <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
@@ -104,6 +174,8 @@
         </td>
     </tr>
 </table>
+
+</TMPL_IF>
 
 <TMPL_INCLUDE NAME="common-before-configuration.thtml">
 <TMPL_INCLUDE NAME="configuration-bar.thtml">

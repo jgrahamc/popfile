@@ -315,7 +315,7 @@ sub parse_form_
     $arguments =~ s/&amp;/&/g;
 
     while ( $arguments =~ m/\G(.*?)=(.*?)(&|\r|\n|$)/g ) {
-        my $arg = $1;
+        my $arg = $self->url_decode_( $1 );
 
         my $need_array = defined( $self->{form_}{$arg} );
 
@@ -356,6 +356,25 @@ sub url_encode_
 
     $text =~ s/ /\+/;
     $text =~ s/([^a-zA-Z0-9_\-.\+\'!~*\(\)])/sprintf("%%%02x",ord($1))/eg;
+
+    return $text;
+}
+
+# ----------------------------------------------------------------------------
+#
+# url_decode_
+#
+# $text     Text to decode from URL safety
+#
+# Decode text in a URL
+#
+# ----------------------------------------------------------------------------
+sub url_decode_
+{
+    my ( $self, $text ) = @_;
+
+    $text =~ s/\+/ /;
+    $text =~ s/(%([A-F0-9][A-F0-9]))/chr(hex($2))/eg;
 
     return $text;
 }

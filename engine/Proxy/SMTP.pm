@@ -8,7 +8,7 @@ use Proxy::Proxy;
 #
 # This module handles proxying the SMTP protocol for POPFile.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -146,10 +146,11 @@ sub start
 #
 # child__
 #
-# The worker method that is called when we get a good connection from a client
+# The worker method that is called when we get a good connection from
+# a client
 #
 # $client   - an open stream to a SMTP client
-# $session        - API session key
+# $session  - administrator session
 #
 # ----------------------------------------------------------------------------
 sub child__
@@ -157,16 +158,21 @@ sub child__
     my ( $self, $client, $session ) = @_;
 
     # Number of messages downloaded in this session
+
     my $count = 0;
 
     # The handle to the real mail server gets stored here
+
     my $mail;
 
-    # Tell the client that we are ready for commands and identify our version number
+    # Tell the client that we are ready for commands and identify our
+    # version number
+
     $self->tee_( $client, "220 " . $self->config_( 'welcome_string' ) . "$eol" );
 
-    # Retrieve commands from the client and process them until the client disconnects or
-    # we get a specific QUIT command
+    # Retrieve commands from the client and process them until the
+    # client disconnects or we get a specific QUIT command
+
     while  ( <$client> ) {
         my $command;
 

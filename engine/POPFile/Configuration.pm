@@ -117,6 +117,13 @@ sub initialize
 
     $self->global_config_( 'message_cutoff', 100000 );
 
+    # Set to 1 if POPFile only supports a single user (the
+    # administrator) This is the default setting and mirrors the up
+    # until v0.23.0 operation of POPFile as a single user program.  If
+    # set to 0 then multiple users are supported.
+
+    $self->global_config_( 'single_user', 1 );
+
     # Register for the TICKD message which is sent hourly by the
     # Logger module.   We use this to hourly save the configuration file
     # so that POPFile's configuration is saved in case of a hard crash.

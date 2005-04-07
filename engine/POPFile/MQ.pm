@@ -39,7 +39,11 @@ use POPFile::Module;
 #
 #     RELSE    Sent when a session key is being released by a client
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+#     CREAT    A sub-process has created a session key so send the session
+#              to the parent so that it can be released by the parent
+#              process at the right moment and used for API access
+#
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

@@ -8,7 +8,7 @@ use POPFile::Module;
 #
 # Bayes.pm --- Naive Bayes text classifier
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -103,6 +103,7 @@ sub new
     $self->{db_get_buckets_with_magnets__} = 0;
     $self->{db_delete_zero_words__} = 0;
     $self->{db_get_user_list__} = 0;
+    $self->{db_get_user_from_account__} = 0;
 
     # Caches the name of each bucket and relates it to both the bucket
     # ID in the database and whether it is pseudo or not
@@ -224,6 +225,7 @@ sub initialize
 
     $self->mq_register_( 'COMIT', $self );
     $self->mq_register_( 'RELSE', $self );
+    $self->mq_register_( 'CREAT', $self );
     $self->mq_register_( 'TICKD', $self );
 
     $self->{parser__}->{mangle__} = $self->mangle_();
@@ -250,6 +252,13 @@ sub deliver
 
     if ( $type eq 'RELSE' ) {
         $self->release_session_key_private__( $message[0] );
+    }
+
+    if ( $type eq 'CREAT' ) {
+        my ( $session, $user ) = ( $message[0], $message[1] );
+        $self->{api_sessions__}{$session} = $user;
+        $self->db_update_cache__( $session );
+        $self->log_( 1, "CREAT message on $session for $user" );
     }
 
     if ( $type eq 'TICKD' ) {
@@ -701,6 +710,9 @@ sub db_prepare__
     $self->{db_get_user_list__} = $self->db_()->prepare(
              'select id, name from users order by name;' );
 
+    $self->{db_get_user_from_account__} = $self->db_()->prepare(
+             'select userid from accounts where account = ?' );
+
     # Get the mapping from parameter names to ids into a local hash
 
     my $h = $self->db_()->prepare( "select name, id from bucket_template;" );
@@ -751,6 +763,7 @@ sub db_cleanup__
     $self->{db_get_buckets_with_magnets__}->finish;
     $self->{db_delete_zero_words__}->finish;
     $self->{db_get_user_list__}->finish;
+    $self->{db_get_user_from_account__}->finish;
 }
 
 #----------------------------------------------------------------------------
@@ -894,7 +907,7 @@ sub upgrade_predatabase_data__
     # of POPFile and hence what we do is cheat and get a session key
     # assuming that the user name is admin with password ''
 
-    my $session = $self->get_session_key( 'admin', '' );
+    my $session = $self->get_administrator_session_key();
 
     if ( !defined( $session ) ) {
         $self->log_( 0, "Tried to get the session key for user admin and failed; cannot upgrade old data" );
@@ -1445,7 +1458,7 @@ sub generate_unique_session_key__
 
     my $random = Crypt::Random::makerandom_octet( Length => 128, Strength => 1 );
     my $now = time;
-    return sha256_hex( "$random$now" );
+    return sha256_hex( "$$" . "$random$now" );
 }
 
 #----------------------------------------------------------------------------
@@ -1569,7 +1582,23 @@ sub get_session_key
 
 #----------------------------------------------------------------------------
 #
-# release_sessionss_key
+# get_user_id_from_session
+#
+# $session        A session key previously returned by get_session_key
+#
+# Returns the user ID associated with a session
+#
+#----------------------------------------------------------------------------
+sub get_user_id_from_session
+{
+    my ( $self, $session ) = @_;
+
+    return $self->valid_session_key__( $session );
+}
+
+#----------------------------------------------------------------------------
+#
+# release_sessions_key
 #
 # $session        A session key previously returned by get_session_key
 #
@@ -1585,6 +1614,89 @@ sub release_session_key
     return undef;
 }
 
+#----------------------------------------------------------------------------
+#
+# get_administrator_session_key
+#
+# Returns a string based session key for the administrator. WARNING
+# this is not for external use.  This function bypasses all
+# authentication checks and gives admin access.  Should only be called
+# in the top-level POPFile process.
+#
+#----------------------------------------------------------------------------
+sub get_administrator_session_key
+{
+    my ( $self ) = @_;
+
+    my $session = $self->generate_unique_session_key__();
+    $self->{api_sessions__}{$session} = 1;
+    $self->db_update_cache__( $session );
+    $self->log_( 1, "get_administrator_session_key returning key $session" );
+    return $session;
+}
+
+#----------------------------------------------------------------------------
+#
+# get_session_key_from_token
+#
+# Gets a session key from a account token
+#
+# $session          Valid administrator session
+# $module           Name of the module that is passing the token
+# $token            The token (usually an account name)
+#
+# Returns undef on failure or a session key
+#
+#----------------------------------------------------------------------------
+
+sub get_session_key_from_token
+{
+    my ( $self, $session, $module, $token ) = @_;
+
+    # Verify that the user has an administrator session set up
+
+    if ( $self->get_user_parameter( $session, 'GLOBAL_can_admin' ) != 1 ) {
+        return undef;
+    }
+
+    # If we are in single user mode then simply return the
+    # administrator session for compatibility with old versions of
+    # POPFile.
+
+    if ( $self->global_config_( 'single_user' ) == 1 ) {
+        return $session;
+    }
+
+    # If the this is not the pop3 module then return the administrator
+    # session since there is currently no token matching for non-POP3
+    # accounts.
+
+    if ( $module ne 'pop3' ) {
+        return $session;
+    }
+
+    # Check the token against the associations in the database and
+    # figure out which user is being talked about
+
+    my $result = $self->{db_get_user_from_account__}->execute( "$module:$token" );
+    if ( !defined( $result ) ) {
+        $self->log_( 1, "Unknown account $module:$token" );
+        return undef;
+    }
+    my $user = $self->{db_get_user_from_account__}->fetchrow_arrayref->[0];
+
+    my $user_session = $self->generate_unique_session_key__();
+    $self->{api_sessions__}{$user_session} = $user;
+    $self->db_update_cache__( $user_session );
+    $self->log_( 1, "get_session_key_from_token returning key $user_session for user $self->{api_sessions__}{$user_session}" );
+
+    # Send the session to the parent so that it is recorded and can
+    # be correctly shutdown
+
+    $self->mq_post_( 'CREAT', $user_session, $user );
+
+    return $user_session;
+}
 
 #----------------------------------------------------------------------------
 #
@@ -2591,6 +2703,112 @@ sub reclassify
 
 #----------------------------------------------------------------------------
 #
+# get_accounts (ADMIN ONLY)
+#
+# Returns a list of accounts associatd with the passed in user ID.  This
+# function is ADMIN ONLY.
+#
+# $session   A valid session key returned by a call to get_session_key
+# $id        A user id
+#
+#----------------------------------------------------------------------------
+sub get_accounts
+{
+    my ( $self, $session, $id ) = @_;
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    # If user is an admin then grab the accounts for the user requested
+
+    my $h = $self->db_()->prepare( "select account from accounts where userid = $id;" );
+    $h->execute;
+    my @accounts;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        push ( @accounts, $row->[0] );
+    }
+    $h->finish;
+
+    return @accounts;
+}
+
+#----------------------------------------------------------------------------
+#
+# add_account (ADMIN ONLY)
+#
+# Add an account associated with a user
+#
+# $session   A valid session key returned by a call to get_session_key
+# $id        A user id
+# $module    The module adding the account
+# $account   The account to add
+#
+#----------------------------------------------------------------------------
+sub add_account
+{
+    my ( $self, $session, $id, $module, $account ) = @_;
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return 0;
+    }
+
+    # User is admin so try to insert the new account after checking to see
+    # if someone already has this account
+
+    my $result = $self->{db_get_user_from_account__}->execute( "$module:$account" );
+    if ( !defined( $result ) ) {
+        return 0;
+    }
+    if ( defined( $self->{db_get_user_from_account__}->fetchrow_arrayref ) ) {
+        return -1;
+    }
+
+    $account = $self->db_()->quote( "$module:$account" );
+    my $h = $self->db_()->prepare( "insert into accounts ( userid, account ) values ( $id, $account );" );
+    if ( !defined( $h->execute ) ) {
+        return 0;
+    }
+
+    return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# remove_account (ADMIN ONLY)
+#
+# Remove an account associated with a user
+#
+# $session   A valid session key returned by a call to get_session_key
+# $module    The module removing the account
+# $account   The account to remove
+#
+#----------------------------------------------------------------------------
+sub remove_account
+{
+    my ( $self, $session, $module, $account ) = @_;
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return 0;
+    }
+
+    return $self->db_()->do( "delete from accounts where account = '$module:$account';" );
+}
+
+#----------------------------------------------------------------------------
+#
 # get_buckets
 #
 # Returns a list containing all the real bucket names sorted into
@@ -3063,7 +3281,9 @@ sub create_user
         return 1;
     }
 
-    $self->db_()->do( "insert into users ( name ) values ( '$new_user' );" );
+    my $password = md5_hex( $new_user . '__popfile__' );
+
+    $self->db_()->do( "insert into users ( name, password ) values ( '$new_user', '$password' );" );
 
     my $id = $self->get_user_id( $session, $new_user );
 
@@ -3089,6 +3309,24 @@ sub create_user
         foreach my $utid (keys %add) {
             $self->db_()->do( "insert into user_params ( userid, utid, val ) values ( $id, $utid, '$add{$utid}' );" );
         }
+
+        # Clone buckets
+
+        $h = $self->db_()->prepare( "select name, pseudo from buckets where userid = $clid;" );
+        $h->execute;
+        my %buckets;
+        while ( my $row = $h->fetchrow_arrayref ) {
+            $buckets{$row->[0]} = $row->[1];
+        }
+        $h->finish;
+        foreach my $name (keys %buckets) {
+            $self->db_()->do( "insert into buckets ( userid, name, pseudo ) values ( $id, '$name', $buckets{$name} );" );
+        }
+
+        # TODO clone bucket parameters
+
+        # TODO assign a password
+
     }
 
     return 0;

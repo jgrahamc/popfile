@@ -8,7 +8,7 @@ use POPFile::Module;
 #
 # IMAP.pm --- a module to use POPFile for an IMAP connection.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -224,13 +224,15 @@ sub service
     if ( time - $self->{last_update__} >= $self->user_config_( 1, 'update_interval' ) ) {
 
         # Check to see if we have obtained a session key yet
+
         if ( $self->{api_session__} eq '' ) {
-            $self->{api_session__} = $self->classifier_()->get_session_key( 'admin', '' );
+            $self->{api_session__} = $self->classifier_()->get_administrator_session_key();
         }
 
-        # Since say__() as well as get_response__() can throw an exception, i.e. die if
-        # they detect a lost connection, we eval the following code to be able
-        # to catch the exception. We also tell Perl to ignore broken pipes.
+        # Since say__() as well as get_response__() can throw an
+        # exception, i.e. die if they detect a lost connection, we
+        # eval the following code to be able to catch the
+        # exception. We also tell Perl to ignore broken pipes.
 
         eval {
             local $SIG{'PIPE'} = 'IGNORE';
@@ -267,17 +269,24 @@ sub service
                 }
 
                 # Reset the hash containing the hash values we have just seen.
+
                 $self->{hash_values__} = ();
             }
 
         };
+
         # if an exception occurred, we try to catch it here
+
         if ( $@ ) {
+
             # say__() and get_response__() will die with this message:
+
             if ( $@ =~ /The connection to the IMAP server was lost/ ) {
                 $self->log_( 0, $@ );
             }
+
             # If we didn't die but somebody else did, we have empathy.
+
             else {
                 die $@;
             }
@@ -317,10 +326,10 @@ sub build_folder_list__
 
     $self->log_( 1, "Building list of serviced folders." );
 
-    # At this point, we simply reset the folders hash.
-    # This isn't really elegant because it will leave dangling connections
-    # if we have already been connected. But I trust in Perl's garbage collection
-    # and keep my fingers crossed.
+    # At this point, we simply reset the folders hash.  This isn't
+    # really elegant because it will leave dangling connections if we
+    # have already been connected. But I trust in Perl's garbage
+    # collection and keep my fingers crossed.
 
     %{$self->{folders__}} = ();
 
@@ -339,10 +348,10 @@ sub build_folder_list__
         }
     }
 
-    # If this is a new POPFile installation that isn't yet
-    # configured, our hash will have exactly one key now
-    # which will point to the INBOX. Since this isn't enough
-    # to do anything meaningful, we simply reset the hash:
+    # If this is a new POPFile installation that isn't yet configured,
+    # our hash will have exactly one key now which will point to the
+    # INBOX. Since this isn't enough to do anything meaningful, we
+    # simply reset the hash:
 
     if ( ( keys %{$self->{folders__}} ) == 1 ) {
         %{$self->{folders__}} = ();
@@ -357,10 +366,10 @@ sub build_folder_list__
 #----------------------------------------------------------------------------
 # connect_folders__
 #
-#   This function will iterate over each folder found in the %{$self->{folders__}}
-#   hash. For each folder it will try to establish a connection, log in, and select
-#   the folder.
-#   The corresponding socket object, will be stored in
+#   This function will iterate over each folder found in the
+#   %{$self->{folders__}} hash. For each folder it will try to
+#   establish a connection, log in, and select the folder.  The
+#   corresponding socket object, will be stored in
 #   $self->{folders__}{$folder}{imap}
 #
 # arguments:
@@ -470,10 +479,10 @@ sub disconnect_folders__
 #
 # scan_folder
 #
-#   This function scans a folder on the IMAP server.
-#   According to the attributes of a folder (watched, output), and the attributes
-#   of the message (new, classified, etc) it then decides what to do with the
-#   messages.
+#   This function scans a folder on the IMAP server.  According to the
+#   attributes of a folder (watched, output), and the attributes of
+#   the message (new, classified, etc) it then decides what to do with
+#   the messages.
 #   There are currently three possible actions:
 #       1. Classify the message and move to output folder
 #       2. Reclassify message
@@ -583,10 +592,11 @@ sub scan_folder
 #
 # classify_message
 #
-#   This function takes a message UID and then tries to classify the corresponding
-#   message to a POPFile bucket. It delegates all the house-keeping that keeps
-#   the POPFile statistics up to date to helper functions, but the house-keeping
-#   is done. The caller need not worry about this.
+#   This function takes a message UID and then tries to classify the
+#   corresponding message to a POPFile bucket. It delegates all the
+#   house-keeping that keeps the POPFile statistics up to date to
+#   helper functions, but the house-keeping is done. The caller need
+#   not worry about this.
 #
 # Arguments:
 #
@@ -701,10 +711,10 @@ sub classify_message
 #
 # reclassify_message
 #
-#   This function takes a message UID and then tries to reclassify the corresponding
-#   message from one POPFile bucket to another POPFile bucket. It delegates all the
-#   house-keeping that keeps the POPFile statistics up to date to helper functions,
-#   but the house-keeping
+#   This function takes a message UID and then tries to reclassify the
+#   corresponding message from one POPFile bucket to another POPFile
+#   bucket. It delegates all the house-keeping that keeps the POPFile
+#   statistics up to date to helper functions, but the house-keeping
 #   is done. The caller need not worry about this.
 #
 # Arguments:
@@ -1102,8 +1112,8 @@ sub say__
 #
 # raw_get_response
 #
-#   Get a response from our server. You should normally not need to call this function
-#   directly. Use get_response__ instead.
+#   Get a response from our server. You should normally not need to
+#   call this function directly. Use get_response__ instead.
 #
 # Arguments:
 #
@@ -1160,8 +1170,8 @@ sub raw_get_response
         if ( $count_octets ) {
             $octet_count += length $buf;
 
-            # There doesn't seem to be a requirement for the message to end with
-            # a newline. So we cannot go for equality
+            # There doesn't seem to be a requirement for the message
+            # to end with a newline. So we cannot go for equality
 
             if ( $octet_count >= $count_octets ) {
                 $count_octets = 0;
@@ -1201,8 +1211,9 @@ sub raw_get_response
                     $self->log_( 0, "Got unsolicited UIDVALIDITY response from server while reading response for $last_command." );
                 }
 
-                # This could happen, but will be caught by the eval in service().
-                # Nevertheless, we look out for unsolicited bye-byes here.
+                # This could happen, but will be caught by the eval in
+                # service().  Nevertheless, we look out for
+                # unsolicited bye-byes here.
                 if ( $untagged_response =~ /^BYE/
                         && $last_command !~ /^LOGOUT/ ) {
                     $self->log_( 0, "Got unsolicited BYE response from server while reading response for $last_command." );
@@ -1251,9 +1262,10 @@ sub raw_get_response
 #
 # get_response__
 #
-# Use this function to get a response from the server. The response will be stored in
-# $self->{last_response__} if you pass in a socket object or in
-# $self->{folders}{$folder}{last_response} if you pass in a folder name
+# Use this function to get a response from the server. The response
+# will be stored in $self->{last_response__} if you pass in a socket
+# object or in $self->{folders}{$folder}{last_response} if you pass in
+# a folder name
 #
 # Arguments:
 #   $imap_or_folder:
@@ -1317,8 +1329,9 @@ sub get_response__
 #
 # get_mailbox_list
 #
-#   Request a list of mailboxes from the server behind the passed in socket object.
-#   The list is stored away in @{$self->{mailboxes__}} and returned.
+#   Request a list of mailboxes from the server behind the passed in
+#   socket object.  The list is stored away in @{$self->{mailboxes__}}
+#   and returned.
 #
 # Arguments:
 #   $imap: contains a valid connection to our IMAP server.

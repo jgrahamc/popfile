@@ -123,6 +123,12 @@ sub stop
 {
     my ( $self ) = @_;
 
+    # Clean up any remaining queries
+
+    foreach my $id (keys %{$self->{queries__}}) {
+        $self->stop_query( $id );
+    }
+
     # Commit any remaining history items.  This is needed because it's
     # possible that we get called with a stop after things have been
     # added to the queue and before service() is called
@@ -825,10 +831,12 @@ sub get_slot_from_hash
 # query.  When the caller is done with the query they return
 # stop_query.
 #
+# session       API session
+#
 #----------------------------------------------------------------------------
 sub start_query
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
 
     # Think of a large random number, make sure that it hasn't
     # been used and then return it
@@ -837,6 +845,8 @@ sub start_query
         my $id = sprintf( '%8.8x', int(rand(4294967295)) );
 
         if ( !defined( $self->{queries__}{$id} ) ) {
+            $self->{queries__}{$id}{session} = $session;
+            $self->{queries__}{$id}{userid} = $self->classifier_()->get_user_id_from_session( $session );
             $self->{queries__}{$id}{query} = 0;
             $self->{queries__}{$id}{count} = 0;
             $self->{queries__}{$id}{cache} = ();
@@ -862,10 +872,12 @@ sub stop_query
     # count then we didn't fetch everything and so
     # we fill call finish to clean up
 
-    my $q = $self->{queries__}{$id}{query};
+    if ( exists( $self->{queries__}{$id} ) ) {
+        my $q = $self->{queries__}{$id}{query};
 
-    if ( ( defined $q ) && ( $q != 0 ) && ( $q->{Active} ) ) {
-        $q->finish;
+        if ( ( defined $q ) && ( $q != 0 ) && ( $q->{Active} ) ) {
+            $q->finish;
+        }
     }
 
     delete $self->{queries__}{$id};
@@ -905,8 +917,10 @@ sub set_query
     # so that we know the size of the resulting data without having
     # to retrieve it all
 
-    $self->{queries__}{$id}{base} = 'select XXX from
-        history, buckets, magnets where history.userid = 1 and committed = 1';
+    my $userid = $self->{queries__}{$id}{userid};
+
+    $self->{queries__}{$id}{base} = "select XXX from history, buckets,
+        magnets where history.userid = $userid and committed = 1";
 
     $self->{queries__}{$id}{base} .= ' and history.bucketid = buckets.id';
     $self->{queries__}{$id}{base} .= ' and magnets.id = magnetid';
@@ -931,11 +945,8 @@ sub set_query
             $self->{queries__}{$id}{base} .=
                 " and history.magnetid $equal 0";
         } else {
-            my $session = $self->classifier_()->get_session_key(
-                              'admin', '' );
             my $bucketid = $self->classifier_()->get_bucket_id(
-                               $session, $filter );
-            $self->classifier_()->release_session_key( $session );
+                               $self->{queries__}{$id}{session}, $filter );
             $self->{queries__}{$id}{base} .=
                 " and history.bucketid $not_equal $bucketid";
         }
@@ -1136,7 +1147,7 @@ sub upgrade_history_files__
         $self->global_config_( 'msgdir' ) . 'popfile*.msg', 0 );
 
     if ( $#msgs != -1 ) {
-        my $session = $self->classifier_()->get_session_key( 'admin', '' );
+        my $session = $self->classifier_()->get_administrator_session_key();
 
         print "\nFound old history files, moving them into database\n    ";
 
