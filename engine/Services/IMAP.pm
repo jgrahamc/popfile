@@ -538,7 +538,7 @@ sub scan_folder
                 $moved_message++;
             }
             else {
-                $self->log_( 0, "Found duplicate hash value: $hash. Ignoring duplicate in folder $folder." );
+                $self->log_( 1, "Found duplicate hash value: $hash. Ignoring duplicate in folder $folder." );
             }
 
             next;
