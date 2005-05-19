@@ -1,21 +1,22 @@
-<script language="JavaScript">
+<script type="text/javascript" language="javascript">
 <!--
 function OnLoadHandler() {    // redefine default OnLoadHandler
     if (document.getElementById("removeChecks"))
-         document.getElementById("removeChecks").innerHTML = "<input type='checkbox' class='checkbox' onclick='javascript:toggleChecks(this);' title='Select All' />"
-
-    document.getElementById("historySearch").focus();
+         document.getElementById("removeChecks").innerHTML = "<input type='checkbox' class='checkbox' onclick='javascript:toggleChecks(this);' title='Select All' />";
 }
 
 function toggleChecks(x) {
     d = document.forms;
-    for (var i=0; i < d.length; i++)
-    {
+    for (var i=0; i < d.length; i++) {
          for (var j=0; j < d[i].elements.length; j++)
               if (d[i].elements[j].name.substr(0,7) == "remove_")
                     d[i].elements[j].checked = x.checked;
     }
     return 0;
+}
+
+function confirmClick(x) {
+    return confirm ("Are you sure you want to do this?");
 }
 -->
 </script>

@@ -1,5 +1,3 @@
-<TMPL_INCLUDE NAME="common-javascript.thtml">
-
 <body dir="<TMPL_VAR NAME="Localize_LanguageDirection">" onLoad="OnLoadHandler()">
     <table class="shellTop" align="center" width="100%" summary="">
         <tr class="shellTopRow">

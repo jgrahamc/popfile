@@ -246,7 +246,6 @@ table.historyWidgetsBottom {
 .configBar {
   background-color: #DFDFAF;
   border: 1px solid #CCCC99;
-  margin-top: 0.5em;
 }
 
 .configBar td {
@@ -264,11 +263,13 @@ table.historyWidgetsBottom {
   display: inline;
   float: left;
   min-height: 3em;
+  background-color: #EDEDCA;
 }
 
 .toggleConfigBar {
   float: right;
   border: 0;
+  margin-top: 2.5em;
 }
 
 .checkLabel {
