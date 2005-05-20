@@ -2234,24 +2234,7 @@ sub corpus_page
     }
 
     my @corpus_data;
-    my $total_messages = $self->mcount__( $session );
-    if ( $total_messages != 0 ) {
-        $templ->param( 'Corpus_If_Message_Count' => 1 );
-    }
-    else {
-        $templ->param( 'Corpus_If_Message_Count' => 0 );
-    }
-    my $total_words = 0;
-    for my $bucket (@buckets) {	
-        $total_words += $self->classifier_()->get_bucket_word_count( $session, $bucket );
-    }
-    $templ->param( 'Corpus_Word_Count' => $self->pretty_number( $total_words ) );
-    if ( $total_words != 0 ) {
-        $templ->param( 'Corpus_If_Word_Count' => 1 );
-    }
-    else {
-        $templ->param( 'Corpus_If_Word_Count' => 0 );
-    }
+
     foreach my $bucket ( @buckets ) {
         my %row_data;
         $row_data{Corpus_Bucket}        = $bucket;
@@ -2271,49 +2254,6 @@ sub corpus_page
         }
         $row_data{Localize_Apply}          = $self->{language__}{Apply};
         $row_data{Corpus_Loop_Loop_Colors} = \@color_data;
-        my $messages = $self->get_bucket_parameter__( $session, $bucket, 'count' );
-        if ( $total_messages != 0 ) {
-            $row_data{Bucket_Message_Percent} = sprintf( "%.2f", ( 100 * ( $messages / $total_messages ) ) );
-        }
-        else {
-            $row_data{Bucket_Message_Percent} = " ";
-        }
-        my $positives = $self->get_bucket_parameter__($session, $bucket, 'fpcount' );
-        $row_data{Bucket_False_Positive} = $self->pretty_number( $positives );
-        if ( ( $total_messages - $messages ) == 0 ) {
-            $row_data{Bucket_Strike_Rate}   = "n/a";
-        }
-        else {
-            $row_data{Bucket_Strike_Rate}   = sprintf( "%.2f%%", ( 100 * ( $positives ) / ( $total_messages - $messages ) ) );
-        }
-        my $negatives = $self->get_bucket_parameter__( $session, $bucket, 'fncount' );
-        $row_data{Bucket_False_Negative} = $self->pretty_number( $negatives );
-        if ( ( $messages + $negatives ) == 0 ) {
-            $row_data{Bucket_Hit_Rate}      = "n/a";
-        }
-        else {
-            $row_data{Bucket_Hit_Rate}      = sprintf( "%.2f%%", ( 100 * ( $messages ) / ( $messages + $negatives ) ) );
-        }
-        my $words = $self->classifier_()->get_bucket_word_count( $session, $bucket );
-        $row_data{Bucket_Word_Count}    = $self->pretty_number( $words );
-        if ( $total_words != 0 ) {
-            $row_data{Bucket_Word_Percent}  = sprintf( "%.2f", ( 100 * ( $words / $total_words ) ) );
-        }
-        else {
-            $row_data{Bucket_Word_Percent} = " ";
-        }
-        if ( $messages != 0 ) {
-            $row_data{Bar_If_Message_Count} = 1;
-        }
-        else {
-            $row_data{Bar_If_Message_Count} = 0;
-        }
-        if ( $words != 0 ) {
-            $row_data{Bar_If_Word_Count} = 1;
-        }
-        else {
-            $row_data{Bar_If_Word_Count} = 0;
-        }
         push ( @corpus_data, \%row_data );
     }
     $templ->param( 'Corpus_Loop_Buckets' => \@corpus_data );
