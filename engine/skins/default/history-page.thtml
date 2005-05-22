@@ -46,7 +46,7 @@
             <TMPL_INCLUDE NAME="history-navigator-widget.thtml">
             <!-- end of history-navigator-widget.thtml content -->
         </TMPL_IF>
- <p />
+
  (<a class="history" href="/history"><TMPL_VAR NAME="Localize_Refresh"></a>)
 
         </td>
@@ -56,7 +56,6 @@
         <td colspan="<TMPL_VAR NAME="History_Colspan">">
             <input type="submit" class="submit removeButton" name="clearpage" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
             <input type="submit" class="submit removeButton" name="clearall" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" />
-            <p />
         </td>
    </tr>
    <tr>
