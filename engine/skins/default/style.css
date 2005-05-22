@@ -243,6 +243,14 @@ table.historyWidgetsBottom {
 /*********************************************************/
 /* Config Bars */
 
+.configBarTitle {
+  border:2px #CCCC99 solid; 
+  padding:0.3em; 
+  padding-bottom:0; 
+  margin-left:0.3em; 
+  background:#CCCC99;
+}
+
 .configBar {
   background-color: #DFDFAF;
   border: 1px solid #CCCC99;
