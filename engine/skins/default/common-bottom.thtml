@@ -1,3 +1,13 @@
+      </td>
+      <td class="shellRight"></td>
+   </tr>
+   <tr class="shellBottomRow">
+      <td class="shellBottomLeft"></td>
+      <td class="shellBottomCenter"></td>
+      <td class="shellBottomRight"></td>
+   </tr>
+</table>
+
 <TMPL_IF NAME="Header_If_Password">
 <TMPL_ELSE>
     <table class="footer" summary="">

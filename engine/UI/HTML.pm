@@ -619,9 +619,9 @@ sub url_handler__
     # the key 
 
     if ( !defined( $session ) ) {
-    	my $continue;
+        my $continue;
         ($session, $continue) = $self->password_page( $client, $url );
-	$continue = '/' unless defined( $continue );
+        $continue = '/' unless defined( $continue );
         if ( defined( $session ) ) {
             $self->http_redirect_( $client, $continue , $session );
         }
@@ -1072,6 +1072,11 @@ sub handle_configuration_bar__
         push ( @language_loop, \%row_data );
     }
     $templ->param( 'Configuration_Loop_Languages' => \@language_loop );
+    
+    # If the configuration bar was included by the history page, let it also include the
+    # history bar
+    
+    $templ->param( 'Is_history_page' => ( $template eq 'history-page.thtml' ? 1 : 0 ) );
 
     if ( defined($self->{form_}{hide_configbar}) ) {
         $self->user_config_( $self->{sessions__}{$session}{user}, 'show_configbars', 0 );
@@ -3273,7 +3278,7 @@ sub view_page
 # password_page - Simple page asking for the POPFile password
 #
 # $client     The web browser to send the results to
-# $url	      The higher level page the password prompt is to be embedded in
+# $url        The higher level page the password prompt is to be embedded in
 #
 # Returns undef if login failed, or a session key value if it succeeded
 #

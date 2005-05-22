@@ -1,3 +1,24 @@
+<TMPL_INCLUDE NAME="common-before-configuration.thtml">
+
+<TMPL_IF NAME="If_Show_Config_Bars">
+
+    <table class="configBar" cellspacing="0" width="100%">
+        
+        <TMPL_IF NAME="Is_history_page">
+        
+        <tr>
+            <td>
+                <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+                    <TMPL_INCLUDE NAME="history-bar.thtml">
+                </form>
+            </td>
+        </tr>
+        
+        </TMPL_IF>
+        
+        <tr>
+            <td>
+                <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <div class="configBarOption">
                     <label class="configurationLabel" for="configSkin">
                         <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
@@ -62,3 +83,12 @@
                     </select>
                     <input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
                 </div>
+                    
+                </form>
+            </td>
+        </tr>
+    </table>
+
+</TMPL_IF>
+
+<TMPL_INCLUDE NAME="common-after-configuration.thtml">

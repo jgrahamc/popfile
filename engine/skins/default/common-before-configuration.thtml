@@ -1,1 +1,15 @@
+<br />
+<TMPL_IF NAME="If_Show_Config_Bars">
 
+    <span style="border:2px #CCCC99 solid; padding:0.3em; padding-bottom:0; margin-left:0.3em; background:#CCCC99;">
+        <a name="configBar" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1"><b>Config Bar</b></a>
+    </span>
+    
+<TMPL_ELSE>
+
+    <span style="border:2px #CCCC99 solid; padding:0.3em; margin:0.3em; background:#CCCC99;">
+        <a href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar"><b>Config Bar</b></a>
+    </span>
+    <br />
+
+</TMPL_IF>

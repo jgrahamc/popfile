@@ -295,43 +295,9 @@
         </td>
     </tr>
 </table>
-<br />
+
 </TMPL_IF> <!-- if some messages -->
 
 <TMPL_INCLUDE NAME="history-javascript.thtml">
-
-<!--<TMPL_INCLUDE NAME="common-before-configuration.thtml">-->
-
-<TMPL_IF NAME="If_Show_Config_Bars">
-
-    <span style="border:2px #CCCC99 solid; padding:0.3em; padding-bottom:0; margin-left:0.3em; background:#CCCC99;">
-        <a name="configBar" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1"><b>Config Bar</b></a>
-    </span>
-
-    <table class="configBar" cellspacing="0" width="100%">
-        <tr>
-            <td>
-                <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                    <TMPL_INCLUDE NAME="history-bar.thtml">
-                </form>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                    <TMPL_INCLUDE NAME="configuration-bar.thtml">
-                </form>
-            </td>
-        </tr>
-    </table>
-
-<TMPL_ELSE>
-
-    <span style="border:2px #CCCC99 solid; padding:0.3em; margin:0.3em; background:#CCCC99;">
-        <a href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar"><b>Config Bar</b></a>
-    </span>
-    <br />
-</TMPL_IF>
-
-<TMPL_INCLUDE NAME="common-after-configuration.thtml">
+<TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">
