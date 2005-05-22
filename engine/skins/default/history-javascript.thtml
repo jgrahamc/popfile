@@ -1,4 +1,4 @@
-<script type="text/javascript" language="javascript">
+<script type="text/javascript">
 <!--
 function OnLoadHandler() {    // redefine default OnLoadHandler
     if (document.getElementById("removeChecks"))
