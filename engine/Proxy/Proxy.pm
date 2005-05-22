@@ -60,7 +60,7 @@ sub new
 
     # Holds an administrator session
 
-    $self->{api_session__} = undef;
+    $self->{api_session__} = '';
 
     # This is the error message returned if the connection at any
     # time times out while handling a command
