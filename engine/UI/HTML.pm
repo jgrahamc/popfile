@@ -3300,7 +3300,7 @@ sub password_page
                                               $self->{form_}{password} );
 
         if ( defined( $session ) ) {
-            return ($session, $self->{form_}{next});
+            return ($session, $self->url_decode_($self->{form_}{next}));
         } else {
             $self->error_message__( $templ,
                        $self->{language__}{Password_Error1} );
