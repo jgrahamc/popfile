@@ -1,8 +1,8 @@
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel" for="configSeparator">
+    <label class="configurationLabel" for="configNntpSeparator">
         <TMPL_VAR NAME="Localize_Configuration_NNTPSeparator">:
     </label>
     <br />
-    <input name="nntp_separator" id="configSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" />
+    <input name="nntp_separator" id="configNntpSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" />
     <input type="submit" class="submit" name="update_nntp_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>

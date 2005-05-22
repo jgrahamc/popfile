@@ -1,17 +1,17 @@
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="securityLabel" for="securitySecureServer">
+    <label class="securityLabel" for="securitySecurePOP3Server">
         <TMPL_VAR NAME="Localize_Security_SecureServer">:
     </label>
     <br />
-    <input type="text" name="server" id="securitySecureServer" value="<TMPL_VAR NAME="POP3_Chain_Secure_Server">" />
+    <input type="text" name="server" id="securitySecurePOP3Server" value="<TMPL_VAR NAME="POP3_Chain_Secure_Server">" />
     <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="securityLabel" for="securitySecurePort">
+    <label class="securityLabel" for="securitySecurePOP3Port">
         <TMPL_VAR NAME="Localize_Security_SecurePort">:
     </label>
     <br />
-    <input type="text" name="sport" id="securitySecurePort" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port">" />
+    <input type="text" name="sport" id="securitySecurePOP3Port" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port">" />
     <input type="submit" class="submit" name="update_sport" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>

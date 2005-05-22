@@ -11,7 +11,7 @@
                 <span class="securityWidgetStateOn">
                     <TMPL_VAR NAME="Localize_Yes">
                 </span>
-                <input id="windows_console" type="submit" class="submit toggleOff" id="windowConsoleOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                <input id="windows_console" type="submit" class="submit toggleOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                 <input type="hidden" name="windows_console" value="0" />
 
                 <TMPL_ELSE>
@@ -19,7 +19,7 @@
                 <span class="securityWidgetStateOff">
                     <TMPL_VAR NAME="Localize_No">
                 </span>
-                <input id="windows_console" type="submit" class="submit toggleOn" id="windowConsoleOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                <input id="windows_console" type="submit" class="submit toggleOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                 <input type="hidden" name="windows_console" value="1" />
 
                 </TMPL_IF>
@@ -43,7 +43,7 @@
                 <span class="securityWidgetStateOn">
                     <TMPL_VAR NAME="Localize_Yes">
                 </span>
-                <input id="windows_trayicon" type="submit" class="submit toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                <input id="windows_trayicon" type="submit" class="submit toggleOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                 <input type="hidden" name="windows_trayicon" value="0" />
 
                 <TMPL_ELSE>
@@ -51,7 +51,7 @@
                 <span class="securityWidgetStateOff">
                     <TMPL_VAR NAME="Localize_No">
                 </span>
-                <input id="windows_trayicon" type="submit" class="submit toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                <input id="windows_trayicon" type="submit" class="submit toggleOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                 <input type="hidden" name="windows_trayicon" value="1" />
 
                 </TMPL_IF>

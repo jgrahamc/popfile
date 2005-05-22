@@ -1,17 +1,17 @@
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel" for="SOCKSServer">
+    <label class="configurationLabel" for="<TMPL_VAR NAME="Socks_Widget_Name">SOCKSServer">
         <TMPL_VAR NAME="Localize_Configuration_SOCKSServer">:
     </label>
     <br />
-    <input type="text" name="<TMPL_VAR NAME="Socks_Widget_Name">_socks_server" id="SOCKSServer" value="<TMPL_VAR NAME="Socks_Server">" />
+    <input type="text" name="<TMPL_VAR NAME="Socks_Widget_Name">_socks_server" id="<TMPL_VAR NAME="Socks_Widget_Name">SOCKSServer" value="<TMPL_VAR NAME="Socks_Server">" />
     <input type="submit" class="submit" name="update_<TMPL_VAR NAME="Socks_Widget_Name">_socks_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel" for="configSOCKSPort">
+    <label class="configurationLabel" for="<TMPL_VAR NAME="Socks_Widget_Name">configSOCKSPort">
         <TMPL_VAR NAME="Localize_Configuration_SOCKSPort">:
     </label>
     <br />
-    <input name="<TMPL_VAR NAME="Socks_Widget_Name">_socks_port" type="text" id="configSOCKSPort" value="<TMPL_VAR NAME="Socks_Port">" />
+    <input name="<TMPL_VAR NAME="Socks_Widget_Name">_socks_port" type="text" id="<TMPL_VAR NAME="Socks_Widget_Name">configSOCKSPort" value="<TMPL_VAR NAME="Socks_Port">" />
     <input type="submit" class="submit" name="update_<TMPL_VAR NAME="Socks_Widget_Name">_socks_port" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>

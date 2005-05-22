@@ -1,8 +1,8 @@
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="securityLabel" for="securitySecureServer">
+    <label class="securityLabel" for="securitySecureSMTPServer">
         <TMPL_VAR NAME="Localize_Security_SMTPServer">:
     </label>
     <br />
-    <input type="text" name="smtp_chain_server" id="securitySecureServer" value="<TMPL_VAR NAME="smtp_chain_server">" />
+    <input type="text" name="smtp_chain_server" id="securitySecureSMTPServer" value="<TMPL_VAR NAME="smtp_chain_server">" />
     <input type="submit" class="submit" name="update_smtp_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>

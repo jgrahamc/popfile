@@ -1,8 +1,8 @@
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel" for="configPopPort">
+    <label class="configurationLabel" for="configXMLRPCPort">
         <TMPL_VAR NAME="Localize_Configuration_XMLRPCPort">:
     </label>
     <br />
-    <input name="xmlrpc_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="XMLRPC_Port">" />
+    <input name="xmlrpc_port" type="text" id="configXMLRPCPort" value="<TMPL_VAR NAME="XMLRPC_Port">" />
     <input type="submit" class="submit" name="update_xmlrpc_port" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>

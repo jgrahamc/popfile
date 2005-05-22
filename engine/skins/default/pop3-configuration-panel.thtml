@@ -8,17 +8,17 @@
 </form>
 
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel" for="configSeparator">
+    <label class="configurationLabel" for="configPopSeparator">
         <TMPL_VAR NAME="Localize_Configuration_POP3Separator">:
     </label>
     <br />
-    <input name="pop3_separator" id="configSeparator" type="text" value="<TMPL_VAR NAME="POP3_Configuration_Separator">" />
+    <input name="pop3_separator" id="configPopSeparator" type="text" value="<TMPL_VAR NAME="POP3_Configuration_Separator">" />
     <input type="submit" class="submit" name="update_pop3_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
-<span class="configurationLabel">
+<label class="configurationLabel" for="pop3forceFork">
     <TMPL_VAR NAME="Localize_Configuration_POPFork">:
-</span>
+</label>
 <br />
 <table border="0" cellpadding="0" cellspacing="0" summary="">
     <tr>
@@ -30,7 +30,7 @@
                 <span class="securityWidgetStateOff">
                     <TMPL_VAR NAME="Localize_No">
                 </span>
-                <input type="submit" class="submit toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                <input type="submit" class="submit toggleOn" id="pop3forceFork" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                 <input type="hidden" name="pop3_force_fork" value="1" />
             </form>
 
@@ -40,7 +40,7 @@
                 <span class="securityWidgetStateOn">
                     <TMPL_VAR NAME="Localize_Yes">
                 </span>
-                <input type="submit" class="submit toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                <input type="submit" class="submit toggleOff" id="pop3forceFork" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                 <input type="hidden" name="pop3_force_fork" value="0" />
             </form>
 
