@@ -82,6 +82,7 @@
 
                     <tr>
                         <td>
+                            <label for="<TMPL_VAR NAME="Advanced_Parameter">">
                             <TMPL_IF NAME="Advanced_If_Changed">
                                 <b>
                             </TMPL_IF>
@@ -89,12 +90,13 @@
                             <TMPL_IF NAME="Advanced_If_Changed">
                                 </b>
                             </TMPL_IF>
+                            </label>
                         </td>
                         <td>
                             <TMPL_IF NAME="Advanced_If_Password">
-                            <input type="password" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">">
+                            <input type="password" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">" id="<TMPL_VAR NAME="Advanced_Parameter">">
                             <TMPL_ELSE>
-                            <input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">">
+                            <input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">" id="<TMPL_VAR NAME="Advanced_Parameter">">
                             </TMPL_IF>
                         </td>
                     </tr>
