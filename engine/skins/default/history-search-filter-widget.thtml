@@ -1,16 +1,16 @@
 <form action="/history" method="post">
-<div style="display:inline; float: left; padding-right:1em;">
+<div class="search">
     <label class="historyLabel" for="historySearch">
         <TMPL_VAR NAME="Localize_History_SearchMessage">
     </label>
-    <br>
+    <br />
     <TMPL_IF NAME="History_If_Search">
     <input type="text" id="historySearch" name="search" value="<TMPL_VAR ESCAPE=HTML NAME="History_Field_Search">" />
     </TMPL_IF>
     &nbsp;&nbsp;
 </div>
 
-<div style="display:inline;">
+<div class="filter">
     <label class="historyLabel" for="historyFilter">
         <TMPL_VAR NAME="Localize_History_FilterBy">
     </label>
@@ -38,7 +38,7 @@
     <input type="submit" class="submit" name="reset_filter_search" value="<TMPL_VAR NAME="Localize_History_ResetSearch">" />
 </div>
 
-<div>
+<div class="negate">
     <input type="hidden" name="negate" value="" />
     <input type="checkbox" name="negate" id="negate" class="checkbox" <TMPL_VAR NAME="History_Field_Not"> />
     <label for="negate">

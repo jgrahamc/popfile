@@ -234,21 +234,49 @@ table.historyWidgetsBottom {
 
 .historyNavigatorTop, .historyNavigatorBottom {
   text-align: right;
+  vertical-align: top;
+}
+
+.historyNavigatorTop form, .historyNavigatorBottom form {
+  display:inline;
+}
+
+.refreshLink {
+  margin-top: 0.5em;
 }
 
 .magnetsTable caption {
   text-align: left;
 }
 
+h2.history {
+  margin-top: 0;
+  margin-bottom: 0.3em;
+}
+
+.search {
+  display: inline;
+  float: left;
+  padding-right: 1em;
+}
+
+.filter {
+  display: inline;
+}
+
+.removeButtonsTop {
+  padding-bottom: 1em;
+}
+
 /*********************************************************/
 /* Config Bars */
 
 .configBarTitle {
-  border:2px #CCCC99 solid; 
-  padding:0.3em; 
-  padding-bottom:0; 
-  margin-left:0.3em; 
-  background:#CCCC99;
+  border: 2px #CCCC99 solid;
+  padding: 0.3em;
+  padding-bottom: 0;
+  margin-left: 0.3em;
+  background: #CCCC99;
 }
 
 .configBar {

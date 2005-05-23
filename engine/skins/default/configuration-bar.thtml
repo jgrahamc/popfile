@@ -1,4 +1,17 @@
-<TMPL_INCLUDE NAME="common-before-configuration.thtml">
+<br />
+<span class="configBarTitle">
+
+<TMPL_IF NAME="If_Show_Config_Bars">
+
+    <a name="configBar" title="<TMPL_VAR NAME="Localize_Configuration_Hide_Bar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1"><b>Config Bar</b></a>
+    
+<TMPL_ELSE>
+
+    <a title="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar"><b>Config Bar</b></a>
+
+</TMPL_IF>
+
+</span>
 
 <TMPL_IF NAME="If_Show_Config_Bars">
 
@@ -91,4 +104,3 @@
 
 </TMPL_IF>
 
-<TMPL_INCLUDE NAME="common-after-configuration.thtml">
