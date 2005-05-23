@@ -174,7 +174,7 @@ sub stop
 {
     my ( $self ) = @_;
 
-    if ( $self->{api_session__} ne '' ) {
+    if ( defined $self->{api_session__} ne '' ) {
         $self->classifier_()->release_session_key( $self->{api_session__} );
     }
 
@@ -234,7 +234,7 @@ sub service
 
                 binmode( $client );
 
-                if ( !defined( $self->{api_session__} ) ) {
+                if ( $self->{api_session__} eq '' ) {
                     $self->{api_session__} = $self->classifier_()->get_administrator_session_key();
                 }
 
