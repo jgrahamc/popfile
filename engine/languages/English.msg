@@ -162,7 +162,7 @@ Configuration_XTCInsertion              X-Text-Classification<br>Header
 Configuration_XPLInsertion              X-POPFile-Link<br>Header
 Configuration_Logging                   Logging
 Configuration_None                      None
-Configuration_ToScreen                  To Screen
+Configuration_ToScreen                  To Screen (console)
 Configuration_ToFile                    To File
 Configuration_ToScreenFile              To Screen and File
 Configuration_LoggerOutput              Logger output
@@ -175,8 +175,6 @@ Configuration_SOCKSPort                 SOCKS V proxy port
 Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s
 Configuration_SOCKSServerUpdate         Updated SOCKS V proxy host to %s
 Configuration_Fields                    Add history columns
-Configuration_Hide_Bar                  Hide configuration bar
-Configuration_Show_Bar                  Show configuration bar
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters
@@ -187,10 +185,10 @@ Advanced_StopWords                      Ignored Words
 Advanced_Message1                       POPFile ignores the following frequently-used words:
 Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
-Advanced_AllParameters                  All POPFile Parameters
+Advanced_AllParameters                  Global POPFile Parameters
 Advanced_Parameter                      Parameter
 Advanced_Value                          Value
-Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.
+Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.  See <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?OptionReference">OptionReference</a> for more information on options.
 Advanced_ConfigFile                     Configuration file:
 
 Users_Create                            Create New User
@@ -292,6 +290,7 @@ Security_Stats                          Send statistics daily
 
 Magnet_Error1                           Magnet '%s' already exists in bucket '%s'
 Magnet_Error2                           New magnet '%s' clashes with magnet '%s' in bucket '%s' and could cause ambiguous results.  New magnet was not added.
+
 Magnet_Error3                           Create new magnet '%s' in bucket '%s'
 Magnet_CurrentMagnets                   Current Magnets
 Magnet_Message1                         The following magnets cause mail to always be classified into the specified bucket.
@@ -418,4 +417,67 @@ Shutdown_Message                        POPFile has shut down
 
 Help_Training                           When you first use POPFile, it knows nothing and will need some training. POPFile requires training on messages for each bucket, training occurs when you reclassify a message POPFile missclassified to the correct bucket. You must also setup your mail client to filter messages based on POPFile's classification. Information on setting up your client filtering can be found at the <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Documentation Project</a>.
 Help_Bucket_Setup                       POPFile requires at least two buckets in addition to the "unclassified" pseudo-bucket. What makes POPFile unique is that it can classify email more than that, you can have any number of buckets. A simple setup would be a "spam", "personal", and a "work" bucket.
-Help_No_More                            Don't show me this again
+Help_No_More                            Don't show this again
+
+# Tooltips used in title attribute of parts of the UI
+tip_Menu_History			View and reclassify email that POPFile has processed
+tip_Menu_Buckets			Manage buckets and browse classification statistics
+tip_Menu_Magnets			Manage simple filters that bypass the Bayesian filtering system
+tip_Menu_Admin				Configuration options
+tip_Menu_Users				User management
+tip_Menu_Advanced			Advanced configuration settings
+
+tip_History_RecentNum			The number of messages matching your current Search and Filter
+tip_History_Column			Sort by this column
+tip_History_Reclassify			Apply the selected bucket changes
+tip_History_Search			Find matches in the From address or Subject
+tip_History_Filter			Limit the view to the items in the selected bucket
+tip_History_Invert			Invert BOTH the Search and Filter
+
+tip_Bucket_BucketName			View bucket details
+tip_Bucket_Distinct			Unique words in each bucket
+tip_Bucket_SubjectMod			Insert bucket name to the begining of the subject.  For clients that can not use the X-Text-Classification header
+tip_Bucket_XTCHeader			Insert an "invisible" header that most mail clients can use to apply a rule based on POPFile's classification
+tip_Bucket_XPLHeader			Insert a header with a link to the message to allow for quickly reclassifing a message
+tip_Bucket_Quarantine			Islolate potentially dangerous email by placing it in attachment
+tip_Bucket_Color			Select a color for each bucket
+tip_Bucket_Lookup			Look up the probability and frequency of a word in all buckets
+tip_Bucket_WordCount			Number and percentage of total words in each bucket
+tip_Bucket_Create			Create a new bucket
+tip_Bucket_Delete			Remove a bucket and its training
+tip_Bucket_Rename			Rename a bucket
+tip_Bucket_FalsePos			Messages that were incorrectly placed in this bucket
+tip_Bucket_FalseNeg			Messages that were incorrectly NOT placed in this bucket
+
+tip_Magnet_Type				Message header to match
+tip_Magnet_Value			Text or address to match
+tip_Magnet_Bucket			Bucket to send matches to
+
+tip_Config_Skin				Change the look of POPFile
+tip_Config_Language			Change the interface language
+tip_Config_HistoryColumns		Add columns you want to display in message history
+tip_Config_PageSize			Number of messages to display per page
+tip_Config_Days				Number of days to keep messages in history
+tip_Config_Purge			Purge older messages now
+tip_Config_HistoryWidth			Adjust size of history columns
+tip_Config_ColumnIncrease		Increase width of columns
+tip_Config_ColumnDecrease		Decrease width of columns
+tip_Config_ColumnAuto			Reset column width based on current columns
+tip_Config_HideBar                      Hide configuration bar
+tip_Config_ShowBar                      Show configuration bar
+
+tip_Admin_AcceptRemoteHTTP		Allow UI access from another machine
+tip_Admin_AcceptRemotePOP3		Allow POP3 mail dowload from another machine
+tip_Admin_Password			Add a password to limit access to POPFile
+tip_Admin_UpdateCheck			0.22 text should be put back
+tip_Admin_ReportStats			0.22 text should be put back
+
+tip_Footer_HomePage			Visit the POPFile home page
+tip_Footer_Manual			The original POPFile documentation (slightly outdated)
+tip_Footer_Documentation		POPFile's documentation wiki
+tip_Footer_FAQ				POPFile Frequently Asked Questions
+tip_Footer_Version			POPFile version number
+tip_Footer_Login			Date and time last accessed by this user
+tip_Footer_RFE				Have an idea to improve POPFile? Let us know.
+tip_Footer_MailingList			Want to hear about changes to POPFile?  Sign up.
+tip_Footer_Donate			Like POPFile?  Contribute to making it more successful.

@@ -1,14 +1,14 @@
         <div class="configBarOption">
-                <label class="configurationLabel">
+                <label class="configurationLabel" title="<TMPL_VAR NAME="Localize_tip_Config_HistoryWidth">">
                     <TMPL_VAR NAME="Localize_History_Column_Characters">:
                 </label>
-                <input type="submit" class="submit" name="increase" value="<TMPL_VAR NAME="Localize_History_Increase">" />
-                <input type="submit" class="submit" name="decrease" value="<TMPL_VAR NAME="Localize_History_Decrease">" />
-                <input type="submit" class="submit" name="automatic" value="<TMPL_VAR NAME="Localize_History_Automatic">" />
+                <input type="submit" class="submit" name="increase" value="<TMPL_VAR NAME="Localize_History_Increase">" title="<TMPL_VAR NAME="Localize_tip_Config_ColumnIncrease">" />
+                <input type="submit" class="submit" name="decrease" value="<TMPL_VAR NAME="Localize_History_Decrease">" title="<TMPL_VAR NAME="Localize_tip_Config_ColumnDecrease">" />
+                <input type="submit" class="submit" name="automatic" value="<TMPL_VAR NAME="Localize_History_Automatic">" title="<TMPL_VAR NAME="Localize_tip_Config_ColumnAuto">" />
         </div>
 
         <div class="configBarOption">
-                <label class="configurationLabel">
+                <label class="configurationLabel" title="<TMPL_VAR NAME="Localize_tip_Config_HistoryColumns">">
                     <TMPL_VAR NAME="Localize_Configuration_Fields">:
                 </label>
 
@@ -30,20 +30,20 @@
         </div>
 
         <div class="configBarOption">
-                <label class="configurationLabel" for="configPageSize">
+                <label class="configurationLabel" for="configPageSize" title="<TMPL_VAR NAME="Localize_tip_Config_PageSize">">
                     <TMPL_VAR NAME="Localize_Configuration_History">:
                 </label>
                 <input name="page_size" id="configPageSize" type="text" size="4" maxlength="4" value="<TMPL_VAR NAME="Configuration_Page_Size">" />
-                <input type="submit" class="submit" name="update_page_size" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_Apply">" />
+                <input type="submit" class="submit" name="update_page_size" value="<TMPL_VAR NAME="Localize_Apply">" />
         </div>
         <div class="configBarOption">
-                <label class="configurationLabel" for="configHistoryDays">
+                <label class="configurationLabel" for="configHistoryDays" title="<TMPL_VAR NAME="Localize_tip_Config_Days">">
                     <TMPL_VAR NAME="Localize_Configuration_Days">:
                 </label>
 
                 <input name="history_days" id="configHistoryDays" type="text" size="3" maxlength="3" value="<TMPL_VAR NAME="Configuration_History_Days">" />
 
                 <span class="checkLabel"><input type="checkbox" class="checkbox" name="purge_history" id="purge_history" value="<TMPL_VAR NAME="Localize_History_Purge">" />
-                <label for="purge_history"><TMPL_VAR NAME="Localize_History_Purge"></label></span>
+                <label for="purge_history" title="<TMPL_VAR NAME="Localize_tip_Config_Purge">"><TMPL_VAR NAME="Localize_History_Purge"></label></span>
                 <input type="submit" class="submit" name="update_history_days" value="<TMPL_VAR NAME="Localize_Apply">" />
         </div>

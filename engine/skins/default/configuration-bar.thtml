@@ -3,11 +3,11 @@
 
 <TMPL_IF NAME="If_Show_Config_Bars">
 
-    <a name="configBar" title="<TMPL_VAR NAME="Localize_Configuration_Hide_Bar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1"><b>Config Bar</b></a>
+    <a name="configBar" title="<TMPL_VAR NAME="Localize_tip_Config_HideBar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1"><b>Config Bar</b></a>
     
 <TMPL_ELSE>
 
-    <a title="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar"><b>Config Bar</b></a>
+    <a title="<TMPL_VAR NAME="Localize_tip_Config_ShowBar">" href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar"><b>Config Bar</b></a>
 
 </TMPL_IF>
 
@@ -33,7 +33,7 @@
             <td>
                 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <div class="configBarOption">
-                    <label class="configurationLabel" for="configSkin">
+                    <label class="configurationLabel" for="configSkin" title="<TMPL_VAR NAME="Localize_tip_Config_Skin">">
                         <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
                     </label>
 
@@ -79,7 +79,7 @@
 
                 <div class="configBarOption">
 
-                    <label class="configurationLabel" for="configLanguage">
+                    <label class="configurationLabel" for="configLanguage" title="<TMPL_VAR NAME="Localize_tip_Config_Language">">
                         <TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:
                     </label>
 
