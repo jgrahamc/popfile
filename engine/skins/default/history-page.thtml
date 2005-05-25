@@ -67,9 +67,9 @@
 
 <form action="/history" method="post">
     <div class="removeButtonsTop">
-        <input type="submit" class="submit removeButton" name="clearchecked" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" title="<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">" />
-        <input type="submit" class="submit removeButton" name="clearpage" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemovePage">" title="<TMPL_VAR NAME="Localize_tip_History_RemovePage">" />
-        <input type="submit" class="submit removeButton" name="clearall" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" title="<TMPL_VAR NAME="Localize_tip_History_RemoveAll">" />
+        <input type="submit" class="submit removeButton" name="clearchecked" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">')" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" title="<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">" />
+        <input type="submit" class="submit removeButton" name="clearpage" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemovePage">')" value="<TMPL_VAR NAME="Localize_History_RemovePage">" title="<TMPL_VAR NAME="Localize_tip_History_RemovePage">" />
+        <input type="submit" class="submit removeButton" name="clearall" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemoveAll">')" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" title="<TMPL_VAR NAME="Localize_tip_History_RemoveAll">" />
     </div>
     <table class="historyTable" width="100%" summary="<TMPL_VAR NAME="Localize_History_MainTableSummary">">
         <tr class="rowHeader">
@@ -242,9 +242,9 @@
         <tr>
             <td colspan="<TMPL_VAR NAME="History_Colspan">">
                 <div class="removeButtonsBottom">
-                   <input type="submit" class="submit removeButton" name="clearchecked" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" title="<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">" />
-                   <input type="submit" class="submit removeButton" name="clearpage" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemovePage">" title="<TMPL_VAR NAME="Localize_tip_History_RemovePage">" />
-                   <input type="submit" class="submit removeButton" name="clearall" onClick="return confirmClick(this)" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" title="<TMPL_VAR NAME="Localize_tip_History_RemoveAll">" />
+                   <input type="submit" class="submit removeButton" name="clearchecked" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">')" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" title="<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">" />
+                   <input type="submit" class="submit removeButton" name="clearpage" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemovePage">')" value="<TMPL_VAR NAME="Localize_History_RemovePage">" title="<TMPL_VAR NAME="Localize_tip_History_RemovePage">" />
+                   <input type="submit" class="submit removeButton" name="clearall" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemoveAll">')" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" title="<TMPL_VAR NAME="Localize_tip_History_RemoveAll">" />
                 </div>
             </td>
             <td>

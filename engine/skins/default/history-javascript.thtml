@@ -15,8 +15,8 @@ function toggleChecks(x) {
     return 0;
 }
 
-function confirmClick(x) {
-    return confirm ("Are you sure you want to do this?");
+function confirmClick(message) {
+    return confirm (message);
 }
 -->
 </script>
