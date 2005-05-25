@@ -2876,10 +2876,10 @@ sub history_page
                 ( $self->{form_}{sort} !~ /^-/ );
             $row_data{History_If_MoveLeft} = ( $header ne $columns[0] );
             $row_data{History_If_MoveRight} = ( $header ne $columns[$#columns] );
-            $row_data{Localize_History_RemoveColumn} = $self->{language__}{History_RemoveColumn};
-            $row_data{Localize_History_Click_To_Sort} = $self->{language__}{History_Click_To_Sort};
-            $row_data{Localize_History_MoveLeft} = $self->{language__}{History_MoveLeft};
-            $row_data{Localize_History_MoveRight} = $self->{language__}{History_MoveRight};
+            $row_data{Localize_tip_History_RemoveColumn} = $self->{language__}{tip_History_RemoveColumn};
+            $row_data{Localize_tip_History_Sort} = $self->{language__}{tip_History_Sort};
+            $row_data{Localize_tip_History_MoveLeft} = $self->{language__}{tip_History_MoveLeft};
+            $row_data{Localize_tip_History_MoveRight} = $self->{language__}{tip_History_MoveRight};
             $row_data{Skin_Root} = $self->{skin_root};
             push ( @header_data, \%row_data );
             $length -= 10;
@@ -3813,3 +3813,4 @@ sub shutdown_page__
 }
 
 1;
+

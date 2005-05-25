@@ -84,8 +84,8 @@ Logout                                  Logout
 # a number into a friendly looking number (for the US and UK this
 # means comma separated at the thousands)
 
-Locale_Thousands                       ,
-Locale_Decimal                         .
+Locale_Thousands                        ,
+Locale_Decimal                          .
 
 # The Locale_Date uses the format strings in Perl's Date::Format
 # module to set the date format for the UI.  There are two possible
@@ -95,7 +95,7 @@ Locale_Decimal                         .
 # <<format> | <format> The first format is used for dates less than
 #                     7 days from now, the second for all other dates
 
-Locale_Date                            %a %R | %D %R
+Locale_Date                             %a %R | %D %R
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center
@@ -207,11 +207,11 @@ Users_Created_Not_Cloned                Created user '%s' but clone of '%s' fail
 Users_Removed                           Removed user '%s'
 Users_Removed_Failed                    Failed to remove user '%s'
 Users_Removed_Failed_Admin              Failed to remove user '%s': disable admin rights first
-Users_SingleUserMode                    Single user mode (POPFile Classic) 
+Users_SingleUserMode                    Single user mode (POPFile Classic)
 Users_Accounts                          Associated POP3 Accounts
 Users_AddAccount                        Add POP3 account (host:user)
 Users_Bad_Account                       The new account name must be in the form host:user
-Users_Duplicate_Account                 Failed to add the account because it is assigned to another user 
+Users_Duplicate_Account                 Failed to add the account because it is assigned to another user
 Users_Failed_Account                    Failed to add the account
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
@@ -224,9 +224,6 @@ History_ShouldBe                        Should be
 History_NoFrom                          no from line
 History_NoSubject                       no subject line
 History_ClassifyAs                      Classify as
-History_RemoveColumn                    Remove column
-History_MoveLeft                        Move left
-History_MoveRight                       Move right
 History_MagnetUsed                      Magnet used
 History_MagnetBecause                   <b>Magnet Used</b><p>Classified to <font color="%s">%s</font> because of magnet %s </p>
 History_ChangedTo                       Changed to <font color="%s">%s</font>
@@ -234,7 +231,6 @@ History_Already                         Reclassified as <font color="%s">%s</fon
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
 History_RemoveChecked                   Remove Checked
-History_Remove                          To remove entries in the history click
 History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages
 History_ShowMagnet                      magnetized
@@ -252,7 +248,6 @@ History_Reclassified                    Reclassified
 History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
-History_Click_To_Sort                   Click to sort on this column
 
 Password_Title                          Login
 Password_Password                       Password
@@ -290,7 +285,6 @@ Security_Stats                          Send statistics daily
 
 Magnet_Error1                           Magnet '%s' already exists in bucket '%s'
 Magnet_Error2                           New magnet '%s' clashes with magnet '%s' in bucket '%s' and could cause ambiguous results.  New magnet was not added.
-
 Magnet_Error3                           Create new magnet '%s' in bucket '%s'
 Magnet_CurrentMagnets                   Current Magnets
 Magnet_Message1                         The following magnets cause mail to always be classified into the specified bucket.
@@ -420,64 +414,73 @@ Help_Bucket_Setup                       POPFile requires at least two buckets in
 Help_No_More                            Don't show this again
 
 # Tooltips used in title attribute of parts of the UI
-tip_Menu_History			View and reclassify email that POPFile has processed
-tip_Menu_Buckets			Manage buckets and browse classification statistics
-tip_Menu_Magnets			Manage simple filters that bypass the Bayesian filtering system
-tip_Menu_Admin				Configuration options
-tip_Menu_Users				User management
-tip_Menu_Advanced			Advanced configuration settings
+tip_Menu_History                        View and reclassify email that POPFile has processed
+tip_Menu_Buckets                        Manage buckets and browse classification statistics
+tip_Menu_Magnets                        Manage simple filters that bypass the Bayesian filtering system
+tip_Menu_Admin                          Configuration options
+tip_Menu_Users                          User management
+tip_Menu_Advanced                       Advanced configuration settings
 
-tip_History_RecentNum			The number of messages matching your current Search and Filter
-tip_History_Column			Sort by this column
-tip_History_Reclassify			Apply the selected bucket changes
-tip_History_Search			Find matches in the From address or Subject
-tip_History_Filter			Limit the view to the items in the selected bucket
-tip_History_Invert			Invert BOTH the Search and Filter
+tip_History_RecentNum                   Number of messages matching current Search and Filter
+tip_History_Column                      Sort by this column
+tip_History_Reclassify                  Apply bucket corrections
+tip_History_Search                      Find matches in the From address or Subject
+tip_History_Filter                      Limit the view to the items in the selected bucket
+tip_History_SearchNegate                Invert both the Search and Filter
+tip_History_SearchSubmit                Submit Search and Filter
+tip_History_SearchReset                 Clear Search and Filter
+tip_History_RemoveAll                   Remove all messages from history (matching Search and Filter)
+tip_History_RemoveChecked               Remove selected messages from history
+tip_History_RemovePage                  Remove messages on this page from history
+tip_History_RemoveColumn                Remove column
+tip_History_MoveLeft                    Move left
+tip_History_MoveRight                   Move right
+tip_History_Sort                        Click to sort on this column
 
-tip_Bucket_BucketName			View bucket details
-tip_Bucket_Distinct			Unique words in each bucket
-tip_Bucket_SubjectMod			Insert bucket name to the begining of the subject.  For clients that can not use the X-Text-Classification header
-tip_Bucket_XTCHeader			Insert an "invisible" header that most mail clients can use to apply a rule based on POPFile's classification
-tip_Bucket_XPLHeader			Insert a header with a link to the message to allow for quickly reclassifing a message
-tip_Bucket_Quarantine			Islolate potentially dangerous email by placing it in attachment
-tip_Bucket_Color			Select a color for each bucket
-tip_Bucket_Lookup			Look up the probability and frequency of a word in all buckets
-tip_Bucket_WordCount			Number and percentage of total words in each bucket
-tip_Bucket_Create			Create a new bucket
-tip_Bucket_Delete			Remove a bucket and its training
-tip_Bucket_Rename			Rename a bucket
-tip_Bucket_FalsePos			Messages that were incorrectly placed in this bucket
-tip_Bucket_FalseNeg			Messages that were incorrectly NOT placed in this bucket
+tip_Bucket_BucketName                   View bucket details
+tip_Bucket_Distinct                     Unique words in each bucket
+tip_Bucket_SubjectMod                   Insert bucket name to the begining of the subject.  For clients that can not use the X-Text-Classification header
+tip_Bucket_XTCHeader                    Insert an "invisible" header that most mail clients can use to apply a rule based on POPFile's classification
+tip_Bucket_XPLHeader                    Insert a header with a link to the message to allow for quickly reclassifing a message
+tip_Bucket_Quarantine                   Islolate potentially dangerous email by placing it in attachment
+tip_Bucket_Color                        Select a color for each bucket
+tip_Bucket_Lookup                       Look up the probability and frequency of a word in all buckets
+tip_Bucket_WordCount                    Number and percentage of total words in each bucket
+tip_Bucket_Create                       Create a new bucket
+tip_Bucket_Delete                       Remove a bucket and its training
+tip_Bucket_Rename                       Rename a bucket
+tip_Bucket_FalsePos                     Messages that were incorrectly placed in this bucket
+tip_Bucket_FalseNeg                     Messages that were incorrectly NOT placed in this bucket
 
-tip_Magnet_Type				Message header to match
-tip_Magnet_Value			Text or address to match
-tip_Magnet_Bucket			Bucket to send matches to
+tip_Magnet_Type                         Message header to match
+tip_Magnet_Value                        Text or address to match
+tip_Magnet_Bucket                       Bucket to send matches to
 
-tip_Config_Skin				Change the look of POPFile
-tip_Config_Language			Change the interface language
-tip_Config_HistoryColumns		Add columns you want to display in message history
-tip_Config_PageSize			Number of messages to display per page
-tip_Config_Days				Number of days to keep messages in history
-tip_Config_Purge			Purge older messages now
-tip_Config_HistoryWidth			Adjust size of history columns
-tip_Config_ColumnIncrease		Increase width of columns
-tip_Config_ColumnDecrease		Decrease width of columns
-tip_Config_ColumnAuto			Reset column width based on current columns
+tip_Config_Skin                         Change the look of POPFile
+tip_Config_Language                     Change the interface language
+tip_Config_HistoryColumns               Add columns you want to display in message history
+tip_Config_PageSize                     Number of messages to display per page
+tip_Config_Days                         Number of days to keep messages in history
+tip_Config_Purge                        Purge older messages now
+tip_Config_HistoryWidth                 Adjust size of history columns
+tip_Config_ColumnIncrease               Increase width of columns
+tip_Config_ColumnDecrease               Decrease width of columns
+tip_Config_ColumnAuto                   Reset column width based on current columns
 tip_Config_HideBar                      Hide configuration bar
 tip_Config_ShowBar                      Show configuration bar
 
-tip_Admin_AcceptRemoteHTTP		Allow UI access from another machine
-tip_Admin_AcceptRemotePOP3		Allow POP3 mail dowload from another machine
-tip_Admin_Password			Add a password to limit access to POPFile
-tip_Admin_UpdateCheck			0.22 text should be put back
-tip_Admin_ReportStats			0.22 text should be put back
+tip_Admin_AcceptRemoteHTTP              Allow UI access from another machine
+tip_Admin_AcceptRemotePOP3              Allow POP3 mail dowload from another machine
+tip_Admin_Password                      Add a password to limit access to POPFile
+tip_Admin_UpdateCheck                   0.22 text should be put back
+tip_Admin_ReportStats                   0.22 text should be put back
 
-tip_Footer_HomePage			Visit the POPFile home page
-tip_Footer_Manual			The original POPFile documentation (slightly outdated)
-tip_Footer_Documentation		POPFile's documentation wiki
-tip_Footer_FAQ				POPFile Frequently Asked Questions
-tip_Footer_Version			POPFile version number
-tip_Footer_Login			Date and time last accessed by this user
-tip_Footer_RFE				Have an idea to improve POPFile? Let us know.
-tip_Footer_MailingList			Want to hear about changes to POPFile?  Sign up.
-tip_Footer_Donate			Like POPFile?  Contribute to making it more successful.
+tip_Footer_HomePage                     Visit the POPFile home page
+tip_Footer_Manual                       The original POPFile documentation (slightly outdated)
+tip_Footer_Documentation                POPFile's documentation wiki
+tip_Footer_FAQ                          POPFile Frequently Asked Questions
+tip_Footer_Version                      POPFile version number
+tip_Footer_Login                        Date and time last accessed by this user
+tip_Footer_RFE                          Have an idea to improve POPFile? Let us know.
+tip_Footer_MailingList                  Want to hear about changes to POPFile?  Sign up.
+tip_Footer_Donate                       Like POPFile?  Contribute to making it more successful.

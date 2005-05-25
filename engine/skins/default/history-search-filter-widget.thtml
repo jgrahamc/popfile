@@ -1,6 +1,6 @@
 <form action="/history" method="post">
 <div class="search">
-    <label class="historyLabel" for="historySearch">
+    <label class="historyLabel" for="historySearch" title="<TMPL_VAR NAME="Localize_tip_History_Search">">
         <TMPL_VAR NAME="Localize_History_SearchMessage">
     </label>
     <br />
@@ -11,7 +11,7 @@
 </div>
 
 <div class="filter">
-    <label class="historyLabel" for="historyFilter">
+    <label class="historyLabel" for="historyFilter" title="<TMPL_VAR NAME="Localize_tip_History_Filter">">
         <TMPL_VAR NAME="Localize_History_FilterBy">
     </label>
     <br>
@@ -34,14 +34,14 @@
             &lt;unclassified&gt;
         </option>
     </select>
-    <input type="submit" class="submit" name="setfilter" value="<TMPL_VAR NAME="Localize_Find">" />
-    <input type="submit" class="submit" name="reset_filter_search" value="<TMPL_VAR NAME="Localize_History_ResetSearch">" />
+    <input type="submit" class="submit" name="setfilter" value="<TMPL_VAR NAME="Localize_Find">" title="<TMPL_VAR NAME="Localize_tip_History_SearchSubmit">" />
+    <input type="submit" class="submit" name="reset_filter_search" value="<TMPL_VAR NAME="Localize_History_ResetSearch">" title="<TMPL_VAR NAME="Localize_tip_History_SearchReset">" />
 </div>
 
 <div class="negate">
     <input type="hidden" name="negate" value="" />
     <input type="checkbox" name="negate" id="negate" class="checkbox" <TMPL_VAR NAME="History_Field_Not"> />
-    <label for="negate">
+    <label for="negate" title="<TMPL_VAR NAME="Localize_tip_History_SearchNegate">">
         <TMPL_VAR NAME="Localize_History_Negate_Search">
     </label>
 </div>
