@@ -37,29 +37,29 @@
     <table class="menu" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Header_MenuSummary">">
         <tr>
             <td class="menuIndent">&nbsp;</td>
-            <td class="<TMPL_VAR NAME="Common_Middle_Tab0">" title="<TMPL_VAR NAME="Localize_tip_Menu_History">" align="center">
-                <a class="menuLink" href="/history"><TMPL_VAR NAME="Localize_Header_History"></a>
+            <td class="<TMPL_VAR NAME="Common_Middle_Tab0">" align="center">
+                <a class="menuLink" href="/history" title="<TMPL_VAR NAME="Localize_tip_Menu_History">"><TMPL_VAR NAME="Localize_Header_History"></a>
             </td>
             <td class="menuSpacer"></td>
-            <td class="<TMPL_VAR NAME="Common_Middle_Tab1">" title="<TMPL_VAR NAME="Localize_tip_Menu_Buckets">" align="center">
-                <a class="menuLink" href="/buckets"><TMPL_VAR NAME="Localize_Header_Buckets"></a>
+            <td class="<TMPL_VAR NAME="Common_Middle_Tab1">" align="center">
+                <a class="menuLink" href="/buckets" title="<TMPL_VAR NAME="Localize_tip_Menu_Buckets">"><TMPL_VAR NAME="Localize_Header_Buckets"></a>
             </td>
             <td class="menuSpacer"></td>
-            <td class="<TMPL_VAR NAME="Common_Middle_Tab2">" title="<TMPL_VAR NAME="Localize_tip_Menu_Magnets">" align="center">
-                <a class="menuLink" href="/magnets?start_magnet=0"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
+            <td class="<TMPL_VAR NAME="Common_Middle_Tab2">" align="center">
+                <a class="menuLink" href="/magnets?start_magnet=0" title="<TMPL_VAR NAME="Localize_tip_Menu_Magnets">"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
             </td>
             <TMPL_IF NAME="Common_Middle_If_CanAdmin">
                 <td class="menuSpacer"></td>
-                <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" title="<TMPL_VAR NAME="Localize_tip_Menu_Admin">" align="center">
-                    <a class="menuLink" href="/administration"><TMPL_VAR NAME="Localize_Header_Administration"></a>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">
+                    <a class="menuLink" href="/administration" title="<TMPL_VAR NAME="Localize_tip_Menu_Admin">"><TMPL_VAR NAME="Localize_Header_Administration"></a>
                 </td>
                 <td class="menuSpacer"></td>
-                <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" title="<TMPL_VAR NAME="Localize_tip_Menu_Users">" align="center">
-                    <a class="menuLink" href="/users"><TMPL_VAR NAME="Localize_Header_Users"></a>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
+                    <a class="menuLink" href="/users" title="<TMPL_VAR NAME="Localize_tip_Menu_Users">"><TMPL_VAR NAME="Localize_Header_Users"></a>
                 </td>
                 <td class="menuSpacer"></td>
-                <td class="<TMPL_VAR NAME="Common_Middle_Tab6">" title="<TMPL_VAR NAME="Localize_tip_Menu_Advanced">" align="center">
-                    <a class="menuLink" href="/advanced"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab6">" align="center">
+                    <a class="menuLink" href="/advanced" title="<TMPL_VAR NAME="Localize_tip_Menu_Advanced">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
                 </td>
             </TMPL_IF>
             <td class="menuIndent">&nbsp;</td>

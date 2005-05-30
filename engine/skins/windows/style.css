@@ -272,12 +272,13 @@ td.stabColor01 {
 td.historyNavigatorTop {
   text-align: right;
   padding-right: 0.5em;
+  padding-top: 0.5em;
+  vertical-align: top;
 }
 
 td.historyNavigatorBottom {
   text-align: right;
   padding-right: 0.5em;
-  padding-bottom: 1em; 
 }
 
 .historyWidgetsTop {
@@ -290,6 +291,32 @@ td.historyNavigatorBottom {
   border-top: none;
   border-bottom: none;
   width: 100%;
+}
+
+.historyNavigatorTop form, .historyNavigatorBottom form {
+  display:inline;
+}
+
+.refreshLink {
+  display: none;
+}
+
+h2.history {
+  margin-top: 0.3em;
+  margin-bottom: 0.5em;
+}
+
+.search {
+  display: inline;
+  float: left;
+}
+
+.filter {
+  display: inline;
+}
+
+.removeButtonsTop {
+  padding-bottom: 1em;
 }
 
 .openMessageTable, .lookupResultsTable {
@@ -363,11 +390,62 @@ table.settingsTable + br {
 /* Config Bars */
 
 .configBar {
-  border: 2px groove ActiveBorder;
-  background-color: transparent;
+  position: absolute;
+  bottom: *;
+  left: 0;
+  right: 0;
+  margin: 1%;
+  margin-top: 3em;
+  padding-top: 1em;
+  padding-bottom: 1em;
 }
 
-.configBar form {
+.configBar .configBarTitle A,
+.configBar .configBarTitle A:hover {
+  color: ButtonText;
+  background-color: ThreeDFace;
+  text-decoration: none;
+  font-weight: normal;
+  border-style: outset outset none;
+  border-color: ActiveBorder;
+  border-width: 2px;
+  padding-top: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  text-decoration: none;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+}
+
+.configBarHidden {
+  padding-top: 1em;
+  padding-bottom: 0.5em;
+}
+
+.configBarHidden .configBarTitle A,
+.configBarHidden .configBarTitle A:hover {
+  color: ButtonText;
+  background-color: ThreeDFace;
+  text-decoration: none;
+  font-weight: normal;
+  border-style: outset;
+  border-color: ActiveBorder;
+  border-width: 2px;
+  padding-top: 1px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  text-decoration: none;
+  -moz-border-radius: 5px;
+}
+
+.configBarBody {
+  border: 2px outset ActiveBorder;
+  background-color: ThreeDFace;
+}
+
+.configBarBody form {
   margin: 0;
 }
 
@@ -380,23 +458,18 @@ table.settingsTable + br {
   min-height: 3em;
 }
 
-.toggleConfigBar {
-  float: right;
-  border: 0;
-}
-
 .checkLabel {
+  border: 2px groove ActiveBorder;
   white-space: nowrap;
 }
 
-.configBar input.submit {
-  margin-top: 4px;
+.configBarBody input.submit {
+  margin-top: 0.1em;
 }
 
-.configBar label.configurationLabel {
+.configBarBody label.configurationLabel {
   display: block;
 }
-
 
 /*********************************************************/
 /* History Column Controls */
@@ -405,6 +478,7 @@ table.settingsTable + br {
   white-space: nowrap;
   vertical-align: top;
   width: 10px;
+  display: none;
 }
 
 .columnRemove, .columnMove {

@@ -1,21 +1,12 @@
-<br />
-<span class="configBarTitle">
-
 <TMPL_IF NAME="If_Show_Config_Bars">
 
-    <a name="configBar" title="<TMPL_VAR NAME="Localize_tip_Config_HideBar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1"><b>Config Bar</b></a>
-    
-<TMPL_ELSE>
+<div class="configBar">
 
-    <a title="<TMPL_VAR NAME="Localize_tip_Config_ShowBar">" href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar"><b>Config Bar</b></a>
+    <span class="configBarTitle">
+        <a name="configBar" title="<TMPL_VAR NAME="Localize_tip_Config_HideBar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1">Config Bar</a>
+    </span>
 
-</TMPL_IF>
-
-</span>
-
-<TMPL_IF NAME="If_Show_Config_Bars">
-
-    <table class="configBar" cellspacing="0" width="100%">
+    <table class="configBarBody" cellspacing="0" width="100%">
         
         <TMPL_IF NAME="Is_history_page">
         
@@ -101,6 +92,16 @@
             </td>
         </tr>
     </table>
+
+</div>
+
+<TMPL_ELSE>
+
+<div class="configBarHidden">
+    <span class="configBarTitle">
+        <a title="<TMPL_VAR NAME="Localize_tip_Config_ShowBar">" href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar">Config Bar</a>
+    </span>
+</div>
 
 </TMPL_IF>
 

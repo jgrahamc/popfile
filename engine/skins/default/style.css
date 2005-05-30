@@ -277,9 +277,10 @@ h2.history {
   padding-bottom: 0;
   margin-left: 0.3em;
   background: #CCCC99;
+  font-weight: bold;
 }
 
-.configBar {
+.configBarBody {
   background-color: #DFDFAF;
   border: 1px solid #CCCC99;
 }
@@ -288,7 +289,7 @@ h2.history {
   border: 1px solid #CCCC99;
 }
 
-.configBar form {
+.configBarBody form {
   margin: 0;
 }
 
@@ -302,22 +303,16 @@ h2.history {
   background-color: #EDEDCA;
 }
 
-.toggleConfigBar {
-  float: right;
-  border: 0;
-  margin-top: 2.5em;
-}
-
 .checkLabel {
   border: 1px solid #CCCC99;
   white-space: nowrap;
 }
 
-.configBar input.submit {
-  margin-top: 4px;
+.configBarBody input.submit {
+  margin-top: 0.1em;
 }
 
-.configBar label.configurationLabel {
+.configBarBody label.configurationLabel {
   display: block;
 }
 
