@@ -1,4 +1,4 @@
-<body dir="<TMPL_VAR NAME="Localize_LanguageDirection">">
+<body dir="<TMPL_VAR NAME="Localize_LanguageDirection">" onLoad="OnLoadHandler()">
     <table class="shellTop" align="center" width="100%" summary="">
         <tr class="shellTopRow">
             <td class="shellTopLeft"></td>
@@ -10,8 +10,8 @@
             <td class="naked">
                 <table class="head" cellspacing="0" summary="">
                     <tr>
-                        <td class="headTitle"><TMPL_VAR NAME="Localize_Header_Title"></td>
-                        <td class="headShutdown" align="right"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a></td>
+                        <td class="head"><TMPL_VAR NAME="Localize_Header_Title"></td>
+                        <td class="headShutdown" align="right"><TMPL_IF NAME="Header_If_Password"><TMPL_ELSE><TMPL_IF NAME="Header_If_SingleUser"><TMPL_ELSE><a class="logoutLink" href="/logout"><TMPL_VAR NAME="Localize_Logout"></a> <TMPL_IF NAME="Common_Middle_If_CanAdmin"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a></TMPL_IF></TMPL_IF></TMPL_IF></td>
                     </tr>
                 </table>
             </td>
@@ -24,29 +24,44 @@
         </tr>
     </table>
 
+
+    <TMPL_IF NAME="Header_If_Message">
+    <table class="shellStatusMessage" width="100%"><tr class="shellStatusRow"><td><TMPL_VAR NAME="Header_Message"></td></tr></table>
+    <br />
+    </TMPL_IF>
+    <TMPL_IF NAME="Header_If_Error">
+    <table class="shellErrorMessage" width="100%"><tr class="shellErrorRow"><td><TMPL_VAR NAME="Header_Error"></td></tr></table>
+    <br />
+    </TMPL_IF>
+    <TMPL_IF NAME="Header_If_Password">
+    <TMPL_ELSE>
     <div class="menu">
         <ul>
             <li class="<TMPL_VAR NAME="Common_Middle_Tab0">">
-                <a class="menuLink" href="/history?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_History"></a>
+                <a class="menuLink" href="/history" title="<TMPL_VAR NAME="Localize_tip_Menu_History">"><TMPL_VAR NAME="Localize_Header_History"></a>
             </li>
             <li class="<TMPL_VAR NAME="Common_Middle_Tab1">">
-                <a class="menuLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Buckets"></a>
+                <a class="menuLink" href="/buckets" title="<TMPL_VAR NAME="Localize_tip_Menu_Buckets">"><TMPL_VAR NAME="Localize_Header_Buckets"></a>
             </li>
             <li class="<TMPL_VAR NAME="Common_Middle_Tab2">">
-                <a class="menuLink" href="/magnets?session=<TMPL_VAR NAME="Session_Key">&amp;start_magnet=0"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
+                <a class="menuLink" href="/magnets?start_magnet=0" title="<TMPL_VAR NAME="Localize_tip_Menu_Magnets">"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
             </li>
 
             <TMPL_IF NAME="Common_Middle_If_CanAdmin">
             <li class="<TMPL_VAR NAME="Common_Middle_Tab4">">
-                <a class="menuLink" href="/administration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Administration"></a>
+                <a class="menuLink" href="/administration" title="<TMPL_VAR NAME="Localize_tip_Menu_Admin">"><TMPL_VAR NAME="Localize_Header_Administration"></a>
             </li>
             <li class="<TMPL_VAR NAME="Common_Middle_Tab5">">
-                <a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
+                <a class="menuLink" href="/users" title="<TMPL_VAR NAME="Localize_tip_Menu_Users">"><TMPL_VAR NAME="Localize_Header_Users"></a>
             </li>
+            <li class="<TMPL_VAR NAME="Common_Middle_Tab6">">
+                <a class="menuLink" href="/advanced" title="<TMPL_VAR NAME="Localize_tip_Menu_Advanced">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
+            </li>
+
             </TMPL_IF>
          </ul>
     </div>
-
+	</TMPL_IF>
     <div class="shell">
         <div class="shellTopRow">
             <span class="shellTopLeft"></span>

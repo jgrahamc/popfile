@@ -269,7 +269,7 @@ h2.history {
 }
 
 /*********************************************************/
-/* Config Bars */
+/* Config Bar */
 
 .configBarTitle {
   border: 2px #CCCC99 solid;
@@ -285,7 +285,7 @@ h2.history {
   border: 1px solid #CCCC99;
 }
 
-.configBar td {
+.configBarBody td {
   border: 1px solid #CCCC99;
 }
 

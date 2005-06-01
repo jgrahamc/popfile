@@ -8,6 +8,9 @@
         </div>
     </div>
 
+<TMPL_IF NAME="Header_If_Password">
+<TMPL_ELSE>
+
     <div class="footer">
     <ul>
         <li class="footerBody">
@@ -47,5 +50,6 @@
         </li>
     </ul>
     </div>
+</TMPL_IF>
 </body>
 </html>

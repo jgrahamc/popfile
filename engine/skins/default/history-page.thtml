@@ -36,7 +36,6 @@
 </form>
 <TMPL_IF NAME="History_If_Some_Messages">
 
-
 <table width="100%" summary="">
     <tr>
         <td align="left">
@@ -57,7 +56,7 @@
         </td>
     </tr>
     <tr>
-        <td colspan="2">
+        <td colspan="2" class="historyWidgetsTop">
             <!-- the following html was history-search-filter-widget.thtml -->
             <TMPL_INCLUDE NAME="history-search-filter-widget.thtml">
             <!-- end of history-search-filter-widget.thtml content -->
