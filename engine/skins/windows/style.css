@@ -362,16 +362,20 @@ div.helpMessage {
   padding-bottom: 0;
 }
 
-.shellStatusMessage { 
+.shellStatusMessage {
   color: InfoText;
   border: 1px solid black;
   background-color: InfoBackground;
+  margin: auto;
+  text-align: center;
 }
 
-.shellErrorMessage { 
+.shellErrorMessage {
   color: red;
   border: 1px solid black;
   background-color: InfoBackground;
+  margin: auto;
+  text-align: center;
 }
 
 span.graphFont {

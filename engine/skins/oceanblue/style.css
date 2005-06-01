@@ -250,6 +250,28 @@ h2 {
   color: darkblue;
 }
 
+.shellStatusMessage {
+  color: black;
+  border: 1px solid white;
+  background-color: lightblue;
+  margin: auto;
+  margin-bottom: 0.2em;
+  text-align: center;
+  width: 100%;
+  border: 1px solid #90bade;
+}
+
+.shellErrorMessage {
+  color: red;
+  border: 1px solid white;
+  background-color: lightblue;
+  margin: auto;
+  margin-bottom: 0.2em;
+  text-align: center;
+  width: 100%;
+  border: 1px solid #90bade;
+}
+
 .bottomLink {
   padding-left: 0.8em;
   padding-right: 0.8em;

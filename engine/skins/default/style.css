@@ -21,12 +21,14 @@ body {
   color: #000000;
   background-color: #EDEDCA;
   border: 3px #CCCC99 solid;
+  width: 100%;
 }
 
 .shellErrorMessage { 
   color: #FF0000;
   background-color: #EDEDCA;
   border: 3px #CCCC99 solid;
+  width: 100%;
 }
 
 table.head {
