@@ -45,6 +45,22 @@ a:hover {
   margin: 0;
 }
 
+.shellStatusMessage {
+  color: #000000;
+  background-color: #bcd5ea;
+  border: 2px #ffffff groove;
+  width: 90%;
+  margin: auto;
+}
+
+.shellErrorMessage {
+  color: #FF0000;
+  background-color: #bcd5ea;
+  border: 2px #ffffff groove;
+  width: 90%;
+  margin: auto;
+}
+
 td.naked {
   padding: 0px;
   margin: 0px;
@@ -97,6 +113,11 @@ td.logo2menuSpace {
   border-color: #ffffff;
   border-style: groove groove none groove;
   border-width: 2px;
+}
+
+.menuLink {
+  display: block;
+  width: 100%;
 }
 
 .menuIndent {
@@ -211,10 +232,6 @@ span.graphFont {
   font-weight: bold;
 }
 
-.bucketsWidgetStateOn, .bucketsWidgetStateOff {
-  font-weight: bold;
-}
-
 .configWidgetStateOn, .configWidgetStateOff {
   font-weight: bold;
 }
@@ -226,24 +243,40 @@ span.graphFont {
 /*********************************************************/
 /* Positioning */
 
-table.historyWidgetsTop {
+td.historyWidgetsTop {
   width: 100%;
+  border: 1 solid red;
   margin-left: 1.5em;
   margin-top: 0.6em;
   margin-bottom: 1.0em;
 }
 
-table.historyWidgetsBottom {
-  width: 100%;
-  margin-top: 0.6em;
+td.historyNavigatorTop, td.historyNavigatorBottom {
+  text-align: right;
+  vertical-align: top;
 }
 
-td.historyNavigatorTop {
-  text-align: right;
+.historyNavigatorTop form, .historyNavigatorBottom form {
+  padding: 0.4em 0;
+  margin: 0;
 }
 
-td.historyNavigatorBottom {
-  text-align: right;
+h2.history {
+  margin: 0;
+}
+
+.search {
+  display: inline;
+  float: left;
+  padding-right: 0.5em;
+}
+
+.filter {
+  display: inline;
+}
+
+.removeButtonsTop {
+  padding-bottom: 0.5em;
 }
 
 /*********************************************************/
@@ -265,5 +298,69 @@ div.helpMessage {
   border: 2px #ffffff groove;
   padding: 0.4em;
   padding-bottom: 0;
+}
+
+/*********************************************************/
+/* Config Bars */
+
+.configBar, .configBarHidden {
+  padding-top: 1em;
+}
+
+.configBarTitle {
+  border: 2px #ffffff groove;
+  border-bottom: none;
+  background-color: #88b5dd;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin: 0.5em;
+}
+
+.configBarTitle a {
+  padding: 0.2em 0.5em;
+  padding-bottom: 0;  
+}
+
+.configBarBody {
+  background-color: #88b5dd;
+  border: 2px #ffffff groove;
+}
+
+.configBarOption {
+  border: 2px #ffffff groove;
+  margin: 0.3em;
+  padding: 0.3em;
+  display: inline;
+  float: left;
+  min-height: 3em;
+  background-color: #bcd5ea;
+}
+
+.checkLabel {
+  border: 1px solid #aaaaff;
+  white-space: nowrap;
+}
+
+.configBarBody input.submit {
+  margin-top: 0.1em;
+}
+
+.configBarBody label.configurationLabel {
+  display: block;
+}
+
+/*********************************************************/
+/* History Column Controls */
+
+.columnControls {
+  white-space:nowrap;
+  vertical-align: top;
+  width: 10px;
+}
+
+.columnRemove, .columnMove {  /* makes area around the controls clickable for bigger target */
+  display: block;
+  width:100%;
+  height: 1em;
 }
 
