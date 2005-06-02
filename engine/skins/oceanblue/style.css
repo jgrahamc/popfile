@@ -420,6 +420,10 @@ a:link:hover, a:visited:hover {
 /*********************************************************/
 /* Config Bar */
 
+.configBar, .configBarHidden {
+  padding-top: 0.5em;
+}
+
 .configBarTitle {
   border: 1px solid white;
   color: white;

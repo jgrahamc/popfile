@@ -91,15 +91,15 @@ td.logo2menuSpace {
 /*********************************************************/
 /* Table Settings */
 
-.settingsTable {
+table.settingsTable {
   border: 1px solid #CCCC99;
 }
 
-.settingsPanel {
+td.settingsPanel {
   border: 1px solid #CCCC99;
 }
 
-.openMessageTable {
+table.openMessageTable {
   border: 3px solid #CCCC99;
 }
 
@@ -127,11 +127,10 @@ tr.rowHighlighted {
 }
 
 tr.rowBoundary { 
-  color: #000000;
   background-color: #CCCC99;
 }
 
-.lookupResultsTable {
+table.lookupResultsTable {
   border: 3px solid #CCCC99;
 }
 
@@ -166,12 +165,9 @@ div.helpMessage {
 /*********************************************************/
 /* Form Labels */
 
-.historyLabel {
-  font-weight: bold;
-}
-
 th.historyLabel {
   text-align: left;
+  font-weight: bold;
 }
 
 .historyLabelSort {
@@ -273,12 +269,16 @@ h2.history {
 /*********************************************************/
 /* Config Bar */
 
+.configBar, .configBarHidden {
+  padding-top: 1em;
+}
+
 .configBarTitle {
   border: 2px #CCCC99 solid;
   padding: 0.3em;
   padding-bottom: 0;
   margin-left: 0.3em;
-  background: #CCCC99;
+  background-color: #CCCC99;
   font-weight: bold;
 }
 

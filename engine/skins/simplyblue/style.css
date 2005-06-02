@@ -199,7 +199,7 @@ span.graphFont {
   font-weight: normal;
 }
 
-.historyLabel em {
+th.historyLabel em {
   font-weight: bold;
   font-style: normal;
 }
@@ -242,14 +242,6 @@ span.graphFont {
 
 /*********************************************************/
 /* Positioning */
-
-td.historyWidgetsTop {
-  width: 100%;
-  border: 1 solid red;
-  margin-left: 1.5em;
-  margin-top: 0.6em;
-  margin-bottom: 1.0em;
-}
 
 td.historyNavigatorTop, td.historyNavigatorBottom {
   text-align: right;
@@ -358,9 +350,8 @@ div.helpMessage {
   width: 10px;
 }
 
-.columnRemove, .columnMove {  /* makes area around the controls clickable for bigger target */
+.columnRemove, .columnMove {
   display: block;
   width:100%;
   height: 1em;
 }
-

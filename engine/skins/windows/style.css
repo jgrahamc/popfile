@@ -404,31 +404,8 @@ table.settingsTable + br {
   padding-bottom: 1em;
 }
 
-.configBar .configBarTitle A,
-.configBar .configBarTitle A:hover {
-  color: ButtonText;
-  background-color: ThreeDFace;
-  text-decoration: none;
-  font-weight: normal;
-  border-style: outset outset none;
-  border-color: ActiveBorder;
-  border-width: 2px;
-  padding-top: 1px;
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-bottom: 2px;
-  text-decoration: none;
-  -moz-border-radius-topleft: 5px;
-  -moz-border-radius-topright: 5px;
-}
-
-.configBarHidden {
-  padding-top: 1em;
-  padding-bottom: 0.5em;
-}
-
-.configBarHidden .configBarTitle A,
-.configBarHidden .configBarTitle A:hover {
+.configBarTitle A,
+.configBarTitle A:hover {
   color: ButtonText;
   background-color: ThreeDFace;
   text-decoration: none;
@@ -442,6 +419,18 @@ table.settingsTable + br {
   padding-bottom: 2px;
   text-decoration: none;
   -moz-border-radius: 5px;
+}
+
+.configBar .configBarTitle A,
+.configBar .configBarTitle A:hover {
+  border-bottom: none;
+  -moz-border-radius-bottomleft: 0;
+  -moz-border-radius-bottomright: 0;
+}
+
+.configBarHidden {
+  padding-top: 1em;
+  padding-bottom: 0.5em;
 }
 
 .configBarBody {
