@@ -40,8 +40,8 @@
 
   ; This script uses a special NSIS plugin (untgz) to extract files from the *.tar.gz archives.
   ;
-  ; The 'NSIS Archives' page for the 'untgz' plugin (description, example and download links):
-  ; http://nsis.sourceforge.net/archive/nsisweb.php?page=74&instances=0,32
+  ; The 'NSIS Wiki' page for the 'untgz' plugin (description, example and download links):
+  ; http://nsis.sourceforge.net/wiki/UnTGZ
   ;
   ; Alternative download links can be found at the 'untgz' author's site:
   ; http://www.darklogic.org/win32/nsis/plugins/
@@ -50,7 +50,7 @@
   ; (${NSISDIR}\Plugins\). The 'untgz' source and example files can be unzipped to the
   ; ${NSISDIR}\Contrib\untgz\ folder if you wish, but this step is entirely optional.
   ;
-  ; Tested with versions 1.0.5, 1.0.6 and 1.0.7 of the 'untgz' plugin.
+  ; Tested with versions 1.0.5, 1.0.6, 1.0.7 and 1.0.8 of the 'untgz' plugin.
 
 
 #--------------------------------------------------------------------------
@@ -86,18 +86,92 @@
 !ifdef INSTALLER
     Section /o "SSL Support" SecSSL
       !insertmacro SECTIONLOG_ENTER "SSL Support"
+
+      ; The main installer does not contain the SSL support files so we provide an estimate
+      ; which includes a slack space allowance (based upon the development system's statistics)
+
+      AddSize 2560
 !else
     Section "SSL Support" SecSSL
+
+      ; The stand-alone utility includes a compressed set of POPFile 0.22.x compatible SSL
+      ; support files so we increase the size estimate to take the necessary unpacking into
+      ; account (and assume that there will not be a significant difference in the space
+      ; required if the wizard decides to download the SSL support files instead).
+
+      AddSize 1450
 !endif
 
-  ; The wizard does not contain the SSL support files so we provide an estimate which
-  ; includes a slack space allowance (based upon the development system's statistics)
-
-  AddSize 2560
 
   !define L_RESULT  $R0  ; used by the 'untgz' plugin to return the result
 
   Push ${L_RESULT}
+
+  !ifdef ADDSSL
+
+      !define L_VER_X    $R1     ; We check only the first three fields in the version number
+      !define L_VER_Y    $R2     ; but the code could be further simplified by merely testing
+      !define L_VER_Z    $R3     ; the 'build number' field (the field we currently ignore)
+
+      Push ${L_VER_X}
+      Push ${L_VER_Y}
+      Push ${L_VER_Z}
+
+      ; The stand-alone utility may be used to add SSL support to an 0.22.x installation
+      ; which is not compatible with the files in the University of Winnipeg repository,
+      ; so we check the minimal Perl's version number to see if we should use the built-in
+      ; SSL files instead of downloading the most up-to-date ones.
+
+      IfFileExists "$G_ROOTDIR\perl58.dll" check_Perl_version
+      DetailPrint "Assume 0.22.x installation (perl58.dll not found in '$G_ROOTDIR' folder)"
+      Goto assume_0_22_x
+
+    check_Perl_version:
+      GetDllVersion "$G_ROOTDIR\perl58.dll" ${L_VER_Y} ${L_VER_Z}
+      IntOp ${L_VER_X} ${L_VER_Y} / 0x00010000
+      IntOp ${L_VER_Y} ${L_VER_Y} & 0x0000FFFF
+      IntOp ${L_VER_Z} ${L_VER_Z} / 0x00010000
+      DetailPrint "Minimal Perl version ${L_VER_X}.${L_VER_Y}.${L_VER_Z} detected in '$G_ROOTDIR' folder"
+
+      ; Only download the SSL files if the minimal Perl is version 5.8.7 or higher
+      
+      StrCpy ${L_RESULT} "built-in"
+
+      IntCmp ${L_VER_X} 5 0 restore_vars set_download_flag
+      IntCmp ${L_VER_Y} 8 0 restore_vars set_download_flag
+      IntCmp ${L_VER_Z} 7 0 restore_vars set_download_flag
+      
+    set_download_flag:
+      StrCpy ${L_RESULT} "download"
+
+    restore_vars:
+      Pop ${L_VER_Z}
+      Pop ${L_VER_Y}
+      Pop ${L_VER_X}
+
+      !undef L_VER_X
+      !undef L_VER_Y
+      !undef L_VER_Z
+
+      StrCmp ${L_RESULT} "download" download_ssl
+
+    assume_0_22_x:
+
+      ; Pretend we've just downloaded these files from the repository
+
+      DetailPrint "therefore built-in SSL files used instead of downloading the latest versions"
+      DetailPrint ""
+      SetOutPath "$PLUGINSDIR"
+      File "ssl-0.22.x\IO-Socket-SSL.tar.gz"
+      File "ssl-0.22.x\Net_SSLeay.pm.tar.gz"
+      File "ssl-0.22.x\ssleay32.dll"
+      File "ssl-0.22.x\libeay32.dll"
+      Goto install_SSL_support
+
+    download_ssl:
+      DetailPrint "therefore the latest versions of the SSL files will be downloaded"
+      DetailPrint ""
+  !endif
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_PROG_CHECKINTERNET) $(PFI_LANG_TAKE_SEVERAL_SECONDS)"
@@ -154,6 +228,10 @@ download:
       IfFileExists "$PLUGINSDIR\Net_SSLeay.pm.tar.gz" 0 installer_error_exit
       IfFileExists "$PLUGINSDIR\ssleay32.dll" 0 installer_error_exit
       IfFileExists "$PLUGINSDIR\libeay32.dll" 0 installer_error_exit
+  !endif
+
+  !ifdef ADDSSL
+    install_SSL_support:
   !endif
 
   ; Now install the files required for SSL support

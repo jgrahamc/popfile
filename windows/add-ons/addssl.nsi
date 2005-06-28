@@ -1,7 +1,13 @@
 #--------------------------------------------------------------------------
 #
-# addssl.nsi --- This is the NSIS script used to create a utility which downloads and
-#                installs SSL support for an existing POPFile 0.22.0 (or later) installation.
+# addssl.nsi --- This is the NSIS script used to create a utility which installs
+#                SSL support for an existing POPFile 0.22.0 (or later) installation.
+#
+#                Normally the SSL support files are downloaded from the University of Winnipeg
+#                repository. However these files are no longer compatible with the minimal Perl
+#                shipped with POPFile 0.22.x so this utility includes a compatible set of files
+#                which will be installed instead. The minimal Perl's version number (obtained
+#                from the 'perl58.dll' file) is used to determine the action to be taken.
 #
 #                The version of Module.pm distributed with POPFile 0.22.0 results in extremely
 #                slow message downloads (e.g. 6 minutes for a 2,713 byte msg) so this utility
@@ -58,8 +64,8 @@
 
   ; This script uses a special NSIS plugin (untgz) to extract files from the *.tar.gz archives.
   ;
-  ; The 'NSIS Archives' page for the 'untgz' plugin (description, example and download links):
-  ; http://nsis.sourceforge.net/archive/nsisweb.php?page=74&instances=0,32
+  ; The 'NSIS Wiki' page for the 'untgz' plugin (description, example and download links):
+  ; http://nsis.sourceforge.net/wiki/UnTGZ
   ;
   ; Alternative download links can be found at the 'untgz' author's site:
   ; http://www.darklogic.org/win32/nsis/plugins/
@@ -68,7 +74,35 @@
   ; (${NSISDIR}\Plugins\). The 'untgz' source and example files can be unzipped to the
   ; ${NSISDIR}\Contrib\untgz\ folder if you wish, but this step is entirely optional.
   ;
-  ; Tested with versions 1.0.5, 1.0.6 and 1.0.7 of the 'untgz' plugin.
+  ; Tested with versions 1.0.5, 1.0.6, 1.0.7 and 1.0.8 of the 'untgz' plugin.
+
+  ;------------------------------------------------
+  ; POPFile 0.22.x Compatibility Problem
+  ;------------------------------------------------
+
+  ; With effect from 22 June 2005 the SSL components in the University of Winnipeg repository
+  ; are no longer compatible with POPFile 0.22.x because the files have been updated to work
+  ; with ActivePerl 5.8.7 Build 813. POPFile 0.22.0 and 0.22.1 use a minimal Perl based upon
+  ; ActivePerl 5.8.3 Build 809 and 0.22.2 uses a minimal Perl based upon 5.8.4 Build 810.
+  ; These minimal Perl systems will crash when attempting to use the University of Winnipeg
+  ; SSL files.
+  ;
+  ; In order to support POPFile 0.22.x the wizard includes an older set of SSL files which
+  ; were downloaded from the University of Winnipeg repository in January 2005. In order to
+  ; simplify the code, the normal Internet download operation is replaced by "File" commands
+  ; which store the old SSL files in the folder used to hold the downloaded files - these old
+  ; files can then be handled as if they had been downloaded from the University of Winnipeg.
+  ;
+  ; The following local SSL files are compatible with POPFile 0.22.x:
+  ;
+  ;   (1) ssl-0.22.x\ssl-0.22.x\IO-Socket-SSL.tar.gz  (dated 01-Aug-2003)
+  ;   (2) ssl-0.22.x\Net_SSLeay.pm.tar.gz             (dated 23-Dec-2004)
+  ;   (3) ssl-0.22.x\libeay32.dll                     (dated 23-Dec-2004)
+  ;   (4) ssl-0.22.x\ssleay32.dll                     (dated 23-Dec-2004)
+  ;
+  ; POPFile 0.23.0 will probably be based upon ActivePerl 5.8.7 Build 813 so it will be safe
+  ; to download the latest versions of the SSL files if the 'SSL Setup' wizard is used to add
+  ; SSL support to a system which uses a minimal Perl version of 5.8.7 or higher.
 
   ;------------------------------------------------
   ; How the Module.pm patch was created
@@ -125,7 +159,7 @@
 
   Name                   "POPFile SSL Setup"
 
-  !define C_PFI_VERSION  "0.0.15"
+  !define C_PFI_VERSION  "0.1.0"
 
   ; Mention the wizard's version number in the window title
 
