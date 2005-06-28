@@ -95,7 +95,7 @@
   ;
   ; The following local SSL files are compatible with POPFile 0.22.x:
   ;
-  ;   (1) ssl-0.22.x\ssl-0.22.x\IO-Socket-SSL.tar.gz  (dated 01-Aug-2003)
+  ;   (1) ssl-0.22.x\IO-Socket-SSL.tar.gz             (dated 01-Aug-2003)
   ;   (2) ssl-0.22.x\Net_SSLeay.pm.tar.gz             (dated 23-Dec-2004)
   ;   (3) ssl-0.22.x\libeay32.dll                     (dated 23-Dec-2004)
   ;   (4) ssl-0.22.x\ssleay32.dll                     (dated 23-Dec-2004)
