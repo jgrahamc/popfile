@@ -75,7 +75,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.3"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.0.4"     ; see 'VIProductVersion' comment below for format details
   !define C_OUTFILE   "runsqlite.exe"
 
   ; The default NSIS caption is "Name Setup" so we override it here
@@ -155,7 +155,7 @@
   !insertmacro RSU_TEXT RSU_LANG_DBIDENTIFIED   "The '$G_DATABASE' file is a SQLite $G_DBFORMAT database"
   !insertmacro RSU_TEXT RSU_LANG_UTILNOTFOUND   "Unable to find the '$G_SQLITEUTIL' file (the SQLite $G_DBFORMAT utility)${MB_NL}${MB_NL}(looked in $EXEDIR folder)"
   !insertmacro RSU_TEXT RSU_LANG_STARTERROR     "Unable to start the '$G_SQLITEUTIL' utility"
-  !insertmacro RSU_TEXT RSU_LANG_UNKNOWNFORMAT  "Unable to tell if '$G_DATABASE' is a SQLite database file${MB_NL}${MB_NL}File format not known $G_DBFORMAT"
+  !insertmacro RSU_TEXT RSU_LANG_UNKNOWNFORMAT  "Unable to tell if '$G_DATABASE' is a SQLite database file${MB_NL}${MB_NL}File format not known $G_DBFORMAT${MB_NL}${MB_NL}Please shutdown POPFile before using this utility"
 
   ;--------------------------------------------------------------------------
 
