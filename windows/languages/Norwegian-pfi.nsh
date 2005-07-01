@@ -294,8 +294,8 @@
 ; Display selected installation location and whether or not an upgrade will be performed
 ; $G_ROOTDIR holds the installation location, e.g. C:\Program Files\POPFile
 
-!insertmacro PFI_LANG_STRING PFI_LANG_SUMMARY_NEWLOCN      "New POPFile installation at $G_ROOTDIR"
-!insertmacro PFI_LANG_STRING PFI_LANG_SUMMARY_UPGRADELOCN  "Upgrade existing POPFile installation at $G_ROOTDIR"
+!insertmacro PFI_LANG_STRING PFI_LANG_SUMMARY_NEWLOCN      "New POPFile installation at $G_PLS_FIELD_2"
+!insertmacro PFI_LANG_STRING PFI_LANG_SUMMARY_UPGRADELOCN  "Upgrade existing POPFile installation at $G_PLS_FIELD_2"
 
 ; By default all of these components are installed (but Kakasi is only installed when Japanese/Nihongo language is chosen)
 
