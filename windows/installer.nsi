@@ -1487,6 +1487,12 @@ Function GetPermissionToInstall
 
   !define C_NLT     "${IO_NL}\t"
 
+  ; Convert the installation pathname into a string which is safe to use in the summary page
+
+  Push $G_ROOTDIR
+  Call NSIS2IO
+  Pop $G_PLS_FIELD_2
+
   IfFileExists "$G_ROOTDIR\popfile.pl" upgrade
   StrCpy ${L_TEMP} "$(PFI_LANG_SUMMARY_NEWLOCN)"
   GetDlgItem $G_DLGITEM $HWNDPARENT 1
@@ -2022,6 +2028,64 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 ;!insertmacro ShowPleaseWaitBanner "un."
+
+#--------------------------------------------------------------------------
+# Installer Function: NSIS2IO
+#
+# Convert an NSIS string to a form suitable for use by InstallOptions
+#
+# Inputs:
+#         (top of stack)     - a string to be used on an InstallOptions page
+# Outputs:
+#         (top of stack)     - a safe version of the input which will be displayed correctly
+#
+# Usage:
+#         Push "C:\Install\Workshop\restore"        ; InstallOptions treats '\r' as a CR char
+#         Call NSIS2IO
+#         Pop $R0
+#
+#         ($R0 will now hold "C:\\Install\\Workshop\\restore"
+#          to make InstallOptions display "C:\Install\Workshop\restore"
+#          instead of "C:\Install\Workshop
+#          estore")
+#
+#--------------------------------------------------------------------------
+
+Function NSIS2IO
+  Exch $0               ; The source
+  Push $1               ; The output
+  Push $2               ; Temporary char
+  StrCpy $1 ""          ; Initialise the output
+
+loop:
+  StrCpy $2 $0 1        ; Get the next source char
+  StrCmp $2 "" done     ; Abort when none left
+  StrCpy $0 $0 "" 1     ; Remove it from the source
+  StrCmp $2 "\" "" +3   ; Back-slash?
+  StrCpy $1 "$1\\"
+  Goto loop
+
+  StrCmp $2 "$\r" "" +3 ; Carriage return?
+  StrCpy $1 "$1\r"
+  Goto loop
+
+  StrCmp $2 "$\n" "" +3 ; Line feed?
+  StrCpy $1 "$1\n"
+  Goto loop
+
+  StrCmp $2 "$\t" "" +3 ; Tab?
+  StrCpy $1 "$1\t"
+  Goto loop
+
+  StrCpy $1 "$1$2"      ; Anything else
+  Goto loop
+
+done:
+  StrCpy $0 $1
+  Pop $2
+  Pop $1
+  Exch $0
+FunctionEnd
 
 #--------------------------------------------------------------------------
 # End of 'installer.nsi'
