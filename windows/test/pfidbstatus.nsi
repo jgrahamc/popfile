@@ -7,9 +7,12 @@
 #                     command-line utilities have to be used: sqlite.exe for 2.x format files
 #                     and sqlite3.exe for 3.x format files.
 #
-#                     In order to reduce the size of this simple utility, it is assumed that
-#                     the appropriate version of the SQLite utility is available on the target
-#                     system (the utility searches for the utility in several likely places).
+#                     It is assumed that the appropriate version of the SQLite utility is
+#                     available on the target system (the utility searches for the utility
+#                     in several likely places). However sqlite.exe v2.8.12 causes GPFs when
+#                     called by the 'nsExec' plug-in to execute SQL from the command-line so
+#                     if that version is found the "built-in" compatible version of sqlite.exe
+#                     is used instead.
 #
 # Copyright (c) 2005  John Graham-Cumming
 #
@@ -104,7 +107,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.2"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.0.3"     ; see 'VIProductVersion' comment below for format details
   !define C_OUTFILE   "pfidbstatus.exe"
 
   ; The default NSIS caption is "Name Setup" so we override it here
@@ -327,6 +330,7 @@
   !insertmacro DBS_TEXT DBS_LANG_DBSCHEMAERROR  "SQLite error detected when extracting POPFile schema version:"
 
   !insertmacro DBS_TEXT DBS_LANG_SQLITEUTIL     "SQLite $G_PLS_FIELD_2 utility found in $G_PLS_FIELD_1"
+  !insertmacro DBS_TEXT DBS_LANG_BUILTINUTIL    "is not compatible with this utility (using 'built-in' SQLite $G_PLS_FIELD_2 instead)"
   !insertmacro DBS_TEXT DBS_LANG_SQLITECOMMAND  "Result of running the 'pragma integrity_check;' command:"
   !insertmacro DBS_TEXT DBS_LANG_SQLITEDBISOK   "The POPFile database has passed the SQLite integrity check!"
 
@@ -584,6 +588,28 @@ run_it:
   StrCpy $G_PLS_FIELD_2 "v$G_PLS_FIELD_2"
   DetailPrint ""
   DetailPrint "$(DBS_LANG_SQLITEUTIL)"
+  StrCmp $G_PLS_FIELD_2 "v2.8.12" 0 use_it
+
+  ; sqlite.exe 2.8.12 causes a GPF when the 'nsExec' plugin uses it to execute a SQL command
+  ; from the command-line so we have to use a more recent sqlite.exe utility if we detect the
+  ; target system uses sqlite.exe 2.8.12 (sqlite.exe 2.8.13, 2.8.15 & 2.8.16 (the most recent
+  ; version available as of 12 July 2005) are all safe to use here)
+
+  SetDetailsPrint none
+  File "/oname=$PLUGINSDIR\sqlite.exe" "sqlite_clu\sqlite.exe"
+  StrCpy $G_PLS_FIELD_1 "$PLUGINSDIR"
+  SetDetailsPrint listonly
+  nsExec::ExecToStack '"$G_PLS_FIELD_1\sqlite.exe" -version'
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "error" start_error
+  StrCmp ${L_TEMP} "timeout" start_error
+  IntCmp ${L_TEMP} 1 0 version_error version_error
+  Call PFI_TrimNewlines
+  Pop $G_PLS_FIELD_2
+  StrCpy $G_PLS_FIELD_2 "v$G_PLS_FIELD_2"
+  DetailPrint "$(DBS_LANG_BUILTINUTIL)"
+
+use_it:
   nsExec::ExecToStack '"$G_PLS_FIELD_1\$G_SQLITEUTIL" "$G_DATABASE" "select version from popfile;"'
   Pop ${L_TEMP}
   Call PFI_TrimNewlines
