@@ -34,15 +34,16 @@
 #  (1) ADDSSL           defined in add-ons\addssl.nsi (POPFile 'SSL Setup' wizard)
 #  (2) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
 #  (3) BACKUP           defined in backup.nsi (POPFile 'User Data' Backup utility)
-#  (4) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
-#  (5) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
-#  (6) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
-#  (7) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
-#  (8) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-#  (9) RUNSQLITE        defined in runsqlite.nsi (simple front-end for sqlite.exe/sqlite3.exe)
-# (10) STOP_POPFILE     defined in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
-# (11) TRANSLATOR       defined in test\translator.nsi (main installer translations testbed)
-# (12) TRANSLATOR_AUW   defined in test\transAUW.nsi ('Add POPFile User' translations testbed)
+#  (4) DBSTATUS         defined in test\pfidbstatus.nsi (POPFile SQLite Database Status Check)
+#  (5) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
+#  (6) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
+#  (7) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
+#  (8) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
+#  (9) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+# (10) RUNSQLITE        defined in runsqlite.nsi (simple front-end for sqlite.exe/sqlite3.exe)
+# (11) STOP_POPFILE     defined in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
+# (12) TRANSLATOR       defined in test\translator.nsi (main installer translations testbed)
+# (13) TRANSLATOR_AUW   defined in test\transAUW.nsi ('Add POPFile User' translations testbed)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -56,7 +57,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.7"
+  !define C_PFI_LIBRARY_VERSION     "0.1.8"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -1526,7 +1527,7 @@
     FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER | RESTORE
+!ifdef ADDUSER | DBSTATUS | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: PFI_GetCompleteFPN
     #
@@ -1968,7 +1969,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | RESTORE | RUNPOPFILE
+!ifdef ADDUSER | BACKUP | DBSTATUS | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: PFI_GetDataPath
     #
@@ -2257,7 +2258,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
+!ifndef RUNPOPFILE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: PFI_GetDateTimeStamp
     #
@@ -2454,7 +2455,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
+!ifndef RUNPOPFILE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: PFI_GetLocalTime
     #
@@ -2684,7 +2685,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE | RUNPOPFILE
+!ifdef ADDSSL | ADDUSER | BACKUP | DBSTATUS | INSTALLER | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: PFI_GetParent
     #
@@ -2985,7 +2986,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
+!ifdef ADDUSER | DBSTATUS
     #--------------------------------------------------------------------------
     # Installer Function: PFI_GetSQLdbPathName
     #
@@ -3107,7 +3108,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | RUNSQLITE | RESTORE
+!ifdef ADDUSER | BACKUP | DBSTATUS | RUNSQLITE | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: PFI_GetSQLiteFormat
     #
@@ -4044,7 +4045,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE | RUNPOPFILE
+!ifdef ADDSSL | ADDUSER | BACKUP | DBSTATUS | INSTALLER | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: PFI_StrBackSlash
     #
@@ -4141,7 +4142,7 @@
   FunctionEnd
 !macroend
 
-!ifndef PFIDIAG & RUNPOPFILE & RUNSQLITE & TRANSLATOR
+!ifndef DBSTATUS & PFIDIAG & RUNPOPFILE & RUNSQLITE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: PFI_StrCheckDecimal
     #
@@ -4224,7 +4225,7 @@
   FunctionEnd
 !macroend
 
-!ifndef ADDSSL & MSGCAPTURE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
+!ifndef ADDSSL & DBSTATUS & MSGCAPTURE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: PFI_StrStr
     #
@@ -4295,7 +4296,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE | TRANSLATOR
+!ifndef MSGCAPTURE & PFIDIAG & RUNPOPFILE & RUNSQLITE & STOP_POPFILE & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: PFI_TrimNewlines
     #
