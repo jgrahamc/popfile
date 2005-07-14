@@ -57,7 +57,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.8"
+  !define C_PFI_LIBRARY_VERSION     "0.1.9"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -2886,6 +2886,7 @@
     Push ${L_TEXTEND}
 
     StrCpy ${L_SQL_CORPUS} ""
+    StrCpy ${L_SQL_CONNECT} ""
 
     IfFileExists "${L_SOURCE}\popfile.cfg" 0 no_sql_set
 
