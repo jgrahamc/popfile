@@ -77,7 +77,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.52"
+  !define C_VERSION   "0.0.53"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -914,6 +914,12 @@ exit:
   DetailPrint "(report created ${L_TEMP})"
   DetailPrint "------------------------------------------------------------"
 
+  StrCmp ${L_DIAG_MODE} "simple" 0 quiet_exit
+
+  ; For 'simple' reports, scroll to the LFN and SFN versions of the installation locations
+
+  Call ScrollToShowPaths
+
 quiet_exit:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_DIAG_RIGHTCLICK)"
@@ -1055,6 +1061,75 @@ exit:
 
   !undef L_STRING
   !undef L_TEMP
+
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Function used to manipulate the contents of the details view
+#--------------------------------------------------------------------------
+
+  ;------------------------------------------------------------------------
+  ; Constants used when accessing the details view
+  ;------------------------------------------------------------------------
+
+  !define C_LVM_GETITEMCOUNT        0x1004
+  !define C_LVM_ENSUREVISIBLE       0x1013
+
+#--------------------------------------------------------------------------
+# Installer Function: ScrollToShowPaths
+#
+# Scrolls the details view up to make it show the locations of the
+# program files and the 'User Data' files in LFN and SFN formats.
+#
+# Inputs:
+#         none
+#
+# Outputs:
+#         none
+#
+# Usage:
+#         Call ScrollToShowPaths
+#
+#--------------------------------------------------------------------------
+
+Function ScrollToShowPaths
+
+  !define L_TEMP      $R9
+  !define L_TOPROW    $R8   ; item index of the line we want to be at the top of the window
+
+  Push ${L_TEMP}
+  Push ${L_TOPROW}
+
+  ; Even the 'simple' report is too long to fit in the details view window so we
+  ; automatically scroll the view to make it display the LFN and SFN versions of
+  ; the POPFile program and 'User Data' folder locations (on the assumption that
+  ; this is the information most users will want to find first).
+
+  StrCpy ${L_TOPROW} 9    ; index of the blank line immediately before "Current UserName"
+
+  ; Check how many 'details' lines there are
+
+  FindWindow ${L_TEMP} "#32770" "" $HWNDPARENT
+  GetDlgItem ${L_TEMP} ${L_TEMP} 0x3F8          ; This is the Control ID of the details view
+  SendMessage ${L_TEMP} ${C_LVM_GETITEMCOUNT} 0 0 ${L_TEMP}
+
+  ; No point in trying to display a non-existent line
+
+  IntCmp ${L_TEMP} ${L_TOPROW} exit exit
+
+  ; Scroll up (in effect) to show Current UserName, Program folder & User Data folder entries
+
+  FindWindow ${L_TEMP} "#32770" "" $HWNDPARENT
+  GetDlgItem ${L_TEMP} ${L_TEMP} 0x3F8           ; This is the Control ID of the details view
+  SendMessage ${L_TEMP} ${C_LVM_ENSUREVISIBLE} ${L_TOPROW} 0
+
+exit:
+  Pop ${L_TOPROW}
+  Pop ${L_TEMP}
+
+  !undef L_TEMP
+  !undef L_TOPROW
 
 FunctionEnd
 
