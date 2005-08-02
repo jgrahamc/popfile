@@ -41,6 +41,12 @@
   ; POPFile components, such as the Kakasi package and POPFile's XMLRPC module, require
   ; extra Perl components which are added when the optional POPFile components are installed.
 
+  ; The 0.22.2 release's minimal Perl was based upon ActivePerl 5.8.4 but the optional SSL
+  ; components from the University of Winnipeg repository are no longer compatible with this
+  ; version of ActivePerl. ActivePerl 5.8.7 (the most recent version at the time of writing)
+  ; introduced some new dependencies so this section assumes the minimal Perl will be based
+  ; upon ActivePerl 5.8.7.
+
   !insertmacro SECTIONLOG_ENTER "Minimal Perl"
 
   ; Install the Minimal Perl files
@@ -70,6 +76,7 @@ install_now:
   File "${C_PERL_DIR}\lib\AutoLoader.pm"
   File "${C_PERL_DIR}\lib\Carp.pm"
   File "${C_PERL_DIR}\lib\Config.pm"
+  File "${C_PERL_DIR}\lib\Config_heavy.pl"
   File "${C_PERL_DIR}\lib\constant.pm"
   File "${C_PERL_DIR}\lib\DynaLoader.pm"
   File "${C_PERL_DIR}\lib\Errno.pm"
@@ -215,6 +222,7 @@ install_now:
 
   SetOutPath "$G_MPLIBDIR"
   File "${C_PERL_DIR}\lib\bytes.pm"
+  File "${C_PERL_DIR}\lib\bytes_heavy.pl"
   File "${C_PERL_DIR}\lib\subs.pm"
 
   SetOutPath "$G_MPLIBDIR\Class"

@@ -689,6 +689,7 @@ skip_Encode:
 
 skip_Win32:
   Delete "$G_MPLIBDIR\*.pm"
+  Delete "$G_MPLIBDIR\*.pl"
   RMDIR "$G_MPLIBDIR"
 
   SetDetailsPrint textonly

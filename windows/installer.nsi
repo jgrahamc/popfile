@@ -1100,12 +1100,13 @@ SectionEnd
     continue:
 
       ;--------------------------------------------------------------------------
-      ; Install Perl modules: base.pm, bytes.pm, the Encode collection and Text::Kakasi
+      ; Install Perl modules: base.pm, the entire Encode collection and Text::Kakasi
+      ; (bytes.pm and bytes_heavy.pl are also required but these files became part of
+      ; the standard minimal Perl when support for encrypted cookies was added for 0.23.0)
       ;--------------------------------------------------------------------------
 
       SetOutPath "$G_MPLIBDIR"
       File "${C_PERL_DIR}\lib\base.pm"
-      File "${C_PERL_DIR}\lib\bytes.pm"
       File "${C_PERL_DIR}\lib\Encode.pm"
 
       SetOutPath "$G_MPLIBDIR\Encode"
