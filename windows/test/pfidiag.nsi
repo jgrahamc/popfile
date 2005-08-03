@@ -44,6 +44,20 @@
 
   !undef  ${NSIS_VERSION}_found
 
+  ;------------------------------------------------
+  ; This script requires the 'ShellLink' NSIS plugin
+  ;------------------------------------------------
+  ;
+  ; This script uses a special NSIS plugin (ShellLink) to extract information from a Windows
+  ; shortcut (*.lnk) file
+  ;
+  ; The 'NSIS Wiki' page for the 'ShellLink' plugin (description, example and download links):
+  ; http://nsis.sourceforge.net/wiki/ShellLink_plugin
+  ;
+  ; To compile this script, copy the 'ShellLink.dll' file to the standard NSIS plugins folder
+  ; (${NSISDIR}\Plugins\). The 'ShellLink' source and example files can be unzipped to the
+  ; ${NSISDIR}\Contrib\ShellLink\ folder if you wish, but this step is entirely optional.
+
 #--------------------------------------------------------------------------
 # Run-time command-line switch (used by 'pfidiag.exe')
 #--------------------------------------------------------------------------
@@ -77,7 +91,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.53"
+  !define C_VERSION   "0.0.54"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -347,15 +361,19 @@
 Section default
 
   !define L_DIAG_MODE       $R9   ; controls the level of detail supplied by the utility
-  !define L_EXPECTED_ROOT   $R8   ; expected value for POPFILE_ROOT or SFN version of RootDir
-  !define L_EXPECTED_USER   $R7   ; expected value for POPFILE_USER or SFN version of UserDir
+  !define L_EXPECTED_ROOT   $R8   ; (1) expected value for POPFILE_ROOT, or
+                                  ; (2) SFN version of RootDir
+  !define L_EXPECTED_USER   $R7   ; (1) expected value for POPFILE_USER, or
+                                  ; (2) SFN version of UserDir
   !define L_ITAIJIDICTPATH  $R6   ; current Kakasi environment variable
   !define L_KANWADICTPATH   $R5   ; current Kakasi environment variable
-  !define L_POPFILE_ROOT    $R4   ; current environment variable
-  !define L_POPFILE_USER    $R3   ; current environment variable
+  !define L_POPFILE_ROOT    $R4   ; current value of POPFILE_ROOT environment variable
+  !define L_POPFILE_USER    $R3   ; current value of POPFILE_USER environment variable
   !define L_REGDATA         $R2   ; data read from registry
-  !define L_STATUS_ROOT     $R1   ; used when reporting whether or not 'popfile.pl' exists
-  !define L_STATUS_USER     $R0   ; used when reporting whether or not 'popfile.cfg' exists
+  !define L_STATUS_ROOT     $R1   ; (1) 'all users' StartUp shortcut total, or
+                                  ; (2) used when reporting whether or not 'popfile.pl' exists
+  !define L_STATUS_USER     $R0   ; (1) 'current user' StartUp shortcut total, or
+                                  ; (2) used when reporting whether or not 'popfile.pl' exists
   !define L_TEMP            $9
   !define L_WIN_OS_TYPE     $8    ; 0 = Win9x, 1 = more modern version of Windows
   !define L_WINUSERNAME     $7    ; user's Windows login name
@@ -443,13 +461,39 @@ start_report:
   SetShellVarContext all
   DetailPrint "AU: $$SMPROGRAMS   = < $SMPROGRAMS >"
   DetailPrint "AU: $$SMSTARTUP    = < $SMSTARTUP >"
+  StrCpy ${L_TEMP} "$SMSTARTUP"
+  DetailPrint ""
+  DetailPrint "Search results for the $\"AU: $$SMSTARTUP$\" folder:"
+  Push "${L_TEMP}"
+  Call AnalyseShortcuts
+  Pop ${L_STATUS_ROOT}
   DetailPrint ""
 
   SetShellVarContext current
   DetailPrint "CU: $$SMPROGRAMS   = < $SMPROGRAMS >"
   DetailPrint "CU: $$SMSTARTUP    = < $SMSTARTUP >"
-  DetailPrint ""
 
+  ; If 'all users' & 'current user' use same StartUp folder there is no need to check it again
+
+  StrCmp ${L_TEMP} "$SMSTARTUP" 0 check_CU_shortcuts
+  DetailPrint ""
+  DetailPrint "($\"CU: $$SMSTARTUP$\" folder is same as $\"AU: $$SMSTARTUP$\" folder)"
+  Goto check_reg_data
+
+check_CU_shortcuts:
+  DetailPrint ""
+  DetailPrint "Search results for the $\"CU: $$SMSTARTUP$\" folder:"
+  Push "$SMSTARTUP"
+  Call AnalyseShortcuts
+  Pop ${L_STATUS_USER}
+  IntOp ${L_TEMP}  ${L_STATUS_ROOT} +  ${L_STATUS_USER}
+  IntCmp ${L_TEMP} 1 check_reg_data check_reg_data
+  DetailPrint ""
+  DetailPrint "'POPFile' total   = ${L_TEMP}"
+  DetailPrint "^^^^^ Error ^^^^^   The $\"'POPFile' total$\" should not be more than one (1)"
+
+check_reg_data:
+  DetailPrint ""
   DetailPrint "------------------------------------------------------------"
   DetailPrint "Obsolete/testbed Registry Entries"
   DetailPrint "------------------------------------------------------------"
@@ -980,6 +1024,136 @@ IsNT_yes:
     ; NT!!!
     Pop $0
     Push 1
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Installer Function: AnalyseShortcuts
+#
+# The Windows installer (setup.exe) and the "Add POPFile User" wizard (adduser.exe) only check
+# for specific StartUp shortcut names so if the user has renamed a POPFile StartUp shortcut
+# created during a previous installation or has created their own shortcut then there may be
+# more than one StartUp shortcut for POPFile. This function analyses all shortcuts in the
+# specified folder and lists those that appear to start POPFile.
+#
+# Inputs:
+#         (top of stack)   - address of the folder containing the shortcuts to be analysed
+#
+# Outputs:
+#         (top of stack)   - number of shortcuts found which appear to start POPFile
+#
+# Usage:
+#
+#         Push "$SMSTARTUP"
+#         Call AnalyseShortcuts
+#         Pop $R0
+#
+#         ; if $R0 is 2 or more then something has gone wrong!
+#
+#--------------------------------------------------------------------------
+
+Function AnalyseShortcuts
+
+  !define L_LNK_FOLDER        $R9   ; folder where the shortcuts (if any) are stored
+  !define L_LNK_HANDLE        $R8   ; file handle used when searching for shortcut files
+  !define L_LNK_NAME          $R7   ; name of a shortcut file
+  !define L_LNK_TOTAL         $R6   ; counts the number of shortcuts we find
+  !define L_POPFILE_TOTAL     $R5   ; total number of shortcuts which appear to start POPFile
+  !define L_SHORTCUT_ARGS     $R4
+  !define L_SHORTCUT_TARGET   $R3
+  !define L_TEMP              $R2
+
+  Exch ${L_LNK_FOLDER}
+  Push ${L_LNK_HANDLE}
+  Push ${L_LNK_NAME}
+  Push ${L_LNK_TOTAL}
+  Push ${L_POPFILE_TOTAL}
+  Push ${L_SHORTCUT_ARGS}
+  Push ${L_SHORTCUT_TARGET}
+  Push ${L_TEMP}
+
+  StrCpy ${L_LNK_TOTAL}     0
+  StrCpy ${L_POPFILE_TOTAL} 0
+
+  IfFileExists "${L_LNK_FOLDER}\*.*" 0 exit
+
+  FindFirst ${L_LNK_HANDLE} ${L_LNK_NAME} "${L_LNK_FOLDER}\*.lnk"
+  StrCmp ${L_LNK_HANDLE} "" all_done_now
+
+examine_shortcut:
+  StrCmp ${L_LNK_NAME} "." look_again
+  StrCmp ${L_LNK_NAME} ".." look_again
+  IfFileExists "${L_LNK_FOLDER}\${L_LNK_NAME}\*.*" look_again
+  IntOp ${L_LNK_TOTAL} ${L_LNK_TOTAL} + 1
+	ShellLink::GetShortCutTarget "${L_LNK_FOLDER}\${L_LNK_NAME}"
+	Pop ${L_SHORTCUT_TARGET}
+	ShellLink::GetShortCutArgs "${L_LNK_FOLDER}\${L_LNK_NAME}"
+	Pop ${L_SHORTCUT_ARGS}
+
+  Push ${L_SHORTCUT_TARGET}
+  Push "popfile"
+  Call PFI_StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 show_details
+  Push ${L_SHORTCUT_ARGS}
+  Push "popfile"
+  Call PFI_StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" look_again
+
+show_details:
+  IntOp ${L_POPFILE_TOTAL} ${L_POPFILE_TOTAL} + 1
+  DetailPrint ""
+  DetailPrint "Shortcut name     = < ${L_LNK_NAME} >"
+  DetailPrint "Shortcut target   = < ${L_SHORTCUT_TARGET} >"
+  StrCpy ${L_TEMP} "found"
+  IfFileExists ${L_SHORTCUT_TARGET} show_args
+  StrCpy ${L_TEMP} "not found"
+
+show_args:
+  StrCmp ${L_SHORTCUT_ARGS} "" no_args
+  DetailPrint "Shortcut argument = < ${L_SHORTCUT_ARGS} >"
+  Goto show_status
+
+no_args:
+  DetailPrint "Shortcut argument = ><"
+
+show_status:
+  DetailPrint "Target status     = ${L_TEMP}"
+
+look_again:
+  FindNext ${L_LNK_HANDLE} ${L_LNK_NAME}
+  StrCmp ${L_LNK_NAME} "" all_done_now examine_shortcut
+
+all_done_now:
+  FindClose ${L_LNK_HANDLE}
+
+exit:
+  DetailPrint ""
+  DetailPrint "*.lnk files found = ${L_LNK_TOTAL}"
+  DetailPrint "POPFile shortcuts = ${L_POPFILE_TOTAL}"
+  IntCmp ${L_POPFILE_TOTAL} 1 restore_regs restore_regs
+  DetailPrint "^^^^^ Error ^^^^^   There should not be more than one (1) POPFile StartUp shortcut here"
+
+restore_regs:
+  StrCpy ${L_LNK_FOLDER} ${L_POPFILE_TOTAL}
+
+  Pop ${L_TEMP}
+  Pop ${L_SHORTCUT_TARGET}
+  Pop ${L_SHORTCUT_ARGS}
+  Pop ${L_LNK_TOTAL}
+  Pop ${L_LNK_NAME}
+  Pop ${L_LNK_HANDLE}
+  Exch ${L_LNK_FOLDER}          ; return number of shortcuts which appear to start POPFile
+
+  !undef L_LNK_FOLDER
+  !undef L_LNK_HANDLE
+  !undef L_LNK_NAME
+  !undef L_LNK_TOTAL
+  !undef L_SHORTCUT_ARGS
+  !undef L_SHORTCUT_TARGET
+  !undef L_TEMP
+
 FunctionEnd
 
 
