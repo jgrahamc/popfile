@@ -91,7 +91,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.54"
+  !define C_VERSION   "0.0.55"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -1141,6 +1141,7 @@ restore_regs:
   Pop ${L_TEMP}
   Pop ${L_SHORTCUT_TARGET}
   Pop ${L_SHORTCUT_ARGS}
+  Pop ${L_POPFILE_TOTAL}
   Pop ${L_LNK_TOTAL}
   Pop ${L_LNK_NAME}
   Pop ${L_LNK_HANDLE}
@@ -1150,6 +1151,7 @@ restore_regs:
   !undef L_LNK_HANDLE
   !undef L_LNK_NAME
   !undef L_LNK_TOTAL
+  !undef L_POPFILE_TOTAL
   !undef L_SHORTCUT_ARGS
   !undef L_SHORTCUT_TARGET
   !undef L_TEMP
