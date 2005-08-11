@@ -1668,6 +1668,7 @@ use_installer_lang:
         !insertmacro PFI_UI_LANG_CONFIG "ENGLISH" "English"
         !insertmacro PFI_UI_LANG_CONFIG "ARABIC" "Arabic"
         !insertmacro PFI_UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
+        !insertmacro PFI_UI_LANG_CONFIG "CATALAN" "Catala"
         !insertmacro PFI_UI_LANG_CONFIG "SIMPCHINESE" "Chinese-Simplified"
         !insertmacro PFI_UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
         !insertmacro PFI_UI_LANG_CONFIG "CZECH" "Czech"

@@ -115,6 +115,7 @@
 
   !insertmacro PFI_LANG_LOAD "Arabic"
   !insertmacro PFI_LANG_LOAD "Bulgarian"
+  !insertmacro PFI_LANG_LOAD "Catalan"
   !insertmacro PFI_LANG_LOAD "SimpChinese"
   !insertmacro PFI_LANG_LOAD "TradChinese"
   !insertmacro PFI_LANG_LOAD "Czech"
