@@ -207,6 +207,7 @@ save_HKCU_root_sfn:
   File "sqlite.exe"
   File "runsqlite.exe"
   File "adduser.exe"
+  File /nonfatal "test\pfidbstatus.exe"
   File /nonfatal "test\pfidiag.exe"
   File "msgcapture.exe"
 

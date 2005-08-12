@@ -423,20 +423,24 @@ Section "un.POPFile Core" UnSecCore
 
   Delete "$G_ROOTDIR\runpopfile.exe"
   Delete "$G_ROOTDIR\adduser.exe"
-  Delete "$G_ROOTDIR\sqlite.exe"
   Delete "$G_ROOTDIR\runsqlite.exe"
-  Delete "$G_ROOTDIR\pfidiag.exe"
+  Delete "$G_ROOTDIR\sqlite.exe"
+  
   Delete "$G_ROOTDIR\msgcapture.exe"
+  Delete "$G_ROOTDIR\pfidbstatus.exe"
+  Delete "$G_ROOTDIR\pfidiag.exe"
   Delete "$G_ROOTDIR\pfimsgcapture.exe"
 
-  IfFileExists "$G_ROOTDIR\pfidiag.exe" try_again
   IfFileExists "$G_ROOTDIR\msgcapture.exe" try_again
-  IfFileExists "$G_ROOTDIR\msgcapture.exe" 0 continue
+  IfFileExists "$G_ROOTDIR\pfidbstatus.exe" try_again
+  IfFileExists "$G_ROOTDIR\pfidiag.exe" try_again
+  IfFileExists "$G_ROOTDIR\pfimsgcapture.exe" 0 continue
 
 try_again:
   Sleep 1000
-  Delete "$G_ROOTDIR\pfidiag.exe"
   Delete "$G_ROOTDIR\msgcapture.exe"
+  Delete "$G_ROOTDIR\pfidbstatus.exe"
+  Delete "$G_ROOTDIR\pfidiag.exe"
   Delete "$G_ROOTDIR\pfimsgcapture.exe"
 
 continue:

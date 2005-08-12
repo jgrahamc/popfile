@@ -1052,6 +1052,14 @@ continue:
   CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
                  "$G_ROOTDIR\runsqlite.exe" "${L_TEMP}"
 
+  ; If the 'POPFile SQlite Database Status Check' utility has been installed, create a
+  ; a shortcut to make it easy to check the integrity of the SQLite database.
+
+  IfFileExists "$G_ROOTDIR\pfidbstatus.exe" 0 stopwords
+  SetFileAttributes "$G_USERDIR\Check database status.lnk" NORMAL
+  CreateShortCut "$G_USERDIR\Check database status.lnk" \
+                 "$G_ROOTDIR\pfidbstatus.exe" "${L_TEMP}"
+
 stopwords:
   IfFileExists "$G_ROOTDIR\pfi-stopwords.default" 0 update_config_ports
 
@@ -1232,7 +1240,7 @@ skip_rel_notes:
                  "$G_USERDIR"
 
 pfidiag_entries:
-  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 silent_shutdown
+  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 dbstatus_check
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk"
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk" \
@@ -1243,6 +1251,22 @@ pfidiag_entries:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Create 'User Data' shortcut.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Create 'User Data' shortcut.lnk" \
                  "$G_ROOTDIR\pfidiag.exe" "/shortcut"
+
+dbstatus_check:
+  IfFileExists "$G_ROOTDIR\pfidbstatus.exe" 0 silent_shutdown
+  Push $G_USERDIR
+  Call PFI_GetSQLdbPathName
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "Not SQLite" silent_shutdown
+
+  ; POPFile is configured to use SQLite so we can create a shortcut to the
+  ; 'POPFile SQLite Database Status Check' utility to make it easy to check
+  ; the integrity of the current user's SQLite database
+
+  SetOutPath "$G_ROOTDIR"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Check database status.lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Check database status.lnk" \
+                 "$G_ROOTDIR\pfidbstatus.exe" "/REGISTRY"
 
 silent_shutdown:
   SetOutPath "$G_ROOTDIR"

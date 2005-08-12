@@ -17,7 +17,8 @@
 #
 #                   (B) The following programs (built using NSIS) are optional:
 #
-#                       (1) pfidiag.exe     (NSIS script: test\pfidiag.nsi)
+#                       (1) pfidbstatus.exe (NSIS script: test\pfidbstatus.nsi)
+#                       (2) pfidiag.exe     (NSIS script: test\pfidiag.nsi)
 #
 # Copyright (c) 2002-2005 John Graham-Cumming
 #

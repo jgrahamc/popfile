@@ -465,7 +465,9 @@ Section "un.ShortCuts" UnSecShortcuts
   DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
   SetDetailsPrint listonly
 
+  Delete "$G_USERDIR\Check database status.lnk"
   Delete "$G_USERDIR\Run SQLite utility.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Check database status.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\User Data ($G_WINUSERNAME).lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
