@@ -1574,6 +1574,20 @@ sub start_parse
 
     $self->{colorized__} = '';
     $self->{colorized__} .= "<tt>" if ( $self->{color__} ne '' );
+
+    # Since Text::Kakasi is not thread-safe, we use it under the
+    # control of a Mutex to avoid a crash if we are running on
+    # Windows.
+
+    if ( $self->{lang__} eq 'Nihongo' ) {
+        if ( $self->{need_kakasi_mutex__} ) {
+            require POPFile::Mutex;
+            $self->{kakasi_mutex__}->acquire();
+        }
+
+        # Open Kakasi dictionary and initialize
+        init_kakasi();
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -1612,6 +1626,16 @@ sub stop_parse
     }
 
     $self->{in_html_tag__} = 0;
+
+    if ( $self->{lang__} eq 'Nihongo' ) {
+        # Close Kakasi dictionary
+        close_kakasi();
+
+        if ( $self->{need_kakasi_mutex__} ) {
+            require POPFile::Mutex;
+            $self->{kakasi_mutex__}->release();
+        }
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -1748,6 +1772,9 @@ sub parse_line
 
                     print "Hit MIME boundary --$1\n" if $self->{debug__};
 
+                    # Decode base64 for every part.
+                    $self->{colorized__} .= $self->clear_out_base64() . "\n\n";
+
                     $self->{in_headers__} = 1;
                 } else {
 
@@ -1830,6 +1857,12 @@ sub clear_out_base64
         print "Base64 data: " . $self->{base64__} . "\n" if ($self->{debug__});
 
         $decoded = decode_base64( $self->{base64__} );
+
+        if ( $self->{lang__} eq 'Nihongo' ) {
+            $decoded = convert_encoding( $decoded, $self->{charset__}, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
+            $decoded = parse_line_with_kakasi( $self, $decoded );
+        }
+
         $self->parse_html( $decoded, 1 );
 
         print "Decoded: " . $decoded . "\n" if ($self->{debug__});
@@ -2558,41 +2591,48 @@ sub parse_line_with_kakasi
 {
     my ( $self, $line ) = @_;
 
+    # If the line does not contain Japanese characters, do nothing
+    return $line if ( $line =~ /^[\x00-\x7F]*$/ );
+
     # This is used to parse Japanese
     require Text::Kakasi;
 
-    # Split Japanese line into words using Kakasi Wakachigaki mode(-w
-    # is passed to Kakasi as argument). Both input and ouput encoding
-    # are EUC-JP.
-    #
-    # Since Text::Kakasi is not thread-safe, we use it under the
-    # control of a semaphore to avoid a crash if we are running on
-    # Windows in a forked process.
-    #
-    # Note that this requires us to detect a sub-process by looking at
-    # the value of $$.  In ActivePerl a negative PID is in a
-    # sub-process If this were to change then this code would not
-    # work.
-
-    my $need_semaphore = ( ( $^O eq 'MSWin32' ) && ( $$ < 0 ) );
-
-    if ( $need_semaphore ) {
-        if ( !defined( $self->{mutex__} ) ) {
-   	    require POPFile::Mutex;
-  	    $self->{mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
-        }
-        $self->{mutex__}->acquire();
-    }
-
-    Text::Kakasi::getopt_argv("kakasi", "-w -ieuc -oeuc");
+    # Split Japanese line into words using Kakasi Wakachigaki mode
     $line = Text::Kakasi::do_kakasi($line);
-    Text::Kakasi::close_kanwadict();
-
-    if ( $need_semaphore ) {
-        $self->{mutex__}->release();
-    }
 
     return $line;
+}
+
+# ----------------------------------------------------------------------------
+#
+# init_kakasi
+#
+# Open the kanwa dictionary and initialize the parameter of Kakasi.
+#
+# ----------------------------------------------------------------------------
+sub init_kakasi
+{
+    require Text::Kakasi;
+
+    # Initialize Kakasi with Wakachigaki mode(-w is passed to 
+    # Kakasi as argument). Both input and ouput encoding are 
+    # EUC-JP.
+
+    Text::Kakasi::getopt_argv("kakasi", "-w", "-ieuc", "-oeuc");
+}
+
+# ----------------------------------------------------------------------------
+#
+# close_kakasi
+#
+# Close the kanwa dictionary of Kakasi.
+#
+# ----------------------------------------------------------------------------
+sub close_kakasi
+{
+    require Text::Kakasi;
+
+    Text::Kakasi::close_kanwadict();
 }
 
 

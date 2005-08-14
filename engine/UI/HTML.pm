@@ -2951,6 +2951,12 @@ sub history_page
 
                  if ($header eq 'subject') {
                      $col_data{History_If_Subject_Column} = 1;
+
+                     if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) eq 'Nihongo' ) {
+                         # Remove wrong characters as euc-jp.
+                         $$row[4] =~ s/\G((?:$euc_jp)*)([\x80-\xFF](?=(?:$euc_jp)*))?/$1/og;
+                     }
+
                      $col_data{History_Cell_Title}    = $$row[4];
                      $col_data{History_Cell_Value} =
                          $self->shorten__( $$row[4], $length );
