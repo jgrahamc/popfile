@@ -17,7 +17,7 @@ body {
   border-collapse: collapse;
   background-color: #000000;
   color: #ffffff;
-  border-spacing: 0px;
+  border-spacing: 0;
 }
 
 .shellTopLeft {
@@ -110,25 +110,10 @@ td.head {
   font-size: 10pt;
   background-image: url(menu.gif);
   width: 100%;
-  padding-top: 20px;
 }
 
-.menuSelected {
-  background-image: url(buttonSelected.gif);
+.menuSelected, .menuStandard {
   width: 124px;
-  color: #000000;
-  background-color: transparent;
-  background-repeat: no-repeat;
-  text-indent: 8px;
-}
-
-.menuStandard {
-  background-image: url(buttonUnselected.gif);
-  width: 124px;
-  color: #000000;
-  background-color: transparent;
-  background-repeat: no-repeat;
-  text-indent: 8px;
 }
 
 .menuIndent {
@@ -138,13 +123,13 @@ td.head {
 }
 
 tr.rowEven {
-  font-size:  0.9em ;
+  font-size: 0.9em;
   color: #FFFFFF;
   background-color: transparent;
 }
 
 tr.rowOdd {
-  font-size:  0.9em ;
+  font-size: 0.9em;
   color: #FFFFFF;
   background-color: #101010;
 }
@@ -186,21 +171,6 @@ td.settingsPanel {
   color: #FFFFFF;
   font-family: sans-serif;
   background-color: #181818;
-}
-
-td.accuracy0to49 {
-  color: black;
-  background-color: red;
-}
-
-td.accuracy50to93 {
-  color: black;
-  background-color: yellow;
-}
-
-td.accuracy94to100 {
-  color: black;
-  background-color: green;
 }
 
 div.error01 {
@@ -287,6 +257,10 @@ select, input, textarea {
   background-color: #313131;
 }
 
+input.checkbox {
+  background-color: transparent;
+}
+
 .submit, .toggleOn, .toggleOff, .undoButton, .deleteButton, .reclassifyButton {
   border-right: #000000 2px solid;
   border-top: #FFFFFF 2px solid;
@@ -306,6 +280,18 @@ a:link:hover, a:visited:hover {
   background-color: #EFEFF7;
 }
 
+.menuSelected a, .menuStandard a:hover {
+  color: #000000;
+  background-image: url(buttonSelected.gif);
+  padding-left: 6px;
+}
+
+.menuStandard a, .menuSelected a:hover {
+  color: #FFFFFF;
+  background-image: url(buttonUnselected.gif);
+  padding-left: 6px;
+}
+
 .menuSpacer {
   padding: 0;
   margin: 0;
@@ -320,9 +306,141 @@ tr.rowBoundary {
   background-color: #050505;
 }
 
+/*********************************************************/
+/* Shell structure */
+
+.shellStatusMessage {	// error message bar that appears between shelltop and shell
+  color: #000000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+  width: 100%;
+}
+
+.shellErrorMessage {	// error message bar that appears between shelltop and shell
+  color: #FF0000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+  width: 100%;
+}
+
+/*********************************************************/
+/* Menu Settings */
+
+.menuLink {             /* makes entire menu tab clickable */
+  display: block;
+  width: 100%;
+}
+
+/*********************************************************/
+/* Messages */
+
 div.helpMessage {
   background-color: #101010;
   border: 1px solid #FFFFFF;
   padding: 0.4em;
-  padding-bottom: 0;
+}
+
+div.helpMessage form {
+  margin: 0;
+}
+
+/*********************************************************/
+/* Form Labels */
+
+th.historyLabel {
+  text-align: left;	// optional
+}
+
+/*********************************************************/
+/* Positioning */
+
+.historyNavigatorTop, .historyNavigatorBottom {
+  text-align: right;
+  vertical-align: top;
+}
+
+.historyNavigatorTop form, .historyNavigatorBottom form {
+  display:inline;	// optional, lets Go box be on same line as navigation widget
+}
+
+.refreshLink {		// optional, link can be hidden
+  margin-top: 0.5em;
+}
+
+h2.history {		// optional
+  margin-top: 0;
+  margin-bottom: 0.3em;
+}
+
+.search {		// search part of search widget
+  display: inline;
+  float: left;
+  padding-right: 1em;
+}
+
+.filter {		// filter part of search widget
+  display: inline;	// force search widget forms to appear on one line
+}
+
+.removeButtonsTop {	// spacing for top remove buttons (can be used to hide the top set of buttons)
+  padding-bottom: 1em;
+}
+
+.viewHeadings {
+  display: inline;
+}
+
+/*********************************************************/
+/* Config Bars */
+
+.configBar, .configBarHidden {
+  padding-top: 1em;
+}
+
+.configBarTitle {
+  font-size: 1em;
+  display: inline;
+  margin-left: 0.4em;
+}
+
+.configBarBody form {
+  margin: 0;
+}
+
+.configBarOption {
+  border: 1px solid #FFFFFF;
+  margin: 0.3em;
+  padding: 0.3em;
+  display: inline;
+  float: left;
+  min-height: 3em;
+  background-color: #101010;
+}
+
+.checkLabel {
+  white-space: nowrap;
+}
+
+.configBarBody input.submit {
+  margin-top: 0.1em;
+}
+
+.configBarBody label.configurationLabel {
+  display: block;
+  font-weight: normal;
+}
+
+/*********************************************************/
+/* History Column Controls */
+
+.columnControls {
+  white-space:nowrap;
+  vertical-align: top;
+  width: 10px;
+}
+
+.columnRemove, .columnMove {  /* makes area around the controls clickable for bigger target */
+  display: block;
+  width:100%;
+  height: 1em;
 }

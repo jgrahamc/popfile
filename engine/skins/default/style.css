@@ -159,7 +159,10 @@ div.helpMessage {
   background-color: #DFDFAF;
   border: 2px solid #CCCC99;
   padding: 0.4em;
-  padding-bottom: 0;
+}
+
+div.helpMessage form {
+  margin: 0;
 }
 
 /*********************************************************/
@@ -266,6 +269,10 @@ h2.history {
   padding-bottom: 1em;
 }
 
+.viewHeadings {
+  display: inline;
+}
+
 /*********************************************************/
 /* Config Bar */
 
@@ -274,12 +281,18 @@ h2.history {
 }
 
 .configBarTitle {
+  display: inline;
+  font-size: 1.0em;
+}
+
+.configBarTitle a {
   border: 2px #CCCC99 solid;
   padding: 0.3em;
   padding-bottom: 0;
   margin-left: 0.3em;
   background-color: #CCCC99;
   font-weight: bold;
+  font-size: 1.0em;
 }
 
 .configBarBody {

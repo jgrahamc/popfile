@@ -1,14 +1,33 @@
 body {
   background-color: #FFFFFF;
-  border: none;
+  border: 0;
   font-family: tahoma, arial, sans-serif;
-  color: black;
-  margin: 10px 20px 20px 20px; 
-  font-size: 10pt;}
+  color: #000000;
+  margin: 10px 20px 20px 20px;
+  font-size: 10pt;
+}
 
 h2 {
   font-size: 11pt;
   font-weight: bold;
+}
+
+h2.history {
+  margin-top: 0;
+  margin-bottom: 0.3em;
+}
+
+.search {
+  display: inline;
+  float: left;
+}
+
+.filter {
+  display: inline;
+}
+
+.removeButtonsTop {
+  padding-bottom: 1em;
 }
 
 .shell, .shellTop {
@@ -21,6 +40,20 @@ h2 {
   background-color: #ffcc66;
 }
 
+.shellStatusMessage {
+  color: #000000;
+  background-color: #ff9900;
+  border: #000000 2px solid;
+  width: 100%;
+}
+
+.shellErrorMessage {
+  color: #FF0000;
+  background-color: #ff9900;
+  border: #000000 2px solid;
+  width: 100%;
+}
+
 input, select, textarea {
   border-right: #000000 1px solid;
   border-top: #000000 1px solid;
@@ -29,6 +62,15 @@ input, select, textarea {
   border-bottom: #000000 1px solid;
   font-family: tahoma, arial, serif;
   background-color: #faebd7;
+}
+
+input.checkbox {
+  background-color: transparent;
+  border: 0;
+}
+
+input.submit:hover {
+  background-color: #FFFFFF;
 }
 
 .menu {
@@ -55,6 +97,11 @@ input, select, textarea {
   color: black;
   background-color: #ffcc66;
   font-size: 10pt;
+}
+
+.menuLink {
+  display: block;
+  width: 100%;
 }
 
 tr.rowEven {
@@ -97,9 +144,9 @@ hr {
 }
 
 td.naked {
-  padding: 0px; 
-  margin: 0px; 
-  border: none;
+  padding: 0; 
+  margin: 0; 
+  border: 0;
 }
 
 td.logo2menuSpace {
@@ -125,9 +172,9 @@ table.head {
   font-family: tahoma, arial, sans-serif;
 }
 
-a.shutdownLink {
+a.logoutLink, a.shutdownLink {
   font-size: 10pt;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 td.footerBody {
@@ -152,10 +199,7 @@ table.settingsTable {
 }
 
 table.openMessageTable, table.lookupResultsTable {
-  border-right: #ff9900 3px solid;
-  border-top: #ff9900 3px solid;
-  border-left: #ff9900 3px solid;
-  border-bottom: #ff9900 3px solid;
+  border: 2px solid #000000;
 }
 
 td.openMessageCloser {
@@ -264,6 +308,11 @@ table.historyButtonsBottom {
 
 td.historyNavigatorTop {
   text-align: right;
+  vertical-align: top;
+}
+
+.historyNavigatorTop form, .historyNavigatorBottom form {
+  margin: 0.2em 0;
 }
 
 td.historyNavigatorBottom {
@@ -288,12 +337,93 @@ span.securityWidgetState {
 }
 
 tr.rowBoundary {
-  background-color: #faebd7;
+  background-color: #000000;
 }
 
 div.helpMessage {
   background-color: #ff9900;
-  border: 1px solid black;
+  border: #000000 2px solid;
+  padding: 0.3em;
+}
+
+div.helpMessage form {
+  margin: 0;
+}
+
+.viewHeadings {
+  display: inline;
+}
+
+td.top20 td.historyNavigatorTop a + a {
+  border-left: 1px solid black;
+  padding-left: 0.5em;
+}
+
+/*********************************************************/
+/* Config Bars */
+
+.configBar, .configBarHidden {
+  padding-top: 1em;
+}
+
+.configBarTitle {
+  font-size: 1em;
+  display: inline;
+}
+
+.configBarTitle a {
+  border: #000000 2px solid;
   padding: 0.3em;
   padding-bottom: 0;
+  margin-left: 0.3em;
+  background-color: #ff9900;
+  font-weight: bold;
+  font-size: 1em;
+  color: black;
+}
+
+.configBarBody {
+  background-color: #ffcc66;
+  border: #000000 1px solid;
+}
+
+.configBar td {
+  border: #000000 1px solid;
+}
+
+.configBarBody form {
+  margin: 0;
+}
+
+.configBarOption {
+  border: #000000 1px solid;
+  margin: 0.3em;
+  padding: 0.3em;
+  display: inline;
+  float: left;
+  min-height: 3em;
+  background-color: #ff9900;
+}
+
+.checkLabel {
+  white-space: nowrap;
+}
+
+.configBarBody label.configurationLabel {
+  display: block;
+}
+
+/*********************************************************/
+/* History Column Controls */
+
+.columnControls {
+  white-space:nowrap;
+  vertical-align: top;
+  width: 10px;
+}
+
+.columnRemove, .columnMove {
+  display: block;
+  width:100%;
+  height: 1em;
 }

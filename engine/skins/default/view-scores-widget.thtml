@@ -1,7 +1,7 @@
 <a name="scores">
-    <b>
+    <h4 class="viewHeadings">
         <TMPL_VAR NAME="Localize_Scores">
-    </b>
+    </h4>
 </a>
 <hr />
 <table class="top20Words">
@@ -81,14 +81,14 @@
 <table width="100%">
     <tr>
         <td class="top20" align="left">
-            <b>
-                <TMPL_IF NAME="View_If_Format">
+            <TMPL_IF NAME="View_If_Format">
 
+            <h4 class="viewHeadings">
                 <TMPL_VAR NAME="Localize_View_WordMatrix"> (<TMPL_VAR NAME="View_View">)
+            </h4>
 
-                </TMPL_IF>
+            </TMPL_IF>
 
-            </b>
         </td>
         <td class="historyNavigatorTop">
 
@@ -198,9 +198,9 @@
     <TMPL_IF NAME="If_chart">
 
     <hr />
-    <b>
+    <h4 class="viewHeadings">
         <TMPL_VAR NAME="Localize_View_Chart">
-    </b>
+    </h4>
     <p>
     <table>
         <tr>

@@ -4,9 +4,9 @@
 <form action="/magnets" method="post">
     <input type="hidden" name="count" value="<TMPL_VAR NAME="View_QuickMagnets_Count">" />
     <hr />
-    <b>
+    <h4 class="viewHeadings">
         <TMPL_VAR NAME="Localize_QuickMagnets">
-    </b>
+    </h4>
     <table class="top20Words">
         <tr>
             <th scope="col">
@@ -18,7 +18,7 @@
         </tr>
 
             <TMPL_LOOP NAME="View_QuickMagnets_Loop">
-            
+
         <tr>
             <td scope="col">
                 <TMPL_VAR NAME="View_QuickMagnets_Type">: 

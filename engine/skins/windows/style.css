@@ -359,7 +359,10 @@ div.helpMessage {
   border: 1px solid black;
   padding: 0.4em;
   margin: 0.3em;
-  padding-bottom: 0;
+}
+
+div.helpMessage form {
+  margin: 0;
 }
 
 .shellStatusMessage {
@@ -390,6 +393,15 @@ table.settingsTable + br {
   display: none;
 }
 
+.viewHeadings {
+  display: inline;
+}
+
+td.top20 td.historyNavigatorTop a + a {
+  border-left: 1px solid black;
+  padding-left: 0.3em;
+}
+
 /*********************************************************/
 /* Config Bar */
 
@@ -402,6 +414,10 @@ table.settingsTable + br {
   margin-top: 3em;
   padding-top: 1em;
   padding-bottom: 1em;
+}
+
+.configBarTitle {
+  display: inline;
 }
 
 .configBarTitle A,

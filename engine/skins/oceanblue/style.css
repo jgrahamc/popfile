@@ -378,7 +378,10 @@ div.helpMessage {
   background-color: lightblue;
   border: 1px solid black;
   padding: 0.4em;
-  padding-bottom: 0;
+}
+
+div.helpMessage form {
+  margin: 0;
 }
 
 span.graphFont {
@@ -412,22 +415,32 @@ a:link:hover, a:visited:hover {
   display: inline;
 }
 
+.viewHeadings {
+  display: inline;
+}
+
 /* Hide Tan Hack from IE5-mac \*/
 * html .shell  {height: 1%;}
 /* End hide from IE5-mac */
-
 
 /*********************************************************/
 /* Config Bar */
 
 .configBar, .configBarHidden {
-  padding-top: 0.5em;
+  padding-top: 0;
 }
 
 .configBarTitle {
+  display: inline;
+  font-weight: normal;
+  font-size: 1em;
+}
+
+.configBarTitle a {
   border: 1px solid white;
   color: white;
   background-color: #2175bc;
+  font-size: 1.1em;
 }
 
 .configBarTitle:hover {

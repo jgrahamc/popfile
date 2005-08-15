@@ -290,10 +290,168 @@ tr.rowBoundary {
   background-color: #808080;
 }
 
+/*********************************************************/
+/* Shell structure */
+
+.shellStatusMessage {
+  color: #000000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+  width: 100%;
+}
+
+.shellErrorMessage {
+  color: #FF0000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+  width: 100%;
+}
+
+/*********************************************************/
+/* Menu Settings */
+
+.menuLink {
+  display: block;
+  width: 100%;
+}
+
+/*********************************************************/
+/* Messages */
+
 div.helpMessage {
   color: black;
   background-color: #C6CBD2;
-  border: 1px solid #000000;
+  border: 2px groove #FFFFFF;
   padding: 0.3em;
-  padding-bottom: 0;
+}
+
+div.helpMessage form {
+  margin: 0;
+}
+
+/*********************************************************/
+/* Form Labels */
+
+th.historyLabel {
+  text-align: left;
+}
+
+/*********************************************************/
+/* Positioning */
+
+.historyNavigatorTop, .historyNavigatorBottom {
+  text-align: right;
+  vertical-align: top;
+}
+
+.historyNavigatorTop form, .historyNavigatorBottom form {
+  display:inline;
+}
+
+.refreshLink {
+  margin-top: 0.5em;
+}
+
+h2.history {
+  margin-top: 0;
+  margin-bottom: 0.3em;
+}
+
+.search {
+  display: inline;
+  float: left;
+  padding-right: 1em;
+}
+
+.filter {
+  display: inline;
+}
+
+.removeButtonsTop {
+  padding-bottom: 1em;
+}
+
+.viewHeadings {
+  display: inline;
+}
+
+/*********************************************************/
+/* Config Bars */
+
+.configBar, .configBarHidden {
+  padding-top: 1em;
+}
+
+.configBarTitle {
+  font-size: 1em;
+  display: inline;
+}
+
+.configBarTitle a {
+  padding: 0.3em 1em 0;
+  margin-left: 1em;
+  font-size: 1em;
+  text-decoration: none;
+  background-color: #D4D0C8;
+  border-color: #FFFFFF;
+  border-style: groove groove none groove;
+  border-width: 2px;
+  color: black;
+}
+
+.configBarHidden .configBarTitle a {
+  border-style: groove;
+  margin-left: 0;
+}
+
+.configBarBody {
+  background-color: #C6CBD2;
+  border-bottom: 2px groove #FFFFFF;
+}
+
+.configBar td {
+  border: 2px groove #FFFFFF;
+  border-bottom: 0;
+}
+
+.configBarBody form {
+  margin: 0;
+}
+
+.configBarOption {
+  border: 1px solid #000000;
+  border: 2px groove #FFFFFF;
+  margin: 0.3em;
+  padding: 0.3em;
+  display: inline;
+  float: left;
+  min-height: 3em;
+  background-color: #D9DEE7;
+}
+
+.checkLabel {
+  white-space: nowrap;
+}
+
+.configBarBody input.submit {
+  margin-top: 0.1em;
+}
+
+.configBarBody label.configurationLabel {
+  display: block;
+}
+
+/*********************************************************/
+/* History Column Controls */
+
+.columnControls {
+  white-space:nowrap;
+  vertical-align: top;
+  width: 10px;
+}
+
+.columnRemove, .columnMove {
+  display: block;
+  width:100%;
+  height: 1em;
 }

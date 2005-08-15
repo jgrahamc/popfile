@@ -1,9 +1,10 @@
 /*********************************************************/
 /* Main Body */
+
 body {
-  background-color: white;
+  background-color: #FFFFFF;
   font-family: tahoma, sans-serif;
-  font-size: 8pt;
+  font-size: 0.7em;
   font-weight: normal;
   color: #000000;
   margin: 3px;
@@ -16,8 +17,9 @@ body {
   color: #000000;
   background-color: #EDEDCA;
   border: 2px #CCCC99 solid;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
+  border-collapse: collapse;
 }
 
 .shellStatusMessage { 
@@ -41,13 +43,18 @@ table.head {
 
 td.head {
   font-weight: bold;
-  font-size: 14pt;
+  font-size: 1.4em;
   color: #666666;
 }
 
 .head a {
-  font-size: 12pt;
+  font-size: 1.2em;
   font-weight: normal;
+  text-decoration: none;
+}
+
+.head a:hover {
+  text-decoration: underline;
 }
 
 table.footer {
@@ -59,8 +66,7 @@ td.footerBody {
   text-align: center;
   padding-left: 5%;
   padding-right: 5%;
-  font-size: 8pt;
-  font-weight: bold;
+  font-size: 1em;
 }
 
 .bottomLink {
@@ -68,8 +74,7 @@ td.footerBody {
 }
 
 .bottomLink:hover {
-  background-color: #FFFFCC;
-  color: #000000;
+  text-decoration: underline;
 }
 
 td.naked {
@@ -86,8 +91,6 @@ td.logo2menuSpace {
 /* Menu Settings */
 
 .menu {
-  font-size: 12pt;
-  font-weight: normal;
   width: 100%;
 }
 
@@ -100,8 +103,8 @@ td.logo2menuSpace {
 
 .menuSelected, .menuSelected a {
   color: #000000;
-  font-size: 14pt;
-  font-weight: normal;
+  font-size: 1.1em;
+  font-weight: bold;
   text-decoration: none;
 }
 
@@ -116,8 +119,8 @@ td.logo2menuSpace {
 .menuStandard, .menuStandard a {
   background-color: #EDEDCA;
   color: #0000ff;
-  font-size: 14pt;
-  font-weight: normal;
+  font-size: 1.1em;
+  font-weight: bold;
   text-decoration: none;
 }
 
@@ -178,6 +181,10 @@ tr.rowEven a, tr.rowOdd a {
 }
 
 tr.rowEven a:hover, tr.rowOdd a:hover {
+  text-decoration: underline;
+}
+
+tr.rowEven:hover, tr.rowOdd:hover {
   color: #000000;
   background-color: #FFFFCC;
 }
@@ -196,44 +203,41 @@ table.lookupResultsTable {
 }
 
 td.naked {
-  padding: 0px; 
-  margin: 0px; 
-  border: none
+  padding: 0;
+  margin: 0;
+  border: 0;
 }
 
 /*********************************************************/
 /* Messages */
 
-div.error01 {
-  background-color: transparent;
-  color: red;
-  font-size: larger;
-}
-
-div.error02 {
-  background-color: transparent;
-  color: red;
-}
-
 div.helpMessage {
   background-color: #DFDFAF;
   border: 2px solid #CCCC99;
   padding: 0.4em;
-  padding-bottom: 0;
+}
+
+div.helpMessage form {
+  margin: 0;
 }
 
 /*********************************************************/
 /* Form Labels */
 
 th.historyLabel {
+  text-align: left;
   font-weight: normal;
-  font-size: 9pt;
+  font-size: 1.1em;
   text-decoration: none;
 }
 
 em.historyLabelSort {
   font-weight: bold;
   font-style: normal;
+}
+
+th.historyLabel a {
+  text-decoration: none;
 }
 
 th.historyLabel a:hover {
@@ -288,9 +292,12 @@ th.historyLabel a:hover {
   vertical-align: top;
 }
 
+.historyNavigatorTop a, .historyNavigatorBottom a {
+  text-decoration: none;
+}
+
 .historyNavigatorTop a:hover, .historyNavigatorBottom a:hover {
-  background-color: #EEEEEE;
-  color: #000000;
+  text-decoration: underline;
 }
 
 .historyNavigatorTop form, .historyNavigatorBottom form {
@@ -307,15 +314,15 @@ th.historyLabel a:hover {
 
 h2.history {
   margin-top: 0;
-  margin-bottom: 0.3em;
-  font-size: 14pt;
+  margin-bottom: 0.2em;
+  font-size: 1.5em;
   font-weight: normal;
 }
 
 .search {
   display: inline;
   float: left;
-  padding-right: 1em;
+  padding-right: 0.4em;
 }
 
 .filter {
@@ -326,20 +333,31 @@ h2.history {
   padding-bottom: 1em;
 }
 
+.viewHeadings {
+  display: inline;
+}
+
 /*********************************************************/
 /* Config Bar */
 
-.configBar, .configBarHidden {
-  padding-top: 1em;
+.configBarTitle {
+  display: inline;
+  font-size: 1.1em;
 }
 
-.configBarTitle {
+.configBarTitle a {
   border: 2px #CCCC99 solid;
   padding: 0.3em;
   padding-bottom: 0;
   margin-left: 0.3em;
   background-color: #CCCC99;
   font-weight: bold;
+  font-size: 1.1em;
+  text-decoration: none;
+}
+
+.configBarTitle a:hover {
+  text-decoration: underline;
 }
 
 .configBarBody {
@@ -389,7 +407,7 @@ h2.history {
 
 .columnRemove, .columnMove {
   display: block;
-  width:100%;
+  width: 100%;
   height: 1em;
 }
 
@@ -397,7 +415,7 @@ h2.history {
 
 input, select, .submit {
   font-family: tahoma, sans-serif;
-  font-size: 8pt;
+  font-size: 1em;
   font-weight: normal;
   padding: 0;
   margin: 0;
@@ -405,7 +423,7 @@ input, select, .submit {
 
 tt {
   font-family: "lucida console", courier, sans-serif;
-  font-size: 9pt;
+  font-size: 1.1em;
   font-weight: normal;
 }
 

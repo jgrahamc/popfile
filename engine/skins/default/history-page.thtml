@@ -4,8 +4,7 @@
 <TMPL_IF NAME="If_Show_Bucket_Help">
 
 <div class="helpMessage">
-    <p>
-        <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
+    <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
     <p />
     <form method="post" action="/buckets">
         <input type="submit" class="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
@@ -17,8 +16,7 @@
 <TMPL_IF NAME="If_Show_Training_Help">
 
 <div class="helpMessage">
-    <p>
-        <TMPL_VAR NAME="Localize_Help_Training">
+    <TMPL_VAR NAME="Localize_Help_Training">
     <p />
     <form method="post" action="/buckets">
         <input type="submit" class="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
@@ -246,9 +244,9 @@
                    <input type="submit" class="submit removeButton" name="clearall" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemoveAll">')" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" title="<TMPL_VAR NAME="Localize_tip_History_RemoveAll">" />
                 </div>
             </td>
-            <td>
+            <th scope="col" class="historyLabel">
                 <input type="submit" class="submit reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" title="<TMPL_VAR NAME="Localize_tip_History_Reclassify">" />
-            </td>
+            </th>
         </tr>
     </table>
 </form>

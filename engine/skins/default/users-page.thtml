@@ -20,7 +20,7 @@
 <table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%">
     <tr>
         <td class="settingsPanel" valign="top">
-            <h3 class="users"><TMPL_VAR NAME="Localize_Users_Create"></h3>
+            <h2 class="users"><TMPL_VAR NAME="Localize_Users_Create"></h2>
 
             <form action="/users" method="post">
            <TMPL_VAR NAME="Localize_Users_CreateUser">:
@@ -39,7 +39,7 @@
             <p >
             <TMPL_IF NAME="Users_If_Remove">
                 <hr />
-                <h3 class="users"><TMPL_VAR NAME="Localize_Users_Remove"></h3>
+                <h2 class="users"><TMPL_VAR NAME="Localize_Users_Remove"></h2>
 
                 <form action="/users" method="post">
                 <TMPL_VAR NAME="Localize_Users_RemoveUser">:
@@ -55,7 +55,7 @@
             </TMPL_IF>
         </td>
         <td class="settingsPanel" valign="top">
-            <h3 class="users"><TMPL_VAR NAME="Localize_Users_Edit"></h3>
+            <h2 class="users"><TMPL_VAR NAME="Localize_Users_Edit"></h2>
 
             <form action="/users" method="post">
             <TMPL_VAR NAME="Localize_Users_EditUser">:
@@ -71,7 +71,7 @@
              
             <TMPL_IF NAME="Users_If_Editing_User">
                 <br /><hr />
-<h3><TMPL_VAR NAME="Localize_Users_Accounts"> (<TMPL_VAR NAME="Users_Edit_User_Name">)</h3>
+<h2><TMPL_VAR NAME="Localize_Users_Accounts"> (<TMPL_VAR NAME="Users_Edit_User_Name">)</h2>
 
         <form action="/users" method="post">
     <TMPL_IF NAME="Users_If_Accounts">
@@ -124,7 +124,7 @@
         </form>
 
                 <hr />
-                <h3><TMPL_VAR NAME="Localize_Users_Parameters"> (<TMPL_VAR NAME="Users_Edit_User_Name">)</h3>
+                <h2><TMPL_VAR NAME="Localize_Users_Parameters"> (<TMPL_VAR NAME="Users_Edit_User_Name">)</h2>
                  
             <form action="/users" method="post">
                 <table width="100%">
