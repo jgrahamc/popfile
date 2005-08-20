@@ -121,7 +121,7 @@
 
   Name                   "POPFile IMAP Updater"
 
-  !define C_PFI_VERSION  "0.0.5"
+  !define C_PFI_VERSION  "0.0.6"
 
   ; Mention the wizard's version number in the window title
 
@@ -459,7 +459,7 @@
   !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_3        "(to get the most up-to-date revision using CVS data)"
   !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_4        "(where x is the required revision number, starting at 1)"
   !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_5        "To get the most recent revision, set x to a huge number like 999"
-  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_ALL      "$(PIU_LANG_MB_BADOPTION_1)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_2)${MB_NL}${MB_NL}updateimap.exe${MB_NL}$(PIU_LANG_MB_BADOPTION_3)${MB_NL}${MB_NL}or${MB_NL}${MB_NL}update.exe /revision=1.x${MB_NL}$(PIU_LANG_MB_BADOPTION_4)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_5)"
+  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_ALL      "$(PIU_LANG_MB_BADOPTION_1)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_2)${MB_NL}${MB_NL}updateimap.exe${MB_NL}$(PIU_LANG_MB_BADOPTION_3)${MB_NL}${MB_NL}or${MB_NL}${MB_NL}updateimap.exe /revision=1.x${MB_NL}$(PIU_LANG_MB_BADOPTION_4)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_5)"
 
   !insertmacro PLS_TEXT PIU_LANG_ANALYSISFAILED_1      "Sorry, unable to determine the most recent revision!"
   !insertmacro PLS_TEXT PIU_LANG_ANALYSISFAILED_2      "You can specify a particular revision using the command"
