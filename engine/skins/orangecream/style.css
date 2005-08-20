@@ -643,6 +643,7 @@ h2.history {
 .checkLabel {
   border: 1px solid #FAE1C8;
   white-space: nowrap;
+  font-size: 0.9em;
 }
 
 .configBarBody input.submit {
