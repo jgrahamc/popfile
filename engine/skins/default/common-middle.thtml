@@ -46,7 +46,7 @@
             </td>
             <td class="menuSpacer"></td>
             <td class="<TMPL_VAR NAME="Common_Middle_Tab2">" align="center">
-                <a class="menuLink" href="/magnets?start_magnet=0" title="<TMPL_VAR NAME="Localize_tip_Menu_Magnets">"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
+                <a class="menuLink" href="/magnets" title="<TMPL_VAR NAME="Localize_tip_Menu_Magnets">"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
             </td>
             <TMPL_IF NAME="Common_Middle_If_CanAdmin">
                 <td class="menuSpacer"></td>
