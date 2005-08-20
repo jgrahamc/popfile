@@ -477,10 +477,10 @@ tip_Admin_ReportStats                   0.22 text should be put back
 
 tip_Footer_HomePage                     Visit the POPFile home page
 tip_Footer_Manual                       The original POPFile documentation (slightly outdated)
-tip_Footer_Documentation                POPFile's documentation wiki
+tip_Footer_Wiki                         POPFile's documentation wiki
 tip_Footer_FAQ                          POPFile Frequently Asked Questions
 tip_Footer_Version                      POPFile version number
 tip_Footer_Login                        Date and time last accessed by this user
 tip_Footer_RFE                          Have an idea to improve POPFile? Let us know.
 tip_Footer_MailingList                  Want to hear about changes to POPFile?  Sign up.
-tip_Footer_Donate                       Like POPFile?  Contribute to making it more successful.
+tip_Footer_FeedMe                       Like POPFile?  Contribute to making it more successful.
