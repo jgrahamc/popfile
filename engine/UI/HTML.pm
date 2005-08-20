@@ -166,6 +166,10 @@ sub initialize
 
     $self->config_( 'strict_templates', 0 );
 
+    # Whether to allow Javascript
+
+    $self->config_( 'allow_javascript', 1 );
+
     # Load skins
 
     $self->load_skins__();
@@ -3426,6 +3430,7 @@ sub load_template__
                        $self->user_config_( $user, 'show_configbars' ),
                    'Common_Middle_If_CanAdmin' =>
                        $self->user_global_config_( $user, 'can_admin' ),
+                   'If_Javascript_OK'          => $self->config_( 'allow_javascript' ),
                    'Configuration_Action'      => $page );
 
     $self->{skin_root} = $root;
