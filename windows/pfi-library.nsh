@@ -35,15 +35,16 @@
 #  (2) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
 #  (3) BACKUP           defined in backup.nsi (POPFile 'User Data' Backup utility)
 #  (4) DBSTATUS         defined in test\pfidbstatus.nsi (POPFile SQLite Database Status Check)
-#  (5) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
-#  (6) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
-#  (7) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
-#  (8) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
-#  (9) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-# (10) RUNSQLITE        defined in runsqlite.nsi (simple front-end for sqlite.exe/sqlite3.exe)
-# (11) STOP_POPFILE     defined in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
-# (12) TRANSLATOR       defined in test\translator.nsi (main installer translations testbed)
-# (13) TRANSLATOR_AUW   defined in test\transAUW.nsi ('Add POPFile User' translations testbed)
+#  (5) IMAPUPDATER      defined in add-ons\updateimap.nsi (POPFile 'IMAP Updater' wizard)
+#  (6) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
+#  (7) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
+#  (8) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
+#  (9) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
+# (10) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+# (11) RUNSQLITE        defined in runsqlite.nsi (simple front-end for sqlite.exe/sqlite3.exe)
+# (12) STOP_POPFILE     defined in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
+# (13) TRANSLATOR       defined in test\translator.nsi (main installer translations testbed)
+# (14) TRANSLATOR_AUW   defined in test\transAUW.nsi ('Add POPFile User' translations testbed)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -57,7 +58,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.9"
+  !define C_PFI_LIBRARY_VERSION     "0.1.10"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -1293,7 +1294,7 @@
     FunctionEnd
 !macroend
 
-!ifdef ADDSSL | BACKUP | INSTALLER | RESTORE
+!ifdef ADDSSL | BACKUP | IMAPUPDATER | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: PFI_DumpLog
     #
@@ -4226,7 +4227,7 @@
   FunctionEnd
 !macroend
 
-!ifndef ADDSSL & DBSTATUS & MSGCAPTURE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
+!ifndef ADDSSL & DBSTATUS & IMAPUPDATER & MSGCAPTURE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: PFI_StrStr
     #
