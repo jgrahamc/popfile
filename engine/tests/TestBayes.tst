@@ -81,6 +81,120 @@ $b->release_session_key( $session );
 $session = $b->get_session_key( 'admin', '' );
 test_assert( $session ne '' );
 
+# Test for getting and setting the session key from an associated
+# account
+
+my ( $success, $password ) = $b->create_user( $session, 'testuser' );
+test_assert_equal( $success, 0 );
+test_assert( $password ne '' );
+my ( $success2, $password2 ) = $b->create_user( $session, 'testuser2' );
+test_assert_equal( $success2, 0 );
+test_assert( $password2 ne '' );
+( $success2, $password2 ) = $b->create_user( $session, 'testuser' );
+test_assert_equal( $success2, 1 );
+test_assert( !defined( $password2 ) );
+
+my @users = sort @{$b->get_user_list( $session )};
+
+test_assert( $#users == 2 );
+test_assert( $users[0] eq 'admin' );
+test_assert( $users[1] eq 'testuser' );
+test_assert( $users[2] eq 'testuser2' );
+
+test_assert( $b->remove_user( $session, 'testuser3' ) == 1 );
+test_assert( $b->remove_user( $session, 'testuser2' ) == 0 );
+
+@users = sort @{$b->get_user_list( $session )};
+
+test_assert( $#users == 1 );
+test_assert( $users[0] eq 'admin' );
+test_assert( $users[1] eq 'testuser' );
+
+$b->global_config_( 'single_user', 1 );
+
+my $session2 = $b->get_session_key_from_token( $session, 'smtp', 'token' );
+test_assert( $session2 eq $session );
+$session2 = $b->get_session_key_from_token( $session, 'nntp', 'token' );
+test_assert( $session2 eq $session );
+$session2 = $b->get_session_key_from_token( $session, 'pop', 'token' );
+test_assert( $session2 eq $session );
+$session2 = $b->get_session_key_from_token( $session, 'pop3', 'token' );
+test_assert( $session2 eq $session );
+
+$b->global_config_( 'single_user', 0 );
+
+$session2 = $b->get_session_key_from_token( $session, 'smtp', 'token' );
+test_assert( $session2 eq $session );
+$session2 = $b->get_session_key_from_token( $session, 'nntp', 'token' );
+test_assert( $session2 eq $session );
+$session2 = $b->get_session_key_from_token( $session, 'pop', 'token' );
+test_assert( $session2 eq $session );
+$session2 = $b->get_session_key_from_token( $session, 'pop3', 'token' );
+test_assert( !defined( $session2 ) );
+
+my $id2 = $b->get_user_id( $session, 'testuser2' );
+test_assert( !defined( $id2 ) );
+$id2 = $b->get_user_id( $session, 'testuser' );
+test_assert( defined( $id2 ) );
+
+test_assert( $b->add_account( $session, $id2, 'pop3', 'foo:bar' ) == 1 );
+test_assert( $b->add_account( $session, $id2, 'pop3', 'foo:bar' ) == -1 );
+
+my $session3 = $b->get_session_key_from_token( $session, 'pop3', 'fooz:bar' );
+test_assert( !defined( $session3 ) ); 
+$session3 = $b->get_session_key_from_token( $session, 'pop3', 'foo:bar' );
+test_assert( defined( $session3 ) ); 
+
+my @parameters = sort $b->get_user_parameter_list( $session );
+test_assert_equal( $#parameters, 35 );
+test_assert_equal( join( ' ', @parameters ), 'GLOBAL_can_admin GLOBAL_private_key GLOBAL_public_key bayes_subject_mod_left bayes_subject_mod_right bayes_unclassified_weight bayes_xpl_angle history_history_days html_column_characters html_columns html_date_format html_language html_last_reset html_last_update_check html_page_size html_send_stats html_session_dividers html_show_bucket_help html_show_configbars html_show_training_help html_skin html_test_language html_update_check html_wordtable_format imap_bucket_folder_mappings imap_expunge imap_hostname imap_login imap_password imap_port imap_training_mode imap_uidnexts imap_uidvalidities imap_update_interval imap_use_ssl imap_watched_folders' );
+
+test_assert( $b->get_user_parameter( $session, 'GLOBAL_can_admin' ) );
+test_assert( !$b->get_user_parameter( $session3, 'GLOBAL_can_admin' ) );
+
+my ( $val, $def ) = $b->get_user_parameter_from_id( 1, 'GLOBAL_can_admin' );
+test_assert_equal( $val, 1 );
+test_assert_equal( $def, 0 );
+( $val, $def ) = $b->get_user_parameter_from_id( $id2, 'GLOBAL_can_admin' );
+test_assert_equal( $val, 0 );
+test_assert_equal( $def, 1 );
+$b->set_user_parameter_from_id( $id2, 'GLOBAL_can_admin', 1 );
+( $val, $def ) = $b->get_user_parameter_from_id( $id2, 'GLOBAL_can_admin' );
+test_assert_equal( $val, 1 );
+test_assert_equal( $def, 0 );
+$b->set_user_parameter_from_id( $id2, 'GLOBAL_can_admin', 0 );
+( $val, $def ) = $b->get_user_parameter_from_id( $id2, 'GLOBAL_can_admin' );
+test_assert_equal( $val, 0 );
+test_assert_equal( $def, 1 );
+
+test_assert_equal( $b->validate_password( $session3, '1234' ), 0 );
+test_assert_equal( $b->validate_password( $session3, $password ), 1 );
+test_assert_equal( $b->validate_password( $session, '1234' ), 0 );
+test_assert_equal( $b->validate_password( $session, '' ), 1 );
+
+test_assert_equal( $b->set_password( $session3, '' ), 1 );
+test_assert_equal( $b->validate_password( $session3, '1234' ), 0 );
+test_assert_equal( $b->validate_password( $session3, '' ), 1 );
+
+test_assert_equal( $b->set_password( $session, '1234' ), 1 );
+test_assert_equal( $b->validate_password( $session, '1234' ), 1 );
+test_assert_equal( $b->validate_password( $session, '' ), 0 );
+
+test_assert_equal( $b->set_password( $session, '' ), 1 );
+
+$b->release_session_key( $session3 );
+
+my @accounts = $b->get_accounts( $session, 0 );
+test_assert( $#accounts == -1 );
+my @accounts = $b->get_accounts( $session, $id2 );
+test_assert( $#accounts == 0 );
+test_assert( $accounts[0] eq 'pop3:foo:bar' );
+
+test_assert( $b->remove_account( $session, 'pop3', 'foo:bar' ) == 1 );
+
+$session3 = $b->get_session_key_from_token( $session, 'pop3', 'foo:bar' );
+test_assert( !defined( $session3 ) ); 
+
 # get_all_buckets
 
 my @all_buckets = $b->get_all_buckets( $session );
@@ -119,6 +233,13 @@ test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
 test_assert_equal( $buckets[2], 'spam' );
 test_assert_equal( defined($buckets[3]), defined(undef)  );
+
+# get_bucket_id, get_bucket_name
+
+my $spam_id = $b->get_bucket_id( $session, 'spam' );
+test_assert( defined( $spam_id ) );
+test_assert_equal( $b->get_bucket_name( $session, $spam_id ), 'spam' );
+
 
 # get_bucket_word_count
 

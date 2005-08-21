@@ -37,6 +37,7 @@ use IO::Select;
 # We use crypto to secure the contents of POPFile's cookies
 
 use Crypt::CBC;
+use Crypt::Random;
 use MIME::Base64;
 
 # A handy variable containing the value of an EOL for the network
@@ -98,7 +99,7 @@ EOM
 
     $self->{selector_} = new IO::Select( $self->{server_} );
 
-    # Think of an encryption key for encrypting cookies using
+    # Think of an encryption key for encrypting cookies using Blowfish
 
     my $key = Crypt::Random::makerandom_octet( Length => 56, Strength => 1 );
     $self->{crypto__} = new Crypt::CBC( { 'key'            => $key,

@@ -87,6 +87,19 @@
                     </select>
                     <input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
                 </div>
+
+                <div class="configBarOption">
+
+                    <label class="configurationLabel" for="configPassword" title="<TMPL_VAR NAME="Localize_tip_Config_Password">">
+                        <TMPL_VAR NAME="Localize_Configuration_ChangePassword">:
+                    </label>
+
+                    <TMPL_VAR NAME="Localize_Configuration_OldPassword">: <input type="password" name="old_password">
+                    <TMPL_VAR NAME="Localize_Configuration_NewPassword">: <input type="password" name="new_password">
+                    <TMPL_VAR NAME="Localize_Configuration_ConfirmPassword">: <input type="password" name="confirm_password">
+
+                    <input type="submit" class="submit" name="change_password" value="<TMPL_VAR NAME="Localize_Apply">" />
+                </div>
                     
                 </form>
             </td>

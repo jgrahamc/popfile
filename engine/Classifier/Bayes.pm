@@ -1475,7 +1475,8 @@ sub generate_unique_session_key__
     # Generate a long random number, hash it and the time together to
     # get a random session key in hex
 
-    my $random = Crypt::Random::makerandom_octet( Length => 128, Strength => 1 );
+    my $random = Crypt::Random::makerandom_octet( Length => 128,
+                                                  Strength => 1 );
     my $now = time;
     return sha256_hex( "$$" . "$random$now" );
 }
@@ -1617,7 +1618,7 @@ sub get_user_id_from_session
 
 #----------------------------------------------------------------------------
 #
-# release_sessions_key
+# release_session_key
 #
 # $session        A session key previously returned by get_session_key
 #
@@ -1667,7 +1668,6 @@ sub get_administrator_session_key
 # Returns undef on failure or a session key
 #
 #----------------------------------------------------------------------------
-
 sub get_session_key_from_token
 {
     my ( $self, $session, $module, $token ) = @_;
@@ -1697,12 +1697,20 @@ sub get_session_key_from_token
     # Check the token against the associations in the database and
     # figure out which user is being talked about
 
-    my $result = $self->{db_get_user_from_account__}->execute( "$module:$token" );
+    my $result = $self->{db_get_user_from_account__}->execute(
+                                                          "$module:$token" );
     if ( !defined( $result ) ) {
         $self->log_( 1, "Unknown account $module:$token" );
         return undef;
     }
-    my $user = $self->{db_get_user_from_account__}->fetchrow_arrayref->[0];
+
+    my $rows = $self->{db_get_user_from_account__}->fetchrow_arrayref;
+    my $user = defined( $rows )?$rows->[0]:undef;
+
+    if ( !defined( $user ) ) {
+        $self->log_( 1, "Unknown account $module:$token" );
+        return undef;
+    }
 
     my $user_session = $self->generate_unique_session_key__();
     $self->{api_sessions__}{$user_session} = $user;
@@ -2625,12 +2633,13 @@ sub classify_and_modify
             # file then copying to another) (perhaps a select on $mail
             # to predict if there is flushable data)
 
-            $self->flush_extra_( $mail, \*FLUSH, 0);
+            $self->flush_extra_( $mail, \*FLUSH, 0 );
             close FLUSH;
 
             # append any data we got to the actual temp file
 
-            if ( ( (-s "$msg_file.flush") > 0 ) && ( open FLUSH, "<$msg_file.flush" ) ) {
+            if ( ( (-s "$msg_file.flush") > 0 ) &&
+                   ( open FLUSH, "<$msg_file.flush" ) ) {
                 binmode FLUSH;
                 if ( open TEMP, ">>$msg_file" ) {
                     binmode TEMP;
@@ -2767,7 +2776,9 @@ sub get_accounts
 # $module    The module adding the account
 # $account   The account to add
 #
-#----------------------------------------------------------------------------
+# Returns 1 if the account was added successfully, or 0 for an error,
+# -1 if another user already has that account associated with it
+# ----------------------------------------------------------------------------
 sub add_account
 {
     my ( $self, $session, $id, $module, $account ) = @_;
@@ -2810,6 +2821,8 @@ sub add_account
 # $module    The module removing the account
 # $account   The account to remove
 #
+# Returns 1 if the account was successfully removed, 0 if not
+#
 #----------------------------------------------------------------------------
 sub remove_account
 {
@@ -2823,7 +2836,9 @@ sub remove_account
         return 0;
     }
 
-    return $self->db_()->do( "delete from accounts where account = '$module:$account';" );
+    my $result = $self->db_()->do( "delete from accounts where account = '$module:$account';" );
+
+    return defined( $result );
 }
 
 #----------------------------------------------------------------------------
@@ -3276,7 +3291,8 @@ sub get_bucket_parameter
 # $clone       (optional) Name of user to clone
 #
 # Returns 0 for success, 1 for user already exists, 2 for other error,
-# 3 for clone failure and undef if caller isn't an admin.
+# 3 for clone failure and undef if caller isn't an admin.  If
+# successful also returns an initial password for the user.
 #
 # ----------------------------------------------------------------------------
 sub create_user
@@ -3291,23 +3307,34 @@ sub create_user
     my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
 
     if ( $can_admin != 1 ) {
-        return undef;
+        return ( undef, undef );
     }
 
     # Check to see if we already have a user with that name
 
     if ( defined( $self->get_user_id( $session, $new_user ) ) ) {
-        return 1;
+        return ( 1, undef );
     }
 
-    my $password = md5_hex( $new_user . '__popfile__' );
+    my $password = '';
+    my @chars = split( //,'abcdefghijklmnopqurstuvwxyz0123456789' );
 
-    $self->db_()->do( "insert into users ( name, password ) values ( '$new_user', '$password' );" );
+    while ( length( $password ) < 8 ) {
+        my $c = $chars[int(rand($#chars+1))];
+        if ( int(rand(2)) == 1 ) {
+            $c = uc($c);
+        }
+        $password .= $c;
+    }
+
+    my $password_hash = md5_hex( $new_user . '__popfile__' . $password );
+
+    $self->db_()->do( "insert into users ( name, password ) values ( '$new_user', '$password_hash' );" );
 
     my $id = $self->get_user_id( $session, $new_user );
 
     if ( !defined( $id ) ) {
-        return 2;
+        return ( 2, undef );
     }
 
     # See if we need to clone the configuration of another user and
@@ -3316,7 +3343,7 @@ sub create_user
     if ( defined( $clone ) && ( $clone ne '' ) ) {
         my $clid = $self->get_user_id( $session, $clone );
         if ( !defined( $clid ) ) {
-            return 3;
+            return ( 3, undef );
         }
         my $h = $self->db_()->prepare( "select utid, val from user_params where userid = $clid;" );
         $h->execute;
@@ -3343,12 +3370,9 @@ sub create_user
         }
 
         # TODO clone bucket parameters
-
-        # TODO assign a password
-
     }
 
-    return 0;
+    return ( 0, $password );
 }
 
 #----------------------------------------------------------------------------
@@ -3358,7 +3382,7 @@ sub create_user
 # Removes an existing user
 #
 # $session     A valid session ID for an administrator
-# $user        The name for the new to remove
+# $user        The name of the user to remove
 #
 # Returns 0 for success, undef for wrong permissions and 1 for user
 # does not exist, 2 means tried to delete admin
@@ -3387,12 +3411,87 @@ sub remove_user
         my ( $val, $def ) = $self->get_user_parameter_from_id( $id,'GLOBAL_can_admin' );
         if ( $val == 0 ) {
             $self->db_()->do( "delete from users where name = '$user';" );
+            return 0;
         } else {
             return 2;
         }
     }
 
-    return 0;
+    return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# validate_password
+#
+# Checks the password for the current user
+#
+# $session     A valid session ID
+# $password    A possible password to check
+#
+# Returns 1 if the password is valid, 0 otherwise
+#
+# ----------------------------------------------------------------------------
+sub validate_password
+{
+    my ( $self, $session, $password ) = @_;
+
+    # Lookup the user name from the session key
+
+    my $user;
+    my $h = $self->db_()->prepare( "select name from users where id = $self->{api_sessions__}{$session};" );
+    $h->execute;
+    if ( my $row = $h->fetchrow_arrayref ) {
+        $h->finish;
+        $user = $row->[0];
+    } else {
+        return 0;
+    }
+
+    my $hash = md5_hex( $user . '__popfile__' . $password );
+
+    $self->{db_get_userid__}->execute( $user, $hash );
+    my $result = $self->{db_get_userid__}->fetchrow_arrayref;
+    if ( !defined( $result ) ) {
+        return 0;
+    }
+
+    return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# set_password
+#
+# Sets the password for the current user
+#
+# $session     A valid session ID
+# $password    The new password
+#
+# Returns 1 if the password was updated, 0 if not
+#
+# ----------------------------------------------------------------------------
+sub set_password
+{
+    my ( $self, $session, $password ) = @_;
+
+    # Lookup the user name from the session key
+
+    my $user;
+    my $h = $self->db_()->prepare( "select name from users where id = $self->{api_sessions__}{$session};" );
+    $h->execute;
+    if ( my $row = $h->fetchrow_arrayref ) {
+        $h->finish;
+        $user = $row->[0];
+    } else {
+        return 0;
+    }
+
+    my $hash = md5_hex( $user . '__popfile__' . $password );
+
+    $self->db_()->do( "update users set password = '$hash' where id = $self->{api_sessions__}{$session};" );
+
+    return 1;
 }
 
 #----------------------------------------------------------------------------
@@ -3472,7 +3571,7 @@ sub get_user_parameter
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my ( $val, $def)= $self->get_user_parameter_from_id( $userid, $parameter );
+    my ( $val, $def )= $self->get_user_parameter_from_id( $userid,$parameter );
 
     return $val;
 }
@@ -3481,7 +3580,7 @@ sub get_user_parameter
 #
 # get_user_id (ADMIN ONLY)
 #
-# Returns the database ID of a named used
+# Returns the database ID of a named user
 #
 # $session     A valid session ID
 # $user        The name of the user
@@ -3687,8 +3786,8 @@ sub get_html_colored_message
 #
 # fast_get_html_colored_message
 #
-# Parser a mail message stored in a file and returns HTML representing the message
-# with coloring of the words
+# Parser a mail message stored in a file and returns HTML representing
+# the message with coloring of the words
 #
 # $session        A valid session key returned by a call to get_session_key
 # $file           The file to colorize

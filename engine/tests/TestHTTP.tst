@@ -125,23 +125,6 @@ test_assert_equal( $h->url_encode_( 'thealmighty$' ), 'thealmighty%24' );
 test_assert_equal( $h->url_encode_( 'youcan"me' ), 'youcan%22me' );
 test_assert_equal( $h->url_encode_( '{start' ), '%7bstart' );
 
-# http_redirect_ tests
-
-open FILE, ">temp.tmp";
-$h->http_redirect_( \*FILE, 'http://www.usethesource.com/' );
-close FILE;
-open FILE, "<temp.tmp";
-my $line = <FILE>;
-test_assert_equal( $line, "HTTP/1.0 302 Found$eol" );
-$line = <FILE>;
-test_assert_equal( $line, "Location: http://www.usethesource.com/$eol" );
-$line = <FILE>;
-test_assert( defined( $line ) );
-test_assert( $line =~ /^$eol$/ );
-$line = <FILE>;
-test_assert( !defined( $line ) );
-close FILE;
-
 # http_error_ tests
 
 open FILE, ">temp.tmp";

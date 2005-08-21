@@ -477,7 +477,10 @@ sub get_session_key_
 {
     my ( $self, $token ) = @_;
 
-    return $self->classifier_()->get_session_key_from_token( $self->{api_session__}, $self->name(), $token );
+    return $self->classifier_()->get_session_key_from_token(
+                                     $self->{api_session__},
+                                     $self->name(),
+                                     $token );
 }
 
 # ----------------------------------------------------------------------------

@@ -1076,10 +1076,10 @@ sub handle_configuration_bar__
         push ( @language_loop, \%row_data );
     }
     $templ->param( 'Configuration_Loop_Languages' => \@language_loop );
-    
-    # If the configuration bar was included by the history page, let it also include the
-    # history bar
-    
+
+    # If the configuration bar was included by the history page, let
+    # it also include the history bar
+
     $templ->param( 'Is_history_page' => ( $template eq 'history-page.thtml' ? 1 : 0 ) );
 
     if ( defined($self->{form_}{hide_configbar}) ) {
@@ -1090,6 +1090,39 @@ sub handle_configuration_bar__
     if ( defined ($self->{form_}{show_configbar}) ) {
         $self->user_config_( $self->{sessions__}{$session}{user}, 'show_configbars', 1 );
         $templ->param( 'If_Show_Config_Bars' => 1 );
+    }
+
+    # See if the user is trying to change their password
+
+    if ( defined( $self->{form_}{change_password} ) ) {
+
+        # Check that the two new passwords match
+
+        if ( $self->{form_}{new_password} ne
+             $self->{form_}{confirm_password} ) {
+
+            $self->error_message__( $templ,
+                       $self->{language__}{Configuration_Password_Mismatch} );
+        } else {
+
+            # Check that the old password is correct
+
+            if ( !$self->classifier_()->validate_password( $session,
+                                        $self->{form_}{old_password} ) ) {
+
+                $self->error_message__( $templ,
+                           $self->{language__}{Configuration_Password_Bad} );
+            } else {
+                if ( !$self->classifier_()->set_password( $session,
+                                             $self->{form_}{new_password} ) ) {
+                    $self->error_message__( $templ,
+                             $self->{language__}{Configuration_Password_Fail});
+                } else {
+                    $self->status_message__( $templ,
+                             $self->{language__}{Configuration_Set_Password} );
+                }
+            }
+        }
     }
 
     return $templ;
@@ -1357,12 +1390,12 @@ sub users_page
     # Handle user creation
 
     if ( exists( $self->{form_}{create} ) && ( $self->{form_}{newuser} ne '' ) ) {
-        my $result = $self->classifier_()->create_user( $session, $self->{form_}{newuser}, $self->{form_}{clone} );
+        my ( $result, $password ) = $self->classifier_()->create_user( $session, $self->{form_}{newuser}, $self->{form_}{clone} );
         if ( $result == 0 ) {
             if ( $self->{form_}{clone} ne '' ) {
-                 $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created_And_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone} ) );
+                 $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created_And_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
             } else {
-                $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created}, $self->{form_}{newuser} ) );
+                $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created}, $self->{form_}{newuser}, $password ) );
             }
         }
         if ( $result == 1 ) {
@@ -1372,7 +1405,7 @@ sub users_page
             $self->error_message__( $templ, sprintf( $self->{language__}{Users_Not_Created}, $self->{form_}{newuser} ) );
         }
         if ( $result == 3 ) {
-            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Created_Not_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone} ) );
+            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Created_Not_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
         }
     }
 

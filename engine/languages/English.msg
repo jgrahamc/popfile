@@ -175,6 +175,14 @@ Configuration_SOCKSPort                 SOCKS V proxy port
 Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s
 Configuration_SOCKSServerUpdate         Updated SOCKS V proxy host to %s
 Configuration_Fields                    Add history columns
+Configuration_ChangePassword            Change Password
+Configuration_OldPassword               Current
+Configuration_NewPassword               New
+Configuration_ConfirmPassword           Confirm New
+Configuration_Password_Mismatch         The new password must by identical in the New and Confirm New boxes
+Configuration_Password_Bad              The old password entered is incorrect
+Configuration_Password_Fail             Failed to set new password
+Configuration_Set_Password              New password has been set
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters
@@ -199,11 +207,11 @@ Users_RemoveUser                        Remove user
 Users_CreateUser                        Create user named
 Users_EditUser                          Edit user
 Users_Parameters                        Parameters
-Users_Created                           Created user '%s'
+Users_Created                           Created user '%s' (initial password '%s')
 Users_Not_Created                       Failed to create user '%s'
-Users_Created_And_Cloned                Created user '%s' as clone of '%s'
+Users_Created_And_Cloned                Created user '%s' as clone of '%s' (initial password '%s')
 Users_Not_Created_Exists                User '%s' not created: already exists
-Users_Created_Not_Cloned                Created user '%s' but clone of '%s' failed
+Users_Created_Not_Cloned                Created user '%s' but clone of '%s' failed (initial password '%s')
 Users_Removed                           Removed user '%s'
 Users_Removed_Failed                    Failed to remove user '%s'
 Users_Removed_Failed_Admin              Failed to remove user '%s': disable admin rights first

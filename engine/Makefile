@@ -148,3 +148,4 @@ packing: popfile.pck
 
 popfile.pck: popfile.pl bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm UI/*.pm
 	@perl make_packing_list.pl $@ $^
+# DO NOT DELETE

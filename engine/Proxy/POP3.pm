@@ -188,7 +188,8 @@ sub child__
     # Tell the client that we are ready for commands and identify our
     # version number
 
-    $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) . "$eol" );
+    $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) .
+               "$eol" );
 
     # Compile some configurable regexp's once
 
