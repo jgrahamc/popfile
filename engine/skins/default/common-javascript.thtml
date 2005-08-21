@@ -1,10 +1,14 @@
 <script type="text/javascript">
 
-warnings = 1; // this will be replaced with an Advanced variable that the Template will insert here
+<TMPL_IF NAME="If_Javascript_OK">
+warnings = 1; // confirmation dialogs enabled
+<TMPL_ELSE>
+warnings = 0; // confirmation dialogs disabled
+</TMPL_IF>
 
-function confirmClick(x) {
+function confirmClick(message) {
     if(warnings)
-         return confirm ("Are you sure you want to do this?");
+         return confirm (message);
     else return 0;
 }
 
