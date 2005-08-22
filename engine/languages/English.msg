@@ -302,6 +302,7 @@ Magnet_MagnetType                       Magnet type
 Magnet_Value                            Values
 Magnet_Always                           Always goes to bucket
 Magnet_Jump                             Jump to magnet page
+Magnet_Note                             Magnets should be used sparingly since they bypass POPFile's learning process.  Using magnets makes POPFile take longer to achieve high accuracy.<br /><br />Read more about magnets at the <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?Glossary/AMagnet">POPFile Documentation Project</a>.
 
 Bucket_Error1                           Bucket names can only contain the letters a to z in lower case, numbers 0 to 9,  plus - and _
 Bucket_Error2                           Bucket named %s already exists
@@ -482,6 +483,8 @@ tip_Admin_AcceptRemotePOP3              Allow POP3 mail dowload from another mac
 tip_Admin_Password                      Add a password to limit access to POPFile
 tip_Admin_UpdateCheck                   0.22 text should be put back
 tip_Admin_ReportStats                   0.22 text should be put back
+
+tip_Users_Remove                        Delete user from POPFile
 
 tip_Footer_HomePage                     Visit the POPFile home page
 tip_Footer_Manual                       The original POPFile documentation (slightly outdated)

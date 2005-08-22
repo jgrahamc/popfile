@@ -50,7 +50,7 @@
                 </TMPL_LOOP>
                 </select>
 
-                <input type="submit" class="submit" name="remove" value="<TMPL_VAR NAME="Localize_Remove">" />
+                <input type="submit" class="submit" name="remove" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Remove">')" value="<TMPL_VAR NAME="Localize_Remove">" />
                 </form>
             </TMPL_IF>
         </td>
@@ -108,7 +108,7 @@
             <td>
             </td>
             <td align="center">
-                <input type="submit" class="submit deleteButton" name="delete" value="<TMPL_VAR NAME="Localize_Remove">" />
+                <input type="submit" class="submit deleteButton" name="delete" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Remove">')" value="<TMPL_VAR NAME="Localize_Remove">" />
             </td>
         </tr>
         </table>

@@ -1,5 +1,7 @@
 <TMPL_IF NAME="Magnet_Navigator_Enabled">
 
+<p>
+
 <TMPL_VAR NAME="Localize_Magnet_Jump">:
 
 <TMPL_IF NAME="Magnet_Navigator_If_Previous">
@@ -25,5 +27,7 @@
 <TMPL_IF NAME="Magnet_Navigator_If_Next">
 [<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Next">"><TMPL_VAR NAME="Localize_Next"></a>]
 </TMPL_IF>
+
+</p>
 
 </TMPL_IF>

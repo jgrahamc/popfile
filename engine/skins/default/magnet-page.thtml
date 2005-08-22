@@ -4,7 +4,6 @@
 <h2 class="magnets"><TMPL_VAR NAME="Localize_Magnet_CurrentMagnets"></h2>
 
 <TMPL_INCLUDE NAME="magnet-navigator.thtml">
-<br /><br />
 
 <form action="/magnets" method="post">
     <table width="75%" class="magnetsTable" summary="<TMPL_VAR NAME="Localize_Magnet_MainTableSummary">">
@@ -84,8 +83,6 @@
     <input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
     <input type="hidden" name="count" value="<TMPL_VAR NAME="Magnet_Count_Magnet">" />
 </form>
-<br />
-<br />
 
 <TMPL_INCLUDE NAME="magnet-navigator.thtml">
 
@@ -98,6 +95,9 @@
         </td>
     </tr>
 </table>
+
+<table>
+<tr><td>
 <div class="magnetsNewWidget">
     <form action="/magnets" method="post">
         <label class="magnetsLabel" for="magnetsAddType" title="<TMPL_VAR NAME="Localize_tip_Magnet_Type">">
@@ -157,8 +157,14 @@
 
     </TMPL_IF>
 
-    <br />
 </div>
+
+</td>
+<td>
+<div class="helpMessage">
+            <TMPL_VAR NAME="Localize_Magnet_Note">
+</div>
+</td></tr></table>
 
 <TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">
