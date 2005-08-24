@@ -14,19 +14,19 @@ body {
 }
 
 table.head {
-  font-weight: normal;
   width: 100%;
-  background-color: #eeeeee;
-  color: #666666;
 }
 
-.shutdownLink {
+.headShutdown {
+  font-size: 80%;
+}
+
+.headShutdown a {
   color: #990000;
-  background-color: inherit;
   text-decoration: none;
 }
 
-.shutdownLink:hover {
+.shutdownLink:hover, .logoutLink:hover {
   text-decoration: underline;
 }
 
@@ -35,7 +35,7 @@ table.head {
   display: none;
 }
 
-.head, td.head {
+.head {
   font-weight: bold;
   font-size: 140%;
   background-color: #eeeeee;
@@ -65,7 +65,7 @@ table.head {
 }
 
 .menu {
-  font-size: 120%;
+  font-size: 140%;
   font-weight: normal;
   width: 100%;
 }
@@ -77,15 +77,13 @@ table.head {
 .menuSelected, .menuSelected a {
   background-color: #cccccc;
   color: #000000;
-  font-size: 123%;
-  font-weight: normal;
+  font-weight: bold;
   text-decoration: none;
 }
 
-td.menuSelected {
-  border-left: 2px solid #000000;
-  border-right: 2px solid #000000;
-  border-top: 2px solid #000000;
+.menuSelected {
+  border: 2px solid #cccccc;
+  border-bottom: 0;
   padding-left: 2px;
   padding-right: 2px;
   margin-left: 2px;
@@ -96,8 +94,7 @@ td.menuSelected {
 .menuStandard, .menuStandard a {
   background-color: #efefef;
   color: #0000ff;
-  font-size: 123%;
-  font-weight: normal;
+  font-weight: bold;
   text-decoration: none;
 }
 
@@ -145,15 +142,6 @@ td.menuStandard {
   color: inherit;
 }
 
-.bucketsTable td {
-  border-top: 1px solid #ffffff;
-  border-bottom: 1px solid #ffffff;
-}
-
-table.bucketsTable {
-  margin: 3px;
-}
-
 .lineImg {
   width: 4px;
 }
@@ -179,24 +167,6 @@ td.naked {
   padding: 0px; 
   margin: 0px; 
   border: none;
-}
-
-td.accuracy0to49 {
-  background-color: red;
-  color: #666666;
-  height: 20px;
-}
-
-td.accuracy50to93 {
-  background-color: yellow;
-  color: #666666;
-  height: 20px;
-}
-
-td.accuracy94to100 {
-  background-color: green;
-  color: #666666;
-  height: 20px;
 }
 
 div.error01 {
@@ -233,10 +203,10 @@ td.openMessageCloser {
 .historyLabel em {
   font-weight: bold;
   font-style: normal;
-  background-color: #ffffcc;
+  background-color: #f7f7f7;
 }
 
-.historyLabel a:hover {
+.historyLabel :hover {
   text-decoration: underline;
 }
 
@@ -268,34 +238,12 @@ td.openMessageCloser {
   font-weight: bold;
 }
 
-table.historyWidgetsTop {
-  width: 100%;
-  border-top: 2px solid #cccccc;
-  border-bottom: 2px solid #cccccc;
-  text-align: center;
-}
-
-.historyWidgetsTop.submit {
-  margin-right: 1.5em;
-}
-
-table.historyWidgetsBottom {
-  width: 100%;
-  border-bottom: 2px solid #cccccc;
-}
-
-table.historyWidgetsBottom td {
-  padding-left: 1em;
-  font-weight: bold;
-}
-
 table.footer {
   width: 100%;
   background-color: #eeeeee;
   color: #666666;
-  border-left: 2px solid #cccccc;
-  border-right: 2px solid #cccccc;
-  border-bottom: 2px solid #cccccc;
+  border: 2px solid #cccccc;
+  border-top: 0;
 }
 
 td.footerBody { 
@@ -386,9 +334,156 @@ tr.rowBoundary {
   height: 0.3em;
 }
 
+optgroup {
+  font-size: inherit;	/* fix Moz 1.0 bug with % font sizes */
+}
+
+/*********************************************************/
+/* Shell structure */
+
+.shellStatusMessage {
+  color: #000000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+  width: 100%;
+}
+
+.shellErrorMessage {
+  color: #FF0000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+  width: 100%;
+}
+
+/*********************************************************/
+/* Menu Settings */
+
+.menuLink {
+  display: block;
+  width: 100%;
+}
+
+/*********************************************************/
+/* Messages */
+
 div.helpMessage {
   background-color: #f7f7f7;
   border: 1px solid #cccccc;
   padding: 0.3em;
+}
+
+div.helpMessage form {
+  margin: 0;
+}
+
+/*********************************************************/
+/* Form Labels */
+
+th.historyLabel {
+  text-align: left;
+}
+
+/*********************************************************/
+/* Positioning */
+
+.historyNavigatorTop, .historyNavigatorBottom {
+  text-align: right;
+  vertical-align: top;
+}
+
+.historyNavigatorTop form, .historyNavigatorBottom form {
+  display:inline;
+}
+
+.refreshLink {
+  margin-top: 0.5em;
+}
+
+h2.history {
+  margin-top: 0;
+  margin-bottom: 0.3em;
+}
+
+.search {
+  display: inline;
+  float: left;
+  padding-right: 1em;
+}
+
+.filter {
+  display: inline;
+}
+
+.viewHeadings {
+  display: inline;
+}
+
+/*********************************************************/
+/* Config Bars */
+
+.configBarTitle {
+  font-size: 100%;
+  display: inline;
+}
+
+.configBarTitle a {
+  border: 1px #cccccc solid;
+  padding: 0.5em;
   padding-bottom: 0;
+  margin-left: 1em;
+  background-color: #cccccc;
+  font-weight: bold;
+  font-size: 100%;
+}
+
+.configBarBody {
+  background-color: #efefef;
+  border-bottom: 1px solid #cccccc;
+}
+
+.configBar td {
+  border: 1px solid #cccccc;
+  border-bottom: 0;
+}
+
+.configBarBody form {
+  margin: 0;
+}
+
+.configBarOption {
+  border: 1px solid #cccccc;
+  margin: 0.3em;
+  padding: 0.3em;
+  display: inline;
+  float: left;
+  min-height: 3em;
+  background-color: #f7f7f7;
+}
+
+.checkLabel {
+  border: 1px solid #cccccc;
+  white-space: nowrap;
+}
+
+.configBarBody input.submit {
+  margin-top: 0.1em;
+}
+
+.configBarBody label.configurationLabel {
+  display: block;
+}
+
+/*********************************************************/
+/* History Column Controls */
+
+.columnControls {
+  white-space:nowrap;
+  vertical-align: top;
+  width: 10px;
+}
+
+.columnRemove, .columnMove {
+  display: block;
+  width:100%;
+  height: 1em;
 }
