@@ -59,7 +59,6 @@ if ($pid == 0) {
     # CHILD THAT WILL RUN THE XMLRPC SERVER
     $x->config_( 'port', $xport );
     if ($x->start() == 1) {
-print "Running\n";
         while ( $x->service() && $POPFile->CORE_service( 1 ) ) {
             select(undef,undef,undef, 0.1);
         }
@@ -75,7 +74,7 @@ print "Running\n";
     select(undef,undef,undef,1);
     use XMLRPC::Lite;
 
-print "Testing\n";
+print "Testing $xport\n";
 
     my $session = XMLRPC::Lite 
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")

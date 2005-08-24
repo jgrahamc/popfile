@@ -361,11 +361,11 @@ sub db_connect_helper__
         if ( $need_upgrade ) {
             print "\n\nDatabase schema is outdated, performing automatic upgrade\n";
 
-            # The database needs upgrading, so we are going to dump out
-            # all the data in the database as INSERT statements in a
-            # temporary file, then DROP all the tables in the database,
-            # then recreate the schema from the new schema and finally
-            # rerun the inserts.
+            # The database needs upgrading, so we are going to dump
+            # out all the data in the database as INSERT OR IGNORE
+            # statements in a temporary file, then DROP all the tables
+            # in the database, then recreate the schema from the new
+            # schema and finally rerun the inserts.
 
             my $i = 0;
             my $ins_file = $self->get_user_path_( 'insert.sql' );
@@ -397,7 +397,7 @@ sub db_connect_helper__
 
                     last if ( $#rows == -1 );
 
-                    print INSERT "INSERT INTO $table (";
+                    print INSERT "INSERT OR IGNORE INTO $table (";
                     for my $i (0..$t->{NUM_OF_FIELDS}-1) {
                         if ( $i != 0 ) {
                             print INSERT ',';
@@ -463,7 +463,7 @@ sub db_connect_helper__
 
             # Now write the current version to the database
 
-            $db->do( "insert into popfile ( version ) values ( $version ); " );
+            $db->do( "INSERT OR REPLACE into popfile ( version ) values ( $version ); " );
 
             unlink $ins_file;
             print "\nDatabase upgrade complete\n\n";

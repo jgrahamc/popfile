@@ -601,7 +601,9 @@ sub add_line
 
                 # Don't decode odd (nonprintable) characters or < >'s.
 
-                if ( ( ( $2 < 255 ) && ( $2 > 63 ) ) || ( $2 == 61 ) || ( ( $2 < 60 ) && ( $2 > 31 ) ) ) {
+                if ( ( ( $2 < 255 ) && ( $2 > 63 ) ) ||
+                     ( $2 == 61 ) ||
+                     ( ( $2 < 60 ) && ( $2 > 31 ) ) ) {
                     my $from = $1;
                     my $to   = chr($2);
 
@@ -609,7 +611,8 @@ sub add_line
                         $line       =~ s/$from/$to/g;
                         $self->{ut__} =~ s/$from/$to/g;
                         print "$from -> $to\n" if $self->{debug__};
-                        $self->update_pseudoword( 'html', 'numericentity', $encoded, $from );
+                        $self->update_pseudoword( 'html',
+                                   'numericentity', $encoded, $from );
                     }
                 }
             }
@@ -623,6 +626,7 @@ sub add_line
             }
 
             # Grab domain names
+
             while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro)([^[:alpha:]0-9\-_\.]|$)/$4/i )  {
                  add_url($self, "$1$3", $encoded, '', '', $prefix);
             }
@@ -654,6 +658,7 @@ sub add_line
             }
 
             if ( $self->{lang__} eq 'Nihongo' ) {
+
                 # In Japanese mode, non-symbol EUC-JP characters should be
                 # matched.
                 #
@@ -685,7 +690,8 @@ sub add_line
                     # expression is changed to 2bytes chars to support
                     # 2 byte characters.
                     #
-                    # In Korean, care about words between 2 and 45 characters.
+                    # In Korean, care about words between 2 and 45
+                    # characters.
 
                     while ( $line =~ s/(([A-Za-z]|$eksc)([A-Za-z\']|$eksc){1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
                         if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {

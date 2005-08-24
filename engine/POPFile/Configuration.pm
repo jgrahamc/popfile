@@ -35,7 +35,7 @@ use strict;
 use warnings;
 use locale;
 
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
 
 #----------------------------------------------------------------------------
 # new
@@ -408,8 +408,11 @@ sub parse_command_line
                         return 0;
                     }
                 } else {
-                    print STDERR "\nUnknown option $options[$i]\n";
-                    return 0;
+                    if ( $options[$i] ne '--' ) {
+                        print STDERR "\nUnknown option: $options[$i]\n";
+                        return 0;
+                    }
+                    ++$i;
                 }
             } else {
                 print STDERR "\nExpected a command line option and got $options[$i]\n";

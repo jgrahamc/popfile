@@ -51,6 +51,10 @@ $POPFile->CORE_initialize();
 $POPFile->CORE_config( 1 );
 $POPFile->CORE_start();
 
+my $l = $POPFile->get_module( 'POPFile/Logger' );
+$l->global_config_( 'debug', 1 );
+$l->config_( 'level', 2 );
+
 # Check the behaviour of reserve_slot.  It should return a valid
 # number and create the associated path (but not the file), check
 # that get_slot_file returns the same file as reserve_slot
@@ -246,7 +250,6 @@ test_assert_equal( $result[17], $size3 ); # size
 
 my $session = $b->get_session_key( 'admin', '' );
 $h->change_slot_classification( 1, 'spam', $session );
-$b->release_session_key( $session );
 
 my @fields = $h->get_slot_fields( 1 );
 test_assert_equal( $fields[10], 4 );
@@ -267,7 +270,7 @@ test_assert( !$h->is_valid_slot( 100 ) );
 # Now that we've got some data in the history test the query
 # interface
 
-my $q = $h->start_query();
+my $q = $h->start_query( $session );
 
 test_assert( defined( $q ) );
 test_assert_regexp( $q, '[0-9a-f]{8}' );
@@ -489,7 +492,7 @@ $h->user_config_( 1, 'history_days', 0 );
 sleep( 2 );
 $h->cleanup_history();
 
-my $qq = $h->start_query();
+my $qq = $h->start_query( $session );
 $h->set_query( $qq, '', '', '', 0 );
 test_assert_equal( $h->get_query_size( $qq ), 0 );
 $h->stop_query( $qq );
@@ -501,6 +504,8 @@ test_assert( !defined( $h->{queries__}{$q} ) );
 test_assert( !( -e 'messages/00' ) );
 test_assert( !( -e 'messages/00/00' ) );
 test_assert( !( -e 'messages/00/00/00' ) );
+
+$b->release_session_key( $session );
 
 $POPFile->CORE_stop();
 

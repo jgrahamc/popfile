@@ -919,8 +919,7 @@ sub set_query
 
     my $userid = $self->{queries__}{$id}{userid};
 
-    $self->{queries__}{$id}{base} = "select XXX from history, buckets,
-        magnets where history.userid = $userid and committed = 1";
+    $self->{queries__}{$id}{base} = "select XXX from history, buckets, magnets where history.userid = $userid and committed = 1";
 
     $self->{queries__}{$id}{base} .= ' and history.bucketid = buckets.id';
     $self->{queries__}{$id}{base} .= ' and magnets.id = magnetid';
