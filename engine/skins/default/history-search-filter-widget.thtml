@@ -41,7 +41,7 @@
 <div class="negate">
     <input type="hidden" name="negate" value="" />
     <input type="checkbox" name="negate" id="negate" class="checkbox" <TMPL_VAR NAME="History_Field_Not"> />
-    <label for="negate" title="<TMPL_VAR NAME="Localize_tip_History_SearchNegate">">
+    <label class="historyLabel" for="negate" title="<TMPL_VAR NAME="Localize_tip_History_SearchNegate">">
         <TMPL_VAR NAME="Localize_History_Negate_Search">
     </label>
 </div>
