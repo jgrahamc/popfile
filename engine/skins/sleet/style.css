@@ -400,14 +400,14 @@ tr.rowBoundary {
 /*********************************************************/
 /* Shell structure */
 
-.shellStatusMessage {	// error message bar that appears between shelltop and shell
+.shellStatusMessage {
   color: #000000;
   background-color: #EDEDCA;
   border: 3px #CCCC99 solid;
   width: 100%;
 }
 
-.shellErrorMessage {	// error message bar that appears between shelltop and shell
+.shellErrorMessage {
   color: #FF0000;
   background-color: #EDEDCA;
   border: 3px #CCCC99 solid;
@@ -417,7 +417,7 @@ tr.rowBoundary {
 /*********************************************************/
 /* Menu Settings */
 
-.menuLink {             /* makes entire menu tab clickable */
+.menuLink {
   display: block;
   width: 100%;
 }
@@ -439,7 +439,7 @@ div.helpMessage form {
 /* Form Labels */
 
 th.historyLabel {
-  text-align: left;	// optional
+  text-align: left;
 }
 
 /*********************************************************/
@@ -451,29 +451,29 @@ th.historyLabel {
 }
 
 .historyNavigatorTop form, .historyNavigatorBottom form {
-  display:inline;	// optional, lets Go box be on same line as navigation widget
+  display:inline;
 }
 
-.refreshLink {		// optional, link can be hidden
+.refreshLink {
   margin-top: 0.5em;
 }
 
-h2.history {		// optional
+h2.history {
   margin-top: 0;
   margin-bottom: 0.3em;
 }
 
-.search {		// search part of search widget
+.search {
   display: inline;
   float: left;
   padding-right: 1em;
 }
 
-.filter {		// filter part of search widget
-  display: inline;	// force search widget forms to appear on one line
+.filter {
+  display: inline;
 }
 
-.removeButtonsTop {	// spacing for top remove buttons (can be used to hide the top set of buttons)
+.removeButtonsTop {
   padding-bottom: 1em;
 }
 
@@ -508,7 +508,6 @@ h2.history {		// optional
 .configBarHidden .configBarTitle a {
   border: 1px #888888 solid;
 }
-
 
 .configBarBody {
   background-color: #545F74;
@@ -556,7 +555,7 @@ h2.history {		// optional
   width: 10px;
 }
 
-.columnRemove, .columnMove {  /* makes area around the controls clickable for bigger target */
+.columnRemove, .columnMove {
   display: block;
   width:100%;
   height: 1em;
