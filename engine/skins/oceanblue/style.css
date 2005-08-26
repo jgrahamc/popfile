@@ -427,7 +427,7 @@ a:link:hover, a:visited:hover {
 /* Config Bar */
 
 .configBar, .configBarHidden {
-  padding-top: 0;
+  padding-top: 0.5em;
 }
 
 .configBarTitle {

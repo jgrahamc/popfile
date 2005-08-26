@@ -435,11 +435,11 @@ select {
 }
 
 .rowOdd select {
-  font-size: 75%;
+  font-size: 100%;
 }
 
 .rowEven select {
-  font-size: 75%;
+  font-size: 100%;
 }
 
 .reclassifyButton {
@@ -566,6 +566,10 @@ h2.history {
 
 /*********************************************************/
 /* Config Bars */
+
+.configBar {
+  padding-top: 1em;
+}
 
 .configBarTitle {
   display: inline;

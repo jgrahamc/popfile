@@ -340,6 +340,10 @@ h2.history {
 /*********************************************************/
 /* Config Bar */
 
+.configBar {
+  padding-top: 1em;
+}
+
 .configBarTitle {
   display: inline;
   font-size: 1.1em;
