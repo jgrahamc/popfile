@@ -427,7 +427,7 @@ td.historyNavigatorTop, td.historyNavigatorBottom {
 }
 
 input {
-  font-size: 67%;
+  font-size: 70%;
 }
 
 select {
@@ -477,6 +477,10 @@ select {
 
 tr.rowBoundary {
   background-color: #cccccc;
+}
+
+optgroup {
+  font-size: inherit;	/* fix Moz 1.0 bug with % font sizes */
 }
 
 /*********************************************************/
@@ -582,7 +586,6 @@ h2.history {
 .configBarBody {
   background-color: #cccccc;
   border-bottom: 1px solid #666699;
-
 }
 
 .configBar td {
@@ -632,4 +635,3 @@ h2.history {
   width:100%;
   height: 1em;
 }
-
