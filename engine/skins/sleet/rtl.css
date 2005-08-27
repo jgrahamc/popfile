@@ -1,0 +1,25 @@
+/* styles for Right to Left languages */
+
+.shellTopLeft {
+  background-image: url(topRight.gif);
+}
+
+.shellTopRight {
+  background-image: url(topLeft.gif);
+}
+
+.shellLeft {
+  background-image: url(right.gif);
+}
+
+.shellRight {
+  background-image: url(left.gif);
+}
+
+.shellBottomLeft {
+  background-image: url(bottomRight.gif);
+}
+
+.shellBottomRight {
+  background-image: url(bottomLeft.gif);
+}
