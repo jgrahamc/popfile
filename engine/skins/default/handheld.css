@@ -1,0 +1,40 @@
+/* styles for handheld devices */
+
+body {
+  font-size: 1em;
+  margin: 0;
+  padding: 0;
+}
+
+a:link, a:link:visited {
+  text-decoration: underline !important;
+}
+
+.openMessageBody {
+  font-size: 0.9em;
+}
+
+.historyNavigatorBottom {
+  display: none;
+}
+
+.removeButtonsBottom {
+  display: none;
+}
+
+.columnControls {
+  display: none;
+}
+
+.helpMessage {
+  display: none;
+}
+
+.footer {
+  display: none;
+}
+
+.configBarOption {
+  display: block;
+  float: none;
+}

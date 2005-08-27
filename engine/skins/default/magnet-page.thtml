@@ -160,9 +160,9 @@
 </div>
 
 </td>
-<td>
+<td valign="top">
 <div class="helpMessage">
-            <TMPL_VAR NAME="Localize_Magnet_Note">
+    <TMPL_VAR NAME="Localize_Magnet_Note">
 </div>
 </td></tr></table>
 

@@ -1,0 +1,47 @@
+/* styles for Printing */
+
+body {
+  font-size: 11pt;
+  margin: 0;
+  padding: 0;
+}
+
+a:link, a:link:visited {
+  text-decoration: underline !important;
+}
+
+.openMessageBody {
+  font-size: 10pt;
+}
+
+.headShutdown {
+  display: none;
+}
+
+.historyNavigatorTop, .historyNavigatorBottom {
+  display: none;
+}
+
+.removeButtonsTop, .removeButtonsBottom {
+  display: none;
+}
+
+.columnControls {
+  display: none;
+}
+
+.helpMessage form {
+  display: none;
+}
+
+.openMessageCloser {
+  display: none;
+}
+
+.footer {
+  display: none;
+}
+
+.configBarHidden {
+  display: none;
+}
