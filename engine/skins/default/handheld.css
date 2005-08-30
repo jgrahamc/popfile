@@ -1,7 +1,7 @@
 /* styles for handheld devices */
 
 body {
-  font-size: 1em;
+  font-size: 0.9em;
   margin: 0;
   padding: 0;
 }
@@ -34,7 +34,56 @@ a:link, a:link:visited {
   display: none;
 }
 
+.configBar {
+  position: relative !important;
+}
+
 .configBarOption {
   display: block;
   float: none;
+}
+
+table.historyTable td, table.historyTable tr {
+  display: block;
+}
+
+.columnControls {
+  display: none !important;
+}
+
+table.historyTable > tr.rowOdd td, table.historyTable > tr.rowOdd,
+table.historyTable > tr.rowEven td, table.historyTable > tr.rowEven {
+  display: block !important;
+  width: 100% !important;
+}
+
+tr.rowHeader {
+  width: auto !important;
+  display: block !important;
+}
+
+h2.history {
+  display: none;
+}
+
+td.head {
+  font-size: 1.1em;
+}
+
+td.historyNavigatorTop {
+  display: block;
+  text-align: left !important;
+}
+
+td.historyNavigatorTop div.refreshLink {
+  display: none;
+}
+
+td.menuIndent {
+  display: none;
+}
+
+th.historyLabel {
+  display: block;
+  text-align: left;
 }
