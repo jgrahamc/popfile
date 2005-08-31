@@ -106,7 +106,8 @@ EOM
                                           'cipher'         => 'Blowfish',
                                           'padding'        => 'standard',
                                           'prepend_iv'     => 0,
-                                          'regenerate_key' => 0 } );
+                                          'regenerate_key' => 0,
+                                          'salt'           => 1 } );
 
     return 1;
 }
@@ -321,10 +322,10 @@ sub parse_form_
         my $need_array = defined( $self->{form_}{$arg} );
 
         if ( $need_array ) {
-	    if ( $#{ $self->{form_}{$arg . "_array"} } == -1 ) {
+            if ( $#{ $self->{form_}{$arg . "_array"} } == -1 ) {
                 push( @{ $self->{form_}{$arg . "_array"} }, $self->{form_}{$arg} );
-	    }
-	}
+            }
+        }
 
         $self->{form_}{$arg} = $2;
         $self->{form_}{$arg} =~ s/\+/ /g;
