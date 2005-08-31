@@ -47,6 +47,10 @@ table.historyTable td, table.historyTable tr {
   display: block;
 }
 
+.historyWidgetsTop {
+  // padding-top: 2em;
+}
+
 .columnControls {
   display: none !important;
 }
@@ -55,6 +59,10 @@ table.historyTable > tr.rowOdd td, table.historyTable > tr.rowOdd,
 table.historyTable > tr.rowEven td, table.historyTable > tr.rowEven {
   display: block !important;
   width: 100% !important;
+}
+
+.rowOdd td {
+  border: none !important;
 }
 
 tr.rowHeader {
@@ -75,6 +83,10 @@ td.historyNavigatorTop {
   text-align: left !important;
 }
 
+.historyNavigatorTop form {
+  display:inline;
+}
+
 td.historyNavigatorTop div.refreshLink {
   display: none;
 }
@@ -86,4 +98,20 @@ td.menuIndent {
 th.historyLabel {
   display: block;
   text-align: left;
+}
+
+.shell {
+  border: 1px;
+}
+
+.shellTopCenter, .shellTopRight, .shellTopLeft {
+  display: none;
+}
+
+.shellRight, .shellLeft {
+  display: none;
+}
+
+.shellBottomCenter, .shellBottomRight, .shellBottomLeft {
+  display: none;
 }
