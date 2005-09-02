@@ -60,6 +60,11 @@ Function un.onInit
   ; Retrieve the language used when POPFile was installed, and use it for the uninstaller
   ; (if the language entry is not found in the registry, a 'language selection' dialog is shown)
 
+  ; Use a different "Language selection" dialog title for the uninstaller
+
+  !undef  MUI_LANGDLL_WINDOWTITLE
+  !define MUI_LANGDLL_WINDOWTITLE             "POPFile Uninstaller Language Selection"
+
   !insertmacro MUI_UNGETLANGUAGE
 
   StrCpy $G_ROOTDIR   "$INSTDIR"

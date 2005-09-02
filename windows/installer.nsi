@@ -466,10 +466,9 @@
   ; Language Settings for MUI pages
   ;----------------------------------------------------------------
 
-  ; Same "Language selection" dialog is used for the installer and the uninstaller
-  ; so we override the standard "Installer Language" title to avoid confusion.
+  ; Override the standard "Installer Language" title for the language selection dialogue
 
-  !define MUI_LANGDLL_WINDOWTITLE             "Language Selection"
+  !define MUI_LANGDLL_WINDOWTITLE             "POPFile Installer Language Selection"
 
   ; Always show the language selection dialog, even if a language has been stored in the
   ; registry (the language stored in the registry will be selected as the default language)
