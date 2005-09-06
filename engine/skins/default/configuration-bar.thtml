@@ -97,7 +97,7 @@
                     <span class="configurationLabel"><TMPL_VAR NAME="Localize_Configuration_NewPassword">:</span> <input type="password" name="new_password" size="10">
                     <span class="configurationLabel"><TMPL_VAR NAME="Localize_Configuration_ConfirmPassword">:</span> <input type="password" name="confirm_password" size="10">
 
-                    <input type="submit" class="submit" name="change_password" value="<TMPL_VAR NAME="Localize_Apply">" />
+                    <input type="submit" class="submit" name="change_password" id="configPassword" value="<TMPL_VAR NAME="Localize_Apply">" />
                 </div>
                     
                 </form>
