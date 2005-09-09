@@ -2,7 +2,7 @@
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
 <form action="/users" method="post">
-<table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%">
+<table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%" summary="">
     <tr>
         <td class="settingsPanel" valign="top">
 
@@ -17,7 +17,7 @@
 <input type="hidden" name="singleuser" value="1">
 </td></tr></table></form>
 
-<table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%">
+<table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%" summary="">
     <tr>
         <td class="settingsPanel" valign="top">
             <h2 class="users"><TMPL_VAR NAME="Localize_Users_Create"></h2>
@@ -36,7 +36,7 @@
 
             <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
             </form>
-            <p >
+            <br />
             <TMPL_IF NAME="Users_If_Remove">
                 <hr />
                 <h2 class="users"><TMPL_VAR NAME="Localize_Users_Remove"></h2>

@@ -221,16 +221,14 @@ th.historyLabel {
 /*********************************************************/
 /* Positioning */
 
-table.historyWidgetsTop {
-  width: 100%;
-  margin-left: 1.5em;
-  margin-top: 0.6em;
-  margin-bottom: 1.0em;
+td.historyWidgetsTop form {
+  margin: 0;
+  padding: 0;
 }
 
-table.historyWidgetsBottom {
-  width: 100%;
-  margin-top: 0.6em;
+form.historyForm {
+  margin: 0;
+  padding: 0;
 }
 
 .historyNavigatorTop, .historyNavigatorBottom {

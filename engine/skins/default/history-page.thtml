@@ -36,7 +36,7 @@
 
 <table width="100%" summary="">
     <tr>
-        <td align="left">
+        <td>
             <h2 class="history" title="<TMPL_VAR NAME="Localize_tip_History_RecentNum">"><TMPL_VAR NAME="Localize_History_Title"> (<TMPL_VAR NAME="History_Count">)</h2>
         </td>
         <td class="historyNavigatorTop" rowspan="2">
@@ -62,7 +62,7 @@
     </tr>
 </table>
 
-<form action="/history" method="post">
+<form action="/history" method="post" class="historyForm">
     <div class="removeButtonsTop">
         <input type="submit" class="submit removeButton" name="clearchecked" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">')" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" title="<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">" />
         <input type="submit" class="submit removeButton" name="clearpage" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemovePage">')" value="<TMPL_VAR NAME="Localize_History_RemovePage">" title="<TMPL_VAR NAME="Localize_tip_History_RemovePage">" />
@@ -75,7 +75,7 @@
             <TMPL_LOOP NAME="History_Loop_Headers">
 
             <th scope="col">
-                <table width="100%" cellspacing="0">
+                <table width="100%" cellspacing="0" summary="">
                     <tr>
                         <td class="columnControls">
                             <a class="columnRemove" href="/history?removecolumn=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_tip_History_RemoveColumn">" src="skins/x.gif" border="0" alt="x"></a>
@@ -190,7 +190,7 @@
             <td>
 
                 <TMPL_IF NAME="History_If_Reclassified">
-                <TMPL_VAR NAME="Localize_History_Reclassified">
+                <span class="reclassifyText"><TMPL_VAR NAME="Localize_History_Reclassified"></span>
                 <input type="submit" class="submit undoButton" name="undo_<TMPL_VAR NAME="History_I">" value="<TMPL_VAR NAME="Localize_Undo">" />
 
                 <TMPL_ELSE>

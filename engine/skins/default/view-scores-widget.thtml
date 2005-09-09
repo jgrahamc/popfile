@@ -1,10 +1,11 @@
-<a name="scores">
     <h4 class="viewHeadings">
+      <a name="scores">
         <TMPL_VAR NAME="Localize_Scores">
+      </a>
     </h4>
-</a>
+
 <hr />
-<table class="top20Words">
+<table class="top20Words" summary="">
     <tr>
         <th scope="col">
             <TMPL_VAR NAME="Localize_Bucket">
@@ -78,7 +79,7 @@
 
 </table>
 <hr />
-<table width="100%">
+<table width="100%" summary="">
     <tr>
         <td class="top20" align="left">
             <TMPL_IF NAME="View_If_Format">
@@ -118,7 +119,7 @@
 
 <TMPL_IF NAME="View_Score_If_Table">
 <br />
-<table class="top20Words">
+<table class="top20Words" summary="">
     <tr>
         <th scope="col">
             <TMPL_VAR NAME="Localize_Word">
@@ -202,7 +203,7 @@
         <TMPL_VAR NAME="Localize_View_Chart">
     </h4>
     <p>
-    <table>
+    <table summary="">
         <tr>
             <th colspan="2" align="center" style="color: <TMPL_VAR NAME="Color_Bucket_1">;">
                 <TMPL_VAR NAME="Bucket_1"> (<TMPL_VAR NAME="Localize_Score">: <TMPL_VAR NAME="Score_Bucket_1">)

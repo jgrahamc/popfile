@@ -6,7 +6,7 @@
         <a name="configBar" title="<TMPL_VAR NAME="Localize_tip_Config_HideBar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1">Config Bar</a>
     </h2>
 
-    <table class="configBarBody" cellspacing="0" width="100%">
+    <table class="configBarBody" cellspacing="0" width="100%" summary="">
         
         <TMPL_IF NAME="Is_history_page">
         

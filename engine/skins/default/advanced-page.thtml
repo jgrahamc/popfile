@@ -1,12 +1,12 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
-<table cellpadding="10%" cellspacing="0" class="settingsTable">
+<table cellpadding="10%" cellspacing="0" class="settingsTable" summary="">
     <tr>
         <td class="settingsPanel" valign="top">
             <h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_StopWords"></h2>
             <TMPL_VAR NAME="Localize_Advanced_Message1">
-            <p />
+            <br /><br />
             <table summary="<TMPL_VAR NAME="Localize_Advanced_MainTableSummary">">
 
                 <TMPL_LOOP NAME="Advanced_Loop_Word">
@@ -23,7 +23,7 @@
                 </TMPL_LOOP>
 
             </table>
-            <p />
+            <br />
             <div class="advancedWidgets">
                 <form action="/advanced" method="post">
                     <label class="advancedLabel" for="advancedAddWordText"><TMPL_VAR NAME="Localize_Advanced_AddWord">:</label><br />
@@ -62,7 +62,7 @@
             <p><TMPL_VAR NAME="Localize_Advanced_ConfigFile"> <TMPL_VAR NAME="Advanced_POPFILE_CFG">
 
             <form action="/advanced" method="post">
-                <table width="100%">
+                <table width="100%" summary="">
                     <tr>
                         <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
                         <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Value"></th>

@@ -96,7 +96,7 @@
     </tr>
 </table>
 
-<table>
+<table summary="">
 <tr><td>
 <div class="magnetsNewWidget">
     <form action="/magnets" method="post">
