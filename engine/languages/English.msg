@@ -495,3 +495,17 @@ tip_Footer_Login                        Date and time last accessed by this user
 tip_Footer_RFE                          Have an idea to improve POPFile? Let us know.
 tip_Footer_MailingList                  Want to hear about changes to POPFile?  Sign up.
 tip_Footer_FeedMe                       Like POPFile?  Contribute to making it more successful.
+
+# Jim's Bucket Stats stuff
+Words                                   Words
+Percent                                 Percent
+Header_ConfigurationShort               Configure
+Footer_HomePage_short                   Home Page
+Footer_QuickStart                       Quick Start
+Footer_WikiShort                        Documents
+Bucket_BreakEmailsClassifiedUpper       Messages<br>Classified
+Bucket_ClassificationErrorsUpper        Classification Errors
+Bucket_BreakClassificationFP            False<br>Positives
+Bucket_BreakClassificationFN            False<br>Negatives
+Bucket_HitRate                          Hit<br>Rate
+Bucket_StrikeRate                       Strike<br>Rate
