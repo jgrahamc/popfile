@@ -5,7 +5,7 @@
 
 <div class="helpMessage">
     <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
-    <p />
+    <br /><br />
     <form method="post" action="/buckets">
         <input type="submit" class="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
@@ -17,7 +17,7 @@
 
 <div class="helpMessage">
     <TMPL_VAR NAME="Localize_Help_Training">
-    <p />
+    <br /><br />
     <form method="post" action="/buckets">
         <input type="submit" class="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
@@ -432,8 +432,8 @@
                                     <strong>
                                         <TMPL_VAR NAME="Localize_Bucket_LookupMessage2">
                                         <TMPL_VAR NAME="Corpus_Word">
+                                        <br />
                                     </strong>
-                                    <p />
                                 </caption>
                                 <tr>
                                     <th scope="col">
