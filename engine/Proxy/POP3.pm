@@ -259,7 +259,7 @@ sub child__
                 $self->mq_post_( 'LOGIN', $user );
 
                 my $ssl = defined( $options ) && ( $options =~ /ssl/i );
-                $port = 110 if ( !defined( $port ) );
+                $port = $ssl?995:110 if ( !defined( $port ) );
 
                 if ( $mail = $self->verify_connected_( $mail, $client,
                                  $host, $port, $ssl ) )  {
