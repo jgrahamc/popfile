@@ -3907,16 +3907,11 @@ sub shutdown_page__
 
     # Replace the reference to the favicon, we won't be able to handle
     # that request
-
     $text =~ s/<link rel="icon" href="favicon\.ico">//;
 
-    # Replace the link to the style sheet with the style sheet itself
+    # Replace the link to the style sheets with the style sheet itself
+    $text =~ s/<link rel="stylesheet" .* media="handheld">/$css/s;
 
-    $text =~ s/\Q<link rel="stylesheet" type="text\/css" href="${root}style.css" title="POPFile-Style">\E/$css/;
-
-    # Remove the session key from the menu links:
-
-    $text =~ s/href="(.+?)\?session=.+?"/href="$1"/g;
 
     return $text;
 }
