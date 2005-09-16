@@ -55,18 +55,9 @@
   DetailPrint "$(PFI_LANG_INST_PROG_PERL)"
   SetDetailsPrint listonly
 
-  ; Remove empty minimal Perl folder (error flag set if folder not empty)
+  ; Install the minimal Perl "core"
+  ; (extra Perl files are added by the "Kakasi", "SOCKS" & "XMLRPC" sections in installer.nsi)
 
-  ClearErrors
-  RMDir "$G_MPLIBDIR"
-  IfErrors 0 install_now
-  StrCpy $G_PLS_FIELD_1 "$G_MPLIBDIR"
-  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_MINPERL_MBREMOLD)" IDNO install_now
-  DetailPrint "Remove old minimal Perl folder"
-  RMDir /r "$G_MPLIBDIR"
-  DetailPrint ""
-
-install_now:
   SetOutPath "$G_ROOTDIR"
   File "${C_PERL_DIR}\bin\perl.exe"
   File "${C_PERL_DIR}\bin\wperl.exe"
