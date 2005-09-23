@@ -58,6 +58,8 @@
   ; To compile this script, copy the 'ShellLink.dll' file to the standard NSIS plugins folder
   ; (${NSISDIR}\Plugins\). The 'ShellLink' source and example files can be unzipped to the
   ; ${NSISDIR}\Contrib\ShellLink\ folder if you wish, but this step is entirely optional.
+  ;
+  ; This script requires v1.1 (or later) of the ShellLink plugin
 
 
 #--------------------------------------------------------------------------
@@ -102,7 +104,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.56"
+  !define C_VERSION   "0.0.57"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -475,9 +477,9 @@ enter_section:
   ; The 'UserInfo' plugin may return an error if run on a Win9x system but since Win9x systems
   ; do not support different account types, we treat this error as if user has 'Admin' rights.
 
-	ClearErrors
-	UserInfo::GetName
-	IfErrors 0 got_name
+  ClearErrors
+  UserInfo::GetName
+  IfErrors 0 got_name
 
   ; Assume Win9x system, so user has 'Admin' rights
 
@@ -486,13 +488,13 @@ enter_section:
   Goto section_end
 
 got_name:
-	Pop $G_WINUSERNAME
+  Pop $G_WINUSERNAME
   StrCmp $G_WINUSERNAME "" 0 get_usertype
   StrCpy $G_WINUSERNAME "UnknownUser"
 
 get_usertype:
   UserInfo::GetAccountType
-	Pop ${L_WINUSERTYPE}
+  Pop ${L_WINUSERTYPE}
   StrCmp ${L_WINUSERTYPE} "Admin" section_end
   StrCmp ${L_WINUSERTYPE} "Power" section_end
   StrCmp ${L_WINUSERTYPE} "User" section_end
@@ -596,7 +598,7 @@ check_CU_shortcuts:
   IntCmp ${L_TEMP} 1 section_end section_end
   DetailPrint ""
   DetailPrint "'POPFile' total   = ${L_TEMP}"
-  DetailPrint "^^^^^ Error ^^^^^   The $\"'POPFile' total$\" should not be more than one (1)"
+  DetailPrint "^^^^ Warning ^^^^   The $\"'POPFile' total$\" is greater than one"
 
 section_end:
   Pop ${L_TEMP}
@@ -1392,14 +1394,15 @@ FunctionEnd
 
 Function AnalyseShortcuts
 
-  !define L_LNK_FOLDER        $R9   ; folder where the shortcuts (if any) are stored
-  !define L_LNK_HANDLE        $R8   ; file handle used when searching for shortcut files
-  !define L_LNK_NAME          $R7   ; name of a shortcut file
-  !define L_LNK_TOTAL         $R6   ; counts the number of shortcuts we find
-  !define L_POPFILE_TOTAL     $R5   ; total number of shortcuts which appear to start POPFile
-  !define L_SHORTCUT_ARGS     $R4
-  !define L_SHORTCUT_TARGET   $R3
-  !define L_TEMP              $R2
+  !define L_LNK_FOLDER         $R9   ; folder where the shortcuts (if any) are stored
+  !define L_LNK_HANDLE         $R8   ; file handle used when searching for shortcut files
+  !define L_LNK_NAME           $R7   ; name of a shortcut file
+  !define L_LNK_TOTAL          $R6   ; counts the number of shortcuts we find
+  !define L_POPFILE_TOTAL      $R5   ; total number of shortcuts which appear to start POPFile
+  !define L_SHORTCUT_ARGS      $R4
+  !define L_SHORTCUT_START_IN  $R3
+  !define L_SHORTCUT_TARGET    $R2
+  !define L_TEMP               $R1
 
   Exch ${L_LNK_FOLDER}
   Push ${L_LNK_HANDLE}
@@ -1407,6 +1410,7 @@ Function AnalyseShortcuts
   Push ${L_LNK_TOTAL}
   Push ${L_POPFILE_TOTAL}
   Push ${L_SHORTCUT_ARGS}
+  Push ${L_SHORTCUT_START_IN}
   Push ${L_SHORTCUT_TARGET}
   Push ${L_TEMP}
 
@@ -1423,10 +1427,10 @@ examine_shortcut:
   StrCmp ${L_LNK_NAME} ".." look_again
   IfFileExists "${L_LNK_FOLDER}\${L_LNK_NAME}\*.*" look_again
   IntOp ${L_LNK_TOTAL} ${L_LNK_TOTAL} + 1
-	ShellLink::GetShortCutTarget "${L_LNK_FOLDER}\${L_LNK_NAME}"
-	Pop ${L_SHORTCUT_TARGET}
-	ShellLink::GetShortCutArgs "${L_LNK_FOLDER}\${L_LNK_NAME}"
-	Pop ${L_SHORTCUT_ARGS}
+  ShellLink::GetShortCutTarget "${L_LNK_FOLDER}\${L_LNK_NAME}"
+  Pop ${L_SHORTCUT_TARGET}
+  ShellLink::GetShortCutArgs "${L_LNK_FOLDER}\${L_LNK_NAME}"
+  Pop ${L_SHORTCUT_ARGS}
 
   Push ${L_SHORTCUT_TARGET}
   Push "popfile"
@@ -1441,8 +1445,11 @@ examine_shortcut:
 
 show_details:
   IntOp ${L_POPFILE_TOTAL} ${L_POPFILE_TOTAL} + 1
+  ShellLink::GetShortCutWorkingDirectory "${L_LNK_FOLDER}\${L_LNK_NAME}"
+  Pop ${L_SHORTCUT_START_IN}
   DetailPrint ""
   DetailPrint "Shortcut name     = < ${L_LNK_NAME} >"
+  DetailPrint "Shortcut start in = < ${L_SHORTCUT_START_IN} >"
   DetailPrint "Shortcut target   = < ${L_SHORTCUT_TARGET} >"
   StrCpy ${L_TEMP} "found"
   IfFileExists ${L_SHORTCUT_TARGET} show_args
@@ -1471,13 +1478,14 @@ exit:
   DetailPrint "*.lnk files found = ${L_LNK_TOTAL}"
   DetailPrint "POPFile shortcuts = ${L_POPFILE_TOTAL}"
   IntCmp ${L_POPFILE_TOTAL} 1 restore_regs restore_regs
-  DetailPrint "^^^^^ Error ^^^^^   There should not be more than one (1) POPFile StartUp shortcut here"
+  DetailPrint "^^^^ Warning ^^^^   More than one POPFile StartUp shortcut found in this folder"
 
 restore_regs:
   StrCpy ${L_LNK_FOLDER} ${L_POPFILE_TOTAL}
 
   Pop ${L_TEMP}
   Pop ${L_SHORTCUT_TARGET}
+  Pop ${L_SHORTCUT_START_IN}
   Pop ${L_SHORTCUT_ARGS}
   Pop ${L_POPFILE_TOTAL}
   Pop ${L_LNK_TOTAL}
@@ -1491,6 +1499,7 @@ restore_regs:
   !undef L_LNK_TOTAL
   !undef L_POPFILE_TOTAL
   !undef L_SHORTCUT_ARGS
+  !undef L_SHORTCUT_START_IN
   !undef L_SHORTCUT_TARGET
   !undef L_TEMP
 
