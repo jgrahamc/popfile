@@ -769,9 +769,9 @@ extract_files:
   ; The 'UserInfo' plugin may return an error if run on a Win9x system but since Win9x systems
   ; do not support different account types, we treat this error as if user has 'Admin' rights.
 
-	ClearErrors
-	UserInfo::GetName
-	IfErrors 0 got_name
+  ClearErrors
+  UserInfo::GetName
+  IfErrors 0 got_name
 
   ; Assume Win9x system, so user has 'Admin' rights (To do: look for username in Registry?)
   ; (UserInfo works on Win98SE so perhaps it is only Win95 that fails ?)
@@ -781,13 +781,13 @@ extract_files:
   Goto exit
 
 got_name:
-	Pop $G_WINUSERNAME
+  Pop $G_WINUSERNAME
   StrCmp $G_WINUSERNAME "" 0 get_usertype
   StrCpy $G_WINUSERNAME "UnknownUser"
 
 get_usertype:
   UserInfo::GetAccountType
-	Pop $G_WINUSERTYPE
+  Pop $G_WINUSERTYPE
   StrCmp $G_WINUSERTYPE "Admin" exit
   StrCmp $G_WINUSERTYPE "Power" exit
   StrCmp $G_WINUSERTYPE "User" exit
@@ -2010,6 +2010,28 @@ no_quotes:
   StrCpy $G_USERDIR $G_USERDIR -1
 
 check_config:
+
+  ; Assume SFN support is enabled (the default setting for Windows)
+
+  StrCpy $G_SFN_DISABLED "0"
+
+  Push $G_USERDIR
+  Call PFI_GetSFNStatus
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "1" check_restore_log
+  StrCpy $G_SFN_DISABLED "1"
+  
+  ; Short file names are not supported here, so we cannot accept any path containing spaces.
+
+  Push $G_USERDIR
+  Push ' '
+  Call PFI_StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" check_restore_log
+  Pop ${L_RESULT}
+  Goto SFN_problem
+
+check_restore_log:
   Pop ${L_RESULT}
   IfFileExists "$G_USERDIR\pfi-restore.log" 0 invalid_restore
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_4)\
@@ -2019,6 +2041,12 @@ check_config:
       $(PFI_LANG_DIRSELECT_MBWARN_5)" IDNO quit_wizard
   Call CheckExistingConfigData
   Abort
+
+SFN_problem:
+  MessageBox MB_OK|MB_ICONSTOP "Internal Error: Unexpected space(s) found in 'restore' path !\
+      ${MB_NL}${MB_NL}\
+      ($G_USERDIR)"
+  Goto quit_wizard
 
 invalid_restore:
   MessageBox MB_OK|MB_ICONSTOP "Error: No 'restore' data found at specified location !\
