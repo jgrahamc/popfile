@@ -7,56 +7,70 @@
     <h4 class="viewHeadings">
         <TMPL_VAR NAME="Localize_QuickMagnets">
     </h4>
-    <table class="top20Words">
-        <tr>
-            <th scope="col">
-                <TMPL_VAR NAME="Localize_Magnet">
-            </th>
-            <th>
-                <TMPL_VAR NAME="Localize_Magnet_Always">
-            </th>
-        </tr>
 
-            <TMPL_LOOP NAME="View_QuickMagnets_Loop">
-
+    <table>
         <tr>
-            <td scope="col">
-                <TMPL_VAR NAME="View_QuickMagnets_Type">: 
-                <select name="text<TMPL_VAR NAME="View_QuickMagnets_I">">
-                    
-                    <TMPL_LOOP NAME="View_QuickMagnets_Loop_Magnets">
-                    
-                    <option value="<TMPL_VAR NAME="View_QuickMagnets_Magnet">">
-                        <TMPL_VAR NAME="View_QuickMagnets_Magnet">
-                    </option>
-                    
+            <td>
+                <table class="top20Words">
+                    <tr>
+                        <th scope="col">
+                            <TMPL_VAR NAME="Localize_Magnet">
+                        </th>
+                        <th>
+                            <TMPL_VAR NAME="Localize_Magnet_Always">
+                        </th>
+                    </tr>
+
+                        <TMPL_LOOP NAME="View_QuickMagnets_Loop">
+
+                    <tr>
+                        <td scope="col">
+                            <TMPL_VAR NAME="View_QuickMagnets_Type">:
+                            <select name="text<TMPL_VAR NAME="View_QuickMagnets_I">">
+
+                                <TMPL_LOOP NAME="View_QuickMagnets_Loop_Magnets">
+
+                                <option value="<TMPL_VAR NAME="View_QuickMagnets_Magnet">">
+                                    <TMPL_VAR NAME="View_QuickMagnets_Magnet">
+                                </option>
+
+                                </TMPL_LOOP>
+
+                            </select>
+                        </td>
+                        <td>
+                            <input type="hidden" name="type<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddType" value="<TMPL_VAR NAME="View_QuickMagnets_Type">" />
+                            <select name="bucket<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddBucket">
+                                <option value=""></option>
+
+                                <TMPL_LOOP NAME="View_QuickMagnets_Loop_Buckets">
+
+                                <option value="<TMPL_VAR NAME="View_QuickMagnets_Bucket">" style="color: <TMPL_VAR NAME="View_QuickMagnets_Bucket_Color">">
+                                    <TMPL_VAR NAME="View_QuickMagnets_Bucket">
+                                </option>
+
+                                </TMPL_LOOP>
+                            </select>
+                        </td>
+                    </tr>
+
                     </TMPL_LOOP>
-                    
-                </select>
-            </td>
-            <td>
-                <input type="hidden" name="type<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddType" value="<TMPL_VAR NAME="View_QuickMagnets_Type">" />
-                <select name="bucket<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddBucket">
-                    <option value=""></option>
-                    
-                    <TMPL_LOOP NAME="View_QuickMagnets_Loop_Buckets">
-                    
-                    <option value="<TMPL_VAR NAME="View_QuickMagnets_Bucket">" style="color: <TMPL_VAR NAME="View_QuickMagnets_Bucket_Color">">
-                        <TMPL_VAR NAME="View_QuickMagnets_Bucket">
-                    </option>
-                    
-                    </TMPL_LOOP>
-                </select>
-            </td>
-        </tr>
-    
-        </TMPL_LOOP>
 
-        <tr>
-            <td>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
+                        </td>
+                    </tr>
+
+                        </td>
+                </table>
             </td>
             <td>
-                <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
+                <div class="helpMessage">
+                    <TMPL_VAR NAME="Localize_Magnet_Note">
+                </div>
             </td>
         </tr>
     </table>
