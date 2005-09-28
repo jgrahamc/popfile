@@ -3835,7 +3835,7 @@ sub shutdown_page__
 
     my $templ = $self->load_template__( 'shutdown-page.thtml','',$session );
 
-    for my $i ( 0..6 ) {
+    for my $i ( 0..5 ) {
         $templ->param( "Common_Middle_Tab$i" => "menuStandard" );
     }
 
