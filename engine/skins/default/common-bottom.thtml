@@ -13,21 +13,21 @@
     <table class="footer" summary="">
     <tr>
         <td class="footerBody">
-            <a class="bottomLink" href="http://popfile.sourceforge.net/" title="<TMPL_VAR NAME="Localize_tip_Footer_HomePage">">
+            <a class="bottomLink" href="http://getpopfile.org/" title="<TMPL_VAR NAME="Localize_tip_Footer_HomePage">">
                 <TMPL_VAR NAME="Localize_Footer_HomePage"></a>
             <br />
-            <a class="bottomLink" href="http://popfile.sourceforge.net/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html" title="<TMPL_VAR NAME="Localize_tip_Footer_Manual">">
+            <a class="bottomLink" href="http://getpopfile.org/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html" title="<TMPL_VAR NAME="Localize_tip_Footer_Manual">">
                 <TMPL_VAR NAME="Localize_Footer_Manual"></a>
             <br />
-            <a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl" title="<TMPL_VAR NAME="Localize_tip_Footer_Wiki">">
+            <a class="bottomLink" href="http://getpopfile.org/cgi-bin/wiki.pl" title="<TMPL_VAR NAME="Localize_tip_Footer_Wiki">">
                 <TMPL_VAR NAME="Localize_Footer_Wiki"></a>
             <br />
-            <a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?<TMPL_VAR NAME="Localize_FAQLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_FAQ">">
+            <a class="bottomLink" href="http://getpopfile.org/cgi-bin/wiki.pl?<TMPL_VAR NAME="Localize_FAQLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_FAQ">">
                 <TMPL_VAR NAME="Localize_FAQ"></a>
             <br />
         </td>
         <td class="footerBody">
-            <a class="bottomLink" href="http://popfile.sourceforge.net/">
+            <a class="bottomLink" href="http://getpopfile.org/">
                 <img src="<TMPL_VAR NAME="Skin_Root">otto.png" border="0" alt="" /></a>
             <br />
             <span title="<TMPL_VAR NAME="Localize_tip_Footer_Version">"><TMPL_VAR NAME="Common_Bottom_Version"></span>
