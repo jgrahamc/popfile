@@ -134,13 +134,13 @@
       DetailPrint "Minimal Perl version ${L_VER_X}.${L_VER_Y}.${L_VER_Z} detected in '$G_ROOTDIR' folder"
 
       ; Only download the SSL files if the minimal Perl is version 5.8.7 or higher
-      
+
       StrCpy ${L_RESULT} "built-in"
 
       IntCmp ${L_VER_X} 5 0 restore_vars set_download_flag
       IntCmp ${L_VER_Y} 8 0 restore_vars set_download_flag
       IntCmp ${L_VER_Z} 7 0 restore_vars set_download_flag
-      
+
     set_download_flag:
       StrCpy ${L_RESULT} "download"
 
@@ -228,11 +228,19 @@ download:
       IfFileExists "$PLUGINSDIR\Net_SSLeay.pm.tar.gz" 0 installer_error_exit
       IfFileExists "$PLUGINSDIR\ssleay32.dll" 0 installer_error_exit
       IfFileExists "$PLUGINSDIR\libeay32.dll" 0 installer_error_exit
+      StrCmp $G_SSL_ONLY "0" install_SSL_support
+
+      ; The '/SSL' option was supplied so we need to make sure it is safe to install the files
+
+      DetailPrint ""
+      SetDetailsPrint both
+      DetailPrint "$(PFI_LANG_PROG_CHECKIFRUNNING) $(PFI_LANG_TAKE_SEVERAL_SECONDS)"
+      SetDetailsPrint listonly
+      DetailPrint ""
+      Call MakeRootDirSafe
   !endif
 
-  !ifdef ADDSSL
-    install_SSL_support:
-  !endif
+install_SSL_support:
 
   ; Now install the files required for SSL support
 
