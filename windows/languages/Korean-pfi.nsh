@@ -160,6 +160,10 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "계속 진행하기 위해 '다음'을 누르십시오."
 
+; Progress Reports displayed above the progress bar when downloading/installing SSL support [addssl.nsi, getssl.nsh]
+
+!insertmacro PFI_LANG_STRING PFI_LANG_PROG_CHECKIFRUNNING  "Checking if POPFile is running..."
+
 ; Installation Log Messages [installer.nsi, adduser.nsi]
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_SHUTDOWN    "이전 버전의 POPFile을 종료 중 - 포트:"
@@ -425,7 +429,6 @@
 ; Progress reports
 
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_INITIALISE      "Initializing..."
-!insertmacro PFI_LANG_STRING PSS_LANG_PROG_CHECKIFRUNNING  "Checking if POPFile is running..."
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_USERCANCELLED   "POPFile SSL Support installation cancelled by the user"
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_SUCCESS         "POPFile SSL support installed"
 

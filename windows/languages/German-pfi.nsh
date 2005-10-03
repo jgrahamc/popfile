@@ -162,6 +162,10 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Klicken Sie auf Weiter um fortzufahren"
 
+; Progress Reports displayed above the progress bar when downloading/installing SSL support [addssl.nsi, getssl.nsh]
+
+!insertmacro PFI_LANG_STRING PFI_LANG_PROG_CHECKIFRUNNING  "Checking if POPFile is running..."
+
 ; Installation Log Messages [installer.nsi, adduser.nsi]
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_SHUTDOWN    "Beende ältere POPFile Version am Port"
@@ -427,7 +431,6 @@
 ; Progress reports
 
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_INITIALISE      "Initializing..."
-!insertmacro PFI_LANG_STRING PSS_LANG_PROG_CHECKIFRUNNING  "Checking if POPFile is running..."
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_USERCANCELLED   "POPFile SSL Support installation cancelled by the user"
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_SUCCESS         "POPFile SSL support installed"
 

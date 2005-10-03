@@ -156,9 +156,13 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT      "Creating POPFile shortcuts..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Installing POPFile UI language files..."
 
-; Installation Progress Reports displayed above the progress bar [installer.nsi, adduser.nsi, getssl.nsh]
+; Installation Progress Reports displayed above the progress bar [installer.nsi, adduser.nsh, getssl.nsh]
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Premi Següent per continuar"
+
+; Progress Reports displayed above the progress bar when downloading/installing SSL support [addssl.nsi, getssl.nsh]
+
+!insertmacro PFI_LANG_STRING PFI_LANG_PROG_CHECKIFRUNNING  "Checking if POPFile is running..."
 
 ; Installation Log Messages [installer.nsi, adduser.nsi]
 
@@ -415,7 +419,6 @@
 ; Progress reports
 
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_INITIALISE      "Initializing..."
-!insertmacro PFI_LANG_STRING PSS_LANG_PROG_CHECKIFRUNNING  "Checking if POPFile is running..."
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_USERCANCELLED   "POPFile SSL Support installation cancelled by the user"
 !insertmacro PFI_LANG_STRING PSS_LANG_PROG_SUCCESS         "POPFile SSL support installed"
 
@@ -835,13 +838,13 @@
 
 ; $G_WINUSERNAME holds the Windows login name of the user running the wizard
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO  "POPFile has been configured for the '$G_WINUSERNAME' user.${IO_NL}${IO_NL}Click Finish to close this wizard."
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "POPFile has been configured for the '$G_WINUSERNAME' user.${IO_NL}${IO_NL}Click Finish to close this wizard."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT      "POPFile User Interface"
 !insertmacro PFI_LANG_STRING PFI_LANG_FINISH_WEB_LINK_TEXT "Click here to visit the POPFile web site"
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-; Add User: Standard MUI Page - Uninstall Confirmation Page (for the 'POPFile User Data' wizard) [adduser.nsi]
+; Add User: Standard MUI Page - Uninstall Confirmation Page (for the 'Add POPFile User' wizard) [adduser.nsi]
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ; $G_WINUSERNAME holds the Windows login name for the user running the uninstall wizard
@@ -852,7 +855,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "The POPFile configuration data for the '$G_WINUSERNAME' user will be uninstalled from the following folder. $_CLICK"
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-; Add User: Standard MUI Page - Uninstallation Page (for the 'POPFile User Data' wizard) [adduser.nsi]
+; Add User: Standard MUI Page - Uninstallation Page (for the 'Add POPFile User' wizard) [adduser.nsi]
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ; $G_WINUSERNAME holds the Windows login name for the user running the uninstall wizard
@@ -876,9 +879,9 @@
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_EXPRUN        "Outlook Express is still running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OUTRUN        "Outlook is still running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_EUDRUN        "Eudora is still running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_EXPRUN        "Outlook Express is still running!"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OUTRUN        "Outlook is still running!"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_EUDRUN        "Eudora is still running!"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_IGNORE        "User requested restore while email program is running"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OPENED        "Opened"
