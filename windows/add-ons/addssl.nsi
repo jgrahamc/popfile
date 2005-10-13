@@ -120,6 +120,22 @@
   ; where Module.pm was CVS version 1.40 and Module_ssl.pm was CVS version 1.41.
 
 #--------------------------------------------------------------------------
+# Language Support NSIS Compiler Warnings
+#--------------------------------------------------------------------------
+#
+# Expect 3 compiler warnings, all related to standard NSIS language files which are
+# out-of-date (if the default multi-language 'SSL Setup' wizard is compiled).
+#
+# There may be further warnings which mention "PFI_LANG_NSISDL_PLURAL" is not set in one or
+# more language tables. The '..\pfi-languages.nsh' file lists all of the language table codes
+# used by the POPFile installer and other NSIS-based utilities.
+#
+# NOTE: The language selection menu order used in this script assumes that the NSIS MUI
+# 'Japanese.nsh' language file has been patched to use 'Nihongo' instead of 'Japanese'
+# [see 'SMALL NSIS PATCH REQUIRED' in the '..\pfi-languages.nsh' file]
+#--------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
 # Compile-time command-line switches (used by 'makensis.exe')
 #--------------------------------------------------------------------------
 #
@@ -165,7 +181,7 @@
 
   Name                   "POPFile SSL Setup"
 
-  !define C_PFI_VERSION  "0.1.1"
+  !define C_PFI_VERSION  "0.1.2"
 
   ; Mention the wizard's version number in the window title
 
