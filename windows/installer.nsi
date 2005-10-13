@@ -71,6 +71,10 @@
 ; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date
 ; (if the default multi-language installer is compiled).
 ;
+; There may be further warnings which mention "PFI_LANG_NSISDL_PLURAL" is not set in one or
+; more language tables. The 'pfi-languages.nsh' file lists all of the language table codes
+; used by the POPFile installer and other NSIS-based utilities.
+;
 ; NOTE: The language selection menu order used in this script assumes that the NSIS MUI
 ; 'Japanese.nsh' language file has been patched to use 'Nihongo' instead of 'Japanese'
 ; [see 'SMALL NSIS PATCH REQUIRED' in the 'pfi-languages.nsh' file]
@@ -1613,9 +1617,9 @@ Function CheckUserRights
   ; The 'UserInfo' plugin may return an error if run on a Win9x system but since Win9x systems
   ; do not support different account types, we treat this error as if user has 'Admin' rights.
 
-	ClearErrors
-	UserInfo::GetName
-	IfErrors 0 got_name
+  ClearErrors
+  UserInfo::GetName
+  IfErrors 0 got_name
 
   ; Assume Win9x system, so user has 'Admin' rights
   ; (UserInfo works on Win98SE so perhaps it is only Win95 that fails ?)
@@ -1625,13 +1629,13 @@ Function CheckUserRights
   Goto exit
 
 got_name:
-	Pop $G_WINUSERNAME
+  Pop $G_WINUSERNAME
   StrCmp $G_WINUSERNAME "" 0 get_usertype
   StrCpy $G_WINUSERNAME "UnknownUser"
 
 get_usertype:
   UserInfo::GetAccountType
-	Pop $G_WINUSERTYPE
+  Pop $G_WINUSERTYPE
   StrCmp $G_WINUSERTYPE "Admin" exit
   StrCmp $G_WINUSERTYPE "Power" not_admin
   StrCmp $G_WINUSERTYPE "User" not_admin
