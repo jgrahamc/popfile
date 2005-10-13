@@ -113,32 +113,39 @@
 
   ; Currently a subset of the languages supported by NSIS MUI 1.70 (using the NSIS names)
 
-  !insertmacro PFI_LANG_LOAD "Arabic"
-  !insertmacro PFI_LANG_LOAD "Bulgarian"
-  !insertmacro PFI_LANG_LOAD "Catalan"
-  !insertmacro PFI_LANG_LOAD "SimpChinese"
-  !insertmacro PFI_LANG_LOAD "TradChinese"
-  !insertmacro PFI_LANG_LOAD "Czech"
-  !insertmacro PFI_LANG_LOAD "Danish"
-  !insertmacro PFI_LANG_LOAD "German"
-  !insertmacro PFI_LANG_LOAD "Spanish"
-  !insertmacro PFI_LANG_LOAD "French"
-  !insertmacro PFI_LANG_LOAD "Greek"
-  !insertmacro PFI_LANG_LOAD "Italian"
-  !insertmacro PFI_LANG_LOAD "Korean"
-  !insertmacro PFI_LANG_LOAD "Hungarian"
-  !insertmacro PFI_LANG_LOAD "Dutch"
-  !insertmacro PFI_LANG_LOAD "Japanese"
-  !insertmacro PFI_LANG_LOAD "Norwegian"
-  !insertmacro PFI_LANG_LOAD "Polish"
-  !insertmacro PFI_LANG_LOAD "Portuguese"
-  !insertmacro PFI_LANG_LOAD "PortugueseBR"
-  !insertmacro PFI_LANG_LOAD "Russian"
-  !insertmacro PFI_LANG_LOAD "Slovak"
-  !insertmacro PFI_LANG_LOAD "Finnish"
-  !insertmacro PFI_LANG_LOAD "Swedish"
-  !insertmacro PFI_LANG_LOAD "Turkish"
-  !insertmacro PFI_LANG_LOAD "Ukrainian"
+  ; NSIS 2.0 compiler error messages use language ID codes when referring to problems with
+  ; language strings, e.g.
+  ;
+  ;     LangString "PFI_LANG_NSISDL_PLURAL" is not set in language table of language 1041
+  ;
+  ; Note: 'English' is 'Language 1033'
+
+  !insertmacro PFI_LANG_LOAD "Arabic"             ; Language 1025
+  !insertmacro PFI_LANG_LOAD "Bulgarian"          ; Language 1026
+  !insertmacro PFI_LANG_LOAD "Catalan"            ; Language 1027
+  !insertmacro PFI_LANG_LOAD "SimpChinese"        ; Language 2052
+  !insertmacro PFI_LANG_LOAD "TradChinese"        ; Language 1028
+  !insertmacro PFI_LANG_LOAD "Czech"              ; Language 1029
+  !insertmacro PFI_LANG_LOAD "Danish"             ; Language 1030
+  !insertmacro PFI_LANG_LOAD "German"             ; Language 1031
+  !insertmacro PFI_LANG_LOAD "Spanish"            ; Language 1034
+  !insertmacro PFI_LANG_LOAD "French"             ; Language 1036
+  !insertmacro PFI_LANG_LOAD "Greek"              ; Language 1032
+  !insertmacro PFI_LANG_LOAD "Italian"            ; Language 1040
+  !insertmacro PFI_LANG_LOAD "Korean"             ; Language 1042
+  !insertmacro PFI_LANG_LOAD "Hungarian"          ; Language 1038
+  !insertmacro PFI_LANG_LOAD "Dutch"              ; Language 1043
+  !insertmacro PFI_LANG_LOAD "Japanese"           ; Language 1041
+  !insertmacro PFI_LANG_LOAD "Norwegian"          ; Language 1044
+  !insertmacro PFI_LANG_LOAD "Polish"             ; Language 1045
+  !insertmacro PFI_LANG_LOAD "Portuguese"         ; Language 2070
+  !insertmacro PFI_LANG_LOAD "PortugueseBR"       ; Language 1046
+  !insertmacro PFI_LANG_LOAD "Russian"            ; Language 1049
+  !insertmacro PFI_LANG_LOAD "Slovak"             ; Language 1051
+  !insertmacro PFI_LANG_LOAD "Finnish"            ; Language 1035
+  !insertmacro PFI_LANG_LOAD "Swedish"            ; Language 1053
+  !insertmacro PFI_LANG_LOAD "Turkish"            ; Language 1055
+  !insertmacro PFI_LANG_LOAD "Ukrainian"          ; Language 1058
 
 #--------------------------------------------------------------------------
 # End of 'pfi-languages.nsh'
