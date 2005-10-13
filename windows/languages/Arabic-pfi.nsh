@@ -156,7 +156,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT      "≈‰‘«¡ ≈Œ ’«—«  POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      " ‰’Ì» „·›«  «··€«  ≈÷«›Ì…..."
 
-; Installation Progress Reports displayed above the progress bar [installer.nsi, adduser.nsh, getssl.nsh]
+; Installation Progress Reports displayed above the progress bar [installer.nsi, adduser.nsi, getssl.nsh]
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "≈÷€ÿ «· «·Ì ··„ «»⁄…"
 

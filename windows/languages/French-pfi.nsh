@@ -156,7 +156,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT      "Creation des raccourcis de POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Installation des fichiers de langue de l'interface de POPFile..."
 
-; Installation Progress Reports displayed above the progress bar [installer.nsi, adduser.nsh, getssl.nsh]
+; Installation Progress Reports displayed above the progress bar [installer.nsi, adduser.nsi, getssl.nsh]
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Cliquez sur 'Suivant' pour continuer"
 
