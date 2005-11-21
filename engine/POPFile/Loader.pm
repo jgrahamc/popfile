@@ -89,6 +89,12 @@ sub new
 
     $self->{debug__} = 0;
 
+    # If this is set to 1 then POPFile will shutdown straight after it
+    # has started up.  This is used by the installer and set by the
+    # --shutdown command-line option
+
+    $self->{shutdown__} = 0;
+
     # This stuff lets us do some things in a way that tolerates some
     # window-isms
 
@@ -167,6 +173,7 @@ sub CORE_loader_init
     # Parse just the --verbose command-line option
 
     GetOptions( "verbose!" => \$self->{debug__},
+                "shutdown" => \$self->{shutdown__},
                 "quiet" => sub{ $self->{debug__} = 0 } );
 }
 
@@ -737,6 +744,13 @@ sub CORE_service
         }
 
         last if $nowait;
+
+        # If we are asked to shutdown then we allow a single run
+        # through the service routines and then exit
+
+        if ( $self->{shutdown__} == 1 ) {
+            $self->{alive__} = 0;
+        }
     }
 
     return $self->{alive__};
