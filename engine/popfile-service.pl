@@ -1,20 +1,21 @@
 #!/usr/bin/perl
 # ----------------------------------------------------------------------------
 #
-# popfile-service.pl --- Message analyzer and sorter (Windows loader used with PerlSvc)
+# popfile-service.pl --- Message analyzer and sorter (Windows loader
+# used with PerlSvc)
 #
-# Acts as a server and client designed to sit between a real mail/news client and a real mail/
-# news server using POP3.  Inserts an extra header X-Text-Classification: into the header to
-# tell the client which category the message belongs in and much more...
+# Acts as a server and client designed to sit between a real mail/news
+# client and a real mail/ news server using POP3.  Inserts an extra
+# header X-Text-Classification: into the header to tell the client
+# which category the message belongs in and much more...
 #
 # Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
+#   POPFile is free software; you can redistribute it and/or modify it
+#   under the terms version 2 of the GNU General Public License as
+#   published by the Free Software Foundation.
 #
 #   POPFile is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of

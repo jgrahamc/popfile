@@ -9,13 +9,14 @@
 
 use strict;
 
-# This hash will store a count of the number of times each line is executed # in each file,
-# it is in fact a hash of hashes used as
+# This hash will store a count of the number of times each line is
+# executed # in each file, it is in fact a hash of hashes used as
 # $count{filename}{linenumber}
 
 my %count;
 
 # This hash will map file names of POPFile modules to coverage
+
 my %files;
 
 # Now look for LNE files containing code coverage information
@@ -24,8 +25,8 @@ my @line_files = glob '*.lne';
 
 foreach my $file (sort @line_files) {
 
-    # Each LNE has a file name of ModuleName.PID.lne and the ModuleName has had
-    # / or :: converted to #
+    # Each LNE has a file name of ModuleName.PID.lne and the
+    # ModuleName has had / or :: converted to #
 
     $file =~ /^(.+)\.pm\.(-?\d+)\.lne$/;
 
