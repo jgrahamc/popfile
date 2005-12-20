@@ -1391,7 +1391,8 @@ sub users_page
 
     # Handle user creation
 
-    if ( exists( $self->{form_}{create} ) && ( $self->{form_}{newuser} ne '' ) ) {
+    if ( exists( $self->{form_}{create} ) &&
+         ( $self->{form_}{newuser} ne '' ) ) {
         my ( $result, $password ) = $self->classifier_()->create_user( $session, $self->{form_}{newuser}, $self->{form_}{clone} );
         if ( $result == 0 ) {
             if ( $self->{form_}{clone} ne '' ) {
@@ -1413,7 +1414,8 @@ sub users_page
 
     # Handle user removal
 
-    if ( exists( $self->{form_}{remove} ) && ( $self->{form_}{toremove} ne '' ) ) {
+    if ( exists( $self->{form_}{remove} ) &&
+         ( $self->{form_}{toremove} ne '' ) ) {
         my $result = $self->classifier_()->remove_user( $session, $self->{form_}{toremove} );
         if ( $result == 0 ) {
             $self->status_message__( $templ, sprintf( $self->{language__}{Users_Removed}, $self->{form_}{toremove} ) );
@@ -1486,7 +1488,8 @@ sub users_page
     $templ->param( 'Users_Loop_Edit' => \@user_loop );
     $templ->param( 'Users_Loop_Copy' => \@user_loop );
 
-    if ( exists( $self->{form_}{edituser} ) ) {
+    if ( exists( $self->{form_}{edituser} ) &&
+         ( $self->{form_}{editname} ne '' ) ) {
         my $id = $self->classifier_()->get_user_id( $session, $self->{form_}{editname} );
         my @parameters = $self->classifier_()->get_user_parameter_list( $session );
 
