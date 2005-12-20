@@ -623,8 +623,11 @@ sub url_handler__
 
     if ( !defined( $session ) ) {
         my $continue;
-        ($session, $continue) = $self->password_page( $client, $url );
-        $continue = '/' unless defined( $continue );
+        ( $session, $continue ) = $self->password_page( $client, $url );
+        if ( !defined( $continue ) ||
+             $continue eq '/password' ) {
+            $continue = '/';
+        }
         if ( defined( $session ) ) {
             $self->http_redirect_( $client, $continue , $session );
         }
@@ -822,7 +825,8 @@ sub http_ok
     $selected = -1 if ( !defined( $selected ) );
 
     my @tab = ( 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard' );
-    $tab[$selected] = 'menuSelected' if ( ( $selected <= $#tab ) && ( $selected >= 0 ) );
+    $tab[$selected] = 'menuSelected' if ( ( $selected <= $#tab ) &&
+                                          ( $selected >= 0 ) );
 
     for my $i (0..$#tab) {
         $templ->param( "Common_Middle_Tab$i" => $tab[$i] );
@@ -834,10 +838,14 @@ sub http_ok
     # then insert a reference to an image that is generated through a
     # CGI.  Also send stats to the same site if that is allowed.
 
-    if ( defined( $session ) && ( $self->{today__} ne $self->user_config_( $self->{sessions__}{$session}{user}, 'last_update_check' ) ) ) {
+    if ( defined( $session ) &&
+         ( $self->{today__} ne
+           $self->user_config_( $self->{sessions__}{$session}{user},
+                                'last_update_check' ) ) ) {
         $self->calculate_today();
 
-        if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check' ) ) {
+        if ( $self->user_config_( $self->{sessions__}{$session}{user},
+                                  'update_check' ) ) {
             my ( $major_version, $minor_version, $build_version ) =
                 $self->version() =~ /^v([^.]*)\.([^.]*)\.(.*)$/;
             $templ->param( 'Common_Middle_If_UpdateCheck' => 1 );
@@ -846,17 +854,22 @@ sub http_ok
             $templ->param( 'Common_Middle_Build_Version' => $build_version );
         }
 
-        if ( defined( $session ) && ( $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats' ) ) ) {
+        if ( defined( $session ) &&
+             ( $self->user_config_( $self->{sessions__}{$session}{user},
+                                    'send_stats' ) ) ) {
             $templ->param( 'Common_Middle_If_SendStats' => 1 );
             my @buckets = $self->classifier_()->get_buckets(
                 $session );
             my $bc      = $#buckets + 1;
             $templ->param( 'Common_Middle_Buckets'  => $bc );
-            $templ->param( 'Common_Middle_Messages' => $self->mcount__( $session ) );
-            $templ->param( 'Common_Middle_Errors'   => $self->ecount__( $session ) );
+            $templ->param( 'Common_Middle_Messages' =>
+                           $self->mcount__( $session ) );
+            $templ->param( 'Common_Middle_Errors'   =>
+                           $self->ecount__( $session ) );
         }
 
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'last_update_check', $self->{today__}, 1 );
+        $self->user_config_( $self->{sessions__}{$session}{user},
+                             'last_update_check', $self->{today__}, 1 );
     }
 
     # Build an HTTP header for standard HTML
@@ -904,7 +917,8 @@ sub handle_history_bar__
     if ( defined($self->{form_}{page_size}) ) {
         if ( ( $self->{form_}{page_size} >= 1 ) &&
              ( $self->{form_}{page_size} <= 1000 ) ) {
-            $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size', $self->{form_}{page_size} );
+            $self->user_config_( $self->{sessions__}{$session}{user},
+                                 'page_size', $self->{form_}{page_size} );
         } else {
             $self->error_message__( $templ,
                 $self->{language__}{Configuration_Error4} );
@@ -913,13 +927,15 @@ sub handle_history_bar__
     }
 
     $templ->param( 'Configuration_Page_Size' =>
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) );
+                   $self->user_config_( $self->{sessions__}{$session}{user},
+                                        'page_size' ) );
 
     if ( defined($self->{form_}{history_days}) ) {
         if ( ( $self->{form_}{history_days} >= 1 ) &&
              ( $self->{form_}{history_days} <= 366 ) ) {
-            $self->user_module_config_( $self->{sessions__}{$session}{user}, 'history', 'history_days',
-                $self->{form_}{history_days} );
+            $self->user_module_config_( $self->{sessions__}{$session}{user},
+                                        'history', 'history_days',
+                                        $self->{form_}{history_days} );
         } else {
             $self->error_message__( $templ,
                 $self->{language__}{Configuration_Error5} );
