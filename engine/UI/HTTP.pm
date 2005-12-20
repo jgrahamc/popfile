@@ -396,7 +396,23 @@ sub http_error_
 
     $self->log_( 0, "HTTP error $error returned" );
 
-    print $client "HTTP/1.0 $error Error$eol$eol";
+    my $text="<html><head><title>POPFile Web Server Error $error</title></head>
+<body>
+<h1>POPFile Web Server Error $error</h1>
+An error has occurred which has caused POPFile to return the error $error.
+<p>
+Click <a href=\"/\">here</a> to continue.
+</body>
+</html>$eol";
+
+    $self->log_( 1, $text );
+
+    print $client "HTTP/1.0 200 OK$eol";
+    print $client "Content-Type: text/html$eol";
+    print $client "Content-Length: ";
+    print $client length( $text );
+    print $client "$eol$eol";
+    print $client $text;
 }
 
 # ----------------------------------------------------------------------------
@@ -435,7 +451,7 @@ sub http_file_
         $header .= "$eol$eol";
         print $client $header . $contents;
     } else {
-        http_error_( $self, $client, 404 );
+        $self->http_error_( $client, 404 );
     }
 }
 
