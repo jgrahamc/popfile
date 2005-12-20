@@ -35,6 +35,7 @@ use warnings;
 use locale;
 
 use Getopt::Long qw(:config pass_through);
+use File::Path;
 
 #----------------------------------------------------------------------------
 # new
@@ -156,7 +157,18 @@ sub start
     # at the end means that we allow the piddir to be absolute and
     # outside the user sandbox
 
-    $self->{pid_file__} = $self->get_user_path( $self->config_( 'piddir' ) . 'popfile.pid', 0 );
+    eval { mkpath( $self->config_( 'piddir' ) ) };
+    if ( $@ ) {
+        $self->log_( 0, "Failed to create directory " . $self->config_( 'piddir' ) );
+    }
+    eval { mkpath( $self->global_config_( 'msgdir' ) ) };
+    if ( $@ ) {
+        $self->log_( 0, "Failed to create directory " . $self->global_config_( 'piddir' ) );
+    }
+
+    $self->{pid_file__} = $self->get_user_path( $self->path_join(
+                                                    $self->config_( 'piddir' ),
+                                                    'popfile.pid' ), 0 ) ;
 
     if (defined($self->live_check_())) {
         return 0;
@@ -602,19 +614,19 @@ sub get_user_path
 {
     my ( $self, $path, $sandbox ) = @_;
 
-    return $self->path_join__( $self->{popfile_user__}, $path, $sandbox );
+    return $self->path_join( $self->{popfile_user__}, $path, $sandbox );
 }
 
 sub get_root_path
 {
     my ( $self, $path, $sandbox ) = @_;
 
-    return $self->path_join__( $self->{popfile_root__}, $path, $sandbox );
+    return $self->path_join( $self->{popfile_root__}, $path, $sandbox );
 }
 
 # ----------------------------------------------------------------------------
 #
-# path_join__
+# path_join
 #
 # Join two paths togther
 #
@@ -624,7 +636,7 @@ sub get_root_path
 #                    paths and paths containing .. are not accepted).
 #
 # ----------------------------------------------------------------------------
-sub path_join__
+sub path_join
 {
     my ( $self, $left, $right, $sandbox ) = @_;
 

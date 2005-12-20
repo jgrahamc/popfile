@@ -735,8 +735,8 @@ sub get_slot_file
 
     my $hex_slot = sprintf( '%8.8x', $slot );
     my $path = $self->get_user_path_(
-                   $self->global_config_( 'msgdir' ) .
-                       substr( $hex_slot, 0, 2 ) . '/', 0 );
+                   $self->path_join( $self->global_config_( 'msgdir' ),
+                                     substr( $hex_slot, 0, 2 ) . '/' ), 0 );
 
     $self->make_directory__( $path );
     $path .= substr( $hex_slot, 2, 2 ) . '/';
@@ -1142,7 +1142,8 @@ sub upgrade_history_files__
     # upgrade them by placing them in the database
 
     my @msgs = sort compare_mf__ glob $self->get_user_path_(
-        $self->global_config_( 'msgdir' ) . 'popfile*.msg', 0 );
+        $self->path_join( $self->global_config_( 'msgdir' ),
+                          'popfile*.msg' ), 0 );
 
     if ( $#msgs != -1 ) {
         my $session = $self->classifier_()->get_administrator_session_key();
@@ -1180,7 +1181,8 @@ sub upgrade_history_files__
         $self->classifier_()->release_session_key( $session );
 
         unlink $self->get_user_path_(
-            $self->global_config_( 'msgdir' ) . 'history_cache', 0 );
+            $self->path_join( $self->global_config_( 'msgdir' ),
+                              'history_cache' ), 0 );
     }
 }
 

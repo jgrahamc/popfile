@@ -592,6 +592,25 @@ sub get_root_path_
 
 # ----------------------------------------------------------------------------
 #
+# path_join
+#
+# Join two paths togther
+#
+# $left              The LHS
+# $right             The RHS
+# $sandbox           Set to 1 if this path must be sandboxed (i.e. absolute
+#                    paths and paths containing .. are not accepted).
+#
+# ----------------------------------------------------------------------------
+sub path_join
+{
+    my ( $self, $left, $right, $sandbox ) = @_;
+
+    return $self->configuration_()->path_join( $left, $right, $sandbox );
+}
+
+# ----------------------------------------------------------------------------
+#
 # flush_slurp_data__
 #
 # Helper function for slurp_ that returns an empty string if the slurp

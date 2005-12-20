@@ -32,6 +32,8 @@ use strict;
 use warnings;
 use locale;
 
+use File::Path;
+
 # Constant used by the log rotation code
 my $seconds_per_day = 60 * 60 * 24;
 
@@ -136,6 +138,13 @@ sub start
 
     $self->calculate_today__();
 
+    # Verify that the logger directory actually exists
+
+    eval { mkpath( $self->config_( 'logdir' ) ) };
+    if ( $@ ) {
+        $self->log_( 0, "Failed to create directory " . $self->config_( 'logdir' ) );
+    }
+
     return 1;
 }
 
@@ -180,7 +189,8 @@ sub calculate_today__
     # sandbox
 
     $self->{debug_filename__} = $self->get_user_path_(
-        $self->config_( 'logdir' ) . "popfile$self->{today__}.log", 0 );
+        $self->path_join( $self->config_( 'logdir' ),
+                          "popfile$self->{today__}.log" ), 0 );
 }
 
 # ---------------------------------------------------------------------------
@@ -195,7 +205,8 @@ sub remove_debug_files
     my ( $self ) = @_;
 
     my @debug_files = glob( $self->get_user_path_(
-                          $self->config_( 'logdir' ) . 'popfile*.log', 0 ) );
+                          $self->path_join( $self->config_( 'logdir' ),
+                                            'popfile*.log' ), 0 ) );
 
     foreach my $debug_file (@debug_files) {
         # Extract the epoch information from the popfile log file name
