@@ -38,6 +38,24 @@
                 <h2 class="security"><TMPL_VAR NAME="Localize_Security_AUTHTitle"></h2>
                 <TMPL_VAR NAME="Security_Dynamic_Chain">
             </div>
+    <div class="singleUserMode">
+<hr>
+                <h2 class="security"><TMPL_VAR NAME="Localize_Users_SingleUserMode"></h2>
+<TMPL_IF NAME="Users_If_Single">
+<form action="/administration" method="post">
+    <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
+    <input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+<input type="hidden" name="singleuser" value="0">
+</form>
+<TMPL_ELSE>
+<form action="/administration" method="post">
+<span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_No"></span>
+<input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+<input type="hidden" name="singleuser" value="1">
+</form>
+</TMPL_IF>
+</div>
+
         </td>
         <td class="settingsPanel" width="33%" valign="top">
             <div class="securityUpdateWidget">

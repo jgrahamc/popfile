@@ -1,22 +1,6 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
-<form action="/users" method="post">
-<table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%" summary="">
-    <tr>
-        <td class="settingsPanel" valign="top">
-
-<TMPL_IF NAME="Users_If_Single">
-    <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Users_SingleUserMode"><br /><TMPL_VAR NAME="Localize_Yes"></span>
-    <input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
-<input type="hidden" name="singleuser" value="0">
-</td></tr></table></form>
-<TMPL_ELSE>
-    <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_Users_SingleUserMode"><br /><TMPL_VAR NAME="Localize_No"></span>
-    <input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-<input type="hidden" name="singleuser" value="1">
-</td></tr></table></form>
-
 <table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%" summary="">
     <tr>
         <td class="settingsPanel" valign="top">
@@ -174,8 +158,6 @@
         </td>
     </tr>
 </table>
-
-</TMPL_IF>
 
 <TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">

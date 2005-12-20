@@ -53,10 +53,15 @@
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab3">" align="center">
                     <a class="menuLink" href="/administration" title="<TMPL_VAR NAME="Localize_tip_Menu_Admin">"><TMPL_VAR NAME="Localize_Header_Administration"></a>
                 </td>
+
+
+<TMPL_IF NAME="Users_If_Single">
+<TMPL_ELSE>
                 <td class="menuSpacer"></td>
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">
                     <a class="menuLink" href="/users" title="<TMPL_VAR NAME="Localize_tip_Menu_Users">"><TMPL_VAR NAME="Localize_Header_Users"></a>
                 </td>
+</TMPL_IF>
                 <td class="menuSpacer"></td>
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
                     <a class="menuLink" href="/advanced" title="<TMPL_VAR NAME="Localize_tip_Menu_Advanced">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>

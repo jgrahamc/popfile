@@ -1167,6 +1167,13 @@ sub administration_page
     my $server_error = '';
     my $port_error   = '';
 
+    # Handle single user mode
+
+    if ( defined( $self->{form_}{usermode} ) ) {
+        $self->global_config_( 'single_user', $self->{form_}{singleuser} );
+    }
+    $templ->param( 'Users_If_Single' => $self->global_config_( 'single_user' ) );
+
     $self->config_( 'local', $self->{form_}{localui}-1 )      if ( defined($self->{form_}{localui}) );
     $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check', $self->{form_}{update_check}-1 ) if ( defined($self->{form_}{update_check}) );
     $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats', $self->{form_}{send_stats}-1 )   if ( defined($self->{form_}{send_stats}) );
@@ -1397,13 +1404,6 @@ sub users_page
 
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
                                                     $page, $session );
-
-    # Handle single user mode
-
-    if ( defined( $self->{form_}{usermode} ) ) {
-        $self->global_config_( 'single_user', $self->{form_}{singleuser} );
-    }
-    $templ->param( 'Users_If_Single' => $self->global_config_( 'single_user' ) );
 
     # Handle user creation
 
