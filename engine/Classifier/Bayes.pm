@@ -3371,6 +3371,12 @@ sub create_user
         }
 
         # TODO clone bucket parameters
+    } else {
+
+        # If we are not cloning a user then they need at least the
+        # default settings
+
+        $self->db_()->do( "insert into buckets ( name, pseudo, userid ) values ( 'unclassified', 1, $id );" );
     }
 
     return ( 0, $password );
