@@ -1295,7 +1295,7 @@ sub administration_page
         $templ->param( 'Configuration_If_Show_Log' => 1 );
     }
 
-    $self->http_ok( $client,$templ, 4, $session );
+    $self->http_ok( $client,$templ, 3, $session );
 }
 
 #----------------------------------------------------------------------------
@@ -1525,7 +1525,7 @@ sub users_page
         }
     }
 
-    $self->http_ok( $client, $templ, 5, $session );
+    $self->http_ok( $client, $templ, 4, $session );
 }
 
 #----------------------------------------------------------------------------
@@ -1672,7 +1672,7 @@ sub advanced_page
 
     $templ->param( 'Advanced_Loop_Parameter' => \@param_loop );
 
-    $self->http_ok( $client, $templ, 6, $session );
+    $self->http_ok( $client, $templ, 5, $session );
 }
 
 sub max
