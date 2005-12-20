@@ -816,6 +816,9 @@ sub http_ok
 {
     my ( $self, $client, $templ, $selected, $session ) = @_;
 
+    my $now = time;
+    $templ->param( 'Common_Bottom_Date' => $self->pretty_date__( $now, undef, $session ) );
+
     $selected = -1 if ( !defined( $selected ) );
 
     my @tab = ( 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard' );
@@ -3450,9 +3453,7 @@ sub load_template__
     # Set a variety of common elements that are used repeatedly
     # throughout POPFile's pages
 
-    my $now = time;
     my %fixups = ( 'Skin_Root'               => $root,
-                   'Common_Bottom_Date'      => $self->pretty_date__( $now, undef, $session ),
                    'Common_Bottom_LastLogin' => $self->{last_login__},
                    'Common_Bottom_Version'   => $self->version(),
                    'If_Show_Bucket_Help'     =>
