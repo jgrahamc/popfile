@@ -6,10 +6,9 @@
 #
 #   This file is part of POPFile
 #
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
+#   POPFile is free software; you can redistribute it and/or modify it
+#   under the terms of version 2 of the GNU General Public License as
+#   published by the Free Software Foundation.
 #
 #   POPFile is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -123,7 +122,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION     "0.5.11"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION     "0.5.12"     ; see 'VIProductVersion' comment below for format details
 
   !define C_OUTFILE     "stop_pf.exe"
 
@@ -253,7 +252,7 @@ usage:
     ${MB_NL}          ECHO **** Shutdown failed ****\
     ${MB_NL}          :DONE\
     ${MB_NL}${MB_NL}\
-    Distributed under the terms of the GNU General Public License (GPL)."
+    Distributed under the terms of the GNU General Public License (GPL) v2."
   Goto error_exit
 
 no_messages:
