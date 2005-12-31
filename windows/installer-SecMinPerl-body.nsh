@@ -68,6 +68,7 @@
   File "${C_PERL_DIR}\lib\Config.pm"
   File "${C_PERL_DIR}\lib\Config_heavy.pl"
   File "${C_PERL_DIR}\lib\constant.pm"
+  File "${C_PERL_DIR}\lib\Cwd.pm"
   File "${C_PERL_DIR}\lib\DynaLoader.pm"
   File "${C_PERL_DIR}\lib\Errno.pm"
   File "${C_PERL_DIR}\lib\Exporter.pm"
@@ -100,8 +101,10 @@
   File "${C_PERL_DIR}\lib\Exporter\*"
 
   SetOutPath "$G_MPLIBDIR\File"
+  File "${C_PERL_DIR}\lib\File\Basename.pm"
   File "${C_PERL_DIR}\lib\File\Copy.pm"
   File "${C_PERL_DIR}\lib\File\Glob.pm"
+  File "${C_PERL_DIR}\lib\File\Path.pm"
   File "${C_PERL_DIR}\lib\File\Spec.pm"
 
   SetOutPath "$G_MPLIBDIR\File\Spec"
