@@ -223,7 +223,7 @@ Users_Duplicate_Account                 Failed to add the account because it is 
 Users_Failed_Account                    Failed to add the account
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
-History_FilterBy                        Filter By
+History_FilterBy                        Filter&nbsp;By
 History_Search                          &nbsp;(searched for from/subject %s)
 History_Title                           Recent Messages
 History_Jump                            Jump to page
