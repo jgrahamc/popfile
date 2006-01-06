@@ -62,7 +62,7 @@
     </tr>
 </table>
 
-<form action="/history" method="post" class="historyForm">
+<form action="/history" method="post" class="historyForm" name="historyForm">
     <div class="removeButtonsTop">
         <input type="submit" class="submit removeButton" name="clearchecked" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">')" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" title="<TMPL_VAR NAME="Localize_tip_History_RemoveChecked">" />
         <input type="submit" class="submit removeButton" name="clearpage" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_History_RemovePage">')" value="<TMPL_VAR NAME="Localize_History_RemovePage">" title="<TMPL_VAR NAME="Localize_tip_History_RemovePage">" />
