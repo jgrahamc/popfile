@@ -4,7 +4,7 @@
 #                 to assist in solving problems with POPFile installations created
 #                 by the Windows installer for POPFile v0.21.0 (or later).
 #
-# Copyright (c) 2004-2005  John Graham-Cumming
+# Copyright (c) 2004-2006  John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -52,7 +52,7 @@
   ; shortcut (*.lnk) file
   ;
   ; The 'NSIS Wiki' page for the 'ShellLink' plugin (description, example and download links):
-  ; http://nsis.sourceforge.net/wiki/ShellLink_plugin
+  ; http://nsis.sourceforge.net/ShellLink_plugin
   ;
   ; To compile this script, copy the 'ShellLink.dll' file to the standard NSIS plugins folder
   ; (${NSISDIR}\Plugins\). The 'ShellLink' source and example files can be unzipped to the
@@ -103,7 +103,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.58"
+  !define C_VERSION   "0.0.59"
 
   !define C_OUTFILE   "pfidiag.exe"
 
