@@ -11,7 +11,7 @@
 #                           to execute SQL from the command-line so this utility checks the
 #                           sqlite.exe version number before trying to execute any SQL.
 #
-# Copyright (c) 2005  John Graham-Cumming
+# Copyright (c) 2005-2006  John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -28,6 +28,49 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #-------------------------------------------------------------------------------------------
+
+  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
+  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
+  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+
+  !define ${NSIS_VERSION}_found
+
+  !ifndef v2.0_found
+      !warning \
+          "$\r$\n\
+          $\r$\n***   NSIS COMPILER WARNING:\
+          $\r$\n***\
+          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
+          $\r$\n***\
+          $\r$\n***   The resulting 'installer' program should be tested carefully!\
+          $\r$\n$\r$\n"
+  !endif
+
+  !undef  ${NSIS_VERSION}_found
+
+  ;------------------------------------------------
+  ; This script requires the 'GetSize' NSIS plugin
+  ;------------------------------------------------
+
+  ; This script uses a special NSIS plugin (GetSize) to find the size of the SQLite database.
+  ;
+  ; 'GetSize' plugin thread in the "NSIS Discussion" forum:
+  ; http://forums.winamp.com/showthread.php?s=bbbe5469cecf3cb842d7a7c5ad18e78a&threadid=224452
+  ;
+  ; 'GetSize' plugin download link (from the above forum thread):
+  ; http://forums.winamp.com/attachment.php?s=bbbe5469cecf3cb842d7a7c5ad18e78a&postid=1756112
+  ;
+  ; To compile this script, copy the 'getsize.dll' file to the standard NSIS plugins folder
+  ; (${NSISDIR}\Plugins\). The 'GetSize' source and example files can be unzipped to the
+  ; ${NSISDIR}\Contrib\GetSize\ folder if you wish, but this step is entirely optional.
+  ;
+  ; Tested with version 1.0 of the 'GetSize' plugin.
+  ;
+  ; The 'GetSize' plugin has not been added to the NSIS Wiki. The plugin's author decided
+  ; to include its functions in a much larger general purpose plugin (Locate). This enhanced
+  ; plugin (it is more than 3 times the size of 'GetSize') has been added to the NSIS Wiki:
+  ; http://nsis.sourceforge.net/Locate_plugin
 
 #--------------------------------------------------------------------------
 # Compile-time command-line switches (used by 'makensis.exe')
@@ -91,25 +134,11 @@
 #
 #-------------------------------------------------------------------------------------------
 
-  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
-  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
-  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+  ;--------------------------------------------------------------------------
+  ; Select LZMA compression (to generate smallest EXE file)
+  ;--------------------------------------------------------------------------
 
-  !define ${NSIS_VERSION}_found
-
-  !ifndef v2.0_found
-      !warning \
-          "$\r$\n\
-          $\r$\n***   NSIS COMPILER WARNING:\
-          $\r$\n***\
-          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
-          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
-          $\r$\n***\
-          $\r$\n***   The resulting 'installer' program should be tested carefully!\
-          $\r$\n$\r$\n"
-  !endif
-
-  !undef  ${NSIS_VERSION}_found
+  SetCompressor lzma
 
   ;--------------------------------------------------------------------------
   ; Symbols used to avoid confusion over where the line breaks occur.
@@ -127,7 +156,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.5"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.0.7"     ; see 'VIProductVersion' comment below for format details
   !define C_OUTFILE   "pfidbstatus.exe"
 
   ; The default NSIS caption is "Name Setup" so we override it here
@@ -176,7 +205,7 @@
   !endif
   VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
   VIAddVersionKey "CompanyName"             "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2006  John Graham-Cumming"
   VIAddVersionKey "FileDescription"         "Check the status of POPFile's SQLite database"
   VIAddVersionKey "FileVersion"             "${C_VERSION}"
   VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
@@ -204,6 +233,7 @@
 
   Var G_DBFORMAT       ; SQLite database format ('2.x', '3.x' or an error string)
   Var G_DBSCHEMA       ; SQLite database schema ( a number like '12' or an error string)
+  Var G_DBSIZE         ; SQLite database file size (in KB)
 
   Var G_PLS_FIELD_1    ; used to customize language strings
   Var G_PLS_FIELD_2    ; used to customize language strings
@@ -362,7 +392,8 @@
   !insertmacro DBS_TEXT DBS_LANG_CHECKTHISONE   "POPFile database found ($G_DATABASE)"
 
   !insertmacro DBS_TEXT DBS_LANG_DBFORMAT       "Database is in SQLite $G_DBFORMAT format"
-  !insertmacro DBS_TEXT DBS_LANG_DBFORMATSCHEMA "$(DBS_LANG_DBFORMAT) and uses POPFile schema version $G_DBSCHEMA"
+  !insertmacro DBS_TEXT DBS_LANG_DBSCHEMA       ", uses schema version $G_DBSCHEMA"
+  !insertmacro DBS_TEXT DBS_LANG_DBSIZE         " and its size is $G_DBSIZE KB"
   !insertmacro DBS_TEXT DBS_LANG_DBSCHEMAERROR  "SQLite error detected when extracting POPFile schema version:"
 
   !insertmacro DBS_TEXT DBS_LANG_SQLITEUTIL     "SQLite $G_PLS_FIELD_2 utility found in $G_PLS_FIELD_1"
@@ -400,6 +431,8 @@ Section CheckSQLiteDatabase
 
   !define L_TEMP    $R9
 
+  Push ${L_TEMP}
+
   SetDetailsPrint textonly
   DetailPrint "$(DBS_LANG_RIGHTCLICK)"
   SetDetailsPrint listonly
@@ -409,10 +442,10 @@ Section CheckSQLiteDatabase
   DetailPrint "------------------------------------------------------------"
   DetailPrint ""
 
-	ClearErrors
-	UserInfo::GetName
-	IfErrors default_name
-	Pop $G_WINUSERNAME
+  ClearErrors
+  UserInfo::GetName
+  IfErrors default_name
+  Pop $G_WINUSERNAME
   StrCmp $G_WINUSERNAME "" 0 check_input
 
 default_name:
@@ -589,8 +622,19 @@ usage_msg:
   Goto error_exit
 
 continue:
+  StrCpy $G_PLS_FIELD_2 $G_DATABASE
   StrCpy $G_DATABASE "$G_PLS_FIELD_1\$G_DATABASE"
   IfFileExists "$G_DATABASE\*.*" dir_not_file
+  Push $0
+  Push $1
+  Push $2
+  getsize::GetSize "$G_PLS_FIELD_1" "/M=$G_PLS_FIELD_2 /G=0 /S=Kb" .r0 .r1 .r2
+  Push $0
+  Call InsertThousandSeparators
+  Pop $G_DBSIZE
+  Pop $2
+  Pop $1
+  Pop $0
   DetailPrint ""
   DetailPrint "$(DBS_LANG_CHECKTHISONE)"
   Push $G_DATABASE
@@ -698,7 +742,7 @@ use_it:
   StrCmp ${L_TEMP} "0" schema_ok
   StrCpy $G_DBSCHEMA "($G_DBSCHEMA)"
   DetailPrint ""
-  DetailPrint "$(DBS_LANG_DBFORMAT)"
+  DetailPrint "$(DBS_LANG_DBFORMAT)$(DBS_LANG_DBSIZE)"
   DetailPrint ""
   DetailPrint "$(DBS_LANG_DBSCHEMAERROR)"
   DetailPrint "$G_DBSCHEMA"
@@ -706,7 +750,7 @@ use_it:
 
 schema_ok:
   DetailPrint ""
-  DetailPrint "$(DBS_LANG_DBFORMATSCHEMA)"
+  DetailPrint "$(DBS_LANG_DBFORMAT)$(DBS_LANG_DBSCHEMA)$(DBS_LANG_DBSIZE)"
 
 check_integrity:
   DetailPrint ""
@@ -768,9 +812,114 @@ exit:
 
   Call HideFinalTimestamp
 
+  POP ${L_TEMP}
+
   !undef L_TEMP
 
 SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: InsertThousandSeparators
+#
+# When large integers are displayed they can be hard to read (eg 1234567). This function
+# inserts one or more "thousand" separators to make large integers easier to read
+# (eg 1,234,567).
+#
+# If the input value isn't an unsigned decimal integer then the output string equals the input.
+#
+# This function uses the target system's OS setting for the "thousand" separator. This is the
+# character (or characters) used to separate groups of digits to the left of the decimal point.
+#
+# Input:
+#       (top of stack)          - input
+#
+# Output:
+#       (top of stack)          - input value with separators inserted if appropriate
+#
+# Usage:
+#       Push "1234567"
+#       Call InsertThousandSeparators
+#       Pop $R0                 ; $R0 will be "1,234,567"
+#                               ; (assuming the 'English' setting for the "thousand" separator)
+#
+#       Push "1234.567"
+#       Call InsertThousandSeparators
+#       Pop $R0                 ; $R0 will be "1234.567"
+#                               ; (no changes made because input contains a decimal point)
+#--------------------------------------------------------------------------
+
+Function InsertThousandSeparators
+
+  !define L_INPUT   $R9   ; the input string
+  !define L_RESULT  $R8   ; the output string
+
+  !define L_TEMP    $1    ; temp variable (also used as .r1 in 'system' call)
+  !define L_COMMA   $0    ; target system's "thousand" separator (used as .r0 in 'system' call)
+
+  Exch ${L_INPUT}
+  Push ${L_RESULT}
+  Push ${L_TEMP}
+  Push ${L_COMMA}
+
+  Push ${L_INPUT}
+  Call PFI_StrCheckDecimal
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" no_commas
+
+  ; Use the target system's "thousand" separator (this is ',' when 'English' locale selected)
+
+  !define LOCALE_SYSTEM_DEFAULT   0x400
+  !define LOCALE_STHOUSAND        0xF
+  !define MAX_PATH                260       ; upper limit for the length of the separator
+
+  StrCpy ${L_COMMA} ""
+
+  System::Call "kernel32::GetLocaleInfoA(i ${LOCALE_SYSTEM_DEFAULT}, i ${LOCALE_STHOUSAND}, t .r0, i ${MAX_PATH}) i r1"
+
+  ; If the 'system' call returns an empty string use the default English separator
+  ; (or should we just use the empty string in case that is what is really required here?)
+
+  StrCmp ${L_COMMA} "" 0 got_separator
+  StrCpy ${L_COMMA} ","
+
+got_separator:
+
+  ; Input is an unsigned decimal integer (i.e. it contains only the characters 0 to 9)
+
+  StrCpy ${L_RESULT} ""
+
+loop:
+  StrLen ${L_TEMP} ${L_INPUT}
+  IntCmp ${L_TEMP} 3 done done
+  StrCpy ${L_TEMP} ${L_INPUT} 3 -3
+  StrCmp ${L_RESULT} "" first_group
+  StrCpy ${L_RESULT} ${L_TEMP}${L_COMMA}${L_RESULT}
+
+next_group:
+  StrCpy ${L_INPUT} ${L_INPUT} -3
+  Goto loop
+
+first_group:
+  StrCpy ${L_RESULT} ${L_TEMP}
+  Goto next_group
+
+done:
+  StrCmp ${L_RESULT} "" no_commas
+  StrCpy ${L_INPUT} ${L_INPUT}${L_COMMA}${L_RESULT}
+
+no_commas:
+  Pop ${L_COMMA}
+  Pop ${L_TEMP}
+  Pop ${L_RESULT}
+  Exch ${L_INPUT}
+
+  !undef L_INPUT
+  !undef L_RESULT
+
+  !undef L_TEMP
+  !undef L_COMMA
+
+FunctionEnd
 
 #--------------------------------------------------------------------------
 # Functions used to manipulate the contents of the details view
