@@ -8,7 +8,7 @@
 #                0.22 (or later) installation. This 'include' file ensures that these two
 #                programs download and install the same SSL files.
 #
-# Copyright (c) 2005 John Graham-Cumming
+# Copyright (c) 2005-2006 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -40,7 +40,7 @@
   ; This script uses a special NSIS plugin (untgz) to extract files from the *.tar.gz archives.
   ;
   ; The 'NSIS Wiki' page for the 'untgz' plugin (description, example and download links):
-  ; http://nsis.sourceforge.net/wiki/UnTGZ
+  ; http://nsis.sourceforge.net/UnTGZ_plug-in
   ;
   ; Alternative download links can be found at the 'untgz' author's site:
   ; http://www.darklogic.org/win32/nsis/plugins/
