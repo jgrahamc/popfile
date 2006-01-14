@@ -3331,7 +3331,7 @@ sub view_page
     if ($magnet ne '') {
         $templ->param( 'View_Magnet_Reason' => sprintf( $self->{language__}{History_MagnetBecause},  # PROFILE BLOCK START
                           $color, $bucket,
-                          Classifier::MailParse::splitline($magnet,0)
+                          Classifier::MailParse->splitline($magnet,0)
             ) );                                                                                     # PROFILE BLOCK STOP
     }
 
