@@ -180,7 +180,7 @@
 
   Name                   "POPFile SSL Setup"
 
-  !define C_PFI_VERSION  "0.1.4"
+  !define C_PFI_VERSION  "0.1.5"
 
   ; Mention the wizard's version number in the window title
 
@@ -247,7 +247,7 @@
   VIAddVersionKey "ProductName"             "POPFile SSL Setup wizard"
   VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
   VIAddVersionKey "CompanyName"             "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2006  John Graham-Cumming"
   VIAddVersionKey "FileDescription"         "Installs SSL support for POPFile 0.22 or later"
   VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
   VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
