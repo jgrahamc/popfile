@@ -98,7 +98,7 @@
   ; these old files can then be handled as if they had been downloaded from the University of
   ; Winnipeg.
   ;
-  ; The following local SSL files are compatible with POPFile 0.22.x:
+  ; The following local SSL files are compatible with POPFile 0.22.0, 0.22.1 and 0.22.2:
   ;
   ;   (1) ssl-0.22.x\IO-Socket-SSL.tar.gz             (dated 01-Aug-2003)
   ;   (2) ssl-0.22.x\Net_SSLeay.pm.tar.gz             (dated 23-Dec-2004)
