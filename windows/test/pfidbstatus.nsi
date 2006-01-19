@@ -56,10 +56,10 @@
   ; This script uses a special NSIS plugin (GetSize) to find the size of the SQLite database.
   ;
   ; 'GetSize' plugin thread in the "NSIS Discussion" forum:
-  ; http://forums.winamp.com/showthread.php?s=bbbe5469cecf3cb842d7a7c5ad18e78a&threadid=224452
+  ; http://forums.winamp.com/showthread.php?threadid=224452
   ;
   ; 'GetSize' plugin download link (from the above forum thread):
-  ; http://forums.winamp.com/attachment.php?s=bbbe5469cecf3cb842d7a7c5ad18e78a&postid=1756112
+  ; http://forums.winamp.com/attachment.php?postid=1756112
   ;
   ; To compile this script, copy the 'getsize.dll' file to the standard NSIS plugins folder
   ; (${NSISDIR}\Plugins\). The 'GetSize' source and example files can be unzipped to the
@@ -156,7 +156,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.7"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.0.8"     ; see 'VIProductVersion' comment below for format details
   !define C_OUTFILE   "pfidbstatus.exe"
 
   ; The default NSIS caption is "Name Setup" so we override it here
