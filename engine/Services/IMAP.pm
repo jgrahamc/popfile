@@ -10,6 +10,8 @@ use POPFile::Module;
 #
 # Copyright (c) 2001-2005 John Graham-Cumming
 #
+#   $Revision$
+#
 #   This file is part of POPFile
 #
 #   POPFile is free software; you can redistribute it and/or modify it
