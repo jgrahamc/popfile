@@ -3,7 +3,7 @@
 # This Makefile is used for the creation of POPFile packages
 # and for testing
 #
-# Copyright (c) 2003-2004 John Graham-Cumming
+# Copyright (c) 2003-2006 John Graham-Cumming
 
 include vars.mak
 
@@ -62,7 +62,7 @@ macosx: ; @$(MAKE) -C ../macosx
 
 winexe: popfile.exe popfileb.exe popfilef.exe popfileib.exe popfileif.exe trayicon.ico ../windows/POPFileIcon/popfile.ico popfile-service.exe
 
-COMMON_EXE_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --icon trayicon.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
+COMMON_EXE_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --icon trayicon.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2006 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
 ifeq ($(EXE_DEBUG),1)
 COMMON_EXE_OPTIONS += --debug
 endif

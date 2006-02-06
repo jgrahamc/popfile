@@ -3,7 +3,7 @@
 #
 # coverage.pl - Calculate coverage data from LNE files
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2006 John Graham-Cumming
 #
 # ----------------------------------------------------------------------------
 
