@@ -1685,6 +1685,7 @@ sub parse_line
                     }
                 }
                 $line = decode_qp( $line );
+                $line =~ s/\x00/NUL/g;
             }
 
             # Decode \x??
@@ -1944,6 +1945,7 @@ sub decode_string
             elsif ($encoding eq "Q" || $encoding eq "q") {
                 $value =~ s/\_/=20/g;
                 $value = decode_qp( $value );
+                $value =~ s/\x00/NUL/g;
 
                 # for Japanese header
 
