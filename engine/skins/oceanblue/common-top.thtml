@@ -4,5 +4,6 @@
 <title><TMPL_VAR NAME="Localize_Header_Title"></title>
 <link rel="icon" href="favicon.ico">
 <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">style.css" title="POPFile-Style">
-    <TMPL_INCLUDE NAME="common-javascript.thtml">
+<!--[if lt IE 7]><link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">ie6.css"><![endif]-->
+<TMPL_INCLUDE NAME="common-javascript.thtml">
 </head>

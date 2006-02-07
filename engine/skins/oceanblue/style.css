@@ -150,7 +150,6 @@ hr {
   padding: 0;
   margin: 0;
   width: 8.3em;
-//width: 6.3em;
   float:left;
 }
 
@@ -290,7 +289,7 @@ h2 {
 .historyNavigatorBottom {
   text-align: right;
   padding-right: 0.5em;
-  padding-bottom: 1em;
+  padding-bottom: 1em; 
   vertical-align: top;
 }
 
@@ -418,10 +417,6 @@ a:link:hover, a:visited:hover {
 .viewHeadings {
   display: inline;
 }
-
-/* Hide Tan Hack from IE5-mac \*/
-* html .shell  {height: 1%;}
-/* End hide from IE5-mac */
 
 /*********************************************************/
 /* Config Bar */

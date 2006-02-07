@@ -1,0 +1,7 @@
+.menu {
+  width: 6.3em;
+}
+
+/* Hide Tan Hack from IE5-mac \*/
+* html .shell  {height: 1%;}
+/* End hide from IE5-mac */
