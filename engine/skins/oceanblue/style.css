@@ -87,6 +87,10 @@ input {
   border: 0;
 }
 
+form {
+  margin: 0;
+}
+
 table.head {
   color: white;
   font-weight: bold;
@@ -172,10 +176,9 @@ hr {
   border-right: 10px solid #508fc4;
   background-color: #2175bc;
   color: #fff;
-  text-decoration: none;
+text-decoration: none;
   width: 100%;
 }
-
 html>body .menu li a {
   width: auto;
 }
@@ -185,6 +188,7 @@ html>body .menu li a {
   border-right: 10px solid #5ba3e0;
   background-color: #2586d7;
   color: #fff;
+
 }
 
 .menuStandard a:hover, .menuSelected a:hover {
