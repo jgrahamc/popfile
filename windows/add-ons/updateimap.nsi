@@ -6,7 +6,7 @@
 #                    for use with an existing POPFile 0.22.x installation (the IMAP module
 #                    is still 'experimental' so it is not shipped with the 0.22.0 release).
 #
-# Copyright (c) 2004-2005 John Graham-Cumming
+# Copyright (c) 2004-2006 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -120,7 +120,7 @@
 
   Name                   "POPFile IMAP Updater"
 
-  !define C_PFI_VERSION  "0.0.7"
+  !define C_PFI_VERSION  "0.0.8"
 
   ; Mention the wizard's version number in the window title
 
@@ -144,6 +144,15 @@
 
   !define C_CVS_IMAP_DL_URL   "http://cvs.sourceforge.net/viewcvs.py/*checkout*/popfile/engine/Services/IMAP.pm?rev=$G_REVISION"
 
+  ;--------------------------------------------------------------------------
+  ; POPFile's module format was changed for the POPFile 0.23.0 release so any
+  ; modules intended for 0.23.0 (or later) are no longer compatible with the
+  ; earlier releases. Therefore if this utility is used to add or update the
+  ; IMAP module in a pre-0.23.0 installation it must ensure it downloads the
+  ; most recent _compatible_ module instead of simply the most recent module.
+  ;--------------------------------------------------------------------------
+
+  !define C_PRE_23_COMPATIBLE_VERSION     "1.9.4.2"
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -205,7 +214,7 @@
   VIAddVersionKey "ProductName"             "POPFile IMAP Updater wizard"
   VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
   VIAddVersionKey "CompanyName"             "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2006  John Graham-Cumming"
   VIAddVersionKey "FileDescription"         "Updates the IMAP module for POPFile 0.22.x"
   VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
   VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
@@ -623,7 +632,7 @@ check_param:
 
 look_for_suitable_version:
   IfFileExists "$G_ROOTDIR\POPFile\Database.pm" look_for_most_recent_version
-  StrCpy $G_REVISION "1.9"
+  StrCpy $G_REVISION "${C_PRE_23_COMPATIBLE_VERSION}"
   DetailPrint "Pre-0.23.0 installation found. Get most recent 0.22-compatible file (IMAP.pm v$G_REVISION)"
   Goto get_imap_module
 
