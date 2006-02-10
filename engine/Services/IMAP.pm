@@ -258,7 +258,8 @@ sub service
                 # all of our folders
                 $self->connect_folders__();
 
-                # Reset the hash containing the hash values we have just seen.
+                # Reset the hash containing the hash values we have seen the 
+                # last time through service.
                 $self->{hash_values__} = ();
 
                 # Now do the real job
