@@ -5,7 +5,7 @@
     <tr>
         <td class="settingsPanel" width="33%" valign="top">
             <div class="securityServerWidget">
-                 <h2 class="security"><TMPL_VAR NAME="Localize_Security_Stealth"></h2>
+                 <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_Stealth"></h2>
                         <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_UI">:
@@ -35,12 +35,12 @@
             </div>
 
             <div class="securityAuthWidgets">
-                <h2 class="security"><TMPL_VAR NAME="Localize_Security_AUTHTitle"></h2>
+                <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_AUTHTitle"></h2>
                 <TMPL_VAR NAME="Security_Dynamic_Chain">
             </div>
     <div class="singleUserMode">
 <hr>
-                <h2 class="security"><TMPL_VAR NAME="Localize_Users_SingleUserMode"></h2>
+                <h2 class="configuration"><TMPL_VAR NAME="Localize_Users_SingleUserMode"></h2>
 <TMPL_IF NAME="Users_If_Single">
 <form action="/administration" method="post">
     <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
@@ -59,7 +59,7 @@
         </td>
         <td class="settingsPanel" width="33%" valign="top">
             <div class="securityUpdateWidget">
-                 <h2 class="security"><TMPL_VAR NAME="Localize_Security_UpdateTitle"></h2>
+                 <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_UpdateTitle"></h2>
                         <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_Update">:
@@ -86,7 +86,7 @@
             </div>
 
             <div class="securityStatsWidget">
-                 <h2 class="security"><TMPL_VAR NAME="Localize_Security_StatsTitle"></h2>
+                 <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_StatsTitle"></h2>
                         <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_Stats">:

@@ -248,7 +248,7 @@ form.historyForm {
   text-align: left;
 }
 
-h2.history {
+h2.history, h2.buckets, h2.magnets, h2.users {
   margin-top: 0;
   margin-bottom: 0.3em;
 }
