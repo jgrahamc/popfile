@@ -1,13 +1,12 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2006 John Graham-Cumming
 # Translated by Adriano Rafael Gomes <adrianorg@users.sourceforge.net>
 # Updated by Fernando de Alcantara Correia <facorreia@users.sourceforge.net> to v0.19.1
 #
 #   This file is part of POPFile
 #
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
+#   POPFile is free software; you can redistribute it and/or modify it
+#   under the terms of version 2 of the GNU General Public License as
+#   published by the Free Software Foundation.
 #
 #   POPFile is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,7 +30,9 @@ ManualLanguage                          br
 FAQLink                                 FrequentlyAskedQuestions
 
 # Common words that are used on their own all over the interface
+Account                                 Conta POP3
 Apply                                   Aplicar
+ApplyChanges                            Aplicar Alterações
 On                                      Ligado
 Off                                     Desligado
 TurnOn                                  Ligar
@@ -76,6 +77,11 @@ ID                                      ID
 Date                                    Data
 Arrived                                 Chegada
 Size                                    Tamanho
+Up                                      Cima
+Down                                    Baixo
+Go                                      Ir
+Edit                                    Editar
+Logout                                  Logout
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -102,7 +108,9 @@ Header_Buckets                          Baldes
 Header_Configuration                    Configuração
 Header_Advanced                         Avançado
 Header_Security                         Segurança
+Header_Administration                   Administração
 Header_Magnets                          Ímãs
+Header_Users                            Usuários
 
 Footer_HomePage                         POPFile Home Page
 Footer_Manual                           Manual
@@ -137,15 +145,15 @@ Configuration_POP3SepUpdate             Separador POP3 alterado para %s
 Configuration_NNTPSepUpdate             Separador NNTP alterado para %s
 Configuration_UI                        Porta da interface web de usuário
 Configuration_UIUpdate                  Alterada a porta da interface web de usuário para %s; esta alteração não terá efeito até que você reinicie o POPFile
-Configuration_History                   Número de mensagens por página
+Configuration_History                   Mensagens por página
 Configuration_HistoryUpdate             Alterado o número de mensagens por página para %s
-Configuration_Days                      Número de dias para manter no histórico
+Configuration_Days                      Dias para manter no histórico
 Configuration_DaysUpdate                Alterado o número de dias para manter no histórico para %s
 Configuration_UserInterface             Interface de Usuário
 Configuration_Skins                     Skins
-Configuration_SkinsChoose               Escolha o skin
+Configuration_SkinsChoose               Skin
 Configuration_Language                  Linguagem
-Configuration_LanguageChoose            Escolha a linguagem
+Configuration_LanguageChoose            Linguagem
 Configuration_ListenPorts               Opções de Módulo
 Configuration_HistoryView               Exibir Histórico
 Configuration_TCPTimeout                Tempo Limite de Conexão
@@ -157,19 +165,27 @@ Configuration_XTCInsertion              Cabeçalho<br>X-Text-Classification
 Configuration_XPLInsertion              Cabeçalho<br>X-POPFile-Link
 Configuration_Logging                   Logging
 Configuration_None                      Nada
-Configuration_ToScreen                  Na Tela
+Configuration_ToScreen                  Na Tela (console)
 Configuration_ToFile                    Em Arquivo
 Configuration_ToScreenFile              Na Tela e em Arquivo
 Configuration_LoggerOutput              Saída do Logger
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
-Configuration_CurrentLogFile            &lt;Download do arquivo de log atual&gt;
+Configuration_CurrentLogFile            &lt;Exibir arquivo de log atual&gt;
 Configuration_SOCKSServer               Endereço do proxy SOCKS V
 Configuration_SOCKSPort                 Porta do proxy SOCKS V
 Configuration_SOCKSPortUpdate           Alterada a porta do proxy SOCKS V para %s
 Configuration_SOCKSServerUpdate         Alterado o endereço do proxy SOCKS V para %s
-Configuration_Fields                    Colunas do Histórico
+Configuration_Fields                    Adicionar colunas do histórico
+Configuration_ChangePassword            Alterar Senha
+Configuration_OldPassword               Atual
+Configuration_NewPassword               Nova
+Configuration_ConfirmPassword           Confirmar Nova
+Configuration_Password_Mismatch         A nova senha deve igual nos campos Nova e Confirmar Nova
+Configuration_Password_Bad              A senha atual informada está incorreta
+Configuration_Password_Fail             Falha ao alterar a senha
+Configuration_Set_Password              A senha foi alterada
 
 Advanced_Error1                         '%s' já está na lista de Palavras Ignoradas
 Advanced_Error2                         Palavras ignoradas podem somente conter caracteres alfanuméricos, ., _, -, ou @
@@ -180,11 +196,35 @@ Advanced_StopWords                      Palavras Ignoradas
 Advanced_Message1                       O POPFile ignora as seguintes palavras freqüentemente usadas:
 Advanced_AddWord                        Adicionar palavra
 Advanced_RemoveWord                     Remover palavra
-Advanced_AllParameters                  Todos os Parâmetros do POPFile
+Advanced_AllParameters                  Parâmetros Globais do POPFile
 Advanced_Parameter                      Parâmetro
 Advanced_Value                          Valor
-Advanced_Warning                        Esta é a lista completa dos parâmetros do POPFile.  Somente para usuários avançados: você pode alterar qualquer um e clicar em Alterar; não há verificação de validade.  Ítens em negrito estão diferentes da configuração padrão.
+Advanced_Warning                        Esta é a lista completa dos parâmetros do POPFile.  Somente para usuários avançados: você pode alterar qualquer um e clicar em Alterar; não há verificação de validade.  Ítens em negrito estão diferentes da configuração padrão. Veja <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?OptionReference">OptionReference</a> para mais informação sobre as opções.
 Advanced_ConfigFile                     Arquivo de configuração:
+
+Users_Create                            Criar Novo Usuário
+Users_Remove                            Remover Usuário Existente
+Users_Edit                              Editar Configurações do Usuário
+Users_CopyFrom                          Copiando configurações do usuário
+Users_RemoveUser                        Remover usuário
+Users_CreateUser                        Criar usuário com nome
+Users_EditUser                          Editar usuário
+Users_Parameters                        Parâmetros
+Users_Created                           Criado usuário '%s' (senha inicial '%s')
+Users_Not_Created                       Falha ao criar usuário '%s'
+Users_Created_And_Cloned                Criado usuário '%s' como um clone de '%s' (senha inicial '%s')
+Users_Not_Created_Exists                Usuário '%s' não criado: já existente
+Users_Created_Not_Cloned                Criado usuário '%s' mas clonagem de '%s' falhou (senha inicial '%s')
+Users_Removed                           Removido usuário '%s'
+Users_Removed_Failed                    Falha ao remover usuário '%s'
+Users_Removed_Failed_Admin              Falha ao remover usuário '%s': desabilite direitos de administrador primeiro
+Users_SingleUserMode                    Modo mono usuário (POPFile Clássico)
+Users_Accounts                          Contas POP3 Associadas
+Users_AddAccount                        Adicionar conta POP3 (computador:usuário)
+Users_Bad_Account                       O nome da nova conta deve estar na forma computador:usuário
+Users_Duplicate_Account                 Falha ao adicionar a conta porque ela já está associada a outro usuário
+Users_Failed_Account                    Falha ao adicionar a conta
+
 
 History_Filter                          &nbsp;(apenas mostrando o balde <font color="%s">%s</font>)
 History_FilterBy                        Filtrar Por
@@ -203,7 +243,6 @@ History_Already                         Reclassificado como <font color="%s">%s<
 History_RemoveAll                       Remover Tudo
 History_RemovePage                      Remover a Página
 History_RemoveChecked                   Remover Marcados
-History_Remove                          Para remover entradas do histórico clique
 History_SearchMessage                   Procurar Remetente/Assunto
 History_NoMessages                      Nenhuma mensagem
 History_ShowMagnet                      magnetizado
@@ -212,20 +251,22 @@ History_Magnet                          &nbsp;(mostrando apenas mensagens classi
 History_NoMagnet                        &nbsp;(mostrando apenas mensagens não classificadas por ímã)
 History_ResetSearch                     Limpar
 History_ChangedClass                    Deveria classificar agora como
-History_Purge                           Deletar Agora
+History_Purge                           Expirar Agora
 History_Increase                        Incrementar
 History_Decrease                        Decrementar
-History_Column_Characters               Alterar a largura das colunas De, Para, Cc e Assunto
+History_Column_Characters               Largura da coluna de histórico
 History_Automatic                       Automático
 History_Reclassified                    Reclassificado
 History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
+History_Click_To_Sort                   Clique para ordenar por esta coluna
 
-Password_Title                          Senha
-Password_Enter                          Digite a senha
-Password_Go                             Ir!
-Password_Error1                         Senha incorreta
+Password_Title                          Login
+Password_Password                       Senha
+Password_Username                       Nome do usuário
+Password_Go                             Login
+Password_Error1                         Senha ou nome de usuário incorretos
 
 Security_Error1                         A porta deve ser um número entre 1 e 65535
 Security_Stealth                        Modo Stealth/Operação Servidor
@@ -266,6 +307,7 @@ Magnet_MagnetType                       Tipo do ímã
 Magnet_Value                            Valores
 Magnet_Always                           Sempre vai para o balde
 Magnet_Jump                             Ir para a página de ímãs
+Magnet_Note                             Ímãs devem ser pouco usados, uma vez que eles desviam do processo de aprendizado do POPFile.  Usar ímãs faz o POPFile levar mais tempo para atingir alta precisão.<br /><br />Leia mais sobre ímãs no <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?Glossary/AMagnet">Projeto de Documentação do POPFile</a>.
 
 Bucket_Error1                           Nomes de balde somente podem conter as letras de a até z minúsculas, números de 0 a 9, mais - e _
 Bucket_Error2                           O balde %s já existe
@@ -291,6 +333,7 @@ Bucket_ClassificationFP                 Falsos Positivos
 Bucket_ClassificationFN                 Falsos Negativos
 Bucket_ResetStatistics                  Reiniciar Estatísticas
 Bucket_LastReset                        Último Reinício
+Bucket_MessagesPerDay                   Média De Mensagens Por Dia
 Bucket_CurrentColor                     A cor atual de %s é %s
 Bucket_SetColorTo                       Ajustar a cor de %s para %s
 Bucket_Maintenance                      Manutenção
@@ -330,7 +373,7 @@ View_Chart                              Gráfico de Decisão
 
 Windows_TrayIcon                        Exibir o ícone do POPFile na bandeja do sistema?
 Windows_Console                         Executar o POPFile em uma janela de console?
-Windows_NextTime                        <p><font color="red">Esta alteração não terá efeito até que você reinicie o POPFile</font>
+Windows_NextTime                        Esta alteração não terá efeito até que você reinicie o POPFile
 
 Header_MenuSummary                      Esta tabela é o menu de navegação que possibilita acesso a cada uma das diferentes páginas do centro de controle.
 History_MainTableSummary                Esta tabela mostra o remetente e o assunto das mensagens recebidas recentemente e permite que elas sejam revisadas e reclassificadas.  Clicar na linha de assunto vai mostrar o texto inteiro da mensagem, juntamente com informação sobre por que ela foi classificada como o foi.  A coluna 'Deveria ser' permite que você especifique a que balde a mensagem pertence, ou desfazer esta mudança.  A coluna 'Remover' permite que você exclua mensagens específicas do histórico se você não precisar mais delas.
@@ -340,16 +383,18 @@ Bucket_StatisticsTableSummary           Esta tabela fornece três conjuntos de es
 Bucket_MaintenanceTableSummary          Esta tabela contém formulários que permitem que você crie, exclua ou renomeie baldes, e para procurar uma palavra em todos os baldes e ver as suas probabilidades relativas.
 Bucket_AccuracyChartSummary             Esta tabela representa graficamente a exatidão da classificação de mensagens.
 Bucket_BarChartSummary                  Esta tabela representa graficamente a uma alocação porcentual para cada um dos diferentes baldes.  Ela é usada tanto para o número de mensagens classificadas como para o número total de palavras.
-Bucket_LookupResultsSummary             Esta tabela mostra as probabilidades associadas com qualquer palavra específica do corpus.  Para cada balde, ela mostra a freqüência com que aquela palavra ocorre, a probabilidade de que ela ocorra naquele balde, e o efeito geral na pontuação do balde se aquela palavra existir em uma mensagem.
+Bucket_LookupResultsSummary             Esta tabela mostra as probabilidades associadas com qualquer palavra específica do corpus.  Para cada balde, ela mostra a freqüência com que cada palavra ocorre, a probabilidade de que ela ocorra naquele balde, e o efeito geral na pontuação do balde se aquela palavra existir em uma mensagem.
 Bucket_WordListTableSummary             Esta tabela fornece uma relação de todas as palavras para um balde específico, organizada pela primeira letra comum para cada linha.
 Magnet_MainTableSummary                 Esta tabela mostra a lista de ímãs que são usados para classificar automaticamente mensagens de acordo com regras fixas.  Cada linha mostra como o ímã está definido, para qual balde ele foi concebido, e um botão para excluir aquele ímã.
 Configuration_MainTableSummary          Esta tabela contém alguns formulários que permitem que você controle a configuração do PopFile.
 Configuration_InsertionTableSummary     Esta tabela contém botões para determinar se certas modificações são feitas no cabeçalho ou no assunto da mensagem antes que ela seja encaminhada para o programa cliente de mensagens.
 Security_MainTableSummary               Esta tabela fornece conjuntos de controles que afetam a segurança da configuração geral do PopFile, se ele deve procurar automaticamente por atualizações do programa, e se estatísticas sobre o desempenho do PopFile devem ser enviadas ao banco de dados central do autor do programa para informação geral.
 Advanced_MainTableSummary               Esta tabela fornece uma lista de palavras que o PopFile ignora quando classifica mensagens por causa da sua freqüência relativa nas mensagens em geral.  Elas são organizadas por linha de acordo com a primeira letra das palavras.
+Users_AccountTableSummary               Esta tabela fornece uma lista de contas POP3 que são associadas com o usuário sendo editado.
 
-Imap_Bucket2Folder                      Email para o balde <b>%s</b> vai para a pasta
+Imap_Bucket2Folder                      Email para o balde '<b>%s</b>' vai para a pasta
 Imap_MapError                           Você não pode mapear mais de um balde para uma única pasta!
+Imap_MapUpdated                         Mapeado balde '%s' para pasta '%s'.
 Imap_Server                             Nome do servidor IMAP:
 Imap_ServerNameError                    Por favor informe o nome do servidor!
 Imap_Port                               Porta do servidor IMAP:
@@ -358,20 +403,114 @@ Imap_Login                              Conta de login IMAP:
 Imap_LoginError                         Por favor informe um nome de usuário/login!
 Imap_Password                           Senha para a conta IMAP:
 Imap_PasswordError                      Por favor informe uma senha para o servidor!
+Imap_ConnectionDetailsUpdated           Os detalhes da conexão IMAP foram atualizados. Por favor atualize a lista de pastas em seguida.
 Imap_Expunge                            Expurgar mensagens deletadas de pastas em observação.
 Imap_Interval                           Intervalo de atualização em segundos:
 Imap_IntervalError                      Por favor informe um intervalo entre 10 e 3600 segundos.
+Imap_OptionsUpdated                     As opções IMAP foram atualizadas com sucesso.
 Imap_RefreshFolders                     Atualizar a lista de pastas
 Imap_Now                                agora!
 Imap_UpdateError1                       Não é possível logar. Verifique seu nome de usuário e senha, por favor.
 Imap_UpdateError2                       Falha na conexão ao servidor. Por favor verifique o nome e porta do servidor e certifique-se que você está online.
 Imap_UpdateError3                       Por favor configure os detalhes da conexão primeiro.
+Imap_UpdateOK                           Lida com sucesso a lista de caixas postais/pastas do servidor.
 Imap_NoConnectionMessage                Por favor configure os detalhes da conexão primeiro. Depois disto, mais opções estarão disponíveis nesta página.
 Imap_WatchMore                          uma pasta para lista de pastas em observação
+Imap_WatchedFolderAdded                 Outra pasta foi adicionada à lista de pastas em observação. Por favor escolha a pasta desejada agora.
 Imap_WatchedFolder                      Pasta em observação nº
+Imap_WatchedFoldersUpdated              Atualizada a lista de pastas em observação
+Imap_WatchedFolderRemoved               Removida a pasta '%s' da lista de pastas em observação
 
 Shutdown_Message                        O POPFile foi desligado
 
 Help_Training                           Quando você usa o POPFile pela primeira vez, ele ainda não sabe nada e precisa de treinamento. O POPFile requer treinamento nas mensagens para cada balde, e o treinamento acontece quando você reclassifica para o balde correto uma mensagem que o POPFile classificou incorretamente. Você deve também configurar seu cliente de email para filtrar mensagens baseado na classificação do POPFile. Informação para configurar os filtros no seu cliente de email pode ser encontrado no <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">Projeto de Documentação do POPFile</a>.
-Help_Bucket_Setup                       O POPFile requer pelo menos dois baldes além do pseudo-balde unclassified. O que torna o POPFile único é que ele pode classificar email, mais do que isso, você pode ter qualquer número de baldes. Uma configuração simples poderia ser um balde "spam", "pessoal", e um balde "trabalho".
-Help_No_More                            Não me mostre isto novamente
+Help_Bucket_Setup                       O POPFile requer pelo menos dois baldes além do pseudo-balde "unclassified". O que torna o POPFile único é que ele pode classificar email, mais do que isso, você pode ter qualquer número de baldes. Uma configuração simples poderia ser um balde "spam", "pessoal", e um balde "trabalho".
+Help_No_More                            Não mostre isto novamente
+
+# Tooltips used in title attribute of parts of the UI
+tip_Menu_History                        Exibir e reclassificar email que o POPFile processou
+tip_Menu_Buckets                        Gerenciar baldes e navegar nas estatísticas de classificação
+tip_Menu_Magnets                        Gerenciar filtros simples que desviam do sistema de filtragem Bayesiano
+tip_Menu_Admin                          Opções de configuraçãoConfiguration options
+tip_Menu_Users                          Gerenciamento de usuários
+tip_Menu_Advanced                       Configuração avançada
+
+tip_History_RecentNum                   Número de mensagens casando com Procura e Filtro atual
+tip_History_Column                      Ordenar por esta coluna
+tip_History_Reclassify                  Aplicar correções do balde
+tip_History_Search                      Procurar ocorrências no endereço do Remetente ou Assunto
+tip_History_Filter                      Limitar a exibição aos ítens do balde selecionado
+tip_History_SearchNegate                Inverter ambos Procura e Filtro
+tip_History_SearchSubmit                Submeter Procura e Filtro
+tip_History_SearchReset                 Limpar Procura e Filtro
+tip_History_RemoveAll                   Remover todas mensagens do histórico (casando com Procura e Filtro)
+tip_History_RemoveChecked               Remover mensagens selecionados do histórico
+tip_History_RemovePage                  Remover mensagens desta página do histórico
+tip_History_RemoveColumn                Remover coluna
+tip_History_MoveLeft                    Mover para esquerda
+tip_History_MoveRight                   Mover para direita
+tip_History_Sort                        Clique para ordenar por esta coluna
+
+tip_Bucket_BucketName                   Exibir detalhes do balde
+tip_Bucket_Distinct                     Palavras únicas em cada balde
+tip_Bucket_SubjectMod                   Inserir o nome do balde no início do assunto. Para clientes que não podem usar o cabeçalho X-Text-Classification
+tip_Bucket_XTCHeader                    Inserir um cabeçalho "invisível" que a maioria dos clientes de e-mail podem usar para aplicar uma regra baseada na classificação do POPFile
+tip_Bucket_XPLHeader                    Inserir um cabeçalho com um link para a mensagem para permitir a rápida reclassificação de uma mensagem
+tip_Bucket_Quarantine                   Isolar e-mail potencialmente perigoso colocando-o em um anexo
+tip_Bucket_Color                        Selecionar uma cor para cada balde
+tip_Bucket_Lookup                       Procurar a probabilidade e freqüência de uma palavra em cada balde
+tip_Bucket_WordCount                    Número e percentual total de palavras em cada balde
+tip_Bucket_Create                       Criar um novo balde
+tip_Bucket_Delete                       Remover um balde e seu treinamento
+tip_Bucket_Rename                       Renomear um balde
+tip_Bucket_FalsePos                     Mensagens que foram incorretamente colocadas neste balde
+tip_Bucket_FalseNeg                     Mensagens que foram incorretamente NÃO colocadas neste balde
+
+tip_Magnet_Type                         Cabeçalho da mensagem a casar
+tip_Magnet_Value                        Texto ou endereço a casar
+tip_Magnet_Bucket                       Balde para mandar os casados
+
+tip_Config_Skin                         Alterar o visual do POPFile
+tip_Config_Language                     Alterar a linguagem da interface
+tip_Config_HistoryColumns               Adicionar colunas para exibir no histórico de mensagens
+tip_Config_PageSize                     Número de mensagens para exibir por página
+tip_Config_Days                         Número de dias para manter as mensagens no histórico
+tip_Config_Purge                        Expurgar mensagens antigas agora
+tip_Config_HistoryWidth                 Ajustar o tamanho das colunas do histórico
+tip_Config_ColumnIncrease               Aumentar a largura das colunas
+tip_Config_ColumnDecrease               Diminuir a largura das colunas
+tip_Config_ColumnAuto                   Resetar a largura baseado nas colunas atuais
+tip_Config_HideBar                      Esconder a barra de configuração
+tip_Config_ShowBar                      Exibir a barra de configuração
+
+tip_Admin_AcceptRemoteHTTP              Permitir o acesso à UI a partir de outra máquina
+tip_Admin_AcceptRemotePOP3              Permitir download POP3 a partir de outra máquina
+tip_Admin_Password                      Adicionar uma senha para limitar o acesso ao POPFile
+tip_Admin_UpdateCheck                   texto 0.22 deveria ser colocado de volta
+tip_Admin_ReportStats                   texto 0.22 deveria ser colocado de volta
+
+tip_Users_Remove                        Deletar usuário do POPFile
+
+tip_Footer_HomePage                     Visitar a página do POPFile na Internet
+tip_Footer_Manual                       A documentação original do POPFile (levemente defasada)
+tip_Footer_Wiki                         Documentação wiki do POPFile
+tip_Footer_FAQ                          Perguntas Freqüentemente Feitas sobre o POPFile
+tip_Footer_Version                      Número de versão do POPFile
+tip_Footer_Login                        Última data e hora acessada por este usuário
+tip_Footer_RFE                          Tem uma idéia para melhorar o POPFile? Deixe-nos saber.
+tip_Footer_MailingList                  Quer saber sobre as modificações no POPFile? Assine.
+tip_Footer_FeedMe                       Gostou do POPFile? Contribua para torná-lo um maior sucesso.
+
+# Jim's Bucket Stats stuff
+Words                                   Palavras
+Percent                                 Percentual
+Header_ConfigurationShort               Configurar
+Footer_HomePage_short                   Página na Internet
+Footer_QuickStart                       Início Rápido
+Footer_WikiShort                        Documentos
+Bucket_BreakEmailsClassifiedUpper       Mensagens<br>Classifiadas
+Bucket_ClassificationErrorsUpper        Erros de Classificação
+Bucket_BreakClassificationFP            Falsos<br>Positivos
+Bucket_BreakClassificationFN            Falsos<br>Negativos
+Bucket_HitRate                          Taxa<br>Hit
+Bucket_StrikeRate                       Taxa<br>Strike
