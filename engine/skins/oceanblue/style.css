@@ -74,8 +74,12 @@ input, select, textarea, .submit {
   background-color: #2175bc;
 }
 
-input:hover, select:hover, textarea:hover, .submit:hover {
+input:hover, select:hover, textarea:hover {
   background-color: #1165ac;
+}
+
+.submit:hover {
+  background-color: #2586d7;
 }
 
 input {
@@ -176,9 +180,10 @@ hr {
   border-right: 10px solid #508fc4;
   background-color: #2175bc;
   color: #fff;
-text-decoration: none;
+  text-decoration: none;
   width: 100%;
 }
+
 html>body .menu li a {
   width: auto;
 }
@@ -188,7 +193,6 @@ html>body .menu li a {
   border-right: 10px solid #5ba3e0;
   background-color: #2586d7;
   color: #fff;
-
 }
 
 .menuStandard a:hover, .menuSelected a:hover {
@@ -442,8 +446,8 @@ a:link:hover, a:visited:hover {
   font-size: 1.1em;
 }
 
-.configBarTitle:hover {
-  background-color: #1165ac;
+.configBarTitle a:hover {
+  background-color: #2586d7;
 }
 
 .configBarTitle a, .configBarTitle a:hover {
