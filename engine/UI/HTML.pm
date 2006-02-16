@@ -5,7 +5,7 @@ package UI::HTML;
 #
 # This package contains an HTML UI for POPFile
 #
-# Copyright (c) 2001-2005 John Graham-Cumming
+# Copyright (c) 2001-2006 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -2794,7 +2794,7 @@ sub history_page
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^rowid_(\d+)$/ ) {
                 $self->log_( 1, "clearpage $i" );
-                $self->history_()->delete_slot( $1 );
+                $self->history_()->delete_slot( $1, 1 );
             }
         }
         $self->history_()->stop_deleting();
