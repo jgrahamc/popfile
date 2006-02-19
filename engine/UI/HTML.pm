@@ -900,7 +900,7 @@ sub http_ok
 
 #----------------------------------------------------------------------------
 #
-# handle_history_bar__ - handle the bar at the bottom of the page
+# handle_history_bar__ - handle the bar at the bottom of the history page
 # that allows selection of the history configuration items
 #
 # $client     The web browser to send the results to
@@ -1021,7 +1021,7 @@ sub handle_history_bar__
 #----------------------------------------------------------------------------
 #
 # handle_configuration_bar__ - handle the bar at the bottom of the page
-# that allows selection of the skin and language
+# that allows selection of interface wide options (skin, language, password)
 #
 # $client     The web browser to send the results to
 # $templ      The loaded page template
@@ -1994,7 +1994,7 @@ sub bucket_page
                                                     $page, $session );
 
     my $color = $self->classifier_()->get_bucket_color( $session, $bucket );
-    $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"$color\">$bucket</font>" ) );
+    $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<span style=\"color:$color\">$bucket</span>" ) );
 
     my $bucket_count = $self->classifier_()->get_bucket_word_count( $session, $bucket );
     $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count ) );
@@ -3483,8 +3483,10 @@ sub load_template__
                        $self->user_config_( $user, 'show_configbars' ),
                    'Common_Middle_If_CanAdmin' =>
                        $self->user_global_config_( $user, 'can_admin' ),
-                   'If_Javascript_OK'          => $self->config_( 'allow_javascript' ),
-                   'Configuration_Action'      => $page );
+                   'If_Javascript_OK'        => $self->config_( 'allow_javascript' ),
+                   'If_Language_RTL'         =>
+                       ( $self->{language__}{LanguageDirection} eq 'rtl' ),
+                   'Configuration_Action'    => $page );
 
     $self->{skin_root} = $root;
 

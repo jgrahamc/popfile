@@ -4,8 +4,8 @@
     <title><TMPL_VAR NAME="Localize_Header_Title"></title>
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">style.css" media="all" title="POPFile">
-    <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">rtl.css" media="all">
     <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">print.css" media="print">
     <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">handheld.css" media="handheld">
-    <TMPL_INCLUDE NAME="common-javascript.thtml">
+    <TMPL_IF NAME="If_Language_RTL"><link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">rtl.css" media="all"></TMPL_IF>
+<TMPL_INCLUDE NAME="common-javascript.thtml">
 </head>
