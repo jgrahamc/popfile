@@ -1,6 +1,8 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
+<TMPL_IF NAME="Magnet_Loop_Magnets">
+
 <h2 class="magnets"><TMPL_VAR NAME="Localize_Magnet_CurrentMagnets"></h2>
 
 <TMPL_INCLUDE NAME="magnet-navigator.thtml">
@@ -83,10 +85,10 @@
     <input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
     <input type="hidden" name="count" value="<TMPL_VAR NAME="Magnet_Count_Magnet">" />
 </form>
-
 <TMPL_INCLUDE NAME="magnet-navigator.thtml">
-
 <hr />
+</TMPL_IF>
+
 <h2 class="magnets"><TMPL_VAR NAME="Localize_Magnet_CreateNew"></h2>
 <table cellspacing="0" summary="">
     <tr>
