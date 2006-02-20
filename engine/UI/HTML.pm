@@ -3316,7 +3316,7 @@ sub view_page
             #
             #        if ( $arg =~ /\Q$text\E/i ) {
             #            my $new_color = $self->classifier_()->get_bucket_color( $session, $bucket );
-            #            $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
+            #            $line =~ s/(\Q$text\E)/<b style=\"color:$new_color\">$1<\/b>/;
             #        }
             #    }
             # }

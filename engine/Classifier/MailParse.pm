@@ -470,7 +470,7 @@ sub update_pseudoword
                 $literal =~ s/</&lt;/g;
                 $literal =~ s/>/&gt;/g;
                 my $color = $self->get_color__($mword);
-                my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
+                my $to    = "<b style=\"color:$color\"><a title=\"$mword\">$literal</a></b>";
                 $self->{ut__} .= $to . ' ';
             }
         }
@@ -514,11 +514,11 @@ sub update_word
             my $color = $self->get_color__($mword);
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
-                if ( !( $self->{ut__} =~ s/($before)\Q$word\E($after)/$1<b><font color=\"$color\">$word<\/font><\/b>$2/ ) ) {
+                if ( !( $self->{ut__} =~ s/($before)\Q$word\E($after)/$1<b style=\"color:$color\">$word<\/b>$2/ ) ) {
                     print "Could not find $word for colorization\n" if ( $self->{debug__} );
                 }
             } else {
-                $self->{ut__} .= "<font color=\"$color\">$word<\/font> ";
+                $self->{ut__} .= "<span style=\"color:$color\">$word<\/span> ";
             }
         }
 
@@ -2013,7 +2013,7 @@ sub parse_header
     if ( $self->update_pseudoword( 'header', $header, 0, $header ) ) {
         if ( $self->{color__} ne '' ) {
             my $color     = $self->get_color__("header:$header" );
-            $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $fix_argument\015\012";
+            $self->{ut__} =  "<b style=\"color:$color\">$header</b>: $fix_argument\015\012";
         }
     } else {
         if ( $self->{color__} ne '' ) {
