@@ -1,11 +1,10 @@
-# Copyright (c) 2001-2005 John Graham-Cumming
+# Copyright (c) 2001-2006 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
+#   POPFile is free software; you can redistribute it and/or modify it
+#   under the terms of version 2 of the GNU General Public License as
+#   published by the Free Software Foundation.
 #
 #   POPFile is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -380,11 +379,11 @@ Bucket_AccuracyChartSummary             This table graphically represents the ac
 Bucket_BarChartSummary                  This table graphically represents a percentage allocation for each of the different buckets.  It is used for both number of messages classified, and total word counts.
 Bucket_LookupResultsSummary             This table shows the probabilities associated with any given word of the corpus.  For each bucket, it shows the frequency with which that word occurs, the probability that it will occur in that bucket, and the overall effect on the score of the bucket if that word exists in a message.
 Bucket_WordListTableSummary             This table provides a listing of all the words for a particular bucket, organized by common first letter for each row.
-Magnet_MainTableSummary                 This table shows the list of magnets that are used to automatically classify message according to fixed rules.  Each row shows how the magnet is defined, what bucket it is intended for, and a button to delete the magnet.
+Magnet_MainTableSummary                 This table shows the list of magnets that are used to automatically classify messages according to fixed rules.  Each row shows how the magnet is defined, what bucket it is intended for, and a button to delete the magnet.
 Configuration_MainTableSummary          This table contains a number of forms to allow you to control the configuration of POPFile.
 Configuration_InsertionTableSummary     This table contains buttons that determine whether or not certain modifications are made to the headers or subject line of the message before it is passed on to the message client.
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
-Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying message due to their relative frequency in message in general.  They are organized per row according to the first letter of the words.
+Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying messages due to their relative frequency in messages in general.  They are organized per row according to the first letter of the words.
 Users_AccountTableSummary               This table provides a list of POP3 accounts that are associated with the user being edited.
 
 Imap_Bucket2Folder                      Mail for bucket '<b>%s</b>' goes to folder

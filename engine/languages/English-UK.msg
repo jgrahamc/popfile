@@ -1,11 +1,10 @@
-# Copyright (c) 2001-2005 John Graham-Cumming
+# Copyright (c) 2001-2006 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
+#   POPFile is free software; you can redistribute it and/or modify it
+#   under the terms of version 2 of the GNU General Public License as
+#   published by the Free Software Foundation.
 #
 #   POPFile is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -75,9 +74,9 @@ ID                                      ID
 Date                                    Date
 Arrived                                 Arrived
 Size                                    Size
-Up                                      Up
-Down                                    Down
 Go                                      Go
+Edit                                    Edit
+Logout                                  Logout
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -106,6 +105,7 @@ Header_Advanced                         Advanced
 Header_Security                         Security
 Header_Administration                   Administration
 Header_Magnets                          Magnets
+Header_Users                            Users
 
 Footer_HomePage                         POPFile Home Page
 Footer_Manual                           Manual
@@ -160,7 +160,7 @@ Configuration_XTCInsertion              X-Text-Classification<br>Header
 Configuration_XPLInsertion              X-POPFile-Link<br>Header
 Configuration_Logging                   Logging
 Configuration_None                      None
-Configuration_ToScreen                  To Screen
+Configuration_ToScreen                  To Screen (console)
 Configuration_ToFile                    To File
 Configuration_ToScreenFile              To Screen and File
 Configuration_LoggerOutput              Logger output
@@ -185,14 +185,14 @@ Advanced_StopWords                      Ignored Words
 Advanced_Message1                       POPFile ignores the following frequently-used words:
 Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
-Advanced_AllParameters                  All POPFile Parameters
+Advanced_AllParameters                  Global POPFile Parameters
 Advanced_Parameter                      Parameter
 Advanced_Value                          Value
-Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.
+Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.  See <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?OptionReference">OptionReference</a> for more information on options.
 Advanced_ConfigFile                     Configuration file:
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
-History_FilterBy                        Filter By
+History_FilterBy                        Filter&nbsp;By
 History_Search                          &nbsp;(searched for from/subject %s)
 History_Title                           Recent Messages
 History_Jump                            Jump to page
@@ -208,7 +208,6 @@ History_Already                         Reclassified as <font color="%s">%s</fon
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
 History_RemoveChecked                   Remove Checked
-History_Remove                          To remove entries in the history click
 History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages
 History_ShowMagnet                      magnetised
@@ -226,12 +225,12 @@ History_Reclassified                    Reclassified
 History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
-History_Click_To_Sort                   Click to sort on this column
 
-Password_Title                          Password
-Password_Enter                          Enter password
-Password_Go                             Go!
-Password_Error1                         Incorrect password
+Password_Title                          Login
+Password_Password                       Password
+Password_Username                       User name
+Password_Go                             Login
+Password_Error1                         Incorrect user name or password
 
 Security_Error1                         The port must be a number between 1 and 65535
 Security_Stealth                        Stealth Mode/Server Operation
@@ -355,8 +354,9 @@ Configuration_InsertionTableSummary     This table contains buttons that determi
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
 Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying messages due to their relative frequency in messages in general.  They are organized per row according to the first letter of the words.
 
-Imap_Bucket2Folder                      Mail for bucket <b>%s</b> goes to folder
+Imap_Bucket2Folder                      Mail for bucket '<b>%s</b>' goes to folder
 Imap_MapError                           You cannot map more than one bucket to a single folder!
+Imap_MapUpdated                         Mapped bucket '%s' to folder '%s'.
 Imap_Server                             IMAP server hostname:
 Imap_ServerNameError                    Please enter the server's hostname!
 Imap_Port                               IMAP Server port:
@@ -381,4 +381,4 @@ Shutdown_Message                        POPFile has shut down
 
 Help_Training                           When you first use POPFile, it knows nothing and will need some training. POPFile requires training on messages for each bucket, training occurs when you reclassify a message POPFile misclassified to the correct bucket. You must also setup your mail client to filter messages based on POPFile's classification. Information on setting up your client filtering can be found at the <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Documentation Project</a>.
 Help_Bucket_Setup                       POPFile requires at least two buckets in addition to the "unclassified" pseudo-bucket. What makes POPFile unique is that it can classify email more than that, you can have any number of buckets. A simple setup would be a "spam", "personal", and a "work" bucket.
-Help_No_More                            Don't show me this again
+Help_No_More                            Don't show this again
