@@ -7,12 +7,12 @@
             <h2 class="users"><TMPL_VAR NAME="Localize_Users_Create"></h2>
 
             <form action="/users" method="post">
-           <TMPL_VAR NAME="Localize_Users_CreateUser">:
+            <TMPL_VAR NAME="Localize_Users_CreateUser">:
             <input type="text" id="usersCreateUser" name="newuser" />
             <br />
             <TMPL_VAR NAME="Localize_Users_CopyFrom">:
             <select name="clone">
-            <option></option>
+            <option value="">&nbsp;</option>
             <TMPL_LOOP NAME="Users_Loop_Copy">
             <option><TMPL_VAR NAME="Users_Name"></option>
             </TMPL_LOOP>
@@ -28,7 +28,7 @@
                 <form action="/users" method="post">
                 <TMPL_VAR NAME="Localize_Users_RemoveUser">:
                 <select name="toremove">
-                <option></option>
+                <option value="">&nbsp;</option>
                 <TMPL_LOOP NAME="Users_Loop_Remove">
                 <option><TMPL_VAR NAME="Users_Name"></option>
                 </TMPL_LOOP>
@@ -44,7 +44,7 @@
             <form action="/users" method="post">
             <TMPL_VAR NAME="Localize_Users_EditUser">:
             <select name="editname">
-            <option></option>
+            <option value="">&nbsp;</option>
             <TMPL_LOOP NAME="Users_Loop_Edit">
             <option><TMPL_VAR NAME="Users_Name"></option>
             </TMPL_LOOP>

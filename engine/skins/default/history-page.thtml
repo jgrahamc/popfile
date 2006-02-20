@@ -200,11 +200,11 @@
                 <TMPL_ELSE>
 
                 <select name="reclassify_<TMPL_VAR NAME="History_I">">
-                    <option selected="selected"></option>
+                    <option value="" selected="selected">&nbsp;</option>
 
                     <TMPL_LOOP NAME="History_Loop_Loop_Buckets">
 
-                    <option value="<TMPL_VAR NAME="History_Bucket">" style="color: <TMPL_VAR NAME="History_Bucket_Color">">
+                    <option value="<TMPL_VAR NAME="History_Bucket">" style="color:<TMPL_VAR NAME="History_Bucket_Color">">
                         <TMPL_VAR NAME="History_Bucket">
                     </option>
 

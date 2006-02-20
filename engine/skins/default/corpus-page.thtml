@@ -334,7 +334,7 @@
                     </label>
                     <br />
                     <select name="name" id="bucketsDeleteBucket">
-                        <option value=""></option>
+                        <option value="">&nbsp;</option>
 
                         <TMPL_LOOP NAME="Corpus_Loop_Delete_Buckets">
 
@@ -364,11 +364,11 @@
                     </label>
                     <br />
                     <select name="oname" id="bucketsRenameBucketFrom">
-                        <option value=""></option>
+                        <option value="">&nbsp;</option>
 
                         <TMPL_LOOP NAME="Corpus_Loop_Rename_Buckets">
 
-                        <option value="<TMPL_VAR NAME="Corpus_Rename_Bucket">" style="color: <TMPL_VAR NAME="Corpus_Rename_Bucket_Color">">
+                        <option value="<TMPL_VAR NAME="Corpus_Rename_Bucket">" style="color:<TMPL_VAR NAME="Corpus_Rename_Bucket_Color">">
                             <TMPL_VAR NAME="Corpus_Rename_Bucket">
                         </option>
 

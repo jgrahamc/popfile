@@ -132,7 +132,7 @@
         </label>
         <br />
         <select name="bucket0" id="magnetsAddBucket">
-            <option value=""></option>
+            <option value="">&nbsp;</option>
 
             <TMPL_LOOP NAME="Magnet_Loop_Buckets">
 

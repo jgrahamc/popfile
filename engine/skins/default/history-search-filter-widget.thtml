@@ -17,7 +17,7 @@
     <br>
     <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
     <select name="filter" id="historyFilter">
-        <option value=""></option>
+        <option value="">&nbsp;</option>
 
         <TMPL_LOOP NAME="History_Loop_SF_Buckets">
 

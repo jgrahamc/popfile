@@ -1,9 +1,9 @@
 <TMPL_LOOP NAME="bar_loop_xaxis">
 <tr>
     <td align="left">
-        <font color="<TMPL_VAR NAME="bar_bucket_color">">
+        <span style="color:<TMPL_VAR NAME="bar_bucket_color">">
             <TMPL_VAR NAME="bar_bucket_name">
-        </font>
+        </span>
     </td>
     <td>
         &nbsp;

@@ -27,7 +27,7 @@
                 <input type="hidden" name="start_message" value="<TMPL_VAR NAME="View_This_Page">" />
                 <input type="hidden" name="filter" value="<TMPL_VAR NAME="View_Field_Filter">" />
 
-                <table align="left">
+                <table align="left" summary="">
                     <tr valign="top">
                         <td>
                             <font size="+1">

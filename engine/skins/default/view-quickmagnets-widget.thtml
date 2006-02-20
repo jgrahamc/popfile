@@ -8,10 +8,10 @@
         <TMPL_VAR NAME="Localize_QuickMagnets">
     </h4>
 
-    <table>
+    <table summary="">
         <tr>
             <td>
-                <table class="top20Words">
+                <table class="top20Words" summary="">
                     <tr>
                         <th scope="col">
                             <TMPL_VAR NAME="Localize_Magnet">
@@ -41,7 +41,7 @@
                         <td>
                             <input type="hidden" name="type<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddType" value="<TMPL_VAR NAME="View_QuickMagnets_Type">" />
                             <select name="bucket<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddBucket">
-                                <option value=""></option>
+                                <option value="">&nbsp;</option>
 
                                 <TMPL_LOOP NAME="View_QuickMagnets_Loop_Buckets">
 
@@ -63,8 +63,6 @@
                             <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
                         </td>
                     </tr>
-
-                        </td>
                 </table>
             </td>
             <td>
