@@ -195,7 +195,7 @@ Advanced_RemoveWord                     Remove word
 Advanced_AllParameters                  Global POPFile Parameters
 Advanced_Parameter                      Parameter
 Advanced_Value                          Value
-Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.  See <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?OptionReference">OptionReference</a> for more information on options.
+Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.  See <a href="http://getpopfile.org/cgi-bin/wiki.pl?OptionReference">OptionReference</a> for more information on options.
 Advanced_ConfigFile                     Configuration file:
 
 Users_Create                            Create New User
