@@ -4,12 +4,12 @@ package Proxy::Proxy;
 #
 # This module implements the base class for all POPFile proxy Modules
 #
-# Copyright (c) 2001-2005 John Graham-Cumming
+# Copyright (c) 2001-2006 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
 #   POPFile is free software; you can redistribute it and/or modify it
-#   under the terms version 2 of the GNU General Public License as
+#   under the terms of version 2 of the GNU General Public License as
 #   published by the Free Software Foundation.
 #
 #   POPFile is distributed in the hope that it will be useful,
