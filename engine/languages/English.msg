@@ -430,7 +430,6 @@ tip_Menu_Users                          User management
 tip_Menu_Advanced                       Advanced configuration settings
 
 tip_History_RecentNum                   Number of messages matching current Search and Filter
-tip_History_Column                      Sort by this column
 tip_History_Reclassify                  Apply bucket corrections
 tip_History_Search                      Find matches in the From address or Subject
 tip_History_Filter                      Limit the view to the items in the selected bucket
@@ -443,22 +442,25 @@ tip_History_RemovePage                  Remove messages on this page from histor
 tip_History_RemoveColumn                Remove column
 tip_History_MoveLeft                    Move left
 tip_History_MoveRight                   Move right
-tip_History_Sort                        Click to sort on this column
+tip_History_Sort                        Sort by this column
 
 tip_Bucket_BucketName                   View bucket details
-tip_Bucket_Distinct                     Unique words in each bucket
-tip_Bucket_SubjectMod                   Insert bucket name to the begining of the subject.  For clients that can not use the X-Text-Classification header
-tip_Bucket_XTCHeader                    Insert an "invisible" header that most mail clients can use to apply a rule based on POPFile's classification
+tip_Bucket_Unique                       Unique words in each bucket
+tip_Bucket_SubjectMod                   Insert bucket name to begining of the subject
+tip_Bucket_XTCHeader                    Insert header that most mail clients can use to filter based on POPFile's classification
 tip_Bucket_XPLHeader                    Insert a header with a link to the message to allow for quickly reclassifing a message
 tip_Bucket_Quarantine                   Islolate potentially dangerous email by placing it in attachment
 tip_Bucket_Color                        Select a color for each bucket
 tip_Bucket_Lookup                       Look up the probability and frequency of a word in all buckets
+tip_Bucket_Accuracy                     Overall classification accuracy
+tip_Bucket_Classified                   Bucket statistics and accuracy
 tip_Bucket_WordCount                    Number and percentage of total words in each bucket
 tip_Bucket_Create                       Create a new bucket
 tip_Bucket_Delete                       Remove a bucket and its training
 tip_Bucket_Rename                       Rename a bucket
 tip_Bucket_FalsePos                     Messages that were incorrectly placed in this bucket
 tip_Bucket_FalseNeg                     Messages that were incorrectly NOT placed in this bucket
+tip_Bucket_ResetStats                   Clear classification statistics
 
 tip_Magnet_Type                         Message header to match
 tip_Magnet_Value                        Text or address to match
@@ -476,6 +478,7 @@ tip_Config_ColumnDecrease               Decrease width of columns
 tip_Config_ColumnAuto                   Reset column width based on current columns
 tip_Config_HideBar                      Hide configuration bar
 tip_Config_ShowBar                      Show configuration bar
+tip_Config_Password                     Change password for accessing POPFile's Control Center
 
 tip_Admin_AcceptRemoteHTTP              Allow UI access from another machine
 tip_Admin_AcceptRemotePOP3              Allow POP3 mail dowload from another machine
