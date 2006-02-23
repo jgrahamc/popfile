@@ -37,31 +37,31 @@
                 </th>
             </tr>
             <tr>
-                <th class="bucketsLabel" scope="col" align="left">
+                <th class="bucketsLabel" scope="col" align="left" title="<TMPL_VAR NAME="Localize_tip_Bucket_BucketName">">
                     <TMPL_VAR NAME="Localize_Bucket_BucketName">
                 </th>
 
-                <th class="bucketsLabel" scope="col" align="right">
+                <th class="bucketsLabel" scope="col" align="right" title="<TMPL_VAR NAME="Localize_tip_Bucket_Unique">">
                     <TMPL_VAR NAME="Localize_Bucket_UniqueWords">
                 </th>
 
-                <th class="bucketsLabel" scope="col" align="center">
+                <th class="bucketsLabel" scope="col" align="center" title="<TMPL_VAR NAME="Localize_tip_Bucket_SubjectMod">">
                     <TMPL_VAR NAME="Localize_Bucket_SubjectModification">
                 </th>
 
-                <th class="bucketsLabel" scope="col" align="center">
+                <th class="bucketsLabel" scope="col" align="center" title="<TMPL_VAR NAME="Localize_tip_Bucket_XTCHeader">">
                     <TMPL_VAR NAME="Localize_Configuration_XTCInsertion">
                 </th>
 
-                <th class="bucketsLabel" scope="col" align="center">
+                <th class="bucketsLabel" scope="col" align="center" title="<TMPL_VAR NAME="Localize_tip_Bucket_XPLHeader">">
                     <TMPL_VAR NAME="Localize_Configuration_XPLInsertion">
                 </th>
 
-                <th class="bucketsLabel" scope="col" align="center">
+                <th class="bucketsLabel" scope="col" align="center" title="<TMPL_VAR NAME="Localize_tip_Bucket_Quarantine">">
                     <TMPL_VAR NAME="Localize_Bucket_Quarantine">
                 </th>
 
-                <th class="bucketsLabel" scope="col" align="center">
+                <th class="bucketsLabel" scope="col" align="center" title="<TMPL_VAR NAME="Localize_tip_Bucket_Color">">
                     <TMPL_VAR NAME="Localize_Bucket_ChangeColor">
                 </th>
             </tr>
@@ -184,7 +184,7 @@
 <table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Bucket_StatisticsTableSummary">">
     <tr>
         <td class="settingsPanel" valign="top" width="33%" align="center">
-            <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_ClassificationAccuracy"></h2>
+            <h2 class="buckets" title="<TMPL_VAR NAME="Localize_tip_Bucket_Accuracy">"><TMPL_VAR NAME="Localize_Bucket_ClassificationAccuracy"></h2>
             <table summary="" width="100%">
                 <tr>
                     <th scope="row" align="left">
@@ -237,7 +237,7 @@
                 <tr>
                     <td colspan="2" align="center">
                         <form action="/buckets" method="post">
-                            <input type="submit" class="submit" name="reset_stats" value="<TMPL_VAR NAME="Localize_Bucket_ResetStatistics">" />
+                            <input type="submit" class="submit" name="reset_stats" value="<TMPL_VAR NAME="Localize_Bucket_ResetStatistics">" title="<TMPL_VAR NAME="Localize_tip_Bucket_ResetStats">" />
 
                             <TMPL_IF NAME="Corpus_If_Last_Reset">
 
@@ -252,7 +252,9 @@
             </table>
         </td>
         <td class="settingsPanel" valign="top" width="33%" align="center">
-            <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_EmailsClassifiedUpper"></h2>
+            <h2 class="buckets" title="<TMPL_VAR NAME="Localize_tip_Bucket_Classified">">
+                <TMPL_VAR NAME="Localize_Bucket_EmailsClassifiedUpper">
+            </h2>
             <table summary="" width="100%">
                 <tr>
                     <th class="bucketsLabel" scope="col" align="left">
@@ -264,10 +266,10 @@
                     <th class="bucketsLabel" scope="col" align="right">
                         <TMPL_VAR NAME="Localize_Bucket_ClassificationCount">
                     </th>
-                    <th class="bucketsLabel" scope="col" align="right">
+                    <th class="bucketsLabel" scope="col" align="right" title="<TMPL_VAR NAME="Localize_tip_Bucket_FalsePos">">
                         <TMPL_VAR NAME="Localize_Bucket_ClassificationFP">
                     </th>
-                    <th class="bucketsLabel" scope="col" align="right">
+                    <th class="bucketsLabel" scope="col" align="right" title="<TMPL_VAR NAME="Localize_tip_Bucket_FalseNeg">">
                         <TMPL_VAR NAME="Localize_Bucket_ClassificationFN">
                     </th>
                 </tr>
@@ -275,7 +277,7 @@
             </table>
         </td>
         <td class="settingsPanel" width="34%" valign="top" align="center">
-            <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_WordCounts"></h2>
+            <h2 class="buckets" title="<TMPL_VAR NAME="Localize_tip_Bucket_WordCount">"><TMPL_VAR NAME="Localize_Bucket_WordCounts"></h2>
             <table summary="" width="100%">
                 <tr>
                     <th class="bucketsLabel" scope="col" align="left">
@@ -300,7 +302,7 @@
             <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Maintenance"></h2>
             <div class="bucketsMaintenanceWidget">
                 <form action="/buckets" method="post">
-                    <label class="bucketsLabel" for="bucketsCreateBucket">
+                    <label class="bucketsLabel" for="bucketsCreateBucket" title="<TMPL_VAR NAME="Localize_tip_Bucket_Create">">
                         <TMPL_VAR NAME="Localize_Bucket_CreateBucket">:
                     </label>
                     <br />
@@ -329,7 +331,7 @@
                 </TMPL_IF>
 
                 <form action="/buckets" method="post">
-                    <label class="bucketsLabel" for="bucketsDeleteBucket">
+                    <label class="bucketsLabel" for="bucketsDeleteBucket" title="<TMPL_VAR NAME="Localize_tip_Bucket_Delete">">
                         <TMPL_VAR NAME="Localize_Bucket_DeleteBucket">:
                     </label>
                     <br />
@@ -359,7 +361,7 @@
                 </TMPL_IF>
 
                 <form action="/buckets" method="post">
-                    <label class="bucketsLabel" for="bucketsRenameBucketFrom">
+                    <label class="bucketsLabel" for="bucketsRenameBucketFrom" title="<TMPL_VAR NAME="Localize_tip_Bucket_Rename">">
                         <TMPL_VAR NAME="Localize_Bucket_RenameBucket">:
                     </label>
                     <br />
@@ -410,7 +412,7 @@
             <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Lookup"></h2>
             <div class="bucketsLookupWidget">
                 <form action="/buckets#Lookup" method="post">
-                    <label class="bucketsLabel" for="bucketsLookup">
+                    <label class="bucketsLabel" for="bucketsLookup" title="<TMPL_VAR NAME="Localize_tip_Bucket_Lookup">">
                         <TMPL_VAR NAME="Localize_Bucket_LookupMessage">:
                     </label>
                     <br />
