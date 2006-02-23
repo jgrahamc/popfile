@@ -90,7 +90,7 @@
 
                 <div class="configBarOption">
 
-                    <label class="configurationLabel" for="configPassword" title="<TMPL_VAR NAME="Localize_tip_Config_Password">">
+                    <label class="configurationLabel" title="<TMPL_VAR NAME="Localize_tip_Config_Password">">
                         <TMPL_VAR NAME="Localize_Configuration_ChangePassword">:
                     </label>
                     <span class="configurationLabel"><TMPL_VAR NAME="Localize_Configuration_OldPassword">:</span> <input type="password" name="old_password" size="10">
