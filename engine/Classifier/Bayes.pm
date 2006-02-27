@@ -221,6 +221,13 @@ sub initialize
     # Allow the user to override the hostname
 
     $self->config_( 'hostname', $self->{hostname__} );
+    
+    # This parameter is used when the UI is operating in Stealth Mode.
+    # If left blank (the default setting) the X-POPFile-Link will use 127.0.0.1
+    # otherwise it will use this string instead. The system's HOSTS file should
+    # map the string to 127.0.0.1
+
+    $self->config_( 'localhostname', '' );
 
     $self->mq_register_( 'COMIT', $self );
     $self->mq_register_( 'RELSE', $self );
@@ -2512,8 +2519,10 @@ sub classify_and_modify
 
     my $xpl = $self->user_config_( 1, 'xpl_angle' )?'<':'';
 
+    my $xpl_localhost = ($self->config_( 'localhostname' ) eq '')?"127.0.0.1":$self->config_( 'localhostname' );
+
     $xpl .= "http://";
-    $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
+    $xpl .= $self->module_config_( 'html', 'local' )?$xpl_localhost:$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot";
 
     if ( $self->user_config_( 1, 'xpl_angle' ) ) {
