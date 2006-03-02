@@ -1,24 +1,5 @@
-            <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <div class="securityLabel">
-                    <TMPL_VAR NAME="Localize_Security_NNTP">:
-                </div>
-
-                <TMPL_IF NAME="nntp_if_local">
-
-                <span class="securityWidgetStateOff">
-                    <TMPL_VAR NAME="Localize_Security_NoStealthMode">
-                </span>
-                <input type="submit" class="toggleOn" id="securityAcceptNNTPOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                <input type="hidden" name="nntp_local" value="0" />
-
-                <TMPL_ELSE>
-
-                <span class="securityWidgetStateOn">
-                    <TMPL_VAR NAME="Localize_Yes">
-                </span>
-                <input type="submit" class="toggleOff" id="securitycceptNNTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
-                <input type="hidden" name="nntp_local" value="1" />
-
-                </TMPL_IF>
-
-            </form>
+                <input type="checkbox" name="serveropt_nntp" id="securityAcceptNNTP" <TMPL_IF NAME="nntp_if_local"><TMPL_ELSE>checked</TMPL_IF> />
+                <label class="administrationLabel" for="securityAcceptNNTP">
+                    <TMPL_VAR NAME="Localize_Security_NNTP">
+                </label>
+                <br />

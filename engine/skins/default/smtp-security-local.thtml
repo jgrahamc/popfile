@@ -1,24 +1,5 @@
-            <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <div class="securityLabel">
-                    <TMPL_VAR NAME="Localize_Security_SMTP">:
-                </div>
-
-                <TMPL_IF NAME="smtp_local_on">
-
-                <span class="securityWidgetStateOff">
-                    <TMPL_VAR NAME="Localize_Security_NoStealthMode">
-                </span>
-                <input type="submit" class="toggleOn" id="securityAcceptSMTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                <input type="hidden" name="smtp_local" value="0" />
-
-                <TMPL_ELSE>
-
-                <span class="securityWidgetStateOn">
-                    <TMPL_VAR NAME="Localize_Yes">
-                </span>
-                <input type="submit" class="toggleOff" id="securityAcceptSMTPOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
-                <input type="hidden" name="smtp_local" value="1" />
-
-                </TMPL_IF>
-
-            </form>
+                <input type="checkbox" name="serveropt_smtp" id="securityAcceptSMTP" <TMPL_IF NAME="smtp_local_on"><TMPL_ELSE>checked</TMPL_IF> />
+                <label class="administrationLabel" for="securityAcceptSMTP">
+                    <TMPL_VAR NAME="Localize_Security_SMTP">
+                </label>
+                <br />

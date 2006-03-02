@@ -1,24 +1,5 @@
-            <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <div class="securityLabel">
-                    <TMPL_VAR NAME="Localize_Security_XMLRPC">:
-                </div>
-
-                <TMPL_IF NAME="XMLRPC_local_on">
-
-                <span class="securityWidgetStateOff">
-                    <TMPL_VAR NAME="Localize_Security_NoStealthMode">
-                </span>
-                <input type="submit" class="submit toggleOn" id="securityAcceptXMLRPCOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                <input type="hidden" name="xmlrpc_local" value="1" />
-
-                <TMPL_ELSE>
-
-                <span class="securityWidgetStateOn">
-                    <TMPL_VAR NAME="Localize_Yes">
-                </span>
-                <input type="submit" class="submit toggleOff" id="securityAcceptXMLRPCOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
-                <input type="hidden" name="xmlrpc_local" value="2" />
-
-                </TMPL_IF>
-
-            </form>
+                <input type="checkbox" name="serveropt_xmlrpc" id="securityAcceptXMLRPC" <TMPL_IF NAME="XMLRPC_local_on"><TMPL_ELSE>checked</TMPL_IF> />
+                <label class="administrationLabel" for="securityAcceptXMLRPC">
+                    <TMPL_VAR NAME="Localize_Security_XMLRPC">
+                </label>
+                <br />

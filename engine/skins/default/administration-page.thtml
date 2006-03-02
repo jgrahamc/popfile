@@ -1,36 +1,57 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
+<script type="text/javascript">
+function serverMode(state) {
+    var d = document.forms;
+    for (var i=0; i < d.length; i++) {
+         for (var j=0; j < d[i].elements.length; j++)
+              if (d[i].elements[j].name.substr(0,10) == "serveropt_")
+                    d[i].elements[j].disabled = !state;
+    }
+    return 0;
+}
+</script>
+
 <table class="settingsTable" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Security_MainTableSummary">">
     <tr>
         <td class="settingsPanel" width="33%" valign="top">
             <div class="securityServerWidget">
                  <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_Stealth"></h2>
                         <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                            <div class="securityLabel">
-                                <TMPL_VAR NAME="Localize_Security_UI">:
+                            <input type="checkbox" name="usermode" id="UserMode" <TMPL_IF NAME="Users_If_Single">checked</TMPL_IF> />
+                            <label class="administrationLabel" for="UserMode">
+                                <TMPL_VAR NAME="Localize_Users_SingleUserMode">
+                            </label>
+                            <br />
+                            <input type="radio" name="servermode" id="StealthMode" value="StealthMode" onClick="serverMode(false)" checked />
+                            <label class="administrationLabel" for="StealthMode">
+                                Stealth Mode (disable remote connections)
+                            </label>
+                            <br />
+                            <input type="radio" name="servermode" id="ServerMode" value="ServerMode" onClick="serverMode(true)" />
+                            <label class="administrationLabel" for="ServerMode">
+                                Server Mode (allow remote connections)
+                            </label>
+                            <br />
+                            <div style="margin-left:1em;" class="adminAcceptRemote">
+                            <input type="checkbox" name="serveropt_http" id="securityAcceptHTTP" name="toggle" />
+                            <label class="administrationLabel" for="securityAcceptHTTP">
+                                <TMPL_VAR NAME="Localize_Security_UI">
+                            </label>
+                            <br />
+
+                            <TMPL_VAR NAME="Security_Dynamic_Security">
+
                             </div>
 
-                            <TMPL_IF NAME="Security_If_Local">
+                            <!-- This file is currently being included by Perl in Configuration_Dynamic below when loaded, Perl needs changing so it doesn't load there (if possible) -->
+                            <TMPL_INCLUDE NAME="windows-configuration.thtml">
 
-                            <span class="securityWidgetStateOff">
-                                <TMPL_VAR NAME="Localize_Security_NoStealthMode">
-                            </span>
-                            <input type="submit" class="submit toggleOn" id="securityAcceptHTTPOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                            <input type="hidden" name="localui" value="1" />
-
-                            <TMPL_ELSE>
-
-                            <span class="securityWidgetStateOn">
-                                <TMPL_VAR NAME="Localize_Yes">
-                            </span>
-                            <input type="submit" class="submit toggleOff" id="securityAcceptHTTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
-                            <input type="hidden" name="localui" value="2" />
-
-                            </TMPL_IF>
-
+                            <br />
+                            <input type="submit" class="submit" name="apply_operation" value="<TMPL_VAR NAME="Localize_Apply">" />
                         </form>
-                        <TMPL_VAR NAME="Security_Dynamic_Security">
+
                  <hr />
             </div>
 
@@ -38,23 +59,6 @@
                 <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_AUTHTitle"></h2>
                 <TMPL_VAR NAME="Security_Dynamic_Chain">
             </div>
-    <div class="singleUserMode">
-<hr>
-                <h2 class="configuration"><TMPL_VAR NAME="Localize_Users_SingleUserMode"></h2>
-<TMPL_IF NAME="Users_If_Single">
-<form action="/administration" method="post">
-    <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
-    <input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
-<input type="hidden" name="singleuser" value="0">
-</form>
-<TMPL_ELSE>
-<form action="/administration" method="post">
-<span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_No"></span>
-<input type="submit" class="submit toggleOn" name="usermode" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-<input type="hidden" name="singleuser" value="1">
-</form>
-</TMPL_IF>
-</div>
 
         </td>
         <td class="settingsPanel" width="33%" valign="top">
@@ -82,6 +86,7 @@
                             </TMPL_IF>
 
                         </form>
+                        <i><TMPL_VAR NAME="Localize_Security_ExplainUpdate"></i>
                  <hr />
             </div>
 
@@ -111,6 +116,7 @@
                             </TMPL_IF>
 
                         </form>
+                        <i><TMPL_VAR NAME="Localize_Security_ExplainStats"></i>
                 <hr />
             </div>
 
