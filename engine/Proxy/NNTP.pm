@@ -127,23 +127,8 @@ sub start
     # item that needs a UI component
 
     $self->register_configuration_item_( 'configuration',
-                                         'nntp_port',
-                                         'nntp-port.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'configuration',
-                                         'nntp_force_fork',
-                                         'nntp-force-fork.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'configuration',
-                                         'nntp_separator',
-                                         'nntp-separator.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'security',
-                                         'nntp_local',
-                                         'nntp-security-local.thtml',
+                                         'nntp_config',
+                                         'nntp-configuration.thtml',
                                          $self );
 
     if ( $self->config_( 'welcome_string' ) =~ /^NNTP POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK START
@@ -426,20 +411,10 @@ sub configure_item
 {
     my ( $self, $name, $templ, $language ) = @_;
 
-    if ( $name eq 'nntp_port' ) {
+    if ( $name eq 'nntp_config' ) {
         $templ->param( 'nntp_port' => $self->config_( 'port' ) );
-    }
-
-    # Separator Character widget
-    if ( $name eq 'nntp_separator' ) {
         $templ->param( 'nntp_separator' => $self->config_( 'separator' ) );
-    }
-
-    if ( $name eq 'nntp_local' ) {
         $templ->param( 'nntp_if_local' => $self->config_( 'local' ) );
-     }
-
-    if ( $name eq 'nntp_force_fork' ) {
         $templ->param( 'nntp_force_fork_on' => $self->config_( 'force_fork' ) );
     }
 
@@ -464,18 +439,17 @@ sub validate_item
 
     my ($status, $error);
 
-    if ( $name eq 'nntp_port' ) {
+    if ( $name eq 'nntp_config' ) {
+        
         if ( defined $$form{nntp_port} ) {
             if ( ( $$form{nntp_port} >= 1 ) && ( $$form{nntp_port} < 65536 ) ) {
+                $self->config_( 'port', $$form{nntp_port} );
                 $status = sprintf $$language{Configuration_NNTPUpdate}, $self->config_( 'port' );
              } else {
                 $error = $$language{Configuration_Error3};
              }
-         }
-         return ($status, $error);
-    }
+        }
 
-    if ( $name eq 'nntp_separator' ) {
         if ( defined $$form{nntp_separator} ) {
             if ( length($$form{nntp_separator}) == 1 ) {
                 $self->config_( 'separator', $$form{nntp_separator} );
@@ -484,22 +458,16 @@ sub validate_item
                $error = $$language{Configuration_Error1};
             }
         }
-        return ($status, $error);
-    }
 
-    if ( $name eq 'nntp_local' ) {
         if ( defined $$form{nntp_local} ) {
             $self->config_( 'local', $$form{nntp_local} );
         }
-        return( undef, undef);
-    }
 
-
-    if ( $name eq 'nntp_force_fork' ) {
         if ( defined $$form{nntp_force_fork} ) {
             $self->config_( 'force_fork', $$form{nntp_force_fork} );
         }
-        return( undef, undef);
+        
+        return( $status, $error );
     }
     return $self->SUPER::validate_item( $name, $templ, $language, $form );
 }

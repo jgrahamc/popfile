@@ -1,8 +1,0 @@
-<form action="/administration" method="post">
-    <label class="configurationLabel" for="configNNTPPort">
-        <TMPL_VAR NAME="Localize_Configuration_NNTPPort">:
-    </label>
-    <br />
-    <input name="nntp_port" type="text" id="configNNTPPort" value="<TMPL_VAR NAME="nntp_port">" />
-    <input type="submit" class="submit" name="update_nntp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-</form>
