@@ -130,6 +130,11 @@ sub start
                                          'nntp_config',
                                          'nntp-configuration.thtml',
                                          $self );
+    
+    $self->register_configuration_item_( 'security',
+                                         'nntp_local',
+                                         'nntp-security-local.thtml',
+                                         $self );                                         
 
     if ( $self->config_( 'welcome_string' ) =~ /^NNTP POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK START
         $self->config_( 'welcome_string', "NNTP POPFile ($self->{version_}) server ready" );        # PROFILE BLOCK STOP
@@ -414,8 +419,11 @@ sub configure_item
     if ( $name eq 'nntp_config' ) {
         $templ->param( 'nntp_port' => $self->config_( 'port' ) );
         $templ->param( 'nntp_separator' => $self->config_( 'separator' ) );
-        $templ->param( 'nntp_if_local' => $self->config_( 'local' ) );
         $templ->param( 'nntp_force_fork_on' => $self->config_( 'force_fork' ) );
+    }
+    
+    if ( $name eq 'nntp_local' ) {
+        $templ->param( 'nntp_if_local' => $self->config_( 'local' ) );
     }
 
     $self->SUPER::configure_item( $name, $templ, $language);
@@ -459,16 +467,20 @@ sub validate_item
             }
         }
 
-        if ( defined $$form{nntp_local} ) {
-            $self->config_( 'local', $$form{nntp_local} );
-        }
-
         if ( defined $$form{nntp_force_fork} ) {
             $self->config_( 'force_fork', $$form{nntp_force_fork} );
         }
         
         return( $status, $error );
     }
+    
+    if ( $name eq 'nntp_local' ) {
+        if ( defined $$form{nntp_local} ) {
+            $self->config_( 'local', $$form{nntp_local} );
+        }
+        return( undef, undef);
+    }    
+
     return $self->SUPER::validate_item( $name, $templ, $language, $form );
 }
 
