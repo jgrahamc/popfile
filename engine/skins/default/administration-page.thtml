@@ -24,31 +24,31 @@ function serverMode(state) {
                                 <TMPL_VAR NAME="Localize_Users_SingleUserMode">
                             </label>
                             <br />
-                            <input type="radio" name="servermode" id="StealthMode" value="StealthMode" onClick="serverMode(false)" checked />
+                            <input type="radio" name="servermode" id="StealthMode" value="StealthMode" onClick="serverMode(false)" <TMPL_IF NAME="Security_If_Local">checked</TMPL_IF> />
                             <label class="administrationLabel" for="StealthMode">
                                 Stealth Mode (disable remote connections)
                             </label>
                             <br />
-                            <input type="radio" name="servermode" id="ServerMode" value="ServerMode" onClick="serverMode(true)" />
+                            <input type="radio" name="servermode" id="ServerMode" value="ServerMode" onClick="serverMode(true)" <TMPL_IF NAME="Security_If_Local"><TMPL_ELSE>checked</TMPL_IF> />
                             <label class="administrationLabel" for="ServerMode">
                                 Server Mode (allow remote connections)
                             </label>
                             <br />
                             <div style="margin-left:1em;" class="adminAcceptRemote">
-                            <input type="checkbox" name="serveropt_http" id="securityAcceptHTTP" name="toggle" />
-                            <label class="administrationLabel" for="securityAcceptHTTP">
-                                <TMPL_VAR NAME="Localize_Security_UI">
-                            </label>
-                            <br />
+                                <input type="checkbox" name="serveropt_http" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF> />
+                                <label class="administrationLabel" for="securityAcceptHTTP">
+                                    <TMPL_VAR NAME="Localize_Security_UI">
+                                </label>
+                                <br />
 
-                            <TMPL_VAR NAME="Security_Dynamic_Security">
+                                <TMPL_VAR NAME="Security_Dynamic_Security">
 
                             </div>
 
                             <!-- This file is currently being included by Perl in Configuration_Dynamic below when loaded, Perl needs changing so it doesn't load there (if possible) -->
                             <TMPL_INCLUDE NAME="windows-configuration.thtml">
 
-                            <br />
+                            <br /><br />
                             <input type="submit" class="submit" name="apply_operation" value="<TMPL_VAR NAME="Localize_Apply">" />
                         </form>
 
@@ -65,87 +65,26 @@ function serverMode(state) {
             <div class="securityUpdateWidget">
                  <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_UpdateTitle"></h2>
                         <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                            <div class="securityLabel">
-                                <TMPL_VAR NAME="Localize_Security_Update">:
-                            </div>
-
-                            <TMPL_IF NAME="Security_If_Update_Check">
-
-                            <span class="securityWidgetStateOn">
-                                <TMPL_VAR NAME="Localize_Yes">
-                            </span>
-                            <input type="submit" class="submit toggleOff" id="securityUpdateCheckOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
-                            <input type="hidden" name="update_check" value="1" />
-
-                            <TMPL_ELSE>
-
-                            <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_No"></span>
-                            <input type="submit" class="submit toggleOn" id="securityUpdateCheckOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                            <input type="hidden" name="update_check" value="2" />
-
-                            </TMPL_IF>
-
+                            <input type="checkbox" id="securityUpdateCheck" name="update_check" <TMPL_IF NAME="Security_If_Update_Check">checked</TMPL_IF> />
+                            <label class="administrationLabel" for="securityUpdateCheck">
+                                <TMPL_VAR NAME="Localize_Security_Update">
+                            </label>
+                            <br />
+                            <input type="checkbox" id="securitySendStats" name="update_check" <TMPL_IF NAME="Security_If_Send_Stats">checked</TMPL_IF> />
+                            <label class="administrationLabel" for="securitySendStats">
+                                <TMPL_VAR NAME="Localize_Security_Stats">
+                            </label>
+                            <br /><br />
+                            <input type="submit" class="submit" name="privacy" value="<TMPL_VAR NAME="Localize_Apply">" />
+                            <br /><br />
+                            <i><TMPL_VAR NAME="Localize_Security_ExplainUpdate"></i>
                         </form>
-                        <i><TMPL_VAR NAME="Localize_Security_ExplainUpdate"></i>
                  <hr />
             </div>
 
-            <div class="securityStatsWidget">
-                 <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_StatsTitle"></h2>
-                        <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                            <div class="securityLabel">
-                                <TMPL_VAR NAME="Localize_Security_Stats">:
-                            </div>
-
-                            <TMPL_IF NAME="Security_If_Send_Stats">
-
-                            <span class="securityWidgetStateOn">
-                                <TMPL_VAR NAME="Localize_Yes">
-                            </span>
-                            <input type="submit" class="submit toggleOff" id="securitySendStatsOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
-                            <input type="hidden" name="send_stats" value="1" />
-
-                            <TMPL_ELSE>
-
-                            <span class="securityWidgetStateOff">
-                                <TMPL_VAR NAME="Localize_No">
-                            </span>
-                            <input type="submit" class="submit toggleOn" id="securitySendStatsOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                            <input type="hidden" name="send_stats" value="2" />
-
-                            </TMPL_IF>
-
-                        </form>
-                        <i><TMPL_VAR NAME="Localize_Security_ExplainStats"></i>
-                <hr />
-            </div>
-
-            <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_TCPTimeout"></h2>
-            <form action="/administration" method="post">
-                <label class="configurationLabel" for="configTCPTimeout">
-                    <TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:
-                </label>
-                <br />
-                <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
-                <input type="submit" class="submit" name="update_timeout" value="<TMPL_VAR NAME="Localize_Apply">" />
-            </form>
-
-            <TMPL_IF NAME="Configuration_If_TCP_Timeout_Error">
-
-            <blockquote>
-                <div class="error01">
-                    <TMPL_VAR NAME="Localize_Configuration_Error6">
-                </div>
-            </blockquote>
-
-            </TMPL_IF>
-
-            <TMPL_VAR NAME="Configuration_TCP_Timeout_Updated">
-                <hr />
-
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_Logging"></h2>
             <form action="/administration" method="post">
-                <label class="configurationLabel" for="configLogging">
+                <label class="administrationLabel" for="configLogging">
                     <TMPL_VAR NAME="Localize_Configuration_LoggerOutput">:
                 </label>
 
@@ -163,14 +102,30 @@ function serverMode(state) {
                         <TMPL_VAR NAME="Localize_Configuration_ToScreenFile">
                     </option>
                 </select>
+                <br />
+                <label class="administrationLabel" for="configLoggingLevel">
+                    Logger level:
+                </label>
+
+                <select name="level" id="configLoggingLevel">
+                    <option value="0" >
+                        Low
+                    </option>
+                    <option value="1" >
+                        Default
+                    </option>
+                    <option value="2" >
+                        High
+                    </option>
+                </select>
+                <br /><br />
                 <input type="submit" class="submit" name="submit_debug" value="<TMPL_VAR NAME="Localize_Apply">" />
             </form>
 
             <TMPL_IF NAME="Configuration_If_Show_Log">
 
-            <p>
-                <a href="popfile_current_log.log" class="downloadLogLink"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
-            </p>
+            <br />
+            <a href="popfile_current_log.log" class="downloadLogLink"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
 
             </TMPL_IF>
 
@@ -183,7 +138,28 @@ function serverMode(state) {
                 </label>
                 <br />
                 <input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port">" />
-                <input type="submit" class="submit" name="update_ui_port" value="<TMPL_VAR NAME="Localize_Apply">" />
+                <br />
+
+                <label class="configurationLabel" for="configTCPTimeout">
+                    <TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:
+                </label>
+                <br />
+                <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
+
+            <TMPL_IF NAME="Configuration_If_TCP_Timeout_Error">
+
+            <blockquote>
+                <div class="error01">
+                    <TMPL_VAR NAME="Localize_Configuration_Error6">
+                </div>
+            </blockquote>
+
+            </TMPL_IF>
+
+            <TMPL_VAR NAME="Configuration_TCP_Timeout_Updated">
+
+                <br /><br />
+                <input type="submit" class="submit" name="update_modules" value="<TMPL_VAR NAME="Localize_Apply">" />
 
             </form>
             <TMPL_VAR NAME="Configuration_Dynamic">

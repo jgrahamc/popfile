@@ -1,4 +1,4 @@
-                <input type="checkbox" name="serveropt_xmlrpc" id="securityAcceptXMLRPC" <TMPL_IF NAME="XMLRPC_local_on"><TMPL_ELSE>checked</TMPL_IF> />
+                <input type="checkbox" name="serveropt_xmlrpc" id="securityAcceptXMLRPC" <TMPL_IF NAME="XMLRPC_local_on"><TMPL_ELSE>checked</TMPL_IF> <TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF> />
                 <label class="administrationLabel" for="securityAcceptXMLRPC">
                     <TMPL_VAR NAME="Localize_Security_XMLRPC">
                 </label>
