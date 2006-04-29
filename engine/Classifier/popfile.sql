@@ -1,10 +1,9 @@
--- POPFILE SCHEMA 7
+-- POPFILE SCHEMA 8
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
 --
 -- Copyright (c) 2003-2006 John Graham-Cumming
-
 --
 --   This file is part of POPFile
 --
@@ -53,7 +52,8 @@
 --  \----==|    id    |---+-(-------| userid  |     \  |  times   |   +-------+
 --      /  |   name   |     |       |  name   |     |  | lastseen |
 --      |  | password |     |       | pseudo  |     |  +----------+
---      |  +----------+     |       +---------+     |
+--      |  +----------+     |       | comment |     |
+--      |                   |       +---------+     |
 --      |                   |                       |
 --      |                   |        +-----------+  |
 --      |                   |        |  magnets  |  |
@@ -127,6 +127,7 @@ create table buckets( id integer primary key, -- unique ID for this bucket
                       pseudo int,             -- 1 if this is a pseudobucket
                                               -- (i.e. one POPFile uses
                                               -- internally)
+                      comment varchar(255),   -- user defined comment
                       unique (userid,name)    -- a user can't have two buckets
                                               -- with the same name
                     );
