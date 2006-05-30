@@ -120,7 +120,7 @@
 
   Name                   "POPFile IMAP Updater"
 
-  !define C_PFI_VERSION  "0.0.8"
+  !define C_PFI_VERSION  "0.0.9"
 
   ; Mention the wizard's version number in the window title
 
@@ -138,11 +138,11 @@
 
   ; SourceForge URL for the CVS Revision History for the POPFile IMAP module
 
-  !define C_CVS_HISTORY_URL   "http://cvs.sourceforge.net/viewcvs.py/popfile/engine/Services/IMAP.pm"
+  !define C_CVS_HISTORY_URL   "http://popfile.cvs.sourceforge.net/popfile/engine/Services/IMAP.pm?view=log"
 
   ; SourceForge URL used when downloading a particular CVS revision of the IMAP module
 
-  !define C_CVS_IMAP_DL_URL   "http://cvs.sourceforge.net/viewcvs.py/*checkout*/popfile/engine/Services/IMAP.pm?rev=$G_REVISION"
+  !define C_CVS_IMAP_DL_URL   "http://popfile.cvs.sourceforge.net/*checkout*/popfile/engine/Services/IMAP.pm?revision=$G_REVISION"
 
   ;--------------------------------------------------------------------------
   ; POPFile's module format was changed for the POPFile 0.23.0 release so any
@@ -906,9 +906,9 @@ loop:
   FileRead ${L_HANDLE} ${L_LINE}
   StrCmp ${L_LINE} "" done
 
-  StrCpy ${L_PARAM} ${L_LINE} 12
-  StrCmp ${L_PARAM} "Revision <b>" 0 loop
-  StrCpy ${L_TEMP} 12
+  StrCpy ${L_PARAM} ${L_LINE} 17
+  StrCmp ${L_PARAM} "Revision <strong>" 0 loop
+  StrCpy ${L_TEMP} 17
 
 revision_loop:
   StrCpy ${L_PARAM} ${L_LINE} 1 ${L_TEMP}
@@ -920,9 +920,9 @@ revision_loop:
 date_loop:
   FileRead ${L_HANDLE} ${L_LINE}
   StrCmp ${L_LINE} "" done
-  StrCpy ${L_PARAM} ${L_LINE} 3
-  StrCmp ${L_PARAM} "<i>" 0 date_loop
-  StrCpy ${L_RESULT_DATE} ${L_LINE} 28 3
+  StrCpy ${L_PARAM} ${L_LINE} 4
+  StrCmp ${L_PARAM} "<em>" 0 date_loop
+  StrCpy ${L_RESULT_DATE} ${L_LINE} 28 4
 
 done:
   FileClose ${L_HANDLE}
