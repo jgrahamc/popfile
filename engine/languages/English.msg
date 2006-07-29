@@ -414,6 +414,8 @@ Imap_WatchedFolderAdded                 Another folder was added to the list of 
 Imap_WatchedFolder                      Watched folder no
 Imap_WatchedFoldersUpdated              Updated the list of watched folders
 Imap_WatchedFolderRemoved               Removed folder '%s' from list of watched folders
+Imap_DoingTraining                      The IMAP module is now going to start training on your message archive. The POPFile UI will remain unresponsive until training is completed. Depending on the size of your archive and the speed of the connection to the IMAP server, this may take a while.
+Imap_DoTraining                         Train from existing mail archive.
 
 Shutdown_Message                        POPFile has shut down
 

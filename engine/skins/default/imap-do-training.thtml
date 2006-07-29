@@ -1,0 +1,20 @@
+<!--  This is the output of template imap-update-mailbox-list.thtml -->
+<TMPL_IF NAME="imap_currently_training">
+
+    <p>
+        <TMPL_VAR NAME="Localize_Imap_DoingTraining">
+    </p>
+
+<TMPL_ELSE>
+
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+    <label for="imap_do_training" class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_DoTraining">
+    </label>
+    <input id="imap_do_training" type="submit" class="submit" name="do_imap_training" value="<TMPL_VAR NAME="Localize_Imap_Now">" />
+</form>
+
+</TMPL_IF>
+<hr width="60%" align="center" />
+
+<!-- End of template imap-do-training.thtml -->

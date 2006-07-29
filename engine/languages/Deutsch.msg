@@ -401,6 +401,8 @@ Imap_WatchedFolderAdded                 Ein Ordner wurde hinzugefügt. Bitte wähl
 Imap_WatchedFolder                      Überwachter Ordner Nr.
 Imap_WatchedFoldersUpdated              Liste der überwachten Ordner wurde aktualisiert.
 Imap_WatchedFolderRemoved               Ordner '%s' wurde aus der Liste der überwachten Ordner entfernt
+Imap_DoingTraining                      Das IMAP Module wird das Training jetzt anhand Ihrer archivierten Nachrichten starten. Je nach der Größe des Archivs und der Geschwindigkeit der Verbindung zum Server, kann diese einige Zeit dauern, während der die Benutzeroberfläche nicht reagieren wird.
+Imap_DoTraining                         Training anhand archivierter Mail.
 
 Shutdown_Message                        POPFile wurde beendet
 

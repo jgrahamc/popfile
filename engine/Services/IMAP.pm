@@ -169,6 +169,10 @@ sub start
                                          'imap_5_options',
                                          'imap-options.thtml',
                                          $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_6_training',
+                                         'imap-do-training.thtml',
+                                         $self );
 
     # Set the time stamp for the last update to the current time
     # minus the update interval so that we will connect as soon
@@ -2069,6 +2073,11 @@ sub configure_item
         # Update interval in seconds
         $templ->param( IMAP_interval => $self->user_config_( 1, 'update_interval' ) );
     }
+
+    # Switch the module to training mode
+    if ( $name eq 'imap_6_training' ) {
+        $templ->param( imap_currently_training => $self->user_config_( 1, 'training_mode' ) );
+    }
 }
 
 
@@ -2291,8 +2300,20 @@ sub validate_item
         return ( $status_message, $error_message );
     }
 
+    if ( $name eq 'imap_6_training' ) {
 
-    $self->SUPER::validate_item( $name, $templ, $language, $form );
+        if ( defined $$form{do_imap_training} ) {
+            $self->user_config_( 1, 'training_mode', 1 );
+            return ( $$language{Imap_DoingTraining}, undef );
+        }
+        else {
+            return ( undef, undef );
+        }
+    }
+
+    # If we end up here, we forgot to validate some item.
+    $self->log_( 0, "A configuration item has been left unvalidated: $name" );
+    return ( undef, "The item $name is not implemented." );
 }
 
 
@@ -2365,6 +2386,8 @@ sub train_on_archive__
 
     # And disable training mode so we won't do this again the next time service is called.
     $self->user_config_( 1, 'training_mode', 0 );
+
+    $self->log_( 0, "Training finished." );
 }
 
 
