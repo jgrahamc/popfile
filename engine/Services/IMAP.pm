@@ -258,7 +258,7 @@ sub service
                 # all of our folders
                 $self->connect_folders__();
 
-                # Reset the hash containing the hash values we have seen the 
+                # Reset the hash containing the hash values we have seen the
                 # last time through service.
                 $self->{hash_values__} = ();
 
@@ -2090,12 +2090,12 @@ sub validate_item
     my ( $self, $name, $templ, $language, $form ) = @_;
 
     my ( $status_message, $error_message );
-    
+
     # connection details
     if ( $name eq 'imap_0_connection_details' ) {
         if ( defined $$form{update_imap_0_connection_details} ) {
             my $something_happened = 0;
-            
+
             if ( $$form{imap_hostname} ne '' ) {
                 $self->user_config_( 1, 'hostname', $$form{imap_hostname} );
                 $something_happened++;
@@ -2127,10 +2127,10 @@ sub validate_item
             else {
                 $error_message = $$language{Imap_PasswordError};
             }
-            
+
             $status_message = $$language{Imap_ConnectionDetailsUpdated} if $something_happened;
         }
-        
+
         return ( $status_message, $error_message );
     }
 
@@ -2252,7 +2252,7 @@ sub validate_item
             else {
                 $error_message = $$language{Imap_UpdateError3};
             }
-            
+
             unless ( defined $error_message ) {
                 $status_message = $$language{Imap_UpdateOK};
             }
@@ -2282,11 +2282,11 @@ sub validate_item
             else {
                 $error_message = $$language{Imap_IntervalError};
             }
-            
+
             unless ( defined $error_message ) {
                 $status_message = $$language{Imap_OptionsUpdated};
             }
-            
+
         }
         return ( $status_message, $error_message );
     }
@@ -2318,15 +2318,15 @@ sub train_on_archive__
     $self->connect_folders__();
 
     foreach my $folder ( keys %{$self->{folders__}} ) {
-
-        # Set uidnext value to 1. We will train on all messages.
-        $self->uid_next__( $folder, 1 );
-        my @uids = $self->get_new_message_list( $folder );
         my $bucket = $self->{folders__}{$folder}{output};
 
         # Skip pseudobuckets and the INBOX
         next if $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket );
         next if $folder eq 'INBOX';
+
+        # Set uidnext value to 1. We will train on all messages.
+        $self->uid_next__( $folder, 1 );
+        my @uids = $self->get_new_message_list( $folder );
 
         $self->log_( 0, "Training on messages in folder $folder to bucket $bucket." );
 
