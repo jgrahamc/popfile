@@ -58,7 +58,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.13"
+  !define C_PFI_LIBRARY_VERSION     "0.1.14"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -4144,7 +4144,7 @@
   FunctionEnd
 !macroend
 
-!ifndef DBANALYSER & PFIDIAG & RUNPOPFILE & RUNSQLITE & TRANSLATOR
+!ifndef DBANALYSER & IMAPUPDATER & PFIDIAG & RUNPOPFILE & RUNSQLITE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: PFI_StrCheckDecimal
     #

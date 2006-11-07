@@ -4,7 +4,8 @@
 #                    installs either the latest version of the experimental IMAP.pm module
 #                    or the version specified on the command-line. This utility is intended
 #                    for use with an existing POPFile 0.22.x installation (the IMAP module
-#                    is still 'experimental' so it is not shipped with the 0.22.0 release).
+#                    is still 'experimental' so it was not shipped with the 0.22.0 or 0.22.1
+#                    releases).
 #
 # Copyright (c) 2004-2006 John Graham-Cumming
 #
@@ -25,18 +26,18 @@
 #
 #--------------------------------------------------------------------------
 
-  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
-  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
-  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+  ; This version of the script has been tested with the "NSIS v2.21" compiler,
+  ; released 20 October 2006. This particular compiler can be downloaded from
+  ; http://prdownloads.sourceforge.net/nsis/nsis-2.21-setup.exe?download
 
   !define ${NSIS_VERSION}_found
 
-  !ifndef v2.0_found
+  !ifndef v2.21_found
       !warning \
           "$\r$\n\
           $\r$\n***   NSIS COMPILER WARNING:\
           $\r$\n***\
-          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   This script has only been tested using the NSIS v2.21 compiler\
           $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
           $\r$\n***\
           $\r$\n***   The resulting 'installer' program should be tested carefully!\
@@ -78,7 +79,8 @@
 #
 #   updateimap.exe /revision=1.4
 #
-# To get the most recent version without knowing its revision number, use the command:
+# To get the most recent version from the main CVS trunk without knowing its revision number,
+# use the command:
 #
 #   updateimap.exe /revision=1.999
 #
@@ -92,10 +94,10 @@
 ## !define PFI_VERBOSE
 
   ;--------------------------------------------------------------------------
-  ; Select LZMA compression (to generate smallest EXE file)
+  ; Select SOLID LZMA compression (to generate smallest EXE file)
   ;--------------------------------------------------------------------------
 
-  SetCompressor lzma
+  SetCompressor /SOLID lzma
 
   ;--------------------------------------------------------------------------
   ; Symbols used to avoid confusion over where the line breaks occur.
@@ -120,7 +122,7 @@
 
   Name                   "POPFile IMAP Updater"
 
-  !define C_PFI_VERSION  "0.0.9"
+  !define C_PFI_VERSION  "0.0.10"
 
   ; Mention the wizard's version number in the window title
 
@@ -152,7 +154,7 @@
   ; most recent _compatible_ module instead of simply the most recent module.
   ;--------------------------------------------------------------------------
 
-  !define C_PRE_23_COMPATIBLE_VERSION     "1.9.4.2"
+  !define C_PRE_23_COMPATIBLE_VERSION     "1.9.4.3"
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -392,7 +394,7 @@
   ;--------------------------------------------------------------------------
 
   !insertmacro PLS_TEXT PIU_LANG_WELCOME_TITLE         "Welcome to the $(^NameDA) Wizard"
-  !insertmacro PLS_TEXT PIU_LANG_WELCOME_TEXT          "This utility will download the POPFile IMAP module from CVS.${IO_NL}${IO_NL}Normally it will download the most up-to-date version, but you can request a particular version by starting the utility with the /revision=1.x option (where x is the revision of interest).${IO_NL}${IO_NL}For example: updateimap.exe /revision=1.5${IO_NL}${IO_NL}For the most recent revision, set x to a huge number like 999${IO_NL}${IO_NL}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${IO_NL}   WARNING:${IO_NL}${IO_NL}   PLEASE SHUT DOWN POPFILE NOW !${IO_NL}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${IO_NL}${IO_NL}$_CLICK"
+  !insertmacro PLS_TEXT PIU_LANG_WELCOME_TEXT          "This utility will download the POPFile IMAP module from CVS.${IO_NL}${IO_NL}Normally it will download the most up-to-date version, but you can request a particular version by starting the utility with the /revision=1.x option (where x is the revision of interest).${IO_NL}${IO_NL}Example (a):   updateimap.exe /revision=1.5${IO_NL}Example (b):   updateimap.exe /revision=1.2.3.4${IO_NL}${IO_NL}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${IO_NL}   WARNING:${IO_NL}${IO_NL}   PLEASE SHUT DOWN POPFILE NOW !${IO_NL}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~${IO_NL}${IO_NL}$_CLICK"
 
   ;--------------------------------------------------------------------------
   ; LICENSE page
@@ -464,10 +466,9 @@
 
   !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_1        "Invalid command-line option supplied ($G_PLS_FIELD_1)"
   !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_2        "Usage examples:"
-  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_3        "(to get the most up-to-date revision using CVS data)"
-  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_4        "(where x is the required revision number, starting at 1)"
-  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_5        "To get the most recent revision, set x to a huge number like 999"
-  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_ALL      "$(PIU_LANG_MB_BADOPTION_1)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_2)${MB_NL}${MB_NL}updateimap.exe${MB_NL}$(PIU_LANG_MB_BADOPTION_3)${MB_NL}${MB_NL}or${MB_NL}${MB_NL}updateimap.exe /revision=1.x${MB_NL}$(PIU_LANG_MB_BADOPTION_4)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_5)"
+  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_3        "(to get the most up-to-date compatible revision)"
+  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_4        "(where 1.x is the required revision number, eg 1.5 or 1.2.3.4)"
+  !insertmacro PLS_TEXT PIU_LANG_MB_BADOPTION_ALL      "$(PIU_LANG_MB_BADOPTION_1)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_2)${MB_NL}${MB_NL}updateimap.exe${MB_NL}$(PIU_LANG_MB_BADOPTION_3)${MB_NL}${MB_NL}or${MB_NL}${MB_NL}updateimap.exe /revision=1.x${MB_NL}$(PIU_LANG_MB_BADOPTION_4)"
 
   !insertmacro PLS_TEXT PIU_LANG_ANALYSISFAILED_1      "Sorry, unable to determine the most recent revision!"
   !insertmacro PLS_TEXT PIU_LANG_ANALYSISFAILED_2      "You can specify a particular revision using the command"
@@ -557,11 +558,11 @@ mutex_ok:
   StrCpy ${L_TEMP} $G_REVISION 12
   StrCmp ${L_TEMP} "/revision=1." 0 bad_option
   StrCpy $G_REVISION $G_REVISION "" 12
+  StrCmp $G_REVISION "" bad_option
   Push $G_REVISION
-  Call PFI_StrCheckDecimal
+  Call CheckRevisionNumber
   Pop $G_REVISION
   StrCmp $G_REVISION "" bad_option
-  IntCmp $G_REVISION 0 bad_option bad_option
   StrCpy $G_REVISION "1.$G_REVISION"
 
 exit:
@@ -570,6 +571,20 @@ exit:
 
   !undef L_RESERVED
   !undef L_TEMP
+
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Installer Function: .onGUIEnd
+#
+# Called right after the installer window closes. This workaround might help
+# ensure that all of the temporary files created by this utility get deleted
+#--------------------------------------------------------------------------
+
+Function .onGUIEnd
+
+  SetOutPath "$TEMP"
 
 FunctionEnd
 
@@ -675,9 +690,7 @@ analysis_failed:
   DetailPrint "$(PIU_LANG_ANALYSISFAILED_2)"
   DetailPrint "$(PIU_LANG_ANALYSISFAILED_3)"
   DetailPrint "$(PIU_LANG_MB_BADOPTION_4)"
-  DetailPrint ""
-  DetailPrint "$(PIU_LANG_MB_BADOPTION_5)"
-  MessageBox MB_OK|MB_ICONSTOP "$(PIU_LANG_MB_ANALYSISFAILED)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_4)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_5)"
+  MessageBox MB_OK|MB_ICONSTOP "$(PIU_LANG_MB_ANALYSISFAILED)${MB_NL}${MB_NL}$(PIU_LANG_MB_BADOPTION_4)"
   Goto error_exit
 
 get_imap_module:
@@ -941,6 +954,80 @@ done:
   !undef L_RESULT_DATE
   !undef L_RESULT_REV
   !undef L_TEMP
+
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckRevisionNumber
+#
+# This function performs some simple checks on the IMAP.pm revision number supplied on the
+# command-line by the user. Revision numbers for the main trunk are in the form 1.xxx but
+# the numbers used on the branches have more than one decimal point (e.g. 1.9.4.3)
+#
+# Inputs:
+#         (top of stack)   - the string to be checked
+#
+# Outputs:
+#         (top of stack)   - the input string (if valid) or "" (if invalid)
+#
+# Usage:
+#
+#         Push "1.234"
+#         Call CheckRevisionNumber
+#         Pop $R0
+#         ($R0 at this point is "1.234")
+#
+#         Push "1.234-A"
+#         Call CheckRevisionNumber
+#         Pop $R0
+#         ($R0 at this point is "")
+
+#--------------------------------------------------------------------------
+
+Function CheckRevisionNumber
+
+  !define VALID_CHAR    "0123456789."   ; string defining the valid characters
+  !define BAD_OFFSET    11              ; length of VALID_CHAR string
+
+  Exch $0   ; The input string
+  Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
+  Push $2   ; A character from the input string
+  Push $3   ; The offset to a character in the "validity check" string
+  Push $4   ; A character from the "validity check" string
+  Push $5   ; Holds the current "validity check" string
+
+  StrCpy $1 ""
+
+next_input_char:
+  StrCpy $2 $0 1                ; Get the next character from the input string
+  StrCmp $2 "" done
+  StrCpy $5 ${VALID_CHAR}$2  ; Add it to end of "validity check" to guarantee a match
+  StrCpy $0 $0 "" 1
+  StrCpy $3 -1
+
+next_valid_char:
+  IntOp $3 $3 + 1
+  StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
+  StrCmp $2 $4 0 next_valid_char
+  IntCmp $3 ${BAD_OFFSET} invalid 0 invalid  ; If match is with the char we added, input is bad
+  StrCpy $1 $1$4                ; Add "valid" character to the result
+  goto next_input_char
+
+invalid:
+  StrCpy $1 ""
+
+done:
+  StrCpy $0 $1      ; Result is either a decimal number string or ""
+  Pop $5
+  Pop $4
+  Pop $3
+  Pop $2
+  Pop $1
+  Exch $0           ; place result on top of the stack
+
+  !undef VALID_CHAR
+  !undef BAD_OFFSET
 
 FunctionEnd
 
