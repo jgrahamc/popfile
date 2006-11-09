@@ -48,21 +48,22 @@
 
 
   ;------------------------------------------------
-  ; This script uses 'cURL' to perform the downloads
+  ; This script requires the 'Inetc' NSIS plugin
   ;------------------------------------------------
 
-  ; The standard NSIS 'nsisdl' plugin cannot be used to download the IMAP.pm module because
-  ; the server does not supply the content length so the 'curl' is used to download the data.
+  ; This script uses a special NSIS plugin (Inetc) to download the IMAP.pm file.
+  ; The standard NSISdl plugin shipped with NSIS cannot be used here because the
+  ; SourceForge server does not supply the necessary header information. The Inetc
+  ; plugin also has much better proxy support than the standard NSISdl plugin.
   ;
-  ; For further information, including download links for a wide variety of platforms, visit
-  ; curl's web site at http://curl.haxx.se
+  ; The 'NSIS Wiki' page for the 'Inetc' plugin (description, example and download links):
+  ; http://nsis.sourceforge.net/Inetc_plug-in
   ;
-  ; There are over 15 official mirrors of the main web site and a similar number of official
-  ; download mirrors.
+  ; To compile this script, copy the 'inetc.dll' file to the standard NSIS plugins folder
+  ; (${NSISDIR}\Plugins\). The 'Inetc' source and example files can be unzipped to the
+  ; appropriate ${NSISDIR} sub-folders if you wish, but this step is entirely optional.
   ;
-  ; For this IMAP Updater wizard the "Win32 - Generic - non-SSL" version of 'curl' was used.
-  ;
-  ; The curl program contains built-in help (curl.exe --help) and a manual (curl.exe --manual)
+  ; Tested with the inetc.dll plugin timestamped 24 September 2006 19:29:22
 
 
 #--------------------------------------------------------------------------
@@ -71,9 +72,10 @@
 #
 # /revision=CVS revision number
 #
-# By default this wizard downloads the most recent version found in CVS. If the wizard fails to
-# correctly identify the most recent version or if the user wishes to download and install a
-# particular revision then this command-line switch can be used.
+# By default this wizard downloads the most recent compatible version found in CVS.
+# If the wizard fails to correctly identify the most recent compatible version or
+# if the user wishes to download and install a particular revision then this
+# command-line switch can be used.
 #
 # For example, to download and install IMAP.pm v1.4 use the command:
 #
@@ -122,7 +124,7 @@
 
   Name                   "POPFile IMAP Updater"
 
-  !define C_PFI_VERSION  "0.0.10"
+  !define C_PFI_VERSION  "0.0.11"
 
   ; Mention the wizard's version number in the window title
 
@@ -142,19 +144,17 @@
 
   !define C_CVS_HISTORY_URL   "http://popfile.cvs.sourceforge.net/popfile/engine/Services/IMAP.pm?view=log"
 
+  ; Restrict the Revision History to the current CVS version (for forthcoming 0.23.0 release)
+
+  !define C_CVS_PATHREV       "&pathrev=MAIN"
+
+  ; Restrict the Revision History to the versions which are compatible with 0.22.x releases
+
+  !define C_PRE_23_PATHREV    "&pathrev=b0_22_2"
+
   ; SourceForge URL used when downloading a particular CVS revision of the IMAP module
 
   !define C_CVS_IMAP_DL_URL   "http://popfile.cvs.sourceforge.net/*checkout*/popfile/engine/Services/IMAP.pm?revision=$G_REVISION"
-
-  ;--------------------------------------------------------------------------
-  ; POPFile's module format was changed for the POPFile 0.23.0 release so any
-  ; modules intended for 0.23.0 (or later) are no longer compatible with the
-  ; earlier releases. Therefore if this utility is used to add or update the
-  ; IMAP module in a pre-0.23.0 installation it must ensure it downloads the
-  ; most recent _compatible_ module instead of simply the most recent module.
-  ;--------------------------------------------------------------------------
-
-  !define C_PRE_23_COMPATIBLE_VERSION     "1.9.4.3"
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -213,10 +213,12 @@
 
   VIProductVersion                          "${C_PFI_VERSION}.0"
 
+  !define /date C_BUILD_YEAR                "%Y"
+
   VIAddVersionKey "ProductName"             "POPFile IMAP Updater wizard"
   VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
   VIAddVersionKey "CompanyName"             "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2006  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) ${C_BUILD_YEAR}  John Graham-Cumming"
   VIAddVersionKey "FileDescription"         "Updates the IMAP module for POPFile 0.22.x"
   VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
   VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
@@ -437,15 +439,23 @@
   ; Progress reports
 
   !insertmacro PLS_TEXT PIU_LANG_PROG_INITIALISE       "Initializing..."
+  !insertmacro PLS_TEXT PIU_LANG_PROG_CMDLINE_REQUEST  "User has requested IMAP.pm v$G_REVISION"
+  !insertmacro PLS_TEXT PIU_LANG_PROG_PRE_23_FOUND     "Pre-0.23.0 installation found"
+  !insertmacro PLS_TEXT PIU_LANG_PROG_MAIN_CVS_FOUND   "0.23.0 (or later) installation found"
   !insertmacro PLS_TEXT PIU_LANG_PROG_GETLIST          "Downloading list of available CVS revisions..."
   !insertmacro PLS_TEXT PIU_LANG_PROG_CHECKDOWNLOAD    "Analyzing the result of the download operation..."
-  !insertmacro PLS_TEXT PIU_LANG_PROG_FINDREVISION     "Searching the list to find the most recent IMAP revision..."
+  !insertmacro PLS_TEXT PIU_LANG_PROG_FINDREVISION     "Searching the list to find the most recent compatible IMAP revision..."
+  !insertmacro PLS_TEXT PIU_LANG_PROG_RESULTFOUND      "Search result: IMAP.pm v$G_REVISION ($G_REVDATE)"
+  !insertmacro PLS_TEXT PIU_LANG_PROG_READYTODOWNLOAD  "Ready to download IMAP.pm v$G_REVISION from CVS"
   !insertmacro PLS_TEXT PIU_LANG_PROG_USERCANCELLED    "IMAP update cancelled by the user"
   !insertmacro PLS_TEXT PIU_LANG_PROG_GETIMAP          "Downloading the IMAP.pm module..."
+  !insertmacro PLS_TEXT PIU_LANG_PROG_DOWNLOADFAILED   "IMAP Updater failed ($G_PLS_FIELD_1)"
   !insertmacro PLS_TEXT PIU_LANG_PROG_BACKUPIMAP       "Making backup copy of previous IMAP.pm file..."
   !insertmacro PLS_TEXT PIU_LANG_PROG_INSTALLIMAP      "Updating the IMAP.pm file..."
   !insertmacro PLS_TEXT PIU_LANG_PROG_SUCCESS          "POPFile 0.22.x IMAP support updated to v$G_REVISION"
+  !insertmacro PLS_TEXT PIU_LANG_PROG_UPDATECOMPLETED  "IMAP Updater completed $G_PLS_FIELD_1"
   !insertmacro PLS_TEXT PIU_LANG_PROG_SAVELOG          "Saving install log file..."
+  !insertmacro PLS_TEXT PIU_LANG_PROG_LOGLOCATION      "Log report saved in '$G_ROOTDIR\updateimap.log'"
 
   !insertmacro PLS_TEXT PIU_LANG_TAKE_A_FEW_SECONDS    "(this may take a few seconds)"
 
@@ -519,6 +529,8 @@
   ; for BZIP2 and LZMA compression)
 
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+  ReserveFile "${NSISDIR}\Plugins\inetc.dll"
+  ReserveFile "${NSISDIR}\Plugins\System.dll"
 
 
 #--------------------------------------------------------------------------
@@ -592,12 +604,9 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Installer Section: POPFile IMAP component
 #
-# The NSISdl plugin cannot be used for these downloads because the server
-# does not specify the content length so this utility uses cURL instead.
+# The Inetc plugin is used here instead of the standard NSISdl plugin because the
+# server does not specify the content length.
 #
-# To avoid opening console windows, the cURL output is sent to the log window
-# (so no progress reports are displayed during the file download operation
-# but we can display some statistics once the file has been downloaded).
 #--------------------------------------------------------------------------
 
 Section "IMAP" SecIMAP
@@ -610,24 +619,12 @@ Section "IMAP" SecIMAP
 
   !define C_CVS_HISTORY_FILE  "$PLUGINSDIR\cvslog.htm"
 
-  ; String used to define cURL report format
-
-  !define C_CURL_REPORT     "Downloaded %{size_download} bytes in %{time_total} seconds${IO_NL}Average speed: %{speed_download} bytes per second${IO_NL}"
-
   Push ${L_HANDLE}
   Push ${L_RESULT}
   Push ${L_TEMP}
 
   SetDetailsPrint textonly
   DetailPrint "$(PIU_LANG_PROG_INITIALISE)"
-  SetDetailsPrint none
-
-  ; We cannot use the nsisdl plugin here because the server does not specify the content length
-  ; (see this script's header comment for information on where to obtain 'curl.exe')
-
-  SetOutPath "$PLUGINSDIR"
-  File "curl.exe"
-  File "COPYING"
   SetDetailsPrint listonly
 
   StrCpy $G_REVDATE ""
@@ -641,28 +638,38 @@ Section "IMAP" SecIMAP
   CreateDirectory $G_ROOTDIR
 
 check_param:
-  StrCmp $G_REVISION "" look_for_suitable_version
-  DetailPrint "User has requested IMAP.pm v$G_REVISION"
+  StrCmp $G_REVISION "" look_for_compatible_version
+  DetailPrint "$(PIU_LANG_PROG_CMDLINE_REQUEST)"
   Goto get_imap_module
 
-look_for_suitable_version:
-  IfFileExists "$G_ROOTDIR\POPFile\Database.pm" look_for_most_recent_version
-  StrCpy $G_REVISION "${C_PRE_23_COMPATIBLE_VERSION}"
-  DetailPrint "Pre-0.23.0 installation found. Get most recent 0.22-compatible file (IMAP.pm v$G_REVISION)"
-  Goto get_imap_module
+  ;--------------------------------------------------------------------------
+  ; The user has not specified a particular revision so we try to get the most
+  ; recent _compatible_ version. POPFile's module format was changed for the
+  ; POPFile 0.23.0 release so any modules intended for 0.23.0 (or later) are
+  ; no longer compatible with any of the earlier releases of POPFile.
+  ;--------------------------------------------------------------------------
+
+look_for_compatible_version:
+  IfFileExists "$G_ROOTDIR\POPFile\Database.pm" use_main_trunk
+  DetailPrint "$(PIU_LANG_PROG_PRE_23_FOUND)"
+  StrCpy $G_REVISION ${C_PRE_23_PATHREV}
+  Goto look_for_most_recent_version
+
+use_main_trunk:
+  DetailPrint "$(PIU_LANG_PROG_MAIN_CVS_FOUND)"
+  StrCpy $G_REVISION ${C_CVS_PATHREV}
 
 look_for_most_recent_version:
   SetDetailsPrint both
   DetailPrint "$(PIU_LANG_PROG_GETLIST) $(PIU_LANG_TAKE_A_FEW_SECONDS)"
   SetDetailsPrint listonly
-  DetailPrint ""
-  nsExec::ExecToLog '"curl.exe" -s -S -w "${C_CURL_REPORT}" -o "${C_CVS_HISTORY_FILE}" "${C_CVS_HISTORY_URL}"'
+  Inetc::get /CAPTION "CVS History log" /POPUP "${C_CVS_HISTORY_URL}$G_REVISION" "${C_CVS_HISTORY_FILE}" /END
   Pop ${L_RESULT}
   DetailPrint ""
   SetDetailsPrint textonly
   DetailPrint "$(PIU_LANG_PROG_CHECKDOWNLOAD)"
   SetDetailsPrint listonly
-  StrCmp ${L_RESULT} "0" analyse_history
+  StrCmp ${L_RESULT} "OK" analyse_history
   StrCpy $G_PLS_FIELD_1 ${L_RESULT}
   SetDetailsPrint both
   DetailPrint "$(PIU_LANG_MB_HISTORYFAIL_1)"
@@ -679,7 +686,7 @@ analyse_history:
   Pop $G_REVDATE
   Pop $G_REVISION
   StrCmp $G_REVISION "" analysis_failed
-  DetailPrint "Search result: IMAP.pm v$G_REVISION ($G_REVDATE)"
+  DetailPrint "$(PIU_LANG_PROG_RESULTFOUND)"
   StrCpy $G_REVDATE "${MB_NL}${MB_NL}(CVS timestamp $G_REVDATE)"
   Goto get_imap_module
 
@@ -696,7 +703,7 @@ analysis_failed:
 get_imap_module:
   DetailPrint ""
   SetDetailsPrint both
-  DetailPrint "Ready to download IMAP.pm v$G_REVISION from CVS"
+  DetailPrint "$(PIU_LANG_PROG_READYTODOWNLOAD)"
   SetDetailsPrint listonly
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PIU_LANG_MB_GETPERMISSION)" IDYES download_imap
   DetailPrint ""
@@ -710,14 +717,13 @@ download_imap:
   SetDetailsPrint both
   DetailPrint "$(PIU_LANG_PROG_GETIMAP) $(PIU_LANG_TAKE_A_FEW_SECONDS)"
   SetDetailsPrint listonly
-  DetailPrint ""
-  nsExec::ExecToLog '"curl.exe" -s -S -w "${C_CURL_REPORT}" -o "$PLUGINSDIR\IMAP.pm" "${C_CVS_IMAP_DL_URL}"'
+  Inetc::get /CAPTION "IMAP module" /POPUP "${C_CVS_IMAP_DL_URL}" "$PLUGINSDIR\IMAP.pm" /END
   Pop ${L_RESULT}
   DetailPrint ""
   SetDetailsPrint textonly
   DetailPrint "$(PIU_LANG_PROG_CHECKDOWNLOAD)"
   SetDetailsPrint listonly
-  StrCmp ${L_RESULT} "0" file_received
+  StrCmp ${L_RESULT} "OK" file_received
   StrCpy $G_PLS_FIELD_1 ${L_RESULT}
   SetDetailsPrint both
   DetailPrint "$(PIU_LANG_MB_IMAPFAIL_1)"
@@ -755,7 +761,7 @@ error_exit:
   Call PFI_GetDateTimeStamp
   Pop $G_PLS_FIELD_1
   DetailPrint "----------------------------------------------"
-  DetailPrint "IMAP Updater failed ($G_PLS_FIELD_1)"
+  DetailPrint "$(PIU_LANG_PROG_DOWNLOADFAILED)"
   DetailPrint "----------------------------------------------"
   Abort
 
@@ -781,7 +787,7 @@ copy_file:
   Call PFI_GetDateTimeStamp
   Pop $G_PLS_FIELD_1
   DetailPrint "----------------------------------------------"
-  DetailPrint "IMAP Updater completed $G_PLS_FIELD_1"
+  DetailPrint "$(PIU_LANG_PROG_UPDATECOMPLETED)"
   DetailPrint "----------------------------------------------"
   DetailPrint ""
   SetDetailsPrint textonly
@@ -794,7 +800,7 @@ copy_file:
   Call PFI_DumpLog
 
   SetDetailsPrint both
-  DetailPrint "Log report saved in '$G_ROOTDIR\updateimap.log'"
+  DetailPrint "$(PIU_LANG_PROG_LOGLOCATION)"
   SetDetailsPrint none
 
   Pop ${L_TEMP}
