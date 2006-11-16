@@ -532,6 +532,9 @@ sub verify_connected_
                     ProxyPort => $self->config_( 'socks_port' ),
                     ConnectAddr  => $hostname,
                     ConnectPort  => $port ); # PROFILE BLOCK STOP
+        $self->log_( 0, "Attempting to connect to socks server at " 
+                    . $self->config_( 'socks_server' ) . ":" 
+                    . ProxyPort => $self->config_( 'socks_port' ) );
     } else {
         if ( $ssl ) {
             require IO::Socket::SSL;
@@ -539,11 +542,16 @@ sub verify_connected_
                         Proto    => "tcp",
                         PeerAddr => $hostname,
                         PeerPort => $port ); # PROFILE BLOCK STOP
-    } else {
+            $self->log_( 0, "Attempting to connect to SSL server at " 
+                        . "$hostname:$port" );
+        
+        } else {
             $mail = IO::Socket::INET->new( # PROFILE BLOCK START
                         Proto    => "tcp",
                         PeerAddr => $hostname,
                         PeerPort => $port ); # PROFILE BLOCK STOP
+            $self->log_( 0, "Attempting to connect to POP server at " 
+                        . "$hostname:$port" );
         }
     }
 
