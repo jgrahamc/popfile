@@ -583,10 +583,10 @@ sub add_line
 
                 if ( defined( $to ) ) {
 
-                    # HTML entities confilict with DBCS chars. Replace
-                    # entities with blanks.
+                    # HTML entities confilict with DBCS and EUC-JP 
+                    # chars. Replace entities with blanks.
 
-                    if ( $self->{lang__} eq 'Korean' ) {
+                    if ( $self->{lang__} eq 'Korean' || $self->{lang__} eq 'Nihongo' ) {
                             $to = ' ';
                     } else {
                         $to = chr($to);
@@ -1581,6 +1581,9 @@ sub start_parse
     $self->{colorized__} = '';
     $self->{colorized__} .= "<tt>" if ( $self->{color__} ne '' );
 
+    # Clear the character set to avoid using the wrong charsets
+    $self->{charset__} = '';
+
     # Since Text::Kakasi is not thread-safe, we use it under the
     # control of a Mutex to avoid a crash if we are running on
     # Windows.
@@ -1688,12 +1691,12 @@ sub parse_line
                 $line =~ s/\x00/NUL/g;
             }
 
-            # Decode \x??
-            if ( $self->{lang__} eq 'Nihongo' && !$self->{in_headers__} ) {
-                $line =~ s/\\x([8-9A-F][A-F0-9])/pack("C", hex($1))/eig;
-            }
-
             if ( $self->{lang__} eq 'Nihongo' ) {
+                # Decode \x??
+                if ( !$self->{in_headers__} ) {
+                    $line =~ s/\\x([8-9A-F][A-F0-9])/pack("C", hex($1))/eig;
+                }
+
                 $line = convert_encoding( $line, $self->{charset__}, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
                 $line = parse_line_with_kakasi( $self, $line );
             }
@@ -2548,6 +2551,9 @@ sub quickmagnets
 sub convert_encoding
 {
     my ( $string, $from, $to, $default, @candidates ) = @_;
+
+    # If the string contains only ascii characters, do nothing.
+    return $string if ( $string =~ /^[\r\n\t\x20-\x7E]*$/ );
 
     require Encode;
     require Encode::Guess;

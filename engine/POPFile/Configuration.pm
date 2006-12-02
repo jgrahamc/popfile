@@ -688,7 +688,13 @@ sub parameter
         }
     }
 
-    return $self->{configuration_parameters__}{$name}{value};
+    # If $self->{configuration_parameters__}{$name} is undefined, simply
+    # return undef to avoid defining $self->{configuration_parameters__}{$name}.
+    if ( defined($self->{configuration_parameters__}{$name}) ) {
+        return $self->{configuration_parameters__}{$name}{value};
+    } else {
+        return undef;
+    }
 }
 
 # ----------------------------------------------------------------------------
