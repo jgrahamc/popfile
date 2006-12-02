@@ -114,7 +114,7 @@
                 <TMPL_LOOP NAME="Bucket_Loop_Column">
 
                 <td>
-                    <a class="wordListLink" href="/buckets?lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word">#Lookup">
+                    <a class="wordListLink" href="/buckets?lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word" ESCAPE=URL>#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word">
                         </b>
