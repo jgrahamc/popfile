@@ -58,7 +58,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.14"
+  !define C_PFI_LIBRARY_VERSION     "0.1.15"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -4101,7 +4101,8 @@
 !macro PFI_StrCheckDecimal UN
   Function ${UN}PFI_StrCheckDecimal
 
-    !define DECIMAL_DIGIT    "0123456789"
+    !define DECIMAL_DIGIT    "0123456789"   ; accept only these digits
+    !define BAD_OFFSET       10             ; length of DECIMAL_DIGIT string
 
     Exch $0   ; The input string
     Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
@@ -4123,7 +4124,7 @@
     IntOp $3 $3 + 1
     StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
     StrCmp $2 $4 0 next_valid_char
-    IntCmp $3 10 invalid 0 invalid  ; If match is with the char we added, input string is bad
+    IntCmp $3 ${BAD_OFFSET} invalid 0 invalid  ; If match is with the char we added, input is bad
     StrCpy $1 $1$4                ; Add "valid" character to the result
     goto next_input_char
 
