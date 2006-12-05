@@ -58,7 +58,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.15"
+  !define C_PFI_LIBRARY_VERSION     "0.1.16"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -4141,6 +4141,7 @@
     Exch $0           ; place result on top of the stack
 
     !undef DECIMAL_DIGIT
+    !undef BAD_OFFSET
 
   FunctionEnd
 !macroend
