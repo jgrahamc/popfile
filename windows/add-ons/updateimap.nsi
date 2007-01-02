@@ -7,7 +7,7 @@
 #                    is still 'experimental' so it was not shipped with the 0.22.0 or 0.22.1
 #                    releases).
 #
-# Copyright (c) 2004-2006 John Graham-Cumming
+# Copyright (c) 2004-2007 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -26,18 +26,18 @@
 #
 #--------------------------------------------------------------------------
 
-  ; This version of the script has been tested with the "NSIS v2.21" compiler,
-  ; released 20 October 2006. This particular compiler can be downloaded from
-  ; http://prdownloads.sourceforge.net/nsis/nsis-2.21-setup.exe?download
+  ; This version of the script has been tested with the "NSIS v2.22" compiler,
+  ; released 27 November 2006. This particular compiler can be downloaded from
+  ; http://prdownloads.sourceforge.net/nsis/nsis-2.22-setup.exe?download
 
   !define ${NSIS_VERSION}_found
 
-  !ifndef v2.21_found
+  !ifndef v2.22_found
       !warning \
           "$\r$\n\
           $\r$\n***   NSIS COMPILER WARNING:\
           $\r$\n***\
-          $\r$\n***   This script has only been tested using the NSIS v2.21 compiler\
+          $\r$\n***   This script has only been tested using the NSIS v2.22 compiler\
           $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
           $\r$\n***\
           $\r$\n***   The resulting 'installer' program should be tested carefully!\
@@ -63,7 +63,7 @@
   ; (${NSISDIR}\Plugins\). The 'Inetc' source and example files can be unzipped to the
   ; appropriate ${NSISDIR} sub-folders if you wish, but this step is entirely optional.
   ;
-  ; Tested with the inetc.dll plugin timestamped 24 September 2006 19:29:22
+  ; Tested with the inetc.dll plugin timestamped 1 January 2007 19:03:52
 
 
 #--------------------------------------------------------------------------
@@ -124,7 +124,7 @@
 
   Name                   "POPFile IMAP Updater"
 
-  !define C_PFI_VERSION  "0.0.11"
+  !define C_PFI_VERSION  "0.0.13"
 
   ; Mention the wizard's version number in the window title
 
