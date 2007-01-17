@@ -3173,6 +3173,13 @@ sub view_page
         $self->{form_}{format} = $self->user_config_( $self->{sessions__}{$session}{user}, 'wordtable_format' );
     }
 
+    # Provide message in plain text for user download/recovery purposes.
+
+    if ( defined( $self->{form_}{text} ) ) {
+        $self->http_file_( $client, $self->{history__}->get_slot_file( $self->{form_}{view} ), 'text/plain' );
+        return 1;
+    }
+
     # If a format change was requested for the word matrix, record it
     # in the configuration and in the classifier options.
 
