@@ -227,6 +227,10 @@
 
         </td>
     <tr>
+        <td>
+            <a class="messageLink" href="/view?view=<TMPL_VAR NAME="View_This">&amp;session=<TMPL_VAR NAME="Session_Key">&amp;text=1"><TMPL_VAR NAME="Localize_View_DownloadMessage"></a>
+        </td>
+
         <td class="openMessageCloser">
             <a class="messageLink" href="/history?<TMPL_VAR NAME="View_All_Fields">"><span class="historyLabel"><TMPL_VAR NAME="Localize_Close"></span></a>
         </td>
