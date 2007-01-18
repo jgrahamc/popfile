@@ -228,7 +228,7 @@
         </td>
     <tr>
         <td>
-            <a class="messageLink" href="/view?view=<TMPL_VAR NAME="View_This">&amp;session=<TMPL_VAR NAME="Session_Key">&amp;text=1"><TMPL_VAR NAME="Localize_View_DownloadMessage"></a>
+            <a class="messageLink" href="/view?view=<TMPL_VAR NAME="View_This">&amp;text=1"><TMPL_VAR NAME="Localize_View_DownloadMessage"></a>
         </td>
 
         <td class="openMessageCloser">
