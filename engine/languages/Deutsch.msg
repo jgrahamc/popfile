@@ -352,6 +352,7 @@ View_WordProbabilities                  zeige Wahrscheinlichkeit des Auftretens
 View_WordFrequencies                    zeige Häufigkeit des Auftretens
 View_WordScores                         zeige Bewertung des Wortes
 View_Chart                              Entscheidungs-Diagramm
+View_DownloadMessage                    Nachricht herunterladen
 
 Windows_TrayIcon                        POPFile-Symbol neben der Uhr anzeigen?
 Windows_Console                         POPFile in einem Konsolenfenster ausführen?
