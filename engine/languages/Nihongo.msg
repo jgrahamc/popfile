@@ -325,6 +325,7 @@ View_WordProbabilities                  確率
 View_WordFrequencies                    頻度
 View_WordScores                         得点
 View_Chart                              分類決定図
+View_DownloadMessage                    メッセージをダウンロード
 
 Windows_TrayIcon                        POPFile のアイコンを Windows システムトレイに表示しますか？
 Windows_Console                         POPFile のメッセージをコンソールウィンドウに出力しますか？
