@@ -106,7 +106,8 @@ EOM
                                           'padding'        => 'standard',
                                           'prepend_iv'     => 0,
                                           'regenerate_key' => 0,
-                                          'salt'           => 1 } );
+                                          'salt'           => 1,
+                                          'header'         => 'salt', } );
 
     return 1;
 }
