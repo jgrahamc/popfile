@@ -373,6 +373,6 @@ Imap_WatchedFolder                      監視フォルダ
 
 Shutdown_Message                        POPFile は終了しました。
 
-Help_Training                           POPFile をこれから使い始める場合、ある程度のトレーニングが必要となります。それは、POPFile はどのメールが必要なメールでどのメールが不要なメールかについてなにも知らないからです。トレーニングはそれぞれのバケツについて行う必要があり（最低でも１つのバケツについて、１つ以上のメッセージを再分類する）、POPFile が分類を間違えたメッセージを正しいバケツに再分類することによってトレーニングすることができます。また、POPFile が行った分類にあわせてフォルダに移動するなど、メールクライアントを設定する必要があります。メールクライアントの設定については、<a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions/EmailSorting">POPFile ドキュメンテーションプロジェクト</a>を参照してください。
+Help_Training                           POPFile をこれから使い始める場合、ある程度のトレーニングが必要となります。それは、POPFile はどのメールが必要なメールでどのメールが不要なメールかについてなにも知らないからです。トレーニングはそれぞれのバケツについて行う必要があり（最低でも１つのバケツについて、１つ以上のメッセージを再分類する）、POPFile が分類を間違えたメッセージを正しいバケツに再分類する（履歴の右側にあるメニューから正しい分類先を選択して「再分類」ボタンをクリックする）ことによってトレーニングすることができます。また、POPFile が行った分類にあわせてフォルダに移動するなど、メールクライアントを設定する必要があります。メールクライアントの設定については、<a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions/EmailSorting">POPFile ドキュメンテーションプロジェクト</a>を参照してください。
 Help_Bucket_Setup                       POPFile では、もともとある unclassified という仮想的なバケツ以外に、最低でも２つのバケツを作成する必要があります。POPFile の特徴は、（メールを spam とそれ以外に分類するというだけではなく）いくつでもバケツを作成し、それらにメールを分類することができることです。簡単な設定では、"spam"、"personal"、"work" といったバケツを設定することになるでしょう。
 Help_No_More                            次回から表示しない。
