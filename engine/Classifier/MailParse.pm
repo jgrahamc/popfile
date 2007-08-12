@@ -639,16 +639,14 @@ sub add_line
 
             # Deal with runs of alternating spaces and letters
 
-            foreach my $space (' ', '\'', '*', '^', '`', '  ', '\38', '.' ){
-                while ( $line =~ s/( |^)(([A-Z]\Q$space\E){2,15}[A-Z])( |\Q$space\E|[!\?,])/ /i ) {
-                    my $original = "$1$2$4";
-                    my $word = $2;
-                    print "$word ->" if $self->{debug__};
-                    $word    =~ s/[^A-Z]//gi;
-                    print "$word\n" if $self->{debug__};
-                    $self->update_word( $word, $encoded, ' ', ' ', $prefix);
-                    $self->update_pseudoword( 'trick', 'spacedout', $encoded, $original );
-                }
+            while ( $line =~ s/( |^)([A-Za-z]([\'\*^`&\. ]|  )(?:[A-Za-z]\3){1,14}[A-Za-z])( |\3|[!\?,]|$)/ / ) {
+                my $original = "$1$2$4";
+                my $word = $2;
+                print "$word ->" if $self->{debug__};
+                $word    =~ s/[^A-Z]//gi;
+                print "$word\n" if $self->{debug__};
+                $self->update_word( $word, $encoded, ' ', ' ', $prefix);
+                $self->update_pseudoword( 'trick', 'spacedout', $encoded, $original );
             }
 
             # Deal with random insertion of . inside words
