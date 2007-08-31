@@ -4248,11 +4248,12 @@ sub delete_magnet
                                                         where magnet_types.mtype = '$type';" );
 
     my $mtid = $result->[0];
+    $text = $self->db_()->quote( $text );
 
     $self->db_()->do( "delete from magnets
                             where magnets.bucketid = $bucketid and
                                   magnets.mtid = $mtid and
-                                  magnets.val  = '$text';" );
+                                  magnets.val  = $text;" );
 }
 
 #----------------------------------------------------------------------------
