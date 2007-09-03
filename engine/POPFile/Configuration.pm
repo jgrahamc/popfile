@@ -386,7 +386,7 @@ sub parse_command_line
     my @options;
 
     for my $i (0..$#set_options) {
-        $set_options[$i] =~ /-?(.+)=(.+)/;
+        $set_options[$i] =~ /-?(.+?)=(.+)/;
 
         if ( !defined( $1 ) ) {
             print STDERR "\nBad option: $set_options[$i]\n";
@@ -733,4 +733,3 @@ sub deprecated_parameter
 }
 
 1;
-
