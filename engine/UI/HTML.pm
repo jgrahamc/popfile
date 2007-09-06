@@ -3010,7 +3010,9 @@ sub history_page
                      
                      if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) eq 'Nihongo' ) {
                          # Remove wrong characters as euc-jp.
-                         $$row[4] =~ s/\G((?:$euc_jp)*)([\x80-\xFF](?=(?:$euc_jp)*))?/$1/og;
+                         for my $i (1..4) {
+                             $$row[$i] =~ s/\G((?:$euc_jp)*)([\x80-\xFF](?=(?:$euc_jp)*))?/$1/og;
+                         }
                      }
 
                      $col_data{History_Cell_Title}    = $$row[4];
@@ -3109,8 +3111,9 @@ sub shorten__
     my ( $self, $string, $length ) = @_;
 
     if ( length($string)>$length) {
-       $string =~ /(.{$length})/;
-       $string = "$1...";
+        $string =~ /(.{$length})/;
+        $1 =~ /((?:$euc_jp)*)/o if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) eq 'Nihongo' );
+        $string = "$1...";
     }
 
     return $string;
