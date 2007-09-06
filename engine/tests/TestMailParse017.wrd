@@ -1,14 +1,14 @@
 200.155.65.82 1
-site 2
+site 1
 mta04-srv.alltel.net 1
 camgirltryouts.com 2
 from:yahoo.com 1
 encoding:base64 1
 utc 1
-hottest_site_on_net22840@yahoo.com 1
+hottest_site_on_net22840@yahoo.com 2
 to:undisclosed 1
 from:hottest_site_on_net22840@yahoo.com 1
-hottest 2
+hottest 1
 203.146.108.97 1
 mx1.mail.yahoo.com 1
 opt 1

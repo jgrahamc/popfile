@@ -1,3 +1,4 @@
+320021892970-0001@t-dialin.net 1
 mimeextension:mimetmp 2
 mimename:00000000 2
 usr 1
@@ -15,7 +16,7 @@ kde 5
 bulk 1
 end 2
 run 2
-gentoo 5
+gentoo 2
 hvlt 1
 linux 5
 restart 1
@@ -74,7 +75,7 @@ pgp 5
 revisions 2
 must 2
 unfortunately 1
-gentoo-announce@gentoo.org 1
+gentoo-announce@gentoo.org 4
 subject:bug 1
 install 1
 manually 1
@@ -117,7 +118,6 @@ swift 1
 enough 1
 now 1
 problems 1
-announce 3
 mit.edu 1
 charset:us-ascii 1
 encoding:base64 1

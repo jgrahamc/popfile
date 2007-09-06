@@ -620,7 +620,7 @@ sub add_line
             # Pull out any email addresses in the line that are marked
             # with <> and have an @ in them
 
-            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))([\"\&\)\?\:\/ >\&\;])// )  {
+            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))([\"\&\)\?\:\/ >\&\;]|$)// )  {
                 update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]', $prefix);
                 add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
             }

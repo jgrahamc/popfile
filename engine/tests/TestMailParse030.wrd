@@ -1,6 +1,6 @@
 #ffffff 2
 .com 27
-.fi 2
+.fi 4
 10.10.20.81 2
 10.10.20.87 1
 127.0.0.1 1
@@ -8,9 +8,8 @@
 adv 1
 adv@sheck-buy.com 2
 anti 1
-asdfsomebody 2
 asdfsomebody@mbnet.fi 1
-asdfsomebody@webmail0.mbnet.fi 1
+asdfsomebody@webmail0.mbnet.fi 3
 buy 1
 city 1
 click 1
@@ -71,8 +70,8 @@ images2.laih.com 4
 internet 1
 kyyhky 3
 laih.com 4
-mbnet 10
-mbnet.fi 2
+mbnet 8
+mbnet.fi 4
 microsoft 1
 mx10.sheck-buy.com 6
 mx3.sheck-buy.com 9
@@ -106,8 +105,8 @@ unsubscribe 1
 unsubscribe@sheck-buy.com 1
 utc 1
 virus 1
-webmail 3
-webmail0.mbnet.fi 1
+webmail 1
+webmail0.mbnet.fi 3
 www.partner2profit.com 1
 www.sheck-buy.com 2
 www2.flowgo.com 1

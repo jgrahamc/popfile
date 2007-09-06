@@ -12,7 +12,7 @@ dfhresp 1
 cics 3
 header:Message-ID 1
 rltvty.com 7
-bugtracker@rltvty.com 1
+bugtracker@rltvty.com 2
 href 1
 bfcc 1
 header:To 1
@@ -25,7 +25,6 @@ mta1.wss.scd.yahoo.com 3
 requestid 1
 override 2
 severity 1
-run 1
 business 1
 microsoft 1
 header:X-Text-Classification 1
@@ -48,7 +47,7 @@ dkf 1
 time 1
 others 1
 line 1
-run@tpkm.ru 2
+run@tpkm.ru 3
 ccsid 1
 equal 1
 kept 2
@@ -127,12 +126,11 @@ blue 1
 column 1
 cobol 4
 gss' 1
-tpkm.ru 3
+tpkm.ru 4
 sources 1
 charset:us-ascii 1
-bugtracker 1
 category 1
-tpkm 3
+tpkm 2
 release 1
 extraction 1
 computation 3
@@ -159,7 +157,7 @@ visual 1
 priority 1
 to:.com 2
 to:.ru 1
-.ru 3
+.ru 4
 .com 10
 from:.ru 1
 .net 1

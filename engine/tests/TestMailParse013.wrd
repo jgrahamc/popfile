@@ -1,7 +1,7 @@
 optimizations 2
 216.91.57.210 1
 tried 1
-armlet 6
+armlet 4
 palm.lyris.net 1
 until 1
 sample 1
@@ -22,7 +22,7 @@ information 1
 deleted 1
 don't 1
 can't 2
-archive@ajw.com 1
+archive@ajw.com 2
 just 2
 writable 1
 functions 1
@@ -80,7 +80,7 @@ subject:armlets 1
 correctly 1
 from:nnnnnnnnn.com 1
 dev 1
-forum 4
+forum 2
 renaming 1
 news.palmos.com 6
 mbf 1
@@ -94,8 +94,7 @@ read 1
 obviously 1
 support 1
 variable 2
-bounce 2
-rrr 2
+rrr 1
 callbacks 1
 get 3
 looks 1
@@ -130,6 +129,8 @@ entry 1
 messy 1
 header:X-MDArchive-Copy 1
 efa 1
+bounce-armlet-forum-55555@news.palmos.com 2
+rrr@pop.rrrrr.net 1
 header:Date 1
 header:To 1
 header:X-Sender 1
@@ -147,7 +148,6 @@ header:From 1
 header:In-Reply-To 1
 header:X-MDaemon-Deliver-To 1
 header:Subject 1
-archive 1
 header:X-Message-Id 1
 header:X-Return-Path 1
 header:X-MBF-FILE 1
