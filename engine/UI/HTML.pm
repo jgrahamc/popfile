@@ -2969,6 +2969,9 @@ sub history_page
             $self->user_config_( $self->{sessions__}{$session}{user}, 'column_characters', $length );
         }
 
+        # Store the language for the user.
+        my $language_for_user = $self->user_config_( $self->{sessions__}{$session}{user}, 'language');
+
         foreach my $row (@rows) {
             my %row_data;
             my $mail_file = $$row[0];
@@ -3000,7 +3003,9 @@ sub history_page
                      $col_data{History_Cell_Title} =$$row[$addresses{$header}];
                      $col_data{History_Cell_Value} =
                          $self->shorten__( $col_data{History_Cell_Title},
-                                           $length );
+                                           $length,
+                                           $language_for_user
+                                           );
                      push ( @column_data, \%col_data );
                      next;
                  }
@@ -3008,7 +3013,7 @@ sub history_page
                  if ($header eq 'subject') {
                      $col_data{History_If_Subject_Column} = 1;
                      
-                     if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) eq 'Nihongo' ) {
+                     if ( $language_for_user eq 'Nihongo' ) {
                          # Remove wrong characters as euc-jp.
                          for my $i (1..4) {
                              $$row[$i] =~ s/\G((?:$euc_jp)*)([\x80-\xFF](?=(?:$euc_jp)*))?/$1/og;
@@ -3017,7 +3022,7 @@ sub history_page
 
                      $col_data{History_Cell_Title}    = $$row[4];
                      $col_data{History_Cell_Value} =
-                         $self->shorten__( $$row[4], $length );
+                         $self->shorten__( $$row[4], $length, $language_for_user );
                      $col_data{History_Mail_File}     = $$row[0];
                      $col_data{History_Fields}        =
                          $self->print_form_fields_(0,1,
@@ -3108,11 +3113,11 @@ sub history_page
 
 sub shorten__
 {
-    my ( $self, $string, $length ) = @_;
+    my ( $self, $string, $length, $language ) = @_;
 
     if ( length($string)>$length) {
         $string =~ /(.{$length})/;
-        $1 =~ /((?:$euc_jp)*)/o if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) eq 'Nihongo' );
+        $1 =~ /((?:$euc_jp)*)/o if ( $language eq 'Nihongo' );
         $string = "$1...";
     }
 
