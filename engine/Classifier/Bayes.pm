@@ -300,7 +300,7 @@ sub start
 
     # Pass in the current interface language for language specific parsing
 
-    $self->{parser__}->{lang__}  = $self->user_module_config_( 1, 'html', 'language' );
+    $self->{parser__}->{lang__}  = $self->user_module_config_( 1, 'html', 'language' ) || '';
     $self->{unclassified__} = log( $self->user_config_( 1, 'unclassified_weight' ) );
 
     $self->upgrade_predatabase_data__();

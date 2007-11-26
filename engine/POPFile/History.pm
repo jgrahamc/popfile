@@ -245,6 +245,9 @@ sub reserve_slot
 
         $self->log_( 2, "reserve_slot selected random number $r" );
 
+        # Avoid another POPFile process using the same committed id
+        $self->db__()->begin_work;
+
         # TODO Replace the hardcoded user ID 1 with the looked up
         # user ID from the session key
 
@@ -252,6 +255,7 @@ sub reserve_slot
                  "select id from history where committed = $r limit 1;");
 
         if ( defined( $test ) ) {
+            $self->db__()->commit;
             next;
         }
 
@@ -267,6 +271,7 @@ sub reserve_slot
 
     my $result = $self->db_()->selectrow_arrayref(
                  "select id from history where committed = $r limit 1;");
+    $self->db__()->commit;
 
     my $slot = $result->[0];
 
@@ -457,6 +462,7 @@ sub commit_history__
         return;
     }
 
+    $self->db__()->begin_work;
     foreach my $entry (@{$self->{commit_list__}}) {
         my ( $session, $slot, $bucket, $magnet ) = @{$entry};
 
@@ -604,6 +610,7 @@ sub commit_history__
             $self->release_slot( $slot );
         }
     }
+    $self->db__()->commit;
 
     $self->{commit_list__} = ();
     $self->force_requery__();
@@ -686,6 +693,7 @@ sub start_deleting
     my ( $self ) = @_;
 
     $self->database_()->tweak_sqlite( 1, 1, $self->db_() );
+    $self->db__()->begin_work;
 }
 
 #----------------------------------------------------------------------------
@@ -700,6 +708,7 @@ sub stop_deleting
 {
     my ( $self ) = @_;
 
+    $self->db__()->commit;
     $self->database_()->tweak_sqlite( 1, 0, $self->db_() );
 }
 

@@ -1617,7 +1617,7 @@ sub advanced_page
         } else {
                 if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) =~ /^Nihongo$/ ) {
                no locale;
-               $word =~ /^($euc_jp)/;
+               $word =~ /^($euc_jp)/o;
                $c = $1;
             } else {
                $word =~ /^(.)/;

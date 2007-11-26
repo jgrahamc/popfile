@@ -69,7 +69,7 @@ Word                                    単語
 Count                                   カウント
 Update                                  更新
 Refresh                                 最新の状態に更新
-FAQ                                     FAQ 初心者・初学者向けのQ&A集
+FAQ                                     FAQ 初心者・初学者向けのQ&amp;A集
 ID                                      ID
 Date                                    日時
 Arrived                                 受信日時

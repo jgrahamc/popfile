@@ -44,7 +44,7 @@ my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])"; #extended ksc
 # These are used for Japanese support
 
 my %encoding_candidates = (
-    'Nihongo' => [ 'shiftjis', 'euc-jp', '7bit-jis' ]
+    'Nihongo' => [ 'cp932', 'euc-jp', '7bit-jis' ]
 );
 
 my $ascii = '[\x00-\x7F]'; # ASCII chars
