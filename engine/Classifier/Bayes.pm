@@ -229,6 +229,11 @@ sub initialize
 
     $self->config_( 'localhostname', '' );
 
+    # Japanese wakachigaki parser ('kakasi' or 'mecab' or 'internal').
+    # TODO: Users can choose the parser engine to use?
+
+    $self->config_( 'nihongo_parser', 'kakasi' );
+
     $self->mq_register_( 'COMIT', $self );
     $self->mq_register_( 'RELSE', $self );
     $self->mq_register_( 'CREAT', $self );
@@ -309,19 +314,35 @@ sub start
     # control of a Mutex to avoid a crash if we are running on
     # Windows and using the fork.
 
-    if ( ( $self->{parser__}->{lang__} eq 'Nihongo' ) && ( $^O eq 'MSWin32' ) && 
-         ( ( ( $self->user_module_config_( 1, 'pop3', 'enabled' ) ) && 
-             ( $self->user_module_config_( 1, 'pop3', 'force_fork' ) ) ) || 
-           ( ( $self->user_module_config_( 1, 'nntp', 'enabled' ) ) && 
-             ( $self->user_module_config_( 1, 'nntp', 'force_fork' ) ) ) || 
-           ( ( $self->user_module_config_( 1, 'smtp', 'enabled' ) ) && 
-             ( $self->user_module_config_( 1, 'smtp', 'force_fork' ) ) ) ) ) {
-        $self->{parser__}->{need_kakasi_mutex__} = 1;
+    if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
+        # Setup Nihongo (Japanese) parser.
 
-        # Prepare the Mutex.
-        require POPFile::Mutex;
-        $self->{parser__}->{kakasi_mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
-        $self->log_( 2, "Create mutex for Kakasi." );
+        my $nihongo_parser = $self->config_( 'nihongo_parser' );
+
+        $nihongo_parser = $self->{parser__}->setup_nihongo_parser( $nihongo_parser );
+
+        $self->log_( 2, "Use Nihongo (Japanese) parser : $nihongo_parser" );
+        $self->config_( 'nihongo_parser', $nihongo_parser );
+
+        # Since Text::Kakasi is not thread-safe, we use it under the
+        # control of a Mutex to avoid a crash if we are running on
+        # Windows and using the fork.
+
+        if ( ( $nihongo_parser eq 'kakasi' ) && ( $^O eq 'MSWin32' ) && 
+             ( ( ( $self->user_module_config_( 1, 'pop3', 'enabled' ) ) && 
+                 ( $self->user_module_config_( 1, 'pop3', 'force_fork' ) ) ) || 
+               ( ( $self->user_module_config_( 1, 'nntp', 'enabled' ) ) && 
+                 ( $self->user_module_config_( 1, 'nntp', 'force_fork' ) ) ) || 
+               ( ( $self->user_module_config_( 1, 'smtp', 'enabled' ) ) && 
+                 ( $self->user_module_config_( 1, 'smtp', 'force_fork' ) ) ) ) ) {
+
+            $self->{parser__}->{need_kakasi_mutex__} = 1;
+
+            # Prepare the Mutex.
+            require POPFile::Mutex;
+            $self->{parser__}->{kakasi_mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
+            $self->log_( 2, "Create mutex for Kakasi." );
+        }
     }
 
     return 1;
