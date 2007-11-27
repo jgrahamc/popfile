@@ -3184,7 +3184,7 @@ sub view_page
     # Provide message in plain text for user download/recovery purposes.
 
     if ( defined( $self->{form_}{text} ) ) {
-        $self->http_file_( $client, $self->{history__}->get_slot_file( $self->{form_}{view} ), 'text/plain' );
+        $self->http_file_( $client, $self->history_()->get_slot_file( $self->{form_}{view} ), 'text/plain' );
         return 1;
     }
 
