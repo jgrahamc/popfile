@@ -59,7 +59,11 @@ sub new {
 
     my $self = bless {}, $class;
 
+    # This is needed when the client module is run in POPFile 0.22.2 context
     $self->{logger__} = $log or return;
+    # And this one is for the 0.23 (aka 2.0) context:
+    $self->{modules__}{logger} = $log;
+
     $self->{config__} = $config or return;
     $self->{global_config__} = $global_config or return;
 
