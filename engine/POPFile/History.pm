@@ -319,6 +319,11 @@ sub release_slot
             $directory =~ s![a-f0-9]{2}/$!!i;
             $depth--;
         }
+        else {
+            # We either aren't allowed to delete the
+            # directory or it wasn't empty
+            last;
+        }
     }
 }
 
