@@ -13,6 +13,12 @@
     <br />
     <input id="imap_port" name="imap_port" type="text" value="<TMPL_VAR NAME="IMAP_port">" />
     <br />
+    <label for="imap_use_ssl" class="configurationLabel">
+    	<TMPL_VAR NAME="Localize_Imap_Use_SSL">
+	</label>
+	<input id="imap_use_ssl" name="imap_use_ssl" type="checkbox" <TMPL_VAR NAME="IMAP_ssl_checked"> />
+    <br />
+    
     <label for="imap_login" class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Login">
     </label>
