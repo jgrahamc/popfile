@@ -221,7 +221,7 @@ sub initialize
     # Allow the user to override the hostname
 
     $self->config_( 'hostname', $self->{hostname__} );
-    
+
     # This parameter is used when the UI is operating in Stealth Mode.
     # If left blank (the default setting) the X-POPFile-Link will use 127.0.0.1
     # otherwise it will use this string instead. The system's HOSTS file should
@@ -328,12 +328,12 @@ sub start
         # control of a Mutex to avoid a crash if we are running on
         # Windows and using the fork.
 
-        if ( ( $nihongo_parser eq 'kakasi' ) && ( $^O eq 'MSWin32' ) && 
-             ( ( ( $self->user_module_config_( 1, 'pop3', 'enabled' ) ) && 
-                 ( $self->user_module_config_( 1, 'pop3', 'force_fork' ) ) ) || 
-               ( ( $self->user_module_config_( 1, 'nntp', 'enabled' ) ) && 
-                 ( $self->user_module_config_( 1, 'nntp', 'force_fork' ) ) ) || 
-               ( ( $self->user_module_config_( 1, 'smtp', 'enabled' ) ) && 
+        if ( ( $nihongo_parser eq 'kakasi' ) && ( $^O eq 'MSWin32' ) &&
+             ( ( ( $self->user_module_config_( 1, 'pop3', 'enabled' ) ) &&
+                 ( $self->user_module_config_( 1, 'pop3', 'force_fork' ) ) ) ||
+               ( ( $self->user_module_config_( 1, 'nntp', 'enabled' ) ) &&
+                 ( $self->user_module_config_( 1, 'nntp', 'force_fork' ) ) ) ||
+               ( ( $self->user_module_config_( 1, 'smtp', 'enabled' ) ) &&
                  ( $self->user_module_config_( 1, 'smtp', 'force_fork' ) ) ) ) ) {
 
             $self->{parser__}->{need_kakasi_mutex__} = 1;
@@ -1503,7 +1503,7 @@ sub generate_unique_session_key__
     # get a random session key in hex
 
     my $random = Crypt::Random::makerandom_octet( Length => 128,
-                                                  Strength => 1 );
+                                                  Strength => 0 );
     my $now = time;
     return sha256_hex( "$$" . "$random$now" );
 }
@@ -1813,6 +1813,7 @@ sub get_top_bucket__
 sub classify
 {
     my ( $self, $session, $file, $templ, $matrix, $idmap ) = @_;
+    $self->log_( 1, "Starting classify" );
     my $msg_total = 0;
 
     my $userid = $self->valid_session_key__( $session );
@@ -1836,6 +1837,7 @@ sub classify
     for my $bucket ($self->get_buckets_with_magnets( $session ))  {
         for my $type ($self->get_magnet_types_in_bucket( $session, $bucket )) {
             if ( $self->magnet_match__( $session, $self->{parser__}->get_header($type), $bucket, $type ) ) {
+                $self->log_( 1, "Matched message to magnet. Bucket is $bucket." );
                 return $bucket;
             }
         }
@@ -2297,6 +2299,7 @@ sub classify
             }
         }
     }
+    $self->log_( 1, "Leaving classify. Class is $class." );
 
     return $class;
 }
@@ -2331,6 +2334,8 @@ sub classify
 sub classify_and_modify
 {
     my ( $self, $session, $mail, $client, $nosave, $class, $slot, $echo, $crlf ) = @_;
+
+    $self->log_( 1, "Starting classify_and_modify" );
 
     $echo = 1    unless (defined $echo);
     $crlf = $eol unless (defined $crlf);
@@ -2386,6 +2391,7 @@ sub classify_and_modify
 
     open MSG, ">$msg_file" unless $nosave;
 
+    $self->log_( 1, "Reading mail message." );
     while ( my $line = $self->slurp_( $mail ) ) {
         my $fileline;
 
@@ -2708,6 +2714,7 @@ sub classify_and_modify
             $self->history_()->commit_slot( $session, $slot, $classification, $self->{magnet_detail__} );
         }
     }
+    $self->log_( 1, "classify_and_modify done. Classification is $classification" );
 
     return ( $classification, $slot, $self->{magnet_used__} );
 }
@@ -3768,6 +3775,7 @@ sub set_user_parameter_from_id
     # if it is then remove the entry because it is a waste of space
 
     my $default = 0;
+
     $self->{db_get_user_parameter_default__}->execute( $utid );
     my $result = $self->{db_get_user_parameter_default__}->fetchrow_arrayref;
 
