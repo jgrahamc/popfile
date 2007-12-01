@@ -113,7 +113,7 @@ create table users ( id integer primary key,  -- unique ID for this user
 -- ---------------------------------------------------------------------------
 --
 -- buckets - the table that stores the name of POPFile buckets and relates
---           them to users. 
+--           them to users.
 --
 -- Note: A single user may have multiple buckets, but a single bucket only has
 -- one user.  Hence there is a many-to-one relationship from buckets to users.
@@ -134,7 +134,7 @@ create table buckets( id integer primary key, -- unique ID for this bucket
 
 -- ---------------------------------------------------------------------------
 --
--- words - the table that creates a unique ID for a word.  
+-- words - the table that creates a unique ID for a word.
 --
 -- Words and buckets come together in the matrix table to form the corpus of
 -- words for each user.
@@ -161,12 +161,12 @@ create table matrix( id integer primary key,   -- unique ID for this entry
                      lastseen date,            -- last time the record was read
                                                -- or written
                      unique (wordid, bucketid) -- each word appears once in a
-                                               -- bucket 
+                                               -- bucket
                    );
 
 -- ---------------------------------------------------------------------------
 --
--- user_template - the table of possible parameters that a user can have.  
+-- user_template - the table of possible parameters that a user can have.
 --
 -- For example in the users table there is just an password associated with
 -- the user.  This table provides a flexible way of creating per user
@@ -184,7 +184,7 @@ create table user_template( id integer primary key, -- unique ID for this entry
                                                     -- defines display format
                                                     -- for parameter
                           unique (name)             -- parameter name's are
-                                                    -- unique 
+                                                    -- unique
                         );
 
 -- ---------------------------------------------------------------------------
@@ -197,17 +197,17 @@ create table user_template( id integer primary key, -- unique ID for this entry
 create table user_params( id integer primary key, -- unique ID for this
                                                   -- entry
                           userid integer,         -- a user
-                          utid integer,           -- points to an entry in 
+                          utid integer,           -- points to an entry in
                                                   -- user_template
                           val varchar(255),       -- value for the
                                                   -- parameter
                           unique (userid, utid)   -- each user has just one
                                                   -- instance of each parameter
                         );
- 
+
 -- ---------------------------------------------------------------------------
 --
--- bucket_template - the table of possible parameters that a bucket can have.  
+-- bucket_template - the table of possible parameters that a bucket can have.
 --
 -- See commentary for user_template for an explanation of the philosophy
 --
@@ -219,8 +219,8 @@ create table bucket_template( id integer primary key,  -- unique ID for this
                                                        -- parameter
                               def varchar(255),        -- the default value for
                                                        -- the parameter
-                              unique (name)            -- parameter names 
-                                                       -- are unique 
+                              unique (name)            -- parameter names
+                                                       -- are unique
                             );
 
 -- ---------------------------------------------------------------------------
@@ -237,11 +237,11 @@ create table accounts( id integer primary key,        -- unique ID for this
                        account varchar(255),          -- Account token
                        unique (account)               -- Each account appears
                                                       -- once
-                     ); 
+                     );
 
 -- ---------------------------------------------------------------------------
 --
--- bucket_params - the table that relates buckets with bucket parameters 
+-- bucket_params - the table that relates buckets with bucket parameters
 --                 (as defined in bucket_template) and specific values.
 --
 -- ---------------------------------------------------------------------------
@@ -249,12 +249,12 @@ create table accounts( id integer primary key,        -- unique ID for this
 create table bucket_params( id integer primary key,   -- unique ID for this
                                                       -- entry
                             bucketid integer,         -- a bucket
-                            btid integer,             -- points to an entry in 
+                            btid integer,             -- points to an entry in
                                                       -- bucket_template
                             val varchar(255),         -- value for the
                                                       -- parameter
-                            unique (bucketid, btid)   -- each bucket has just 
-                                                      -- one instance of each 
+                            unique (bucketid, btid)   -- each bucket has just
+                                                      -- one instance of each
                                                       -- parameter
                         );
 
@@ -298,9 +298,9 @@ create table history( id integer primary key,    -- unique ID for this entry
                       userid integer,            -- which user owns this
                       committed integer,         -- 1 if this item has been
                                                  -- committed
-                      hdr_from    varchar(255),  -- The From: header 
-                      hdr_to      varchar(255),  -- The To: header            
-                      hdr_cc      varchar(255),  -- The Cc: header            
+                      hdr_from    varchar(255),  -- The From: header
+                      hdr_to      varchar(255),  -- The To: header
+                      hdr_cc      varchar(255),  -- The Cc: header
                       hdr_subject varchar(255),  -- The Subject: header
                       hdr_date    date,          -- The Date: header
                       hash        varchar(255),  -- MD5 message hash
@@ -308,14 +308,14 @@ create table history( id integer primary key,    -- unique ID for this entry
                       bucketid integer,          -- Current classification
                       usedtobe integer,          -- Previous classification
                       magnetid integer,          -- If classified with magnet
-                      sort_from    varchar(255),  -- The From: header 
-                      sort_to      varchar(255),  -- The To: header            
-                      sort_cc      varchar(255),  -- The Cc: header            
+                      sort_from    varchar(255),  -- The From: header
+                      sort_to      varchar(255),  -- The To: header
+                      sort_cc      varchar(255),  -- The Cc: header
                       sort_subject varchar(255),  -- The Subject: header
                       size        integer        -- Size of the message (bytes)
                     );
 
--- MySQL SPECIFIC 
+-- MySQL SPECIFIC
 
 -- ---------------------------------------------------------------------------
 --
@@ -343,7 +343,7 @@ alter table popfile modify id int(11) auto_increment;
 
 alter table words modify word binary(255);
 
--- MySQL enforces types, SQLite uses the concept of manifest typing, where 
+-- MySQL enforces types, SQLite uses the concept of manifest typing, where
 -- the type of a value is associated with the value itself, not the column that
 -- it is stored in. POPFile has two date fields in history where POPFile
 -- is actually storing the unix time not a date. MySQL interprets the
@@ -363,10 +363,10 @@ alter table history modify inserted int(11);
 --                 that entries the hang off the bucket table are also deleted
 --
 -- It deletes the related entries in the 'matrix', 'bucket_params' and
--- 'magnets' tables.  
+-- 'magnets' tables.
 --
 -- ---------------------------------------------------------------------------
- 
+
 create trigger delete_bucket delete on buckets
              begin
                  delete from matrix where bucketid = old.id;
@@ -434,20 +434,20 @@ insert into magnets ( id, bucketid, mtid, val, comment, seq ) values ( 0, 0, 0, 
 
 -- These are the possible parameters for a bucket
 --
--- subject      1 if should do subject modification for message classified 
+-- subject      1 if should do subject modification for message classified
 --              to this bucket
 -- xtc          1 if should add X-Text-Classification header
 -- xpl          1 if should add X-POPFile-Link header
--- fncount      Number of messages that were incorrectly classified, and 
+-- fncount      Number of messages that were incorrectly classified, and
 --              meant to go into this bucket but did not
--- fpcount      Number of messages that were incorrectly classified into 
+-- fpcount      Number of messages that were incorrectly classified into
 --              this bucket
--- quarantine   1 if should quaratine (i.e. RFC822 wrap) messages in this 
+-- quarantine   1 if should quaratine (i.e. RFC822 wrap) messages in this
 --              bucket
 -- count        Total number of messages classified into this bucket
 -- color        The color used for this bucket in the UI
 
-insert into bucket_template ( name, def ) values ( 'subject',    '1' ); 
+insert into bucket_template ( name, def ) values ( 'subject',    '1' );
 insert into bucket_template ( name, def ) values ( 'xtc',        '1' );
 insert into bucket_template ( name, def ) values ( 'xpl',        '1' );
 insert into bucket_template ( name, def ) values ( 'fncount',    '0' );
@@ -563,6 +563,7 @@ insert into user_template ( name, def, form ) values ( 'imap_uidvalidities', '',
 insert into user_template ( name, def, form ) values ( 'imap_update_interval', 20, '%d' );
 insert into user_template ( name, def, form ) values ( 'imap_use_ssl', 0, '%d' );
 insert into user_template ( name, def, form ) values ( 'imap_watched_folders', 'INBOX', '%s' );
+insert into user_template ( name, def, form ) values ( 'imap_use_multiple_connections', '0', '%d' );
 
 -- Show the config bar at the bottom of each page defaults to on
 insert into user_template ( name, def, form ) values ( 'html_show_configbars', 1, '%d' );
