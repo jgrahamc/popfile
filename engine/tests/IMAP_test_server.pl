@@ -2,7 +2,7 @@
 #
 # Tests for IMAP.pm
 #
-# Copyright (c) 2003-2006 John Graham-Cumming
+# Copyright (c) 2003-2007 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -40,6 +40,7 @@
 use IO::Socket;
 use IO::Select;
 use File::Copy;
+use Date::Format;
 use strict;
 use warnings;
 
@@ -48,19 +49,20 @@ $SIG{CHLD} = 'IGNORE';
 my $cr = "\015";
 my $lf = "\012";
 my $eol = "$cr$lf";
-my $debug = 0;
-if ( $ARGV[0] && $ARGV[0] eq 'debug' ) {
-    $debug = 1;
-}
+my $debug = 1;
 my $spool = "imap.spool";
+
+# if nothing happens with in $idle_timeout seconds
+# we call exit.
+my $idle_timeout = 6;
 
 my @mailboxes = qw/INBOX spam personal other unclassified/;
 
 
-# This is where we store all the folders' UIDNEXT values 
+# This is where we store all the folders' UIDNEXT values
 my %uidnext;
-foreach ( @mailboxes ) {
-    $uidnext{ $_ } = 1;
+foreach my $box ( @mailboxes ) {
+    uid_next( $box, 1 );
 }
 
 # State information:
@@ -84,7 +86,7 @@ foreach ( @mailboxes ) {
     mkdir $_;
 }
 chdir "..";
-    
+
 
 
 # The socket used for listening for incoming connections.
@@ -96,24 +98,43 @@ my $main_sock = new IO::Socket::INET ( LocalPort => 1143,
 
 die "Socket could not be created. Reason: $!\n" unless ($main_sock);
 
+local $SIG{ALRM}
+    = sub {
+            $main_sock->shutdown(2);
+            debug( "Exiting due to idle time-out." );
+            die "IMAP-Test-Server timed out. Did your tests just crash?";
+          };
+
 
 # The endless loop that accepts incoming connections.
+# It's not really endless. There are two ways to exit
+# that loop:
+# 1. The regular way: A client tries to login with the user
+#    name 'shutdown'. In that case, we shut down the socket
+#    and exit.
+# 2. If the tests didn't run the way they should and the
+#    testing parent dies or does something otherwise silly,
+#    we keep an eye on the clock and exit if nothing happened
+#    in the last $idle_timeout seconds.
 
 while ( 1 ) {
+    alarm $idle_timeout if $debug;
 
+    debug ( "Waiting for a new client to connect." );
     my $new_sock = $main_sock->accept();
-
     # We set up a pipe that lets the child tell the parent that it
     # no longer needs to wait for new connections.
 
     pipe my $reader, my $writer;
 
+    debug( "Trying to fork..." );
     my $pid = fork();
     die "Cannot fork: $!" unless defined( $pid );
 
     # child that will handle one connection.
     if ( $pid == 0 ) {
         close $reader;
+        close $main_sock;
         $writer->autoflush( 1 );
 
         print $new_sock "* OK POPFile IMAP test server ready for testing$eol";
@@ -123,7 +144,7 @@ while ( 1 ) {
 
         while ( my $buf = <$new_sock> ) {
 
-            debug( "Received a command: $buf" );
+            debug( "client said: $buf" );
             # Look out for the shutdown signal and tell the parent
             # that it's time to go home when we get it. Tell the
             # parent anything else each time we get a login
@@ -140,22 +161,30 @@ while ( 1 ) {
             }
 
             if ( $time_out_at == $command_no ) {
-                sleep 300;
+                alarm 0 if $debug;
+                debug( "Going to sleep for $idle_timeout seconds" );
+                sleep $idle_timeout;
+                #alarm $idle_timeout if $debug;
+                # The client is supposed to drop its connection
+                # at that point. So we are going to do the same thing
+                # here:
+                debug( "Child is exiting after time out" );
+                $new_sock->shutdown( 2 );
+                exit 0;
             }
 
             # We may need to drop the connection
             if ( $command_no == $drop_connection_at ) {
                 $new_sock->shutdown( 2 );
+                alarm 0 if $debug;
             }
-
             # else we handle the command
             else {
                 handle_command( $new_sock, $buf );
             }
-            
             $command_no++;
         }
-
+        debug( "Child is exiting: EOF from socket" );
         exit 0;
     }
     # parent
@@ -165,6 +194,7 @@ while ( 1 ) {
         # something.
 
         my $line = <$reader>;
+        debug ( "child said $line" );
         if ( $line =~ /shutdown/ ) {
             close $reader;
             last;
@@ -173,7 +203,7 @@ while ( 1 ) {
 }
 
 close $main_sock;
-
+print "\nThe IMAP_test_server is exiting.\n";
 
 # handle_command
 # Function to decipher an IMAP command and respond to it in whatever way we need to.
@@ -188,7 +218,6 @@ sub handle_command
         my $command = $2;
 
     # LOGIN
-
         # This section is of special importance because the user name given
         # at login determines which stones we throw at IMAP.pm
 
@@ -206,10 +235,10 @@ sub handle_command
 
                 # New messages in one of the incoming mailboxes
                 if ( $user =~ /^new_/ ) {
-                    $user =~ /_(\w+)_/;
+                    $user =~ /_([a-zA-Z]+)_/;
                     my $mailbox = $1;
                     while ( $user =~ /_(\d+)/g ) {
-                        file_message ( $mailbox, $1 );
+                        file_message( $mailbox, $1 );
                     }
                 }
                 elsif ( $user =~ /^reclass$/ ) {
@@ -234,7 +263,6 @@ sub handle_command
 
 
     # LIST
-
         if ( $command =~ /^LIST "" "\*"/ && $state ne 'Not Authenticated' ) {
             foreach ( @mailboxes ) {
 
@@ -251,7 +279,6 @@ sub handle_command
         }
 
     # LOGOUT
-
         if ( $command =~ /^LOGOUT/ ) {
             print $client "* BYE bye$eol";
             print $client "$tag OK LOGOUT complete.$eol";
@@ -261,12 +288,11 @@ sub handle_command
             return;
         }
 
-
     # SELECT
-
         if ( $command =~ /^SELECT "(.+)"$/ && ( $state eq 'Authenticated' || $state eq 'Selected' ) ) {
             my $mailbox = $1;
 
+            uid_next ( $mailbox );
             if ( exists $uidnext{ $mailbox } ) {
                 $state = 'Selected';
                 $cur_mailbox = $mailbox;
@@ -282,14 +308,10 @@ sub handle_command
         }
 
     # NOOP
-        # (we check for Selected state here because we do not want the
-        # IMAP module to do a NOOP unless we are Selected
-
-        if ( $command =~ /^NOOP/ && $state eq 'Selected' ) {
+        if ( $command =~ /^NOOP/ ) {
             print $client "$tag OK NOOP complete.$eol";
             return;
         }
-
 
     # EXPUNGE
         if ( $command =~ /^EXPUNGE/ && $state eq 'Selected' ) {
@@ -299,14 +321,14 @@ sub handle_command
 
     # STATUS (we only need to handle STATUS commands asking for the UIDNEXT value because
             # IMAP.pm won't use any other STATUS commands)
-             
-        if ( $command =~ /^STATUS "(.+?)" \(UIDNEXT\)$/ && $state eq "Selected" ) {
+        if ( $command =~ /^STATUS "(.+?)" \(UIDNEXT UIDVALIDITY\)$/  ) {
 
             my $mailbox = $1;
+            uid_next( $mailbox );
 
             if ( exists $uidnext{ $mailbox } ) {
                 my $number_of_messages = $uidnext{ $mailbox };
-                print $client "* STATUS $mailbox (UIDNEXT ", $uidnext{ $mailbox } , ")$eol";
+                print $client "* STATUS $mailbox (UIDNEXT $uidnext{ $mailbox } UIDVALIDITY $uidvalidity)$eol";
                 print $client "$tag OK STATUS complete.$eol";
             }
             else {
@@ -321,7 +343,7 @@ sub handle_command
 
             my $uid = $1;
             my $part = $2;
-            
+
             my $response;
 
             if ( $part eq 'HEADER.FIELDS (Message-id Date Subject Received)' ) {
@@ -371,7 +393,7 @@ sub handle_command
             } else {
                 print $client "$tag NO no such message$eol";
             }
-            
+
             return;
         }
 
@@ -388,8 +410,6 @@ sub handle_command
             return;
         }
 
-
-
         # If we get here, we don't know the command and say so
 
         print $client "$tag BAD command$eol";
@@ -405,13 +425,13 @@ sub handle_command
 }
 
 
-sub select_mailbox
-{
+sub select_mailbox {
     my ( $client, $mailbox ) = @_;
 
     local $\ = "$eol";
-    
+
     my @msgs = glob "$spool/$mailbox/*";
+    uid_next( $mailbox );
 
     print $client "* ", scalar @msgs, " EXISTS";
     print $client "* 0 RECENT";
@@ -422,52 +442,52 @@ sub select_mailbox
 }
 
 
-sub debug 
-{
+sub debug {
     return unless $debug;
     my @messages = @_;
-    open LOG, ">>IMAPdebug.log";
+    open my $LOG, '>>', 'IMAPdebug.log';
     foreach ( @messages ) {
         s/[\r\n]//g;
-        print LOG "$_\n";
+        my $time = time2str( "%H:%M:%S", time );
+        print $LOG "$time: $_\n";
     }
-    close LOG;
+    close $LOG;
 }
-    
-sub file_message
-{
+
+sub file_message {
     my ( $folder, $msg ) = @_;
-    
+
+    uid_next( $folder );
     my $new_uid = $uidnext{ $folder };
-    $uidnext{ $folder }++;
-    
+    uid_next( $folder, $uidnext{ $folder }+1 );
+    debug( "Trying to copy TestMailParse$msg.msg to $spool/$folder/$new_uid" );
     copy "TestMailParse$msg.msg", "$spool/$folder/$new_uid";
 }
 
 
-sub copy_message
-{
+sub copy_message {
     my ( $uid, $from, $to ) = @_;
-    
+
     if ( -e "$spool/$from/$uid" ) {
+        uid_next( $to );
         if ( exists $uidnext{ $to } ) {
             my $new_uid = $uidnext{ $to };
-            $uidnext{ $to }++;
+            uid_next( $to, $uidnext{ $to }+1 );
             copy "$spool/$from/$uid", "$spool/$to/$new_uid";
             return 'OK Completed';
         } else {
             return 'NO [TRYCREATE] Mailbox does not exist';
         }
-    } else {
-        return 'NO Message does not exist';
+    }
+    else {
+        return "NO Message '$spool/$from/$uid' does not exist";
     }
 }
-    
-    
-sub delete_message
-{
+
+
+sub delete_message {
     my ( $folder, $uid ) = @_;
-    
+
     if ( -e "$spool/$folder/$uid" ) {
         unlink "$spool/$folder/$uid";
         return 1;
@@ -478,13 +498,11 @@ sub delete_message
 }
 
 
-
-sub search_messages_ge
-{
+sub search_messages_ge {
     my ( $folder, $uid ) = @_;
-    
+
     chdir "$spool/$folder/";
-    
+
     my @list;
     foreach ( glob "*" ) {
         push @list, $_ if ( /\d/ );
@@ -493,16 +511,15 @@ sub search_messages_ge
     foreach ( sort { $a <=> $b } @list ) {
         $flat .= " $_";
     }
-    
+
     chdir "../..";
-    
+
     return $flat;
 }
 
-sub get_header_fields
-{
+sub get_header_fields {
     my ( $folder, $uid ) = @_;
-    
+
     if ( -e "$spool/$folder/$uid" ) {
         open MSG, "$spool/$folder/$uid";
         my %header;
@@ -522,28 +539,31 @@ sub get_header_fields
         }
         close MSG;
         my @headers = qw/message-id date subject received/;
-        
+
         my $response = '';
-        
+
         foreach ( @headers ) {
             if ( exists $header{ $_ } ) {
                 $response .= "\u$_: ${$header{ $_ }}[0]$eol";
-            } 
+            }
         }
-        
+
+        unless ( $response ) {
+            warn "Server couldn't find any header fields in message '$spool/$folder/$uid'\n";
+        }
+
         return $response;
     }
     else {
+        warn "Server could not find file '$spool/$folder/$uid'\n";
         return;
     }
 }
 
 
-
-sub get_message
-{
+sub get_message {
     my ( $folder, $uid ) = @_;
-    
+
     if ( -e "$spool/$folder/$uid" ) {
         open MSG, "$spool/$folder/$uid";
         my $msg = '';
@@ -561,10 +581,9 @@ sub get_message
 }
 
 
-sub get_message_header
-{
+sub get_message_header {
     my ( $folder, $uid ) = @_;
-    
+
     if ( -e "$spool/$folder/$uid" ) {
         my $response = '';
         open MSG, "$spool/$folder/$uid";
@@ -574,7 +593,7 @@ sub get_message_header
             $response .= "$_$eol";
         }
         close MSG;
-        
+
         return "$response$eol";
     }
     else {
@@ -582,10 +601,9 @@ sub get_message_header
     }
 }
 
-sub get_message_text
-{
+sub get_message_text {
     my ( $folder, $uid ) = @_;
-    
+
     if ( -e "$spool/$folder/$uid" ) {
         my $response = '';
         open MSG, "$spool/$folder/$uid";
@@ -602,4 +620,36 @@ sub get_message_text
         return;
     }
 }
+
+
+sub uid_next {
+    my $folder  = shift;
+    my $uidnext = shift;
+
+    if ( open my $UIDS, '<', 'imap.uids' ) {
+        while ( <$UIDS> ) {
+            /(.+):(.+)[\r\n]/;
+            $uidnext{ $1 } = $2;
+        }
+    }
+#    else {
+#        die "IMAP-test-server has a problem: cannot open file 'imap.uids'";
+#    }
+
+    if ( defined $uidnext ) {
+        $uidnext{ $folder } = $uidnext;
+        if ( open my $UIDS, '>', 'imap.uids' ) {
+            foreach ( keys %uidnext ) {
+                print $UIDS "$_:$uidnext{ $_ }\n";
+            }
+        }
+        else {
+            die "IMAP-test-server has a problem: cannot open file 'imap.uids'";
+        }
+    }
+
+    return $uidnext{ $folder };
+}
+
+
 
