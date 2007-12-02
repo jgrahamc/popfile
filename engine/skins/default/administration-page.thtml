@@ -19,7 +19,7 @@ function serverMode(state) {
             <div class="securityServerWidget">
                  <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_Stealth"></h2>
                         <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                            <input type="checkbox" name="usermode" id="UserMode" <TMPL_IF NAME="Users_If_Single">checked</TMPL_IF> />
+                            <input type="checkbox" name="usermode" id="UserMode" <TMPL_IF NAME="If_Single_User">checked</TMPL_IF> />
                             <label class="administrationLabel" for="UserMode">
                                 <TMPL_VAR NAME="Localize_Users_SingleUserMode">
                             </label>
@@ -35,7 +35,7 @@ function serverMode(state) {
                             </label>
                             <br />
                             <div style="margin-left:1em;" class="adminAcceptRemote">
-                                <input type="checkbox" name="serveropt_http" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF> />
+                                <input type="checkbox" name="serveropt_http" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF> <TMPL_IF NAME="Security_If_Local_Http"><TMPL_ELSE>checked</TMPL_IF>/>
                                 <label class="administrationLabel" for="securityAcceptHTTP">
                                     <TMPL_VAR NAME="Localize_Security_UI">
                                 </label>
@@ -49,7 +49,7 @@ function serverMode(state) {
                             <TMPL_INCLUDE NAME="windows-configuration.thtml">
 
                             <br /><br />
-                            <input type="submit" class="submit" name="apply_operation" value="<TMPL_VAR NAME="Localize_Apply">" />
+                            <input type="submit" class="submit" name="apply_stealth" value="<TMPL_VAR NAME="Localize_Apply">" />
                         </form>
 
                  <hr />
@@ -70,7 +70,7 @@ function serverMode(state) {
                                 <TMPL_VAR NAME="Localize_Security_Update">
                             </label>
                             <br />
-                            <input type="checkbox" id="securitySendStats" name="update_check" <TMPL_IF NAME="Security_If_Send_Stats">checked</TMPL_IF> />
+                            <input type="checkbox" id="securitySendStats" name="send_stats" <TMPL_IF NAME="Security_If_Send_Stats">checked</TMPL_IF> />
                             <label class="administrationLabel" for="securitySendStats">
                                 <TMPL_VAR NAME="Localize_Security_Stats">
                             </label>
@@ -108,13 +108,13 @@ function serverMode(state) {
                 </label>
 
                 <select name="level" id="configLoggingLevel">
-                    <option value="0" >
+                    <option value="0" <TMPL_VAR NAME="logger_level_selected_0">>
                         Low
                     </option>
-                    <option value="1" >
+                    <option value="1" <TMPL_VAR NAME="logger_level_selected_1">>
                         Default
                     </option>
-                    <option value="2" >
+                    <option value="2" <TMPL_VAR NAME="logger_level_selected_2">>
                         High
                     </option>
                 </select>

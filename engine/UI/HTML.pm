@@ -619,7 +619,7 @@ sub url_handler__
     # If we don't have a valid session key, then insist that the user
     # log in, or check the username and password for validity, if they
     # are valid then create the session now.  In single user mode get
-    # the key 
+    # the key
 
     if ( !defined( $session ) ) {
         my $continue;
@@ -738,9 +738,6 @@ sub url_handler__
         # No logout button in single user mode
 
         my $templ = $self->load_template__( $template, $url, $session );
-        if ( $self->global_config_( 'single_user' ) ) {
-            $templ->param( 'Header_If_SingleUser' => 1 );
-        }
 
         &{$method}( $self, $client, $templ,
                     $template, $url, $session );
@@ -1167,21 +1164,66 @@ sub administration_page
     my $server_error = '';
     my $port_error   = '';
 
-    # Handle single user mode
+    # TODO: add status messages
 
-    if ( defined( $self->{form_}{usermode} ) ) {
-        $self->global_config_( 'single_user', $self->{form_}{singleuser} );
+    # Server / Stealth mode
+    if ( defined $self->{form_}->{apply_stealth} ) {
+        $self->global_config_( 'single_user', $self->{form_}->{usermode} ? 1 : 0 );
+
+        if ( $self->{form_}->{servermode} eq 'ServerMode' ) {
+            $self->config_( 'local', $self->{form_}->{serveropt_http} ? 0 : 1 );
+        }
     }
-    $templ->param( 'Users_If_Single' => $self->global_config_( 'single_user' ) );
+    # Privacy options
+    elsif ( $self->{form_}->{privacy} ) {
+        $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats', $self->{form_}->{send_stats} ? 1 : 0 );
+        $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check', $self->{form_}->{update_check} ? 1 : 0 );
+    }
+    # Logger options
+    elsif ( $self->{form_}->{submit_debug} ) {
+        $self->module_config_( 'logger', 'level', $self->{form_}->{level} );
 
-    $self->config_( 'local', $self->{form_}{localui}-1 )      if ( defined($self->{form_}{localui}) );
-    $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check', $self->{form_}{update_check}-1 ) if ( defined($self->{form_}{update_check}) );
-    $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats', $self->{form_}{send_stats}-1 )   if ( defined($self->{form_}{send_stats}) );
+        if ( ( defined($self->{form_}->{debug}) ) &&
+            ( ( $self->{form_}{debug} >= 1 ) &&
+            ( $self->{form_}{debug} <= 4 ) ) ) {
+           $self->global_config_( 'debug', $self->{form_}{debug}-1 );
+        }
+    }
+    # HTML module options
+    elsif ( $self->{form_}->{update_modules} ) {
+        if ( defined($self->{form_}{ui_port}) ) {
+            if ( ( $self->{form_}{ui_port} >= 1 ) &&
+                 ( $self->{form_}{ui_port} < 65536 ) ) {
+                $self->config_( 'port', $self->{form_}{ui_port} );
+                $self->status_message__( $templ, sprintf( $self->{language__}{Configuration_UIUpdate},
+                    $self->config_( 'port' ) ) );
+            } else {
+                $self->error_message__( $templ, $self->{language__}{Configuration_Error2} );
+                delete $self->{form_}{ui_port};
+            }
+        }
 
-    $templ->param( 'Security_If_Local' => ( $self->config_( 'local' ) == 1 ) );
+        if ( defined($self->{form_}{timeout}) ) {
+            if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
+                $self->global_config_( 'timeout', $self->{form_}{timeout} );
+            }
+            else {
+                $self->error_message__( $self->{language__}{Configuration_Error6} );
+                delete $self->{form_}{timeout};
+            }
+        }
+
+
+    }
     #$templ->param( 'Security_If_Password_Updated' => ( defined($self->{form_}{password} ) ) );
-    $templ->param( 'Security_If_Update_Check' => ( $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check' ) == 1 ) );
-    $templ->param( 'Security_If_Send_Stats' => ( $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats' ) == 1 ) );
+    $templ->param( 'Configuration_UI_Port' => $self->config_( 'port' ) );
+    $templ->param( 'If_Single_User' => $self->global_config_( 'single_user' ) );
+    $templ->param( Security_If_Local_Http => $self->config_( 'local') );
+    $templ->param( 'Security_If_Send_Stats' => $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats' ) );
+    $templ->param( 'Security_If_Update_Check' => $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check' ) );
+    $templ->param( 'logger_level_selected_' . $self->module_config_( 'logger', 'level' ), 'selected="selected"' );
+    $templ->param ( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected', 'selected="selected"' );
+
 
     my ($status_message, $error_message);
     my %security_templates;
@@ -1234,11 +1276,7 @@ sub administration_page
     $templ->param( 'Security_Dynamic_Security' => $security_html );
     $templ->param( 'Security_Dynamic_Chain'    => $chain_html    );
 
-   if ( ( defined($self->{form_}{debug}) ) &&
-        ( ( $self->{form_}{debug} >= 1 ) &&
-        ( $self->{form_}{debug} <= 4 ) ) ) {
-       $self->global_config_( 'debug', $self->{form_}{debug}-1 );
-   }
+
 
     # Load all of the templates that are needed for the dynamic parts of
     # the configuration page, and for each one call its validation interface
@@ -1267,32 +1305,8 @@ sub administration_page
         }
     }
 
-    if ( defined($self->{form_}{ui_port}) ) {
-        if ( ( $self->{form_}{ui_port} >= 1 ) &&
-             ( $self->{form_}{ui_port} < 65536 ) ) {
-            $self->config_( 'port', $self->{form_}{ui_port} );
-        } else {
-            $self->error_message__( $templ, $self->{language__}{Configuration_Error2} );
-            delete $self->{form_}{ui_port};
-        }
-    }
 
-    if ( defined($self->{form_}{ui_port} ) ) {
-        $self->status_message__( $templ, sprintf( $self->{language__}{Configuration_UIUpdate},
-                $self->config_( 'port' ) ) );
-    }
-    $templ->param( 'Configuration_UI_Port' => $self->config_( 'port' ) );
-
-    if ( defined($self->{form_}{timeout}) ) {
-        if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
-            $self->global_config_( 'timeout', $self->{form_}{timeout} );
-        } else {
-            $self->error_message__( $self->{language__}{Configuration_Error6} );
-            delete $self->{form_}{timeout};
-        }
-    }
-
-    $self->status_message__( sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
+    $self->status_message__( $templ, sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
     $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
 
     # Insert all the items that are dynamically created from the
@@ -3012,7 +3026,7 @@ sub history_page
 
                  if ($header eq 'subject') {
                      $col_data{History_If_Subject_Column} = 1;
-                     
+
                      if ( $language_for_user eq 'Nihongo' ) {
                          # Remove wrong characters as euc-jp.
                          for my $i (1..4) {
@@ -3094,7 +3108,7 @@ sub history_page
                 $row_data{History_If_Session} = ( abs( $$row[7] - $last ) >
                                                   300 );
             }
-            # we set this here so feedback lines will also 
+            # we set this here so feedback lines will also
             # get the correct colspan:
             $row_data{History_Colspan} = $colspan+1;
 
@@ -3501,7 +3515,10 @@ sub load_template__
                    'If_Javascript_OK'        => $self->config_( 'allow_javascript' ),
                    'If_Language_RTL'         =>
                        ( $self->{language__}{LanguageDirection} eq 'rtl' ),
-                   'Configuration_Action'    => $page );
+                   'Configuration_Action'    => $page,
+                   'Header_If_SingleUser'    =>
+                       $self->global_config_( 'single_user' ),
+                   );
 
     $self->{skin_root} = $root;
 
