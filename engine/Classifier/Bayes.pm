@@ -1502,8 +1502,11 @@ sub generate_unique_session_key__
     # Generate a long random number, hash it and the time together to
     # get a random session key in hex
 
+    # TODO: make the Strength parameter configurable with a GLOBAL option
+    # and also add the option to specify another Device?
+
     my $random = Crypt::Random::makerandom_octet( Length => 128,
-                                                  Strength => 0 );
+                                                  Strength => 0, Device => '' );
     my $now = time;
     return sha256_hex( "$$" . "$random$now" );
 }

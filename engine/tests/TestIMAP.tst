@@ -61,7 +61,7 @@ else {
     # talk to the server.
     configure_imap_module( $im, $c, $mq, $l, $b, $h );
     test_imap_ui( $im );
-    onfigure_imap_module( $im, $c, $mq, $l, $b, $h );
+    configure_imap_module( $im, $c, $mq, $l, $b, $h );
     test_imap_module( $im, $c, $mq, $l, $b, $h );
     test_imap_client( $im );
 
@@ -620,15 +620,15 @@ sub test_imap_ui {
     $form->{imap_password} = 'secret';
     $form->{imap_use_ssl} = 1;
     $im->validate_item( 'imap_0_connection_details', $tmpl, $language, $form );
-    test_assert_equal( $im->user_config_( 1,  'use_ssl' ), 1 );
-    test_assert_equal( $im->user_config_( 1,  'password' ), 'secret' );
-    test_assert_equal( $im->user_config_( 1,  'login' ), 'username' );
-    test_assert_equal( $im->user_config_( 1,  'port' ), 123 );
-    test_assert_equal( $im->user_config_( 1,  'hostname' ), 'hostname' );
+    test_assert_equal( $im->user_config_( 1, 'use_ssl' ), 1 );
+    test_assert_equal( $im->user_config_( 1, 'password' ), 'secret' );
+    test_assert_equal( $im->user_config_( 1, 'login' ), 'username' );
+    test_assert_equal( $im->user_config_( 1, 'port' ), 123 );
+    test_assert_equal( $im->user_config_( 1, 'hostname' ), 'hostname' );
 
     $form->{imap_use_ssl} = undef;
     $im->validate_item( 'imap_0_connection_details', $tmpl, $language, $form );
-    test_assert_equal( $im->user_config_( 1,  'use_ssl' ), 0 );
+    test_assert_equal( $im->user_config_( 1, 'use_ssl' ), 0 );
 
     # After updating the connection details, the module must disconnect
     # and empty its folders hash:
@@ -641,11 +641,8 @@ sub test_imap_ui {
         my %invalid_form = %$form;
         delete $invalid_form{$_};
         $tmpl = HTML::Template->new( filename => '../skins/default/imap-connection-details.thtml' );
-        $im->validate_item( 'imap_0_connection_details', $tmpl, $language, \%invalid_form );
-        my $template_param = $_;
-        $template_param =~ s/imap_//;
-        $template_param = 'IMAP_connection_if_' . $template_param . '_error';
-        test_assert_equal( $tmpl->param( $template_param ), 1, $_ );
+        my ($status, $error ) = $im->validate_item( 'imap_0_connection_details', $tmpl, $language, \%invalid_form );
+        test_assert( $error );
     }
 
 
@@ -694,27 +691,27 @@ sub test_imap_ui {
     $im->user_config_( 1,  'port', '1143' );
     $im->user_config_( 1,  'update_interval', 10 );
     $im->user_config_( 1,  'use_ssl', 0 );
-    $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
+    my ( $status, $error ) = $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
     test_assert_equal( scalar @{$im->{mailboxes__}}, 5 );
-    test_assert( ! $tmpl->param( 'IMAP_update_list_failed' ) );
+    test_assert( ! $error );
 
     $im->user_config_( 1,  'login', 'someone' );
     $im->user_config_( 1,  'hostname', '' );
     $tmpl = HTML::Template->new( filename => '../skins/default/imap-update-mailbox-list.thtml' );
-    $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
-    test_assert( $tmpl->param( 'IMAP_update_list_failed' ) );
+    ( $status, $error ) = $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
+    test_assert_equal( $error, $language->{Imap_UpdateError3} );
 
     $im->user_config_( 1,  'hostname', '127.0.0.1' );
     $im->user_config_( 1,  'port', '12345' );
     $tmpl = HTML::Template->new( filename => '../skins/default/imap-update-mailbox-list.thtml' );
-    $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
-    test_assert( $tmpl->param( 'IMAP_update_list_failed' ) );
+    ( $status, $error ) = $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
+    test_assert_equal( $error, $language->{Imap_UpdateError2} );
 
     $im->user_config_( 1,  'port', 1143 );
     $im->user_config_( 1,  'login', 'fail' );
     $tmpl = HTML::Template->new( filename => '../skins/default/imap-update-mailbox-list.thtml' );
-    $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
-    test_assert( $tmpl->param( 'IMAP_update_list_failed' ) );
+    ( $status, $error ) = $im->validate_item( 'imap_4_update_mailbox_list', $tmpl, $language, $form );
+    test_assert( $error, $language->{Imap_UpdateError1} );
 
 
     # imap-options.thtml
@@ -732,8 +729,8 @@ sub test_imap_ui {
     test_assert_equal( $im->user_config_( 1,  'expunge' ), 0 );
 
     $form->{imap_options_update_interval} = 0;
-    $im->validate_item( 'imap_5_options', $tmpl, $language, $form );
-    test_assert_equal( $tmpl->param('IMAP_if_interval_error'), 1 );
+    ( $status, $error ) = $im->validate_item( 'imap_5_options', $tmpl, $language, $form );
+    test_assert_equal( $error, $language->{Imap_IntervalError} );
 }
 
 sub load_language {
