@@ -188,7 +188,7 @@ sub test_imap_module {
 
     # get the msgs hashes and ask the imap module whether those messages
     # can be reclassified. It should say 'no!'
-    foreach ( 1 .. 5 ) {
+    foreach ( 1 .. 6 ) {
         $hash = ($h->get_slot_fields( $_ ))[6];
         test_assert_equal( $im->can_reclassify__( $hash, 'spam' ), undef );
         test_assert( ! $im->can_classify__( $hash ) );
