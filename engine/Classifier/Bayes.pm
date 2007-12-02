@@ -39,8 +39,7 @@ use DBI;
 use Digest::MD5 qw( md5_hex );
 use Digest::SHA qw( sha256_hex );
 use MIME::Base64;
-
-use Crypt::Random;
+use Crypt::Random qw( makerandom_octet );
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -1502,11 +1501,12 @@ sub generate_unique_session_key__
     # Generate a long random number, hash it and the time together to
     # get a random session key in hex
 
-    # TODO: make the Strength parameter configurable with a GLOBAL option
-    # and also add the option to specify another Device?
-
-    my $random = Crypt::Random::makerandom_octet( Length => 128,
-                                                  Strength => 0, Device => '' );
+    $self->log_( 1, "Generating random octet" );
+    my $random = makerandom_octet(
+                    Length   => 128,
+                    Strength => $self->global_config_( 'crypt_strength' ),
+                    Device   => $self->global_config_( 'crypt_device' ),
+                 );
     my $now = time;
     return sha256_hex( "$$" . "$random$now" );
 }

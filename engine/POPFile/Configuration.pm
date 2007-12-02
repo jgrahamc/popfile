@@ -124,6 +124,22 @@ sub initialize
 
     $self->global_config_( 'single_user', 1 );
 
+    # The Strength value used in calls to Crypt::Random::makerandom_octet
+    # The default is weak (0), but should work on all systems without
+    # blocking POPFile. Set this to 1 if your syste provides enough
+    # entropy and you need extra-random randomness.
+
+    $self->global_config_( 'crypt_strength', 0 );
+
+    # The random number device that should be used in calls to
+    # Crypt::Random::makerandom_octet. Depending on the Strength
+    # value Crypt::Random uses either /dev/random (Strength 1)
+    # or /dev/urandom (Strength 0). If you have another
+    # device that can produce random numbers, you can configure
+    # it with this variable.
+
+    $self->global_config_( 'crypt_device', '' );
+
     # Register for the TICKD message which is sent hourly by the
     # Logger module.   We use this to hourly save the configuration file
     # so that POPFile's configuration is saved in case of a hard crash.

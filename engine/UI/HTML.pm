@@ -390,10 +390,14 @@ sub set_cookie__
         # Value of the $session variable
         # The IP address of the client that set the cookie
         # MD5 checksum of the data (hex encoded)
-
-        $cookie_string =  encode_base64( makerandom_octet( Length => 16,
-                                             Strength => 1 ),
-                              '' );
+        $self->log_( 1, "Generating random octet" );
+        $cookie_string =  encode_base64(
+                            makerandom_octet(
+                                Length   => 16,
+                                Strength => $self->global_config_( 'crypt_strength' ),
+                                Device   => $self->global_config_( 'crypt_device' )
+                             ),
+                        '' );
         $cookie_string .= ' ';
         $cookie_string .= time;
         $cookie_string .= ' ';
