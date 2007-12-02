@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 8
+-- POPFILE SCHEMA 9
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
