@@ -182,6 +182,10 @@ Configuration_Password_Mismatch         The new password must by identical in th
 Configuration_Password_Bad              The old password entered is incorrect
 Configuration_Password_Fail             Failed to set new password
 Configuration_Set_Password              New password has been set
+Configuration_Logger_Level0				Low
+Configuration_Logger_Level1				Medium
+Configuration_Logger_Level2				High
+Configuration_Logger_Level              Logger level:
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters
