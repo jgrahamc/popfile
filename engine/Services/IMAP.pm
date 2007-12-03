@@ -1384,7 +1384,7 @@ sub validate_connection_details {
             $error_message = $language->{Imap_PortError};
         }
 
-        if ( $form->{imap_login} ne '' ) {
+        if ( defined $form->{imap_login} && $form->{imap_login} =~ /^\S/ ) {
             if ( $self->user_config_( 1, 'login' ) ne $form->{imap_login} ) {
                 $self->user_config_( 1, 'login', $form->{imap_login} );
                 $something_happened++;
@@ -1394,7 +1394,7 @@ sub validate_connection_details {
             $error_message = $language->{Imap_LoginError};
         }
 
-        if ( $form->{imap_password} ne '' ) {
+        if ( defined $form->{imap_password} && $form->{imap_password} =~ /^\S/ ) {
             if ( $self->user_config_( 1, 'password' ) ne $form->{imap_password} ) {
                 $self->user_config_( 1, 'password', $form->{imap_password} );
                 $something_happened++;
@@ -1507,6 +1507,7 @@ sub validate_bucket_folders {
             }
         }
 
+        $status_message = '';
         while ( my ( $bucket, $folder ) = each %bucket2folder ) {
 
             # If a folder is supposed to be mapped to more than one bucket
@@ -1517,7 +1518,8 @@ sub validate_bucket_folders {
                 if ( $self->folder_for_bucket__( $bucket ) ne $folder ) {
                     $self->folder_for_bucket__( $bucket, $folder );
                     $self->{folder_change_flag__} = 1;
-                    $status_message = sprintf $language->{Imap_MapUpdated}, $bucket, $folder;
+                    $status_message .= sprintf $language->{Imap_MapUpdated}, $bucket, $folder;
+                    $status_message .= '<br />';
                 }
             }
         }

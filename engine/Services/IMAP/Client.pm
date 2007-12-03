@@ -954,11 +954,11 @@ sub check_uidvalidity {
     my $old_val = $self->uid_validity( $folder );
 
     # Check whether the old value is still valid
-    if ( $new_val != $old_val ) {
-        return;
+    if ( defined $old_val && $old_val ne '' && $new_val == $old_val ) {
+        return 1;
     }
     else {
-        return 1;
+        return;
     }
 }
 
