@@ -51,6 +51,7 @@ my $lf = "\012";
 my $eol = "$cr$lf";
 my $debug = 1;
 my $spool = "imap.spool";
+my $uid_file = 'imap.uids';
 
 # if nothing happens with in $idle_timeout seconds
 # we call exit.
@@ -203,6 +204,7 @@ while ( 1 ) {
 }
 
 close $main_sock;
+unlink $uid_file;
 print "\nThe IMAP_test_server is exiting.\n";
 
 # handle_command
@@ -626,15 +628,12 @@ sub uid_next {
     my $folder  = shift;
     my $uidnext = shift;
 
-    if ( open my $UIDS, '<', 'imap.uids' ) {
+    if ( open my $UIDS, '<', $uid_file ) {
         while ( <$UIDS> ) {
             /(.+):(.+)[\r\n]/;
             $uidnext{ $1 } = $2;
         }
     }
-#    else {
-#        die "IMAP-test-server has a problem: cannot open file 'imap.uids'";
-#    }
 
     if ( defined $uidnext ) {
         $uidnext{ $folder } = $uidnext;
