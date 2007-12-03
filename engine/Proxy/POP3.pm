@@ -771,7 +771,12 @@ sub validate_item
     }
 
     if ( $name eq 'pop3_security' ) {
-        $self->config_( 'local', $$form{pop3_local}-1 ) if ( defined($$form{pop3_local}) );
+        if ( $form->{serveropt_pop3} ) {
+            $self->config_( 'local', 0 );
+        }
+        else {
+            $self->config_( 'local', 1 );
+        }
 
         return(undef, undef);
     }

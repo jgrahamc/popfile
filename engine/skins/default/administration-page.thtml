@@ -24,18 +24,18 @@ function serverMode(state) {
                                 <TMPL_VAR NAME="Localize_Users_SingleUserMode">
                             </label>
                             <br />
-                            <input type="radio" name="servermode" id="StealthMode" value="StealthMode" onClick="serverMode(false)" <TMPL_IF NAME="Security_If_Local">checked</TMPL_IF> />
+                            <input type="radio" name="servermode" id="StealthMode" value="StealthMode" onClick="serverMode(false)" <TMPL_IF NAME="Security_If_Local">checked="checked"</TMPL_IF> />
                             <label class="administrationLabel" for="StealthMode">
                                 Stealth Mode (disable remote connections)
                             </label>
                             <br />
-                            <input type="radio" name="servermode" id="ServerMode" value="ServerMode" onClick="serverMode(true)" <TMPL_IF NAME="Security_If_Local"><TMPL_ELSE>checked</TMPL_IF> />
+                            <input type="radio" name="servermode" id="ServerMode" value="ServerMode" onClick="serverMode(true)" <TMPL_UNLESS NAME="Security_If_Local">checked="checked"</TMPL_UNLESS> />
                             <label class="administrationLabel" for="ServerMode">
                                 Server Mode (allow remote connections)
                             </label>
                             <br />
                             <div style="margin-left:1em;" class="adminAcceptRemote">
-                                <input type="checkbox" name="serveropt_http" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF> <TMPL_IF NAME="Security_If_Local_Http"><TMPL_ELSE>checked</TMPL_IF>/>
+                                <input type="checkbox" name="serveropt_html" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF> <TMPL_IF NAME="Security_If_Local_html"><TMPL_ELSE>checked="checked"</TMPL_IF>/>
                                 <label class="administrationLabel" for="securityAcceptHTTP">
                                     <TMPL_VAR NAME="Localize_Security_UI">
                                 </label>
@@ -44,10 +44,6 @@ function serverMode(state) {
                                 <TMPL_VAR NAME="Security_Dynamic_Security">
 
                             </div>
-
-                            <!-- This file is currently being included by Perl in Configuration_Dynamic below when loaded, Perl needs changing so it doesn't load there (if possible) -->
-                            <TMPL_INCLUDE NAME="windows-configuration.thtml">
-
                             <br /><br />
                             <input type="submit" class="submit" name="apply_stealth" value="<TMPL_VAR NAME="Localize_Apply">" />
                         </form>
@@ -104,18 +100,18 @@ function serverMode(state) {
                 </select>
                 <br />
                 <label class="administrationLabel" for="configLoggingLevel">
-                    Logger level:
+                    <TMPL_VAR NAME="Localize_Configuration_Logger_Level">
                 </label>
 
                 <select name="level" id="configLoggingLevel">
                     <option value="0" <TMPL_VAR NAME="logger_level_selected_0">>
-                        Low
+                        <TMPL_VAR NAME="Localize_Configuration_Logger_Level0">
                     </option>
                     <option value="1" <TMPL_VAR NAME="logger_level_selected_1">>
-                        Default
+                        <TMPL_VAR NAME="Localize_Configuration_Logger_Level1">
                     </option>
                     <option value="2" <TMPL_VAR NAME="logger_level_selected_2">>
-                        High
+                        <TMPL_VAR NAME="Localize_Configuration_Logger_Level2">
                     </option>
                 </select>
                 <br /><br />

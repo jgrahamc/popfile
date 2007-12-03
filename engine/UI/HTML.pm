@@ -1167,21 +1167,26 @@ sub administration_page
 
     my $server_error = '';
     my $port_error   = '';
+    my $user = $self->{sessions__}{$session}{user};
 
     # TODO: add status messages
 
+    # Read the CGI parameters and set the configuration vars accordingly
     # Server / Stealth mode
     if ( defined $self->{form_}->{apply_stealth} ) {
         $self->global_config_( 'single_user', $self->{form_}->{usermode} ? 1 : 0 );
 
-        if ( $self->{form_}->{servermode} eq 'ServerMode' ) {
-            $self->config_( 'local', $self->{form_}->{serveropt_http} ? 0 : 1 );
+        if ( $self->{form_}->{ serveropt_html } ) {
+            $self->config_( 'local',  0 );
+        }
+        else {
+            $self->config_( 'local',  1 );
         }
     }
     # Privacy options
     elsif ( $self->{form_}->{privacy} ) {
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats', $self->{form_}->{send_stats} ? 1 : 0 );
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check', $self->{form_}->{update_check} ? 1 : 0 );
+        $self->user_config_( $user, 'send_stats', $self->{form_}->{send_stats} ? 1 : 0 );
+        $self->user_config_( $user, 'update_check', $self->{form_}->{update_check} ? 1 : 0 );
     }
     # Logger options
     elsif ( $self->{form_}->{submit_debug} ) {
@@ -1216,17 +1221,22 @@ sub administration_page
                 delete $self->{form_}{timeout};
             }
         }
-
-
     }
+
+    # Set the template parameters
     #$templ->param( 'Security_If_Password_Updated' => ( defined($self->{form_}{password} ) ) );
-    $templ->param( 'Configuration_UI_Port' => $self->config_( 'port' ) );
-    $templ->param( 'If_Single_User' => $self->global_config_( 'single_user' ) );
-    $templ->param( Security_If_Local_Http => $self->config_( 'local') );
-    $templ->param( 'Security_If_Send_Stats' => $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats' ) );
-    $templ->param( 'Security_If_Update_Check' => $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check' ) );
-    $templ->param( 'logger_level_selected_' . $self->module_config_( 'logger', 'level' ), 'selected="selected"' );
-    $templ->param ( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected', 'selected="selected"' );
+    $templ->param( 'Configuration_UI_Port'    => $self->config_( 'port' ) );
+    $templ->param( 'If_Single_User'           => $self->global_config_( 'single_user' ) );
+    $templ->param( 'Security_If_Local_Http'   => $self->config_( 'local') );
+    $templ->param( 'Security_If_Send_Stats'   => $self->user_config_( $user, 'send_stats' ) );
+    $templ->param( 'Security_If_Update_Check' => $self->user_config_( $user, 'update_check' ) );
+    $templ->param( 'logger_level_selected_' . $self->module_config_( 'logger', 'level' )
+                        => 'selected="selected"');
+    $templ->param( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected'
+                        => 'selected="selected"' );
+    #my $all_local = 1;
+    $templ->param( "Security_If_Local_html" => $self->config_( 'local') );
+    #$templ->param( 'Security_If_Local' => $all_local );
 
 
     my ($status_message, $error_message);
@@ -1234,15 +1244,17 @@ sub administration_page
 
     for my $name (keys %{$self->{dynamic_ui__}{security}}) {
         $security_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{security}{$name}{template}, $page, $session );
-        ($status_message, $error_message) = $self->{dynamic_ui__}{security}{$name}{object}->validate_item( $name,
+        if ( $self->{form_}->{apply_stealth} ) {
+            ($status_message, $error_message) = $self->{dynamic_ui__}{security}{$name}{object}->validate_item( $name,
                                                                        $security_templates{$name},
                                                                        \%{$self->{language__}},
                                                                        \%{$self->{form_}} );
 
-        # Tell the user anything the dynamic UI was interested in sharing
-        $self->log_( 3, "dynamic security UI $name had status/error $status_message/$error_message")  if (defined $status_message || defined $error_message);
-        $self->status_message__($templ,$status_message) if ( defined( $status_message ));
-        $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
+            # Tell the user anything the dynamic UI was interested in sharing
+            $self->log_( 3, "dynamic security UI $name had status/error $status_message/$error_message")  if (defined $status_message || defined $error_message);
+            $self->status_message__($templ,$status_message) if ( defined( $status_message ));
+            $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
+        }
     }
 
     my %chain_templates;
