@@ -13,6 +13,7 @@ error:
 	@echo Must specify one of coverage, test, package or windows
 	@echo
 	@echo "coverage - Run POPFile test suite with coverage information"
+	@echo "cover    - Run POPFile test suite with coverage information provided by Devel::Cover"
 	@echo "test     - Run POPFile test suite"
 	@echo "eachtest - Run POPFile tests one by one"
 	@echo "           (test and coverage pass TESTARGS to the test suite)"
@@ -35,6 +36,13 @@ ifdef TESTARGS
 	@echo with arguments '$(TESTARGS)'
 endif
 	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=-d:TestCoverage
+
+cover:
+	@echo Running test suite with code coverage by Devel::Cover
+ifdef TESTARGS
+	@echo with arguments '$(TESTARGS)'
+endif
+	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) COVERARGS=-MDevel::Cover=-db,cover_db,-coverage,statement,branch,condition,path,subroutine,-silent,ON,-summary,ON
 
 test:
 	@echo Running test suite

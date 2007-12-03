@@ -28,10 +28,12 @@ export POPFILE_ROOT=../
 export POPFILE_USER=../tests/
 
 runtest:
-	@rm -rf popfile.pid popfile.cfg
-	@perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
+	@perl -I ../ $(DEBUGARGS) $(COVERARGS) ../tests.pl $(TESTARGS)
 ifdef DEBUGARGS
 	@perl ../coverage.pl
+endif
+ifdef COVERARGS
+	cover -report html cover_db
 endif
 	@rm -rf corpus
 	@rm -rf messages
