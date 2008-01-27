@@ -24,8 +24,11 @@ LanguageDirection                       ltr
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          en
 
-# This is where to find the FAQ on the Wiki
-FAQLink                                 FrequentlyAskedQuestions
+# These are where to find the documents on the Wiki
+WikiLink                                
+FAQLink                                 FAQ
+RequestFeatureLink                      RequestFeature
+MailingListLink                         POPFileAnnounce
 
 # Common words that are used on their own all over the interface
 Account                                 POP3 Account

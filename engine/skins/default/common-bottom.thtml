@@ -19,10 +19,10 @@
             <a class="bottomLink" href="http://getpopfile.org/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html" title="<TMPL_VAR NAME="Localize_tip_Footer_Manual">">
                 <TMPL_VAR NAME="Localize_Footer_Manual"></a>
             <br />
-            <a class="bottomLink" href="http://getpopfile.org/cgi-bin/wiki.pl" title="<TMPL_VAR NAME="Localize_tip_Footer_Wiki">">
+            <a class="bottomLink" href="http://getpopfile.org/wiki/<TMPL_VAR NAME="Localize_WikiLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_Wiki">">
                 <TMPL_VAR NAME="Localize_Footer_Wiki"></a>
             <br />
-            <a class="bottomLink" href="http://getpopfile.org/cgi-bin/wiki.pl?<TMPL_VAR NAME="Localize_FAQLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_FAQ">">
+            <a class="bottomLink" href="http://getpopfile.org/wiki/<TMPL_VAR NAME="Localize_FAQLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_FAQ">">
                 <TMPL_VAR NAME="Localize_FAQ"></a>
             <br />
         </td>
@@ -35,10 +35,10 @@
             <span title="<TMPL_VAR NAME="Localize_tip_Footer_Login">">(<TMPL_VAR NAME="Common_Bottom_Date"> - <TMPL_VAR NAME="Common_Bottom_LastLogin">)</span>
         </td>
         <td class="footerBody">
-            <a class="bottomLink" href="http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959" title="<TMPL_VAR NAME="Localize_tip_Footer_RFE">">
+            <a class="bottomLink" href="http://getpopfile.org/wiki/<TMPL_VAR NAME="Localize_RequestFeatureLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_RFE">">
                 <TMPL_VAR NAME="Localize_Footer_RequestFeature"></a>
             <br />
-            <a class="bottomLink" href="http://lists.sourceforge.net/lists/listinfo/popfile-announce" title="<TMPL_VAR NAME="Localize_tip_Footer_MailingList">">
+            <a class="bottomLink" href="http://getpopfile.org/wiki/<TMPL_VAR NAME="Localize_MailingListLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_MailingList">">
                 <TMPL_VAR NAME="Localize_Footer_MailingList"></a>
             <br />
             <a class="bottomLink" href="http://sourceforge.net/forum/forum.php?forum_id=213876" title="<TMPL_VAR NAME="Localize_tip_Footer_FeedMe">">
