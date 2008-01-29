@@ -3046,7 +3046,11 @@ sub history_page
                      if ( $language_for_user eq 'Nihongo' ) {
                          # Remove wrong characters as euc-jp.
                          for my $i (1..4) {
-                             $$row[$i] =~ s/\G((?:$euc_jp)*)([\x80-\xFF](?=(?:$euc_jp)*))?/$1/og;
+                            my $result = '';
+                            while ( $$row[$i] =~ /((?:$euc_jp){1,300})/og ) {
+                                $result .= $1;
+                            }
+                            $$row[$i] = $result;
                          }
                      }
 
