@@ -211,18 +211,6 @@ sub service {
 
     if ( time - $self->{last_update__} >= $self->user_config_( 1, 'update_interval' ) ) {
 
-        # Should we use a single or multiple connections?
-        # And did this configuration options change?
-        if ( defined $self->{use_multiple_connections} ) {
-            my $config = $self->user_config_( 1,'use_multiple_connections');
-            if ( $config != $self->{use_multiple_connections} ) {
-                # Configuration has changed!
-                $self->disconnect_folders__();
-            }
-        }
-
-        $self->{use_multiple_connections} = $self->user_config_( 1,'use_multiple_connections');
-
         # Since the IMAP-Client module can throw an exception, i.e. die if
         # it detects a lost connection, we eval the following code to be able
         # to catch the exception. We also tell Perl to ignore broken pipes.
@@ -242,14 +230,7 @@ sub service {
                     $self->build_folder_list__();
                 }
 
-                # Try to establish connections, log in, and select for
-                # all of our folders if using multiple connections
-                if ( $self->{use_multiple_connections} ) {
-                    $self->connect_folders__();
-                }
-                else {
-                    $self->connect_server__();
-                }
+                $self->connect_server__();
 
                 # Reset the hash containing the hash values we have seen the
                 # last time through service.
@@ -344,104 +325,6 @@ sub build_folder_list__ {
     $self->{folder_change_flag__} = 0;
 }
 
-
-
-#----------------------------------------------------------------------------
-# connect_folders__
-#
-#   This function will iterate over each folder found in the
-#   %{$self->{folders__}} hash. For each folder it will try to
-#   establish a connection, log in, and select the folder.  The
-#   corresponding socket object, will be stored in
-#   $self->{folders__}{$folder}{imap}
-#
-# arguments:
-#   none.
-#
-# return value:
-#   none.
-#----------------------------------------------------------------------------
-
-sub connect_folders__ {
-    my $self = shift;
-
-    # Establish a connection for each folder in the hash
-    foreach my $folder ( keys %{$self->{folders__}} ) {
-
-        # We may already have a valid connection for this folder:
-        if ( exists $self->{folders__}{$folder}{imap} ) {
-            next;
-        }
-
-        $self->{folders__}{$folder}{server} = 1;
-        $self->{folders__}{$folder}{tag} = 0;
-
-        # The folder may be write-only:
-        if ( exists $self->{folders__}{$folder}{output}
-                &&
-            ! exists $self->{folders__}{$folder}{watched}
-                &&
-            $self->classifier_()->is_pseudo_bucket( $self->api_session(),
-                                    $self->{folders__}{$folder}{output} ) ) {
-                next;
-        }
-
-        $self->log_( 1, "Trying to connect to ". $self->user_config_( 1, 'hostname' ) . " for folder $folder." );
-        my $imap = $self->new_imap_client();
-
-        if ( $imap ) {
-            # Build a list of IMAP mailboxes if we haven't already got one:
-            unless ( @{$self->{mailboxes__}} ) {
-                @{$self->{mailboxes__}} = $imap->get_mailbox_list();
-            }
-            # Do a STATUS to check UIDVALIDITY and UIDNEXT
-            my $info = $imap->status( $folder );
-            my $uidnext = $info->{UIDNEXT};
-            my $uidvalidity = $info->{UIDVALIDITY};
-
-            if ( defined $uidvalidity && defined $uidnext ) {
-                # If we already have a UIDVALIDITY value stored,
-                # we compare the old and the new value.
-
-                if ( defined $imap->uid_validity( $folder ) ) {
-                    if ( $imap->check_uidvalidity( $folder, $uidvalidity ) ) {
-                        # That's the nice case. We simply do nothing.
-                    }
-                    else {
-                        # The validity has changed, we log this and update our stored
-                        # values for UIDNEXT and UIDVALIDITY
-                        $self->log_( 0, "Changed UIDVALIDITY for folder $folder. Some new messages might have been skipped." );
-                        $imap->uid_validity( $folder, $uidvalidity );
-                        $imap->uid_next( $folder, $uidnext );
-                    }
-                }
-                else {
-                    # We don't have a stored value, so let's change that.
-                    $self->log_( 0, "Storing UIDVALIDITY for folder $folder." );
-                    $imap->uid_validity( $folder, $uidvalidity );
-                    $imap->uid_next( $folder, $uidnext );
-                }
-            }
-            else {
-                $self->log_( 0, "Could not STATUS folder $folder." );
-                $imap->logout();
-                die "The connection to the IMAP server was lost";
-            }
-
-            # Now select the folder
-            if ( $imap->select( $folder ) ) {
-                $self->{folders__}{$folder}{imap} = $imap;
-            }
-            else {
-                $self->log_( 0, "Could not SELECT folder $folder." );
-                $imap->logout();
-            }
-        }
-        else {
-            # TODO: what now?
-        }
-    }
-}
 
 # ----------------------------------------------------------------------------
 #
@@ -608,12 +491,7 @@ sub scan_folder {
     my $moved_message = 0;
     my @uids = ();
 
-    if ( $self->{use_multiple_connections} ) {
-        @uids = $imap->get_new_message_list();
-    }
-    else {
-        @uids = $imap->get_new_message_list_unselected( $folder );
-    }
+    @uids = $imap->get_new_message_list_unselected( $folder );
 
     # We now have a list of messages with UIDs greater than or equal
     # to our last stored UIDNEXT value (of course, the list might be

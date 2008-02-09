@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 9
+-- POPFILE SCHEMA 8
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
@@ -563,7 +563,6 @@ insert into user_template ( name, def, form ) values ( 'imap_uidvalidities', '',
 insert into user_template ( name, def, form ) values ( 'imap_update_interval', 20, '%d' );
 insert into user_template ( name, def, form ) values ( 'imap_use_ssl', 0, '%d' );
 insert into user_template ( name, def, form ) values ( 'imap_watched_folders', 'INBOX', '%s' );
-insert into user_template ( name, def, form ) values ( 'imap_use_multiple_connections', '0', '%d' );
 
 -- Show the config bar at the bottom of each page defaults to on
 insert into user_template ( name, def, form ) values ( 'html_show_configbars', 1, '%d' );
