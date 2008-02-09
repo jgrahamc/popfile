@@ -947,8 +947,11 @@ sub uid_next {
 # ----------------------------------------------------------------------------
 sub check_uidvalidity {
     my $self    = shift;
-    my $folder  = shift or confess "gimme a folder";
-    my $new_val = shift or confess "gimme a new_val";
+    my $folder  = shift;
+    my $new_val = shift;
+
+    confess "check_uidvalidity needs a new uidvalidity!" unless defined $new_val;
+    confess "check_uidvalidity needs a folder name!" unless defined $folder;
 
     # Save old UIDVALIDITY value (if we have one)
     my $old_val = $self->uid_validity( $folder );
