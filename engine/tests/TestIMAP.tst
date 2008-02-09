@@ -702,6 +702,26 @@ sub test_imap_ui {
     test_assert_equal( $im->folder_for_bucket__( 'other' ), 'personal' );
     test_assert_equal( $im->folder_for_bucket__( 'personal' ), 'other' );
 
+    # The module should not let you map more than one bucket to a folder:
+    $form = {};
+    $form->{imap_3_bucket_folders} = 1;
+    $form->{imap_folder_for_other} = 'other';
+    $form->{imap_folder_for_personal} = 'other';
+    ( $status, $error ) = $im->validate_item('imap_3_bucket_folders', $tmpl, $language, $form );
+    test_assert_equal( $error, $language->{Imap_MapError} );
+    test_assert_equal( $im->folder_for_bucket__( 'other' ), 'personal' );
+    test_assert_equal( $im->folder_for_bucket__( 'personal' ), 'other' );
+
+    # The same goes for pseudo buckets:
+    $form = {};
+    $form->{imap_3_bucket_folders} = 1;
+    $form->{imap_folder_for_unclassified} = 'other';
+    $form->{imap_folder_for_personal} = 'other';
+    ( $status, $error ) = $im->validate_item('imap_3_bucket_folders', $tmpl, $language, $form );
+    test_assert_equal( $error, $language->{Imap_MapError} );
+    test_assert_equal( $im->folder_for_bucket__( 'unclassified' ), 'unclassified' );
+    test_assert_equal( $im->folder_for_bucket__( 'personal' ), 'other' );
+
     # imap-update-mailbox-list.thtml
     $form = {};
     $form->{do_imap_4_update_mailbox_list} = 1;

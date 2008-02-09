@@ -1498,6 +1498,7 @@ sub validate_bucket_folders {
                 my $folder = $form->{ $key };
 
                 $bucket2folder{ $bucket } = $folder;
+                $folders{ $folder }++;
             }
         }
 
