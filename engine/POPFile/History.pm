@@ -239,7 +239,7 @@ sub reserve_slot
     my ( $self ) = @_;
 
     my $r;
-    my $in_transaction = ! ( $self->db__()->{AutoCommit} );
+    my $in_transaction = ! ( $self->db_()->{AutoCommit} );
     $self->log_( 2, "already in a transaction." ) if ($in_transaction);
 
     while (1) {
