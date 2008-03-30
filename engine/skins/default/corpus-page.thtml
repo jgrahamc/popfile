@@ -320,16 +320,6 @@
 
                 </TMPL_IF>
 
-                <TMPL_IF NAME="Corpus_If_Create_Error">
-
-                <blockquote>
-                    <div class="error01">
-                        <TMPL_VAR NAME="Localize_Bucket_Error1">
-                    </div>
-                </blockquote>
-
-                </TMPL_IF>
-
                 <form action="/buckets" method="post">
                     <label class="bucketsLabel" for="bucketsDeleteBucket" title="<TMPL_VAR NAME="Localize_tip_Bucket_Delete">">
                         <TMPL_VAR NAME="Localize_Bucket_DeleteBucket">:
@@ -349,16 +339,6 @@
                     </select>
                     <input type="submit" class="submit" name="delete" value="<TMPL_VAR NAME="Localize_Delete">" />
                 </form>
-
-                <TMPL_IF NAME="Corpus_If_Delete_Message">
-
-                <blockquote>
-                    <b>
-                        <TMPL_VAR NAME="Corpus_Delete_Message">
-                    </b>
-                </blockquote>
-
-                </TMPL_IF>
 
                 <form action="/buckets" method="post">
                     <label class="bucketsLabel" for="bucketsRenameBucketFrom" title="<TMPL_VAR NAME="Localize_tip_Bucket_Rename">">
@@ -383,26 +363,6 @@
                     <input type="text" id="bucketsRenameBucketTo" name="newname" />
                     <input type="submit" class="submit" name="rename" value="<TMPL_VAR NAME="Localize_Rename">" />
                 </form>
-
-                <TMPL_IF NAME="Corpus_If_Rename_Message">
-
-                <blockquote>
-                    <b>
-                        <TMPL_VAR NAME="Corpus_Rename_Message">
-                    </b>
-                </blockquote>
-
-                </TMPL_IF>
-
-                <TMPL_IF NAME="Corpus_If_Rename_Error">
-
-                <blockquote>
-                    <div class="error01">
-                        <TMPL_VAR NAME="Localize_Bucket_Error1">
-                    </div>
-                </blockquote>
-
-                </TMPL_IF>
 
                 <br />
             </div>

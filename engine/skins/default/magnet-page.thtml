@@ -147,18 +147,6 @@
         <input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
     </form>
 
-    <TMPL_IF NAME="Magnet_If_Message">
-
-    <blockquote>
-        <div class="error02">
-            <b>
-                <TMPL_VAR NAME="Magnet_Message">
-            </b>
-        </div>
-    </blockquote>
-
-    </TMPL_IF>
-
 </div>
 
 </td>

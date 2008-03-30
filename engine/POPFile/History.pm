@@ -992,7 +992,7 @@ sub set_query
 
     # Add the sort option (if there is one)
 
-    if ( $sort ne '' ) {print "$sort";
+    if ( $sort ne '' ) {
         $sort =~ s/^(\-)//;
         my $direction = defined($1)?'desc':'asc';
         if ( $sort eq 'bucket' ) {

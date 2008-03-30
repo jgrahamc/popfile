@@ -706,7 +706,7 @@ sub child__
 
 sub configure_item
 {
-    my ( $self, $name, $templ, $language, $all_local ) = @_;
+    my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'pop3_configuration' ) {
         $templ->param( 'POP3_Configuration_If_Force_Fork' => ( $self->config_( 'force_fork' ) == 0 ) );

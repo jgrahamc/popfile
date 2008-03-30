@@ -31,28 +31,12 @@
                     <input type="submit" class="submit" name="add" value="<TMPL_VAR NAME="Localize_Add">" />
                 </form>
 
-                <TMPL_IF NAME="Advanced_If_Add_Message">
-
-                <blockquote>
-                    <div class="error02"><b><TMPL_VAR NAME="Localize_Advanced_Error2"></b></div>
-                </blockquote>
-
-                </TMPL_IF>
-
                 <form action="/advanced" method="post">
                     <label class="advancedLabel" for="advancedRemoveWordText"><TMPL_VAR NAME="Localize_Advanced_RemoveWord">:</label><br />
 
                     <input type="text" id="advancedRemoveWordText" name="word" />
                     <input type="submit" class="submit" name="remove" value="<TMPL_VAR NAME="Localize_Remove">" />
                 </form>
-
-                <TMPL_IF NAME="Advanced_If_Delete_Message">
-
-                <blockquote>
-                    <div class="error02"><b><TMPL_VAR NAME="Localize_Advanced_Error2"></b></div>
-                </blockquote>
-
-                </TMPL_IF>
 
             </div>
         </td>

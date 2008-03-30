@@ -142,18 +142,6 @@ function serverMode(state) {
                 <br />
                 <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
 
-            <TMPL_IF NAME="Configuration_If_TCP_Timeout_Error">
-
-            <blockquote>
-                <div class="error01">
-                    <TMPL_VAR NAME="Localize_Configuration_Error6">
-                </div>
-            </blockquote>
-
-            </TMPL_IF>
-
-            <TMPL_VAR NAME="Configuration_TCP_Timeout_Updated">
-
                 <br /><br />
                 <input type="submit" class="submit" name="update_modules" value="<TMPL_VAR NAME="Localize_Apply">" />
 

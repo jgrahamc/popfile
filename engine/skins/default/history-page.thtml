@@ -152,7 +152,7 @@
             <td>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-
+                    <img title="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" alt="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" src="/skins/magnet.png">
                 </TMPL_IF>
 
                 <TMPL_IF NAME="History_If_Not_Pseudo">
@@ -196,8 +196,8 @@
                 <TMPL_ELSE>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-                    <img title="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" alt="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" src="/skins/magnet.png">
-                <TMPL_ELSE>
+                <TMPL_VAR NAME="Localize_History_MagnetUsed">
+				<TMPL_ELSE>
 
                 <select name="reclassify_<TMPL_VAR NAME="History_I">">
                     <option value="" selected="selected">&nbsp;</option>

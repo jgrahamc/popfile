@@ -873,6 +873,12 @@ sub http_ok
                              'last_update_check', $self->{today__}, 1 );
     }
 
+    # Show login user name on header in the multi-user mode
+    if ( !$self->global_config_( 'single_user' ) && defined( $session ) ) {
+        my $user = $self->classifier_()->get_user_name_from_session( $session );
+        $templ->param( 'Header_User_Name' => $user );
+    }
+
     # Build an HTTP header for standard HTML
 
     my $http_header = "HTTP/1.1 200 OK\r\n";
@@ -1169,11 +1175,14 @@ sub administration_page
     my $port_error   = '';
     my $user = $self->{sessions__}{$session}{user};
 
+    my $single_user_mode_changed = 0;
+
     # TODO: add status messages
 
     # Read the CGI parameters and set the configuration vars accordingly
     # Server / Stealth mode
     if ( defined $self->{form_}->{apply_stealth} ) {
+        my $current_single_user = $self->global_config_( 'single_user' );
         $self->global_config_( 'single_user', $self->{form_}->{usermode} ? 1 : 0 );
 
         if ( $self->{form_}->{ serveropt_html } ) {
@@ -1181,6 +1190,13 @@ sub administration_page
         }
         else {
             $self->config_( 'local',  1 );
+        }
+
+        # If the single user mode (POPFile classic) is enabled or disabled
+        # we should reflesh the UI
+
+        if ( $current_single_user ne ( $self->{form_}->{usermode} ? 1 : 0 ) ) {
+            $single_user_mode_changed = 1;
         }
     }
     # Privacy options
@@ -1217,7 +1233,7 @@ sub administration_page
                 $self->global_config_( 'timeout', $self->{form_}{timeout} );
             }
             else {
-                $self->error_message__( $self->{language__}{Configuration_Error6} );
+                $self->error_message__( $templ, $self->{language__}{Configuration_Error6} );
                 delete $self->{form_}{timeout};
             }
         }
@@ -1356,6 +1372,14 @@ sub administration_page
 
     if ( $self->global_config_( 'debug' ) & 1 ) {
         $templ->param( 'Configuration_If_Show_Log' => 1 );
+    }
+
+    # If the single user mode (POPFile classic) is enabled or disabled
+    # we should reflesh the UI
+
+    if ( $single_user_mode_changed ) {
+        $self->http_redirect_( $client, "/administration", $session );
+        return;
     }
 
     $self->http_ok( $client,$templ, 3, $session );
@@ -1660,7 +1684,9 @@ sub advanced_page
         my $result = $self->classifier_()->add_stopword( $session,
                          $self->{form_}{newword} );
         if ( $result == 0 ) {
-            $templ->param( 'Advanced_If_Add_Message' => 1 );
+            $self->error_message__( $templ, $self->{language__}{Advanced_Error2} );
+        } else {
+            $self->status_message__( $templ, sprintf $self->{language__}{Advanced_Error3}, $self->{form_}{newword} );
         }
     }
 
@@ -1668,7 +1694,9 @@ sub advanced_page
         my $result = $self->classifier_()->remove_stopword( $session,
                          $self->{form_}{word} );
         if ( $result == 0 ) {
-            $templ->param( 'Advanced_If_Delete_Message' => 1 );
+            $self->error_message__( $templ, $self->{language__}{Advanced_Error2} );
+        } else {
+            $self->status_message__( $templ, sprintf $self->{language__}{Advanced_Error5}, $self->{form_}{word} );
         }
     }
 
@@ -1797,7 +1825,8 @@ sub magnet_page
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
                                                     $page, $session );
 
-    my $magnet_message = '';
+    my $error_message = '';
+    my $status_message = '';
 
     if ( defined( $self->{form_}{delete} ) ) {
         for my $i ( 1 .. $self->{form_}{count} ) {
@@ -1870,7 +1899,7 @@ sub magnet_page
 
                         if ( exists( $magnets{$current_mtext} ) ) {
                             $found  = 1;
-                            $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . '<br>';
+                            $error_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . '<br>';
                             last;
                         }
                     }
@@ -1883,7 +1912,7 @@ sub magnet_page
                             for my $from (keys %magnets)  {
                                 if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
                                     $found = 1;
-                                    $magnet_message .= sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . '<br>';
+                                    $error_message .= sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . '<br>';
                                     last;
                                 }
                             }
@@ -1915,7 +1944,7 @@ sub magnet_page
 
                     $self->classifier_()->create_magnet( $session, $mbucket, $mtype, $current_mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
-                        $magnet_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket )  . '<br>';
+                        $status_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket )  . '<br>';
                     }
                 }
             }
@@ -1923,9 +1952,13 @@ sub magnet_page
         }
     }
 
-    if ( $magnet_message ne '' ) {
-        $templ->param( 'Magnet_If_Message' => 1 );
-        $templ->param( 'Magnet_Message'    => $magnet_message );
+    # Show error/status message
+
+    if ( $error_message ne '' ) {
+        $self->error_message__( $templ, $error_message );
+    }
+    if ( $status_message ne '' ) {
+        $self->status_message__( $templ, $status_message );
     }
 
     # Current Magnets panel
@@ -2282,16 +2315,14 @@ sub corpus_page
 
     if ( ( defined($self->{form_}{cname}) ) && ( $self->{form_}{cname} ne '' ) ) {
         if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
-            $templ->param( 'Corpus_If_Create_Error' => 1 );
+            $self->error_message__( $templ, $self->{language__}{Bucket_Error1} );
         } else {
             if ( $self->classifier_()->is_bucket( $session, $self->{form_}{cname} ) ||
                 $self->classifier_()->is_pseudo_bucket( $session, $self->{form_}{cname} ) ) {
-                $templ->param( 'Corpus_If_Create_Message' => 1 );
-                $templ->param( 'Corpus_Create_Message' => sprintf( $self->{language__}{Bucket_Error2}, $self->{form_}{cname} ) );
+                $self->error_message__( $templ, sprintf( $self->{language__}{Bucket_Error2}, $self->{form_}{cname} ) );
             } else {
                 $self->classifier_()->create_bucket( $session, $self->{form_}{cname} );
-                $templ->param( 'Corpus_If_Create_Message' => 1 );
-                $templ->param( 'Corpus_Create_Message' => sprintf( $self->{language__}{Bucket_Error3}, $self->{form_}{cname} ) );
+                $self->status_message__( $templ, sprintf( $self->{language__}{Bucket_Error3}, $self->{form_}{cname} ) );
             }
        }
     }
@@ -2299,24 +2330,21 @@ sub corpus_page
     if ( ( defined($self->{form_}{delete}) ) && ( $self->{form_}{name} ne '' ) ) {
         $self->{form_}{name} = lc($self->{form_}{name});
         $self->classifier_()->delete_bucket( $session, $self->{form_}{name} );
-        $templ->param( 'Corpus_If_Delete_Message' => 1 );
-        $templ->param( 'Corpus_Delete_Message' => sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) );
+        $self->status_message__( $templ, sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) );
     }
 
     if ( ( defined($self->{form_}{newname}) ) &&
          ( $self->{form_}{oname} ne '' ) ) {
         if ( ( $self->{form_}{newname} eq '' ) ||
              ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) )  {
-            $templ->param( 'Corpus_If_Rename_Error' => 1 );
+            $self->error_message__( $templ, $self->{language__}{Bucket_Error1} );
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
             $self->{form_}{newname} = lc($self->{form_}{newname});
             if ( $self->classifier_()->rename_bucket( $session, $self->{form_}{oname}, $self->{form_}{newname} ) == 1 ) {
-                $templ->param( 'Corpus_If_Rename_Message' => 1 );
-                $templ->param( 'Corpus_Rename_Message' => sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) );
+                $self->status_message__( $templ, sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) );
             } else {
-                $templ->param( 'Corpus_If_Rename_Message' => 1 );
-                $templ->param( 'Corpus_Rename_Message' => 'Internal error: rename failed' );
+                $self->error_message__( $templ, 'Internal error: rename failed' );
             }
         }
     }
@@ -3157,6 +3185,7 @@ sub history_page
 
             $row_data{History_Loop_Loop_Cells} = \@column_data;
             $row_data{History_If_Reclassified} = ( $$row[9] != 0 );
+            $row_data{History_If_Magnetized} = ( $$row[11] ne '' );
             $row_data{History_I}             = $$row[0];
             $row_data{History_I1}            = $$row[0];
             $row_data{History_Loop_Loop_Buckets} = \@bucket_data;

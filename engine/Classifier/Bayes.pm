@@ -1650,6 +1650,27 @@ sub get_user_id_from_session
 
 #----------------------------------------------------------------------------
 #
+# get_user_name_from_session
+#
+# $session        A session key previously returned by get_session_key
+#
+# Returns the user name associated with a session
+#
+#----------------------------------------------------------------------------
+sub get_user_name_from_session
+{
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    if ( defined($userid) ) {
+        return $self->get_user_name_from_id( $session, $userid );
+    } else {
+        return undef;
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # release_session_key
 #
 # $session        A session key previously returned by get_session_key
@@ -2520,6 +2541,8 @@ sub classify_and_modify
     my $xpl_insertion        = $self->get_bucket_parameter( $session, $classification, 'xpl'        );
     my $quarantine           = $self->get_bucket_parameter( $session, $classification, 'quarantine' );
 
+    # TODO : Should we use user's configuration?
+
     my $modification = $self->user_config_( 1, 'subject_mod_left' ) . $classification . $self->user_config_( 1, 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
@@ -2548,6 +2571,8 @@ sub classify_and_modify
 
     # Add the XPL header
 
+    # TODO : Should we use user's configuration?
+
     my $xpl = $self->user_config_( 1, 'xpl_angle' )?'<':'';
 
     my $xpl_localhost = ($self->config_( 'localhostname' ) eq '')?"127.0.0.1":$self->config_( 'localhostname' );
@@ -2555,6 +2580,8 @@ sub classify_and_modify
     $xpl .= "http://";
     $xpl .= $self->module_config_( 'html', 'local' )?$xpl_localhost:$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot";
+
+    # TODO : Should we use user's configuration?
 
     if ( $self->user_config_( 1, 'xpl_angle' ) ) {
         $xpl .= '>';
@@ -3866,6 +3893,33 @@ sub get_user_parameter_from_id
 
 #----------------------------------------------------------------------------
 #
+# get_user_name_from_id
+#
+# Returns the name of a user
+#
+# $session     A valid session ID
+# $userid      The ID of the user
+#
+#----------------------------------------------------------------------------
+sub get_user_name_from_id
+{
+    my ( $self, $session, $id ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    my $h = $self->db_()->prepare( "select name from users where id = $id;" );
+    $h->execute;
+    if ( my $row = $h->fetchrow_arrayref ) {
+        $h->finish;
+        return $row->[0];
+    } else {
+        return undef;
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # set_bucket_parameter
 #
 # Sets the value associated with a bucket specific parameter
@@ -4072,8 +4126,11 @@ sub delete_bucket
         return 0;
     }
 
-    $self->db_()->do(                                                                        # PROFILE BLOCK START
-        "delete from buckets where buckets.userid = $userid and buckets.name = '$bucket';" ); # PROFILE BLOCK STOP
+    $self->db_()->do(                                   # PROFILE BLOCK START
+        "delete from buckets where 
+             buckets.userid = $userid and 
+             buckets.name = '$bucket' and 
+             buckets.pseudo = 0;" );                    # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 
     return 1;
@@ -4510,6 +4567,8 @@ sub add_stopword
 
     # Pass language parameter to add_stopword()
 
+    # TODO : hard-coded 1
+
     return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
 }
 
@@ -4521,6 +4580,8 @@ sub remove_stopword
     return undef if ( !defined( $userid ) );
 
     # Pass language parameter to remove_stopword()
+
+    # TODO : hard-coded 1
 
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
 }

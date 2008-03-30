@@ -193,7 +193,7 @@ Configuration_Logger_Level2	            高
 Configuration_Logger_Level              ログレベル:
 
 Advanced_Error1                         '%s' は既に無視する単語のリストに含まれています。
-Advanced_Error2                         無効な文字が使われています。再度入力して下さい。
+Advanced_Error2                         無視する単語に無効な文字が使われています。再度入力して下さい。
 Advanced_Error3                         '%s' を無視する単語のリストに追加しました。
 Advanced_Error4                         '%s' は無視する単語のリストに含まれていません。
 Advanced_Error5                         '%s' を無視する単語のリストから削除しました。
@@ -279,7 +279,7 @@ Password_Password                       パスワード
 Password_Username                       ユーザー名
 Password_Enter                          パスワードを入力してください
 Password_Go                             ログイン
-Password_Error1                         パスワードが間違っています
+Password_Error1                         ユーザー名またはパスワードが間違っています
 
 Security_Error1                         認証ポート番号は1から65535までにしてください。
 Security_Stealth                        ステルスモード/サーバーオペレーション
@@ -311,7 +311,7 @@ Security_StatsTitle                     統計情報レポート
 Security_Stats                          統計情報を毎日送る
 
 Magnet_Error1                           マグネット '%s' には既にバケツ '%s' を割り当てています。
-Magnet_Error2                           新規マグネット '%s' は既にあるマグネット '%s' (バケツ '%s' が割り当てられています) と衝突するため、正しい処理をおこなうことができません。新規マグネットは追加しませんでした。
+Magnet_Error2                           新規マグネット '%s' は既にあるマグネット '%s' (バケツ '%s' が割り当てられています) と衝突するため、正しい処理をおこなうことができません。新規マグネットは追加されませんでした。
 Magnet_Error3                           新規マグネット '%s' にバケツ '%s' を割り当てました。
 Magnet_CurrentMagnets                   現在のマグネット
 Magnet_Message1                         次のマグネットにより、メールを常に特定のバケツに分類します。

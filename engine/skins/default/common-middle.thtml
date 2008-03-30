@@ -11,7 +11,7 @@
                 <table class="head" cellspacing="0" summary="">
                     <tr>
                         <td class="head"><TMPL_VAR NAME="Localize_Header_Title"></td>
-                        <td class="headShutdown" align="right" valign="bottom"><TMPL_IF NAME="Header_If_Password"><TMPL_ELSE><TMPL_IF NAME="Header_If_SingleUser"><TMPL_ELSE><a class="logoutLink" href="/logout"><TMPL_VAR NAME="Localize_Logout"></a> </TMPL_IF><TMPL_IF NAME="Common_Middle_If_CanAdmin"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a></TMPL_IF></TMPL_IF>&nbsp;</td>
+                        <td class="headShutdown" align="right" valign="bottom"><TMPL_IF NAME="Header_If_Password"><TMPL_ELSE><TMPL_IF NAME="Header_If_SingleUser"><TMPL_ELSE><a class="logoutLink" href="/logout"><TMPL_VAR NAME="Localize_Logout"> (<TMPL_VAR NAME="Header_User_Name">)</a> </TMPL_IF><TMPL_IF NAME="Common_Middle_If_CanAdmin"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a></TMPL_IF></TMPL_IF>&nbsp;</td>
                     </tr>
                 </table>
             </td>
@@ -25,11 +25,11 @@
     </table>
     <br />
     <TMPL_IF NAME="Header_If_Message">
-    <table class="shellStatusMessage"><tr class="shellStatusRow"><td><TMPL_VAR NAME="Header_Message"></td></tr></table>
+    <table class="shellStatusMessage"><tr class="shellStatusRow"><td><TMPL_VAR NAME="Header_Message" ESCAPE=HTML></td></tr></table>
     <br />
     </TMPL_IF>
     <TMPL_IF NAME="Header_If_Error">
-    <table class="shellErrorMessage"><tr class="shellErrorRow"><td><TMPL_VAR NAME="Header_Error"></td></tr></table>
+    <table class="shellErrorMessage"><tr class="shellErrorRow"><td><TMPL_VAR NAME="Header_Error" ESCAPE=HTML></td></tr></table>
     <br />
     </TMPL_IF>
     <TMPL_IF NAME="Header_If_Password">
