@@ -1,6 +1,8 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
+<!-- TODO : Script to disable user's password box if Initialize Password checkbox is checked -->
+
 <table cellpadding="10%" cellspacing="0" class="settingsTable" width="100%" summary="">
     <tr>
         <td class="settingsPanel" valign="top">
@@ -35,6 +37,36 @@
                 </select>
 
                 <input type="submit" class="submit" name="remove" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Remove">')" value="<TMPL_VAR NAME="Localize_Remove">" />
+                </form>
+            </TMPL_IF>
+            <br />
+            <TMPL_IF NAME="Users_If_Remove">
+                <hr />
+                <h2 class="users"><TMPL_VAR NAME="Localize_Users_Change_Password"></h2>
+
+                <form action="/users" method="post">
+                <TMPL_VAR NAME="Localize_Users_ChangePasswordUser">:
+                <select name="tochangepassword">
+                <option value="">&nbsp;</option>
+                <TMPL_LOOP NAME="Users_Loop_ChangePassword">
+                <option><TMPL_VAR NAME="Users_Name"></option>
+                </TMPL_LOOP>
+                </select>
+                <br />
+
+                <input type="checkbox" name="users_reset_password" id="usersResetPassword" />
+                <label class="usersLabel" for="usersResetPassword">
+                  <TMPL_VAR NAME="Localize_Users_ResetPassword">
+                </label>
+                <br />
+
+                <TMPL_VAR NAME="Localize_Configuration_NewPassword">:
+                <input type="password" name="users_new_password" size="10" />
+                <TMPL_VAR NAME="Localize_Configuration_ConfirmPassword">:
+                <input type="password" name="users_confirm_password" size="10" />
+                <br />
+
+                <input type="submit" class="submit" name="users_change_password" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Change_Password">')" value="<TMPL_VAR NAME="Localize_Update">" />
                 </form>
             </TMPL_IF>
         </td>

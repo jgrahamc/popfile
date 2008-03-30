@@ -26,13 +26,15 @@ ManualLanguage                          jp
 
 
 # These are where to find the documents on the Wiki
-WikiLink                                
-FAQLink                                 FAQ
-RequestFeatureLink                      RequestFeature
-MailingListLink                         POPFileAnnounce
+WikiLink                                JP
+FAQLink                                 JP:FAQ
+RequestFeatureLink                      JP:RequestFeature
+MailingListLink                         JP:POPFileAnnounce
 
 # Common words that are used on their own all over the interface
+Account                                 POP3 アカウント
 Apply                                   適用
+ApplyChanges                            変更を適用
 On                                      ON
 Off                                     OFF
 TurnOn                                  ON にする
@@ -77,6 +79,9 @@ ID                                      ID
 Date                                    日時
 Arrived                                 受信日時
 Size                                    サイズ
+Go                                      ジャンプ
+Edit                                    編集
+Logout                                  ログアウト
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -103,7 +108,9 @@ Header_Buckets                          バケツ
 Header_Configuration                    設定
 Header_Advanced                         詳細設定
 Header_Security                         セキュリティ
+Header_Administration                   管理
 Header_Magnets                          マグネット
+Header_Users                            ユーザー
 
 Footer_HomePage                         POPFile ホームページ
 Footer_Manual                           マニュアル
@@ -171,6 +178,19 @@ Configuration_SOCKSPort                 SOCKS V プロキシ ポート番号
 Configuration_SOCKSPortUpdate           SOCKS V プロキシのポート番号を %s に変更しました。
 Configuration_SOCKSServerUpdate         SOCKS V プロキシのサーバを %s に変更しました。
 Configuration_Fields                    履歴タブに表示する項目
+Configuration_ChangePassword            パスワードの変更
+Configuration_OldPassword               旧パスワード
+Configuration_NewPassword               新パスワード
+Configuration_ConfirmPassword           新パスワードの確認
+Configuration_Password_Mismatch         新パスワードと新パスワードの確認は同一でなくてはなりません
+Configuration_Password_Bad              入力された旧パスワードが間違っています
+Configuration_Password_Fail             新しいパスワードに設定できませんでした
+Configuration_Set_Password              新しいパスワードが設定されました
+Configuration_ConfigBar                 設定バー
+Configuration_Logger_Level0	            低
+Configuration_Logger_Level1	            中
+Configuration_Logger_Level2	            高
+Configuration_Logger_Level              ログレベル:
 
 Advanced_Error1                         '%s' は既に無視する単語のリストに含まれています。
 Advanced_Error2                         無効な文字が使われています。再度入力して下さい。
@@ -186,6 +206,37 @@ Advanced_Parameter                      パラメーター
 Advanced_Value                          値
 Advanced_Warning                        以下は POPFile の全てのパラメーターのリストです。アドバンスド・ユーザーに限り、必要時、値を変更して更新ボタンをクリックして下さい。バリディティー（妥当性）チェックは行いません。
 Advanced_ConfigFile                     設定ファイル:
+
+Users_Create                            新しいユーザーの作成
+Users_Remove                            既存ユーザーの削除
+Users_Edit                              ユーザー設定の編集
+Users_Change_Password                   ユーザーパスワードの変更/初期化
+Users_CopyFrom                          設定をコピーするユーザー
+Users_RemoveUser                        ユーザーの削除
+Users_CreateUser                        ユーザーの作成
+Users_EditUser                          編集するユーザー
+Users_ChangePasswordUser                パスワードを変更するユーザー
+Users_ResetPassword                     パスワードの初期化
+Users_Parameters                        パラメーター
+Users_Created                           ユーザー '%s' を作成しました（初期パスワードは '%s'）
+Users_Not_Created                       ユーザー '%s' を作成できませんでした
+Users_Created_And_Cloned                ユーザー '%s' を '%s' の設定をコピーして作成しました（初期パスワードは '%s'）
+Users_Not_Created_Exists                ユーザー '%s' は作成できませんでした。すでに存在しています
+Users_Created_Not_Cloned                ユーザー '%s' を作成しましたが、'%s' の設定はコピーできませんでした（初期パスワードは '%s'）
+Users_Removed                           ユーザー '%s' を削除しました
+Users_Removed_Failed                    ユーザー '%s' を削除できませんでした
+Users_Removed_Failed_Admin              ユーザー '%s' を削除できませんでした。先に管理者権限を無効にしてください
+Users_Changed_Password                  ユーザー '%s' のパスワードを変更しました
+Users_Change_Password_Failed            ユーザー '%s' のパスワードが変更できませんでした
+Users_Change_Password_Failed_Mismatch   ユーザー '%s' のパスワードが変更できませんでした。 新パスワードと新パスワードの確認は同一でなくてはなりません
+Users_Reset_Password                    ユーザー '%s' のパスワードを初期化しました（新しい初期パスワードは '%s'）
+Users_Reset_Password_Failed             ユーザー '%s' のパスワードが初期化できませんでした
+Users_SingleUserMode                    シングルユーザーモード（POPFile クラシック）
+Users_Accounts                          関連づけられた POP3 アカウント
+Users_AddAccount                        POP3 アカウントの追加（ホスト名:ユーザー名）
+Users_Bad_Account                       新しいアカウント名は「ホスト名:ユーザー名」の形式でなければなりません
+Users_Duplicate_Account                 アカウントを追加できませんでした。別のユーザーに関連づけられています
+Users_Failed_Account                    アカウントを追加できませんでした。
 
 History_Filter                          &nbsp;(<font color="%s">%s </font>バケツのみを表示)
 History_FilterBy                        フィルタリング
@@ -224,6 +275,8 @@ History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
 
 Password_Title                          パスワード
+Password_Password                       パスワード
+Password_Username                       ユーザー名
 Password_Enter                          パスワードを入力してください
 Password_Go                             ログイン
 Password_Error1                         パスワードが間違っています
@@ -231,7 +284,8 @@ Password_Error1                         パスワードが間違っています
 Security_Error1                         認証ポート番号は1から65535までにしてください。
 Security_Stealth                        ステルスモード/サーバーオペレーション
 Security_NoStealthMode                  いいえ (ステルスモード)
-Security_StealthMode                    (ステルスモード)
+Security_StealthMode                    ステルスモード (リモートからの接続を禁止)
+Security_ServerMode                     サーバーモード (リモートからの接続を許可)
 Security_ExplainStats                   (POPFile は毎日一回、以下の三つのデータを www.usethesource.com 上のスクリプトに送ります。: bc (バケツの総数)、mc (POPFile が分類したメッセージの総数)、ec (分類エラーの総数)。これらはファイルに記録され、POPFile がどのように使用され、どの程度の効果をあげているのかを示す統計情報として公開させていただきます。使用しています Web サーバーはこれらのログファイルを約五日間保存したあと、削除します。これらの統計値を IP アドレスと関連付けて保存したりはいっさいいたしません。)
 Security_ExplainUpdate                  (POPFile は毎日一回、以下の三つのデータを www.usethesource.com 上のスクリプトに送ります。: ma (インストールされている POPFile のメジャーバージョン番号)、mi (インストールされている POPFile のマイナーバージョン番号)、bn (インストールされている POPFile のビルド番号)。新しいバージョンがリリースされると、POPFile はその情報を受けてページの上部にグラフィックを表示してお知らせします。使用しています Web サーバーはこれらのログファイルを約五日間保存したあと、削除します。これらの更新チェックに使用したデータを IP アドレスと関連付けて保存したりはいっさいいたしません。)
 Security_PasswordTitle                  ユーザーインターフェースパスワード
@@ -252,7 +306,7 @@ Security_NNTP                           リモートマシンからの NNTP 接続を認める (
 Security_UI                             リモートマシンからの HTTP 接続(ユーザーインターフェースの利用)を認める (POPFile の再起動が必要)
 Security_XMLRPC                         リモートマシンからの XML-RPC 接続を認める (POPFile の再起動が必要)
 Security_UpdateTitle                    更新自動チェック
-Security_Update                         POPFile が更新されているかどうか毎日チェックします
+Security_Update                         POPFile が更新されているかどうか毎日チェックする
 Security_StatsTitle                     統計情報レポート
 Security_Stats                          統計情報を毎日送る
 
@@ -267,6 +321,7 @@ Magnet_MagnetType                       マグネットタイプ
 Magnet_Value                            値
 Magnet_Always                           分類先のバケツ
 Magnet_Jump                             マグネットページにジャンプ
+Magnet_Note                             マグネットは POPFile の学習プロセスをバイパスすることになるため、慎重に使うべきです。マグネットを使用することにより、POPFile が高い精度に達するまでにより長い時間がかかることになるでしょう。<br /><br >マグネットについての詳細は<a href="http://popfile.sourceforge.net/wiki/jp:glossary:amagnet">POPFile ドキュメンテーションプロジェクト</a>をお読みください。
 
 Bucket_Error1                           バケツ名にはアルファベットの小文字(a から z まで)か - (ハイフン)、または _ (アンダースコア)しか使えません。
 Bucket_Error2                           バケツ %s は既にあります。
@@ -292,6 +347,7 @@ Bucket_ClassificationFP                 誤検出
 Bucket_ClassificationFN                 見逃し
 Bucket_ResetStatistics                  リセット
 Bucket_LastReset                        最後のリセット
+Bucket_MessagesPerDay                   1 日あたりのメール数
 Bucket_CurrentColor                     %s 現在の色は %s
 Bucket_SetColorTo                       %s の色を %s に設定
 Bucket_Maintenance                      管理
@@ -330,8 +386,8 @@ View_WordScores                         得点
 View_Chart                              分類決定図
 View_DownloadMessage                    メッセージをダウンロード
 
-Windows_TrayIcon                        POPFile のアイコンを Windows システムトレイに表示しますか？
-Windows_Console                         POPFile のメッセージをコンソールウィンドウに出力しますか？
+Windows_TrayIcon                        POPFile のアイコンを Windows システムトレイに表示する
+Windows_Console                         POPFile のメッセージをコンソールウィンドウに出力する
 Windows_NextTime                        <p><font color="red">この変更は POPFile を次回起動するまで有効になりません。</font>
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
@@ -349,9 +405,11 @@ Configuration_MainTableSummary          This table contains a number of forms to
 Configuration_InsertionTableSummary     This table contains buttons that determine whether or not certain modifications are made to the headers or subject line of the email before it is passed on to the email client.
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
 Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying email due to their relative frequency in email in general.  They are organized per row according to the first letter of the words.
+Users_AccountTableSummary               This table provides a list of POP3 accounts that are associated with the user being edited.
 
 Imap_Bucket2Folder                      <b>%s</b> バケツに分類されたメールの移動先
 Imap_MapError                           複数のバケツをひとつのフォルダに対応付けすることはできません。
+Imap_MapUpdated                         バケツ '%s' を フォルダ '%s' に対応付けました。
 Imap_Server                             IMAP サーバ ホスト名:
 Imap_ServerNameError                    サーバのホスト名を入力してください。
 Imap_Port                               IMAP サーバ ポート番号:
@@ -360,9 +418,11 @@ Imap_Login                              IMAP アカウント ユーザ名:
 Imap_LoginError                         ユーザ名／ログイン名を入力してください。
 Imap_Password                           IMAP アカウントのパスワード:
 Imap_PasswordError                      サーバに対するパスワードを入力してください。
+Imap_ConnectionDetailsUpdated           IMAP の接続設定が更新されました。次はフォルダリストを更新してください。
 Imap_Expunge                            監視フォルダから移動されたメッセージを削除する。
 Imap_Interval                           更新の間隔（秒）:
 Imap_IntervalError                      更新間隔は10秒から3600秒の間で入力してください。
+Imap_OptionsUpdated                     IMAP のオプションは正常に更新されました。
 Imap_Bytelimit                          分類のために使用するメッセージのバイト数。0（空白）の場合、メッセージの全体を使用します:
 Imap_BytelimitError                     数字を入力してください。
 Imap_RefreshFolders                     フォルダリストの更新
@@ -370,12 +430,111 @@ Imap_Now                                実行
 Imap_UpdateError1                       ログインできません。ユーザ名とパスワードを確認してください。
 Imap_UpdateError2                       サーバに接続できません。ホスト名とポート番号を確認するとともに、インターネットに接続されているかどうかを確認してください。
 Imap_UpdateError3                       サーバに接続するための情報を先に設定してください。
+Imap_UpdateOK                           Successfully read the list of mailboxes/folders on the server.
 Imap_NoConnectionMessage                サーバに接続するための情報を先に設定してください。そうすると、さらに多くのオプションが設定できるようになります。
 Imap_WatchMore                          監視フォルダリストにフォルダを追加
+Imap_WatchedFolderAdded                 監視フォルダリストの項目をひとつ増やしました。監視したいフォルダを選んでください。
 Imap_WatchedFolder                      監視フォルダ 
+Imap_WatchedFoldersUpdated              監視フォルダのリストを更新しました
+Imap_WatchedFolderRemoved               監視フォルダのリストからフォルダ '%' を削除しました
+Imap_DoingTraining                      IMAP モジュールはこれからメッセージアーカイブから学習を始めるところです。学習が終わるまでの間 POPFile の UI は反応しなくなります。アーカイブの大きさや IMAP サーバとの接続速度にもよりますが、この処理にはしばらくかかります。
+Imap_DoTraining                         既存のメールアーカイブから学習します。
+Imap_Use_SSL							SSL 使用
 
 Shutdown_Message                        POPFile は終了しました。
 
-Help_Training                           POPFile をこれから使い始める場合、ある程度のトレーニングが必要となります。それは、POPFile はどのメールが必要なメールでどのメールが不要なメールかについてなにも知らないからです。トレーニングはそれぞれのバケツについて行う必要があり（最低でも１つのバケツについて、１つ以上のメッセージを再分類する）、POPFile が分類を間違えたメッセージを正しいバケツに再分類する（履歴の右側にあるメニューから正しい分類先を選択して「再分類」ボタンをクリックする）ことによってトレーニングすることができます。また、POPFile が行った分類にあわせてフォルダに移動するなど、メールクライアントを設定する必要があります。メールクライアントの設定については、<a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions/EmailSorting">POPFile ドキュメンテーションプロジェクト</a>を参照してください。
+Help_Training                           POPFile をこれから使い始める場合、ある程度のトレーニングが必要となります。それは、POPFile はどのメールが必要なメールでどのメールが不要なメールかについてなにも知らないからです。トレーニングはそれぞれのバケツについて行う必要があり（最低でも１つのバケツについて、１つ以上のメッセージを再分類する）、POPFile が分類を間違えたメッセージを正しいバケツに再分類することによってトレーニングすることができます。また、POPFile が行った分類にあわせてフォルダに移動するなど、メールクライアントを設定する必要があります。メールクライアントの設定については、<a href="http://popfile.sourceforge.net/wiki/JP:FAQ:EmailSorting">POPFile ドキュメンテーションプロジェクト</a>を参照してください。
 Help_Bucket_Setup                       POPFile では、もともとある unclassified という仮想的なバケツ以外に、最低でも２つのバケツを作成する必要があります。POPFile の特徴は、（メールを spam とそれ以外に分類するというだけではなく）いくつでもバケツを作成し、それらにメールを分類することができることです。簡単な設定では、"spam"、"personal"、"work" といったバケツを設定することになるでしょう。
 Help_No_More                            次回から表示しない。
+
+# Tooltips used in title attribute of parts of the UI
+tip_Menu_History                        POPFile が処理したメールを確認し、再分類します
+tip_Menu_Buckets                        バケツを管理したり、分類の統計情報を確認します
+tip_Menu_Magnets                        ベイジアンフィルタシステムをバイパスする単純なフィルタを管理します
+tip_Menu_Admin                          オプション設定を変更します
+tip_Menu_Users                          ユーザーを管理します
+tip_Menu_Advanced                       高度な設定を変更します
+
+tip_History_RecentNum                   Number of messages matching current Search and Filter
+tip_History_Reclassify                  分類先バケツの修正を行います
+tip_History_Search                      Find matches in the From address or Subject
+tip_History_Filter                      Limit the view to the items in the selected bucket
+tip_History_SearchNegate                Invert both the Search and Filter
+tip_History_SearchSubmit                Submit Search and Filter
+tip_History_SearchReset                 Clear Search and Filter
+tip_History_RemoveAll                   Remove all messages from history (matching Search and Filter)
+tip_History_RemoveChecked               Remove selected messages from history
+tip_History_RemovePage                  Remove messages on this page from history
+tip_History_RemoveColumn                列を削除します
+tip_History_MoveLeft                    左へ移動します
+tip_History_MoveRight                   右へ移動します
+tip_History_Sort                        この列で並び替えます
+
+tip_Bucket_BucketName                   View bucket details
+tip_Bucket_Unique                       Unique words in each bucket
+tip_Bucket_SubjectMod                   Insert bucket name to begining of the subject
+tip_Bucket_XTCHeader                    Insert header that most mail clients can use to filter based on POPFile's classification
+tip_Bucket_XPLHeader                    Insert a header with a link to the message to allow for quickly reclassifing a message
+tip_Bucket_Quarantine                   Islolate potentially dangerous email by placing it in attachment
+tip_Bucket_Color                        Select a color for each bucket
+tip_Bucket_Lookup                       Look up the probability and frequency of a word in all buckets
+tip_Bucket_Accuracy                     Overall classification accuracy
+tip_Bucket_Classified                   Bucket statistics and accuracy
+tip_Bucket_WordCount                    Number and percentage of total words in each bucket
+tip_Bucket_Create                       新しいバケツを作成します
+tip_Bucket_Delete                       バケツとこのバケツへの学習内容を削除します
+tip_Bucket_Rename                       バケツの名前を変更します
+tip_Bucket_FalsePos                     誤ってこのバケツに分類されたメッセージ
+tip_Bucket_FalseNeg                     誤ってこのバケツに分類<b>されなかった</b>メッセージ
+tip_Bucket_ResetStats                   分類精度の統計情報を初期化します
+
+tip_Magnet_Type                         Message header to match
+tip_Magnet_Value                        Text or address to match
+tip_Magnet_Bucket                       Bucket to send matches to
+
+tip_Config_Skin                         Change the look of POPFile
+tip_Config_Language                     Change the interface language
+tip_Config_HistoryColumns               Add columns you want to display in message history
+tip_Config_PageSize                     Number of messages to display per page
+tip_Config_Days                         Number of days to keep messages in history
+tip_Config_Purge                        Purge older messages now
+tip_Config_HistoryWidth                 Adjust size of history columns
+tip_Config_ColumnIncrease               Increase width of columns
+tip_Config_ColumnDecrease               Decrease width of columns
+tip_Config_ColumnAuto                   Reset column width based on current columns
+tip_Config_HideBar                      Hide configuration bar
+tip_Config_ShowBar                      Show configuration bar
+tip_Config_Password                     Change password for accessing POPFile's Control Center
+
+tip_Admin_AcceptRemoteHTTP              Allow UI access from another machine
+tip_Admin_AcceptRemotePOP3              Allow POP3 mail dowload from another machine
+tip_Admin_Password                      Add a password to limit access to POPFile
+tip_Admin_UpdateCheck                   0.22 text should be put back
+tip_Admin_ReportStats                   0.22 text should be put back
+
+tip_Users_Remove                        POPFile からユーザーを削除します
+
+tip_Footer_HomePage                     POPFile ホームページに接続します
+tip_Footer_Manual                       The original POPFile documentation (slightly outdated)
+tip_Footer_Wiki                         POPFile's documentation wiki
+tip_Footer_FAQ                          POPFile Frequently Asked Questions
+tip_Footer_Version                      POPFile version number
+tip_Footer_Login                        Date and time last accessed by this user
+tip_Footer_RFE                          Have an idea to improve POPFile? Let us know.
+tip_Footer_MailingList                  Want to hear about changes to POPFile?  Sign up.
+tip_Footer_FeedMe                       Like POPFile?  Contribute to making it more successful.
+
+# Jim's Bucket Stats stuff
+Words                                   単語
+Percent                                 パーセント
+Header_ConfigurationShort               設定
+Footer_HomePage_short                   ホームページ
+Footer_QuickStart                       クイックスタート
+Footer_WikiShort                        ドキュメント
+Bucket_BreakEmailsClassifiedUpper       分類された<br>メッセージ
+Bucket_ClassificationErrorsUpper        分類ミス
+Bucket_BreakClassificationFP            誤検出
+Bucket_BreakClassificationFN            見逃し
+Bucket_HitRate                          成功率
+Bucket_StrikeRate                       失敗率
+

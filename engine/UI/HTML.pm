@@ -610,7 +610,7 @@ sub url_handler__
         my $slot = $self->{form_}{view};
 
         if ( ( $slot =~ /^\d+$/ ) &&
-             ( $self->history_()->is_valid_slot( $slot ) ) ) {
+             ( $self->history_()->is_valid_slot( $slot, $session ) ) ) {
             $self->http_redirect_( $client,
                  "/view?view=$slot", $session );
         } else {
@@ -723,9 +723,9 @@ sub url_handler__
     # not then remove the administration and advanced URLs
 
     if ( !$self->user_global_config_( $self->{sessions__}{$session}{user}, 'can_admin' ) ) {
-        delete $url_table{administration};
-        delete $url_table{advanced};
-        delete $url_table{users};
+        delete $url_table{'/administration'};
+        delete $url_table{'/advanced'};
+        delete $url_table{'/users'};
     }
 
     # Any of the standard pages can be found in the url_table, the
@@ -1227,17 +1227,14 @@ sub administration_page
     #$templ->param( 'Security_If_Password_Updated' => ( defined($self->{form_}{password} ) ) );
     $templ->param( 'Configuration_UI_Port'    => $self->config_( 'port' ) );
     $templ->param( 'If_Single_User'           => $self->global_config_( 'single_user' ) );
-    $templ->param( 'Security_If_Local_Http'   => $self->config_( 'local') );
     $templ->param( 'Security_If_Send_Stats'   => $self->user_config_( $user, 'send_stats' ) );
     $templ->param( 'Security_If_Update_Check' => $self->user_config_( $user, 'update_check' ) );
     $templ->param( 'logger_level_selected_' . $self->module_config_( 'logger', 'level' )
                         => 'selected="selected"');
     $templ->param( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected'
                         => 'selected="selected"' );
-    #my $all_local = 1;
-    $templ->param( "Security_If_Local_html" => $self->config_( 'local') );
-    #$templ->param( 'Security_If_Local' => $all_local );
-
+    $templ->param( "Security_If_Local_html" => $self->config_( 'local' ) );
+    my $all_local = $self->config_( 'local' );
 
     my ($status_message, $error_message);
     my %security_templates;
@@ -1270,16 +1267,26 @@ sub administration_page
         $self->log_( 3, "dynamic chain UI $name had status/error $status_message/$error_message")  if (defined $status_message || defined $error_message);
         $self->status_message__($templ,$status_message) if ( defined( $status_message ));
         $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
-
     }
+
+    # Build Securty panel
 
     my $security_html = '';
 
     for my $name (sort keys %{$self->{dynamic_ui__}{security}}) {
-        $self->{dynamic_ui__}{security}{$name}{object}->configure_item(
+        my $local = $self->{dynamic_ui__}{security}{$name}{object}->configure_item(
             $name, $security_templates{$name}, \%{$self->{language__}} );
+        $all_local &&= $local;
+    }
+
+    # If all modules are local, disable checkboxes
+
+    for my $name (sort keys %{$self->{dynamic_ui__}{security}}) {
+        $security_templates{$name}->param( 'Security_If_Local' => $all_local );
         $security_html .= $security_templates{$name}->output;
     }
+
+    $templ->param( 'Security_If_Local' => $all_local );
 
     my $chain_html = '';
 
@@ -1474,6 +1481,43 @@ sub users_page
         }
     }
 
+    # Handle changing/initializing user's password
+
+    if ( exists( $self->{form_}{users_change_password} ) &&
+         ( $self->{form_}{tochangepassword} ne '' ) ) {
+
+        my $initialize_password = $self->{form_}{users_reset_password};
+
+        if ( $initialize_password ) {
+            # Initialize user's password
+            my ($result, $new_password) = $self->classifier_()->initialize_users_password( $session, $self->{form_}{tochangepassword} );
+            if ( $result == 0 ) {
+                $self->status_message__( $templ, sprintf( $self->{language__}{Users_Reset_Password}, $self->{form_}{tochangepassword}, $new_password ) );
+            }
+            if ( $result == 1 ) {
+                $self->error_message__( $templ, sprintf( $self->{language__}{Users_Reset_Password_Failed}, $self->{form_}{tochangepassword} ) );
+            }
+
+        } else {
+            # Change user's password
+
+            my $new_password = $self->{form_}{users_new_password};
+            my $confirm_password = $self->{form_}{users_confirm_password};
+
+            if ( $new_password eq $confirm_password ) {
+                my $result = $self->classifier_()->change_users_password( $session, $self->{form_}{tochangepassword}, $new_password );
+                if ( $result == 0 ) {
+                    $self->status_message__( $templ, sprintf( $self->{language__}{Users_Changed_Password}, $self->{form_}{tochangepassword} ) );
+                }
+                if ( $result == 1 ) {
+                    $self->error_message__( $templ, sprintf( $self->{language__}{Users_Change_Password_Failed}, $self->{form_}{tochangepassword} ) );
+                }
+            } else {
+                $self->error_message__( $templ, sprintf( $self->{language__}{Users_Change_Password_Failed_Mismatch}, $self->{form_}{tochangepassword} ) );
+            }
+        }
+    }
+
     # Handle editing the parameters of a user
 
     if ( defined( $self->{form_}{update_params} ) ) {
@@ -1519,7 +1563,7 @@ sub users_page
 
     my @user_loop;
     my @remove_user_loop;
-    foreach my $user (@$users) {
+    foreach my $user (values %$users) {
         my %row_data;
         $row_data{Users_Name} = $user;
         push ( @user_loop, \%row_data);
@@ -1533,6 +1577,7 @@ sub users_page
     }
     $templ->param( 'Users_Loop_Edit' => \@user_loop );
     $templ->param( 'Users_Loop_Copy' => \@user_loop );
+    $templ->param( 'Users_Loop_ChangePassword' => \@user_loop );
 
     if ( exists( $self->{form_}{edituser} ) &&
          ( $self->{form_}{editname} ne '' ) ) {
@@ -2667,7 +2712,7 @@ sub history_undo
     foreach my $key (keys %{$self->{form_}}) {
         if ( $key =~ /^undo_([0-9]+)$/ ) {
             my $slot = $1;
-            my @fields = $self->history_()->get_slot_fields( $slot );
+            my @fields = $self->history_()->get_slot_fields( $slot, $session );
             my $bucket = $fields[8];
             my $newbucket = $self->classifier_()->get_bucket_name(
                                 $session,
@@ -2708,7 +2753,7 @@ sub history_page
 
         if ( $destination <= $maximum && $destination > 0 ) {
             return $self->http_redirect_( $client, "/history?start_message=$destination&"
-                 . $self->print_form_fields_(1,0,('filter','search','sort','session','negate') ), $session );
+                 . $self->print_form_fields_(1,0,('filter','search','sort','negate') ), $session );
         }
     }
 
@@ -2817,14 +2862,13 @@ sub history_page
 
     if ( defined( $self->{form_}{clearpage} ) ) {
 
-        # Remove the list of marked messages using the array of
-        # "remove" checkboxes
+        # Remove the list of messages on the current page
 
         $self->history_()->start_deleting();
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^rowid_(\d+)$/ ) {
                 $self->log_( 1, "clearpage $i" );
-                $self->history_()->delete_slot( $1, 1 );
+                $self->history_()->delete_slot( $1, 1, $session, 0 );
             }
         }
         $self->history_()->stop_deleting();
@@ -2841,7 +2885,7 @@ sub history_page
                 my $slot = $1;
                 if ( $self->{form_}{$i} ne '' ) {
                     $self->log_( 1, "clearchecked $i" );
-                    $self->history_()->delete_slot( $slot );
+                    $self->history_()->delete_slot( $slot, 0, $session, 0 );
                 }
             }
         }
@@ -2854,7 +2898,7 @@ sub history_page
     # clear the current page or clear all the files in the cache
 
     if ( defined( $self->{form_}{clearall} ) ) {
-        $self->history_()->delete_query( $q );
+        $self->history_()->delete_query( $q, $session );
     }
 
     $self->history_()->set_query( $q,
@@ -2869,7 +2913,7 @@ sub history_page
          defined( $self->{form_}{clearpage}      ) ||
          defined( $self->{form_}{undo}           ) ||
          defined( $self->{form_}{reclassify}     ) ) { # PROFILE BLOCK STOP
-        return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','session','negate') ), $session );
+        return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','negate') ), $session );
     }
 
     $templ->param( 'History_Field_Search'  => $self->{form_}{search} );
@@ -2945,7 +2989,7 @@ sub history_page
             $header =~ s/^.//;
             $row_data{History_Fields} =
                 $self->print_form_fields_(1,1,
-                    ('filter','session','search','negate'));
+                    ('filter','search','negate'));
             $row_data{History_Sort}   =
                 ( $self->{form_}{sort} eq $header )?'-':'';
             $row_data{History_Header} = $header;
@@ -3060,7 +3104,7 @@ sub history_page
                      $col_data{History_Mail_File}     = $$row[0];
                      $col_data{History_Fields}        =
                          $self->print_form_fields_(0,1,
-                           ('start_message','session','filter','search',
+                           ('start_message','filter','search',
                             'sort','negate' ) );
                      push ( @column_data, \%col_data );
                      next;
@@ -3197,12 +3241,17 @@ sub view_page
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
-    my $mail_file = $self->history_()->get_slot_file( $self->{form_}{view} );
-    my $start_message = $self->{form_}{start_message} || 0;
-
     my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted,
         $bucket, $reclassified, $bucketid, $magnet ) =
-        $self->history_()->get_slot_fields( $self->{form_}{view} );
+        $self->history_()->get_slot_fields( $self->{form_}{view}, $session );
+
+    if ( !defined($id) ) {
+        $self->http_redirect_( $client, "/history", $session );
+        return 1;
+    }
+
+    my $mail_file = $self->history_()->get_slot_file( $self->{form_}{view} );
+    my $start_message = $self->{form_}{start_message} || 0;
 
     my $color = $self->classifier_()->get_bucket_color(
                     $session, $bucket );
@@ -3229,7 +3278,7 @@ sub view_page
 
     my $index = $self->{form_}{view};
 
-    $templ->param( 'View_All_Fields'       => $self->print_form_fields_(1,1,('start_message','filter','session','search','sort','negate')));
+    $templ->param( 'View_All_Fields'       => $self->print_form_fields_(1,1,('start_message','filter','search','sort','negate')));
     $templ->param( 'View_Field_Search'     => $self->{form_}{search} );
     $templ->param( 'View_Field_Negate'     => $self->{form_}{negate} );
     $templ->param( 'View_Field_Sort'       => $self->{form_}{sort}   );

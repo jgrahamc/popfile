@@ -410,6 +410,8 @@ sub child__
 #                     when registering
 #    $language        Current language
 #
+# Returns 1 if nntp_local is 1
+#
 # ----------------------------------------------------------------------------
 
 sub configure_item
@@ -424,6 +426,7 @@ sub configure_item
     
     if ( $name eq 'nntp_local' ) {
         $templ->param( 'nntp_if_local' => $self->config_( 'local' ) );
+        return $self->config_( 'local' );
     }
 
     $self->SUPER::configure_item( $name, $templ, $language);
@@ -475,8 +478,10 @@ sub validate_item
     }
     
     if ( $name eq 'nntp_local' ) {
-        if ( defined $$form{nntp_local} ) {
-            $self->config_( 'local', $$form{nntp_local} );
+        if ( $form->{serveropt_nntp} ) {
+            $self->config_( 'local', 0 );
+        } else {
+            $self->config_( 'local', 1 );
         }
         return( undef, undef);
     }    

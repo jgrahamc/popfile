@@ -185,6 +185,7 @@ Configuration_Password_Mismatch         The new password must by identical in th
 Configuration_Password_Bad              The old password entered is incorrect
 Configuration_Password_Fail             Failed to set new password
 Configuration_Set_Password              New password has been set
+Configuration_ConfigBar                 Config Bar
 Configuration_Logger_Level0				Low
 Configuration_Logger_Level1				Medium
 Configuration_Logger_Level2				High
@@ -208,10 +209,13 @@ Advanced_ConfigFile                     Configuration file:
 Users_Create                            Create New User
 Users_Remove                            Remove Existing User
 Users_Edit                              Edit User Settings
+Users_Change_Password                   Change/Initialize User's Password
 Users_CopyFrom                          Copying settings from user
 Users_RemoveUser                        Remove user
 Users_CreateUser                        Create user named
 Users_EditUser                          Edit user
+Users_ChangePasswordUser                Change Password for user
+Users_ResetPassword                     Initialize Password
 Users_Parameters                        Parameters
 Users_Created                           Created user '%s' (initial password '%s')
 Users_Not_Created                       Failed to create user '%s'
@@ -221,6 +225,11 @@ Users_Created_Not_Cloned                Created user '%s' but clone of '%s' fail
 Users_Removed                           Removed user '%s'
 Users_Removed_Failed                    Failed to remove user '%s'
 Users_Removed_Failed_Admin              Failed to remove user '%s': disable admin rights first
+Users_Changed_Password                  Changed password for user '%s'
+Users_Change_Password_Failed            Failed to change password for user '%s'
+Users_Change_Password_Failed_Mismatch   Failed to change password for user '%s': The new password must by identical in the New and Confirm New boxes
+Users_Reset_Password                    Initialized password for user '%s' (new initial password '%s')
+Users_Reset_Password_Failed             Failed to initialize password for user '%s'
 Users_SingleUserMode                    Single user mode (POPFile Classic)
 Users_Accounts                          Associated POP3 Accounts
 Users_AddAccount                        Add POP3 account (host:user)
@@ -272,7 +281,8 @@ Password_Error1                         Incorrect user name or password
 Security_Error1                         The port must be a number between 1 and 65535
 Security_Stealth                        Stealth Mode/Server Operation
 Security_NoStealthMode                  No (Stealth Mode)
-Security_StealthMode                    (Stealth Mode)
+Security_StealthMode                    Stealth Mode (disable remote connections)
+Security_ServerMode                     Server Mode (allow remote connections)
 Security_ExplainStats                   (With this turned on POPFile sends once per day the following three values to a script on www.usethesource.com: bc (the total number of buckets that you have), mc (the total number of messages that POPFile has classified) and ec (the total number of classification errors).  These get stored in a file and I will use this to publish some statistics about how people use POPFile and how well it works.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the statistics and individual IP addresses.)
 Security_ExplainUpdate                  (With this turned on POPFile sends once per day the following three values to a script on www.usethesource.com: ma (the major version number of your installed POPFile), mi (the minor version number of your installed POPFile) and bn (the build number of your installed POPFile).  POPFile receives a response in the form of a graphic that appears at the top of the page if a new version is available.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the update checks and individual IP addresses.)
 Security_PasswordTitle                  User Interface Password
@@ -498,6 +508,7 @@ tip_Admin_UpdateCheck                   0.22 text should be put back
 tip_Admin_ReportStats                   0.22 text should be put back
 
 tip_Users_Remove                        Delete user from POPFile
+tip_Users_Change_Password               Change user's password
 
 tip_Footer_HomePage                     Visit the POPFile home page
 tip_Footer_Manual                       The original POPFile documentation (slightly outdated)

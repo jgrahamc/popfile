@@ -2383,7 +2383,8 @@ sub classify_and_modify
     $class = '' if ( !defined( $class ) );
     if ( $class eq '' ) {
         $self->{parser__}->start_parse();
-        ( $slot, $msg_file ) = $self->history_()->reserve_slot();
+        my $userid = $self->valid_session_key__( $session );
+        ( $slot, $msg_file ) = $self->history_()->reserve_slot( $session, $userid );
     } else {
         $msg_file = $self->history_()->get_slot_file( $slot );
     }
@@ -2750,7 +2751,7 @@ sub reclassify
         $self->log_(2, "Message $slot will be reclassified to $newbucket" );
         push @{$work{$newbucket}},
                 $self->history_()->get_slot_file( $slot );
-        my @fields = $self->history_()->get_slot_fields( $slot);
+        my @fields = $self->history_()->get_slot_fields( $slot, $session );
         my $bucket = $fields[8];
         $self->classifier_()->reclassified(
             $session, $bucket, $newbucket, 0 );
@@ -3357,16 +3358,7 @@ sub create_user
         return ( 1, undef );
     }
 
-    my $password = '';
-    my @chars = split( //,'abcdefghijklmnopqurstuvwxyz0123456789' );
-
-    while ( length( $password ) < 8 ) {
-        my $c = $chars[int(rand($#chars+1))];
-        if ( int(rand(2)) == 1 ) {
-            $c = uc($c);
-        }
-        $password .= $c;
-    }
+    my $password = $self->generate_users_password();
 
     my $password_hash = md5_hex( $new_user . '__popfile__' . $password );
 
@@ -3410,7 +3402,43 @@ sub create_user
             $self->db_()->do( "insert into buckets ( userid, name, pseudo ) values ( $id, '$name', $buckets{$name} );" );
         }
 
-        # TODO clone bucket parameters
+        # Fetch new bucket ids and cloned bucket ids
+
+        $h = $self->db_()->prepare(
+            "select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2 
+                 where bucket1.userid = $id and bucket1.name = bucket2.name and bucket2.userid = $clid;" );
+        $h->execute;
+        my %new_buckets;
+        while ( my $row = $h->fetchrow_arrayref ) {
+            $new_buckets{$row->[1]} = $row->[0];
+        }
+        $h->finish;
+
+        # Clone bucket parameters
+
+        $h = $self->db_()->prepare(
+            "select bucketid, btid, val from buckets, bucket_params
+                 where userid = $clid and buckets.id = bucket_params.bucketid;" );
+        $h->execute;
+        my %bucket_params;
+        while (my $row = $h->fetchrow_arrayref ) {
+            $bucket_params{$new_buckets{$row->[0]}}{$row->[1]} = $row->[2];
+        }
+        $h->finish;
+
+        foreach my $bucketid ( keys %bucket_params ) {
+            foreach my $btid ( keys %{$bucket_params{$bucketid}} ) {
+                my $val = $self->db_()->quote( $bucket_params{$bucketid}{$btid} );
+                $self->db_()->do(
+                    "insert into bucket_params ( bucketid, btid, val ) 
+                         values ( $bucketid, $btid, $val );" );
+            }
+        }
+
+        # TODO : Clone magnets
+
+        # TODO : Clone corpus data (optional)
+
     } else {
 
         # If we are not cloning a user then they need at least the
@@ -3420,6 +3448,28 @@ sub create_user
     }
 
     return ( 0, $password );
+}
+
+#----------------------------------------------------------------------------
+#
+# generate_users_password
+#
+# Generates user's initial password
+#
+#----------------------------------------------------------------------------
+sub generate_users_password
+{
+    my $password = '';
+    my @chars = split( //,'abcdefghijklmnopqurstuvwxyz0123456789' );
+
+    while ( length( $password ) < 8 ) {
+        my $c = $chars[int(rand($#chars+1))];
+        if ( int(rand(2)) == 1 ) {
+            $c = uc($c);
+        }
+        $password .= $c;
+    }
+    return $password;
 }
 
 #----------------------------------------------------------------------------
@@ -3461,6 +3511,88 @@ sub remove_user
             return 0;
         } else {
             return 2;
+        }
+    }
+
+    return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# initialize_users_password (ADMIN ONLY)
+#
+# Initializes the password for the specified user
+#
+# $session     A valid session ID for an administrator
+# $user        The name of the user to change password
+#
+# Returns 0 for success, undef for wrong permissions and 1 for user
+# does not exist
+#
+# ----------------------------------------------------------------------------
+sub initialize_users_password
+{
+    my ( $self, $session, $user ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    my $id = $self->get_user_id( $session, $user );
+    my $password = $self->generate_users_password();
+
+    if ( defined( $id ) ) {
+        my $result = $self->set_password_for_user( $session, $id, $password );
+        if ( $result == 1 ) {
+            return (0, $password);
+        }
+    }
+
+    return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# change_users_password (ADMIN ONLY)
+#
+# Changes the password for the specified user
+#
+# $session     A valid session ID for an administrator
+# $user        The name of the user to change password
+# $password    The new password
+#
+# Returns 0 for success, undef for wrong permissions and 1 for user
+# does not exist
+#
+# ----------------------------------------------------------------------------
+sub change_users_password
+{
+    my ( $self, $session, $user, $password ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    my $id = $self->get_user_id( $session, $user );
+
+    if ( defined( $id ) ) {
+        my $result = $self->set_password_for_user( $session, $id, $password );
+        if ( $result == 1 ) {
+            return 0;
         }
     }
 
@@ -3522,10 +3654,32 @@ sub set_password
 {
     my ( $self, $session, $password ) = @_;
 
+    my $userid = $self->{api_sessions__}{$session};
+
+    return $self->set_password_for_user( $session, $userid, $password );
+}
+
+#----------------------------------------------------------------------------
+#
+# set_password_for_user
+#
+# Sets the password for the current user
+#
+# $session     A valid session ID
+# $userid      A user's id for change password
+# $password    The new password
+#
+# Returns 1 if the password was updated, 0 if not
+#
+# ----------------------------------------------------------------------------
+sub set_password_for_user
+{
+    my ( $self, $session, $userid, $password ) = @_;
+
     # Lookup the user name from the session key
 
     my $user;
-    my $h = $self->db_()->prepare( "select name from users where id = $self->{api_sessions__}{$session};" );
+    my $h = $self->db_()->prepare( "select name from users where id = $userid;" );
     $h->execute;
     if ( my $row = $h->fetchrow_arrayref ) {
         $h->finish;
@@ -3536,7 +3690,7 @@ sub set_password
 
     my $hash = md5_hex( $user . '__popfile__' . $password );
 
-    $self->db_()->do( "update users set password = '$hash' where id = $self->{api_sessions__}{$session};" );
+    $self->db_()->do( "update users set password = '$hash' where id = $userid;" );
 
     return 1;
 }
@@ -3565,13 +3719,13 @@ sub get_user_list
         return undef;
     }
 
-    my @users;
+    my %users;
     $self->{db_get_user_list__}->execute();
     while ( my $row = $self->{db_get_user_list__}->fetchrow_arrayref ) {
-        push @users, $row->[1];
+        $users{$row->[0]} = $row->[1];
     }
 
-    return \@users;
+    return \%users;
 }
 
 #----------------------------------------------------------------------------

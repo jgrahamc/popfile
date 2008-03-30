@@ -26,12 +26,12 @@ function serverMode(state) {
                             <br />
                             <input type="radio" name="servermode" id="StealthMode" value="StealthMode" onClick="serverMode(false)" <TMPL_IF NAME="Security_If_Local">checked="checked"</TMPL_IF> />
                             <label class="administrationLabel" for="StealthMode">
-                                Stealth Mode (disable remote connections)
+                                <TMPL_VAR NAME="Localize_Security_StealthMode">
                             </label>
                             <br />
                             <input type="radio" name="servermode" id="ServerMode" value="ServerMode" onClick="serverMode(true)" <TMPL_UNLESS NAME="Security_If_Local">checked="checked"</TMPL_UNLESS> />
                             <label class="administrationLabel" for="ServerMode">
-                                Server Mode (allow remote connections)
+                                <TMPL_VAR NAME="Localize_Security_ServerMode">
                             </label>
                             <br />
                             <div style="margin-left:1em;" class="adminAcceptRemote">

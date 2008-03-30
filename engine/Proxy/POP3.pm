@@ -700,11 +700,13 @@ sub child__
 #                     when registering
 #    $language        Current language
 #
+# Returns 1 if pop3_local is 1
+#
 # ----------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $templ, $language ) = @_;
+    my ( $self, $name, $templ, $language, $all_local ) = @_;
 
     if ( $name eq 'pop3_configuration' ) {
         $templ->param( 'POP3_Configuration_If_Force_Fork' => ( $self->config_( 'force_fork' ) == 0 ) );
@@ -713,6 +715,7 @@ sub configure_item
     } else {
         if ( $name eq 'pop3_security' ) {
             $templ->param( 'POP3_Security_Local' => ( $self->config_( 'local' ) == 1 ) );
+            return ( $self->config_( 'local' ) == 1 );
         } else {
             if ( $name eq 'pop3_chain' ) {
                 $templ->param( 'POP3_Chain_Secure_Server' => $self->config_( 'secure_server' ) );

@@ -81,7 +81,7 @@
                             <a class="columnRemove" href="/history?removecolumn=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_tip_History_RemoveColumn">" src="skins/x.gif" border="0" alt="x"></a>
                         </td>
                         <th class="historyLabel">
-                            <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_tip_History_Sort">">
+                            <a href="/history?setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header"><TMPL_VAR NAME="History_Fields">" title="<TMPL_VAR NAME="Localize_tip_History_Sort">">
 
                                 <TMPL_IF NAME="History_If_Sorted">
 

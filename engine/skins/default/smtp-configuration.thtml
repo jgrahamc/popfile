@@ -1,3 +1,17 @@
+<label class="configurationLabel" for="configSMTPPort">
+    <TMPL_VAR NAME="Localize_Configuration_SMTPPort">:
+</label>
+<table border="0" cellpadding="0" cellspacing="0" summary="">
+    <tr>
+        <td>
+            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+                <input name="smtp_port" type="text" id="configSMTPPort" value="<TMPL_VAR NAME="smtp_port">" />
+                <input type="submit" class="submit" name="update_smtp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
+            </form>
+        </td>
+    </tr>
+</table>
+
 <label class="configurationLabel" for="smtpForceFork">
     <TMPL_VAR NAME="Localize_Configuration_SMTPFork">:
 </label>
@@ -29,16 +43,3 @@
     </tr>
 </table>
 <br />
-<label class="configurationLabel" for="configSMTPPort">
-    <TMPL_VAR NAME="Localize_Configuration_SMTPPort">:
-</label>
-<table border="0" cellpadding="0" cellspacing="0" summary="">
-    <tr>
-        <td>
-            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <input name="smtp_port" type="text" id="configSMTPPort" value="<TMPL_VAR NAME="smtp_port">" />
-                <input type="submit" class="submit" name="update_smtp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-            </form>
-        </td>
-    </tr>
-</table>

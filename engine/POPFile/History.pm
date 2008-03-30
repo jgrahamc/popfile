@@ -236,7 +236,10 @@ sub deliver
 #----------------------------------------------------------------------------
 sub reserve_slot
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->classifier_()->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     my $r;
     my $in_transaction = ! ( $self->db_()->{AutoCommit} );
@@ -267,7 +270,7 @@ sub reserve_slot
 
         my $now = time;
         $self->db_()->do(
-            "insert into history ( userid, committed, inserted ) values ( 1, $r, $now );" );
+            "insert into history ( userid, committed, inserted ) values ( $userid, $r, $now );" );
         last;
     }
 
@@ -380,7 +383,7 @@ sub change_slot_classification
 
     my $oldbucketid = 0;
     if ( !$undo ) {
-        my @fields = $self->get_slot_fields( $slot );
+        my @fields = $self->get_slot_fields( $slot, $session );
         $oldbucketid = $fields[10];
     }
 
@@ -398,13 +401,14 @@ sub change_slot_classification
 # in the database.
 #
 # slot         The slot to update
+# session      A valid API session
 #
 #----------------------------------------------------------------------------
 sub revert_slot_classification
 {
-    my ( $self, $slot ) = @_;
+    my ( $self, $slot, $session ) = @_;
 
-    my @fields = $self->get_slot_fields( $slot );
+    my @fields = $self->get_slot_fields( $slot, $session );
     my $oldbucketid = $fields[9];
 
     $self->db_()->do( "update history set bucketid = $oldbucketid,
@@ -425,13 +429,17 @@ sub revert_slot_classification
 #---------------------------------------------------------------------------
 sub get_slot_fields
 {
-    my ( $self, $slot ) = @_;
+    my ( $self, $slot, $session ) = @_;
+
+    my $userid = $self->classifier_()->valid_session_key__( $session );
+    return undef if ( !defined($userid) );
 
     return $self->db_()->selectrow_array(
         "select $fields_slot from history, buckets, magnets
-             where history.id = $slot and
-                   buckets.id = history.bucketid and
-                   magnets.id = magnetid;" );
+             where history.id     = $slot and
+                   history.userid = $userid and
+                   buckets.id     = history.bucketid and
+                   magnets.id      = magnetid;" );
 }
 
 #---------------------------------------------------------------------------
@@ -441,14 +449,20 @@ sub get_slot_fields
 # Returns 1 if the slot ID passed in is valid
 #
 # slot           The slot id
+# session        A valid API session
 #
 #---------------------------------------------------------------------------
 sub is_valid_slot
 {
-    my ( $self, $slot ) = @_;
+    my ( $self, $slot, $session ) = @_;
+
+    my $userid = $self->classifier_()->valid_session_key__( $session );
+    return 0 if ( !defined($userid) );
 
     my @row = $self->db_()->selectrow_array(
-        "select id from history where history.id = $slot;" );
+        "select id from history
+             where history.id     = $slot and
+                   history.userid = $userid;" );
 
     return ( ( @row ) && ( $row[0] == $slot ) );
 }
@@ -632,26 +646,42 @@ sub commit_history__
 #
 # $slot              The slot ID
 # $archive           1 if it's OK to archive this entry
+# $session           A valid API session
+# $cleanup           1 if force delete this entry
+#                    ( from cleanup_history only )
 #
 # ---------------------------------------------------------------------------
 sub delete_slot
 {
-    my ( $self, $slot, $archive ) = @_;
+    my ( $self, $slot, $archive, $session, $cleanup ) = @_;
+
+    my $userid = $self->classifier_()->valid_session_key__( $session );
+    return if ( !defined($userid) );
+
+    my @b;
+    if ( $cleanup ) {
+        @b = $self->db_()->selectrow_array(
+            "select buckets.name from history, buckets
+                 where history.bucketid = buckets.id and
+                       history.id = $slot;" );
+    } else {
+        @b = $self->db_()->selectrow_array(
+            "select buckets.name from history, buckets
+                 where history.bucketid = buckets.id and
+                       history.userid = $userid and
+                       history.id = $slot;" );
+    }
 
     my $file = $self->get_slot_file( $slot );
-    $self->log_( 2, "delete_slot called for slot $slot, file $file" );
+    $self->log_( 2, "delete_slot called for slot $slot, file $file from userid $userid" );
+
+    my $bucket = $b[0];
+    return if ( !defined($bucket) );
 
     if ( $archive && $self->config_( 'archive' ) ) {
         my $path = $self->get_user_path_( $self->config_( 'archive_dir' ), 0 );
 
         $self->make_directory__( $path );
-
-        my @b = $self->db_()->selectrow_array(
-            "select buckets.name from history, buckets
-                 where history.bucketid = buckets.id and
-                       history.id = $slot;" );
-
-        my $bucket = $b[0];
 
         if ( ( $bucket ne 'unclassified' ) &&
              ( $bucket ne 'unknown class' ) ) {
@@ -962,7 +992,7 @@ sub set_query
 
     # Add the sort option (if there is one)
 
-    if ( $sort ne '' ) {
+    if ( $sort ne '' ) {print "$sort";
         $sort =~ s/^(\-)//;
         my $direction = defined($1)?'desc':'asc';
         if ( $sort eq 'bucket' ) {
@@ -1008,11 +1038,12 @@ sub set_query
 # Called to delete all the rows returned in a query
 #
 # id            The ID returned by start_query
+# session       A valid API session
 #
 #----------------------------------------------------------------------------
 sub delete_query
 {
-    my ( $self, $id ) = @_;
+    my ( $self, $id, $session ) = @_;
 
     $self->start_deleting();
 
@@ -1026,7 +1057,7 @@ sub delete_query
         push ( @ids, $row[0] );
     }
     foreach my $id (@ids) {
-        $self->delete_slot( $id, 1 );
+        $self->delete_slot( $id, 1, $session, 0 );
     }
 
     $self->stop_deleting();
@@ -1262,18 +1293,26 @@ sub cleanup_history
 {
     my ( $self ) = @_;
 
+    # TODO : multi-user support
+    my $session = $self->classifier_()->get_administrator_session_key();
+    my $users = $self->classifier_()->get_user_list( $session );
+
     my $seconds_per_day = 24 * 60 * 60;
-    my $old = time - $self->user_config_( 1, 'history_days' )*$seconds_per_day;
-    my $d = $self->db_()->prepare( "select id from history
-                                         where inserted < $old;" );
-    $d->execute;
-    my @row;
+
     my @ids;
-    while ( @row = $d->fetchrow_array ) {
-        push ( @ids, $row[0] );
+    foreach my $userid ( keys %$users ) {
+        my $old = time - $self->user_config_( $userid, 'history_days' )*$seconds_per_day;
+        my $d = $self->db_()->prepare( "select id from history
+                                             where userid = $userid and
+                                                   inserted < $old;" );
+        $d->execute;
+        my @row;
+        while ( @row = $d->fetchrow_array ) {
+            push ( @ids, $row[0] );
+        }
     }
     foreach my $id (@ids) {
-        $self->delete_slot( $id, 1 );
+        $self->delete_slot( $id, 1, $session, 1 );
     }
 }
 

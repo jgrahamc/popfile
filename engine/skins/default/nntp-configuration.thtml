@@ -7,6 +7,15 @@
     <input type="submit" class="submit" name="update_nntp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+    <label class="configurationLabel" for="configNntpSeparator">
+        <TMPL_VAR NAME="Localize_Configuration_NNTPSeparator">:
+    </label>
+    <br />
+    <input name="nntp_separator" id="configNntpSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" />
+    <input type="submit" class="submit" name="update_nntp_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
+</form>
+
 <label class="configurationLabel" for="nntpForceFork">
     <TMPL_VAR NAME="Localize_Configuration_NNTPFork">:
 </label>
@@ -38,37 +47,4 @@
         </td>
     </tr>
 </table>
-
-<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="configurationLabel" for="configNntpSeparator">
-        <TMPL_VAR NAME="Localize_Configuration_NNTPSeparator">:
-    </label>
-    <br />
-    <input name="nntp_separator" id="configNntpSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" />
-    <input type="submit" class="submit" name="update_nntp_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
-</form>
-
-            <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <div class="securityLabel">
-                    <TMPL_VAR NAME="Localize_Security_NNTP">:
-                </div>
-
-                <TMPL_IF NAME="nntp_if_local">
-
-                <span class="securityWidgetStateOff">
-                    <TMPL_VAR NAME="Localize_Security_NoStealthMode">
-                </span>
-                <input type="submit" class="toggleOn" id="securityAcceptNNTPOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                <input type="hidden" name="nntp_local" value="0" />
-
-                <TMPL_ELSE>
-
-                <span class="securityWidgetStateOn">
-                    <TMPL_VAR NAME="Localize_Yes">
-                </span>
-                <input type="submit" class="toggleOff" id="securitycceptNNTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
-                <input type="hidden" name="nntp_local" value="1" />
-
-                </TMPL_IF>
-
-            </form>
+<br />

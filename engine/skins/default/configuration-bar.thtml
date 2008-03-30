@@ -3,7 +3,7 @@
 <div class="configBar">
 
     <h2 class="configBarTitle">
-        <a name="configBar" title="<TMPL_VAR NAME="Localize_tip_Config_HideBar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1">Config Bar</a>
+        <a name="configBar" title="<TMPL_VAR NAME="Localize_tip_Config_HideBar">" href="<TMPL_VAR NAME="Configuration_Action">?hide_configbar=1"><TMPL_VAR NAME="Localize_Configuration_ConfigBar"></a>
     </h2>
 
     <table class="configBarBody" cellspacing="0" width="100%" summary="">
@@ -111,7 +111,7 @@
 
 <div class="configBarHidden">
     <h2 class="configBarTitle">
-        <a title="<TMPL_VAR NAME="Localize_tip_Config_ShowBar">" href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar">Config Bar</a>
+        <a title="<TMPL_VAR NAME="Localize_tip_Config_ShowBar">" href="<TMPL_VAR NAME="Configuration_Action">?show_configbar=1#configBar"><TMPL_VAR NAME="Localize_Configuration_ConfigBar"></a>
     </h2>
 </div>
 

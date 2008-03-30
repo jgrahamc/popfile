@@ -330,6 +330,8 @@ sub smtp_echo_response_
 #                     when registering
 #    $language        Current language
 #
+# Returns 1 if smtp_local is 1
+#
 # ----------------------------------------------------------------------------
 
 sub configure_item
@@ -343,6 +345,7 @@ sub configure_item
 
     if ( $name eq 'smtp_local' ) {
         $templ->param( 'smtp_local_on' => $self->config_( 'local' ) );
+        return $self->config_( 'local' );
      }
 
     if ( $name eq 'smtp_server' ) {
@@ -393,8 +396,10 @@ sub validate_item
     }
 
     if ( $name eq 'smtp_local' ) {
-        if ( defined $$form{smtp_local} ) {
-            $self->config_( 'local', $$form{smtp_local} );
+        if ( $form->{serveropt_smtp} ) {
+            $self->config_( 'local', 0 );
+        } else {
+            $self->config_( 'local', 1 );
         }
         return ( $status, $error );
     }
