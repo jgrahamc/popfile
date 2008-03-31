@@ -33,7 +33,6 @@ use locale;
 
 use IO::Socket;
 use IO::Select;
-use Digest::MD5 qw( md5_hex );
 use HTML::Template;
 use Date::Format;
 use Date::Parse;
