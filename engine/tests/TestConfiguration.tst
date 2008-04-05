@@ -112,7 +112,9 @@ $c->stop();
 
 open FILE, "<popfile.cfg";
 my $line = <FILE>;
-test_assert_regexp( $line, 'config_piddir ../tests/' );
+test_assert_regexp( $line, 'GLOBAL_crypt_device ' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_crypt_strength 0' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_debug 0' );
 $line = <FILE>;
@@ -123,6 +125,8 @@ $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_single_user 1' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_timeout 60' );
+$line = <FILE>;
+test_assert_regexp( $line, 'config_piddir ../tests/' );
 $line = <FILE>;
 test_assert_regexp( $line, 'logger_format default' );
 $line = <FILE>;
@@ -151,32 +155,32 @@ test_assert_equal( $c->parameter( 'testparam3' ), '' );
 # Check that parameter upgrading works
 
 my %upgrades = (     'corpus',                   'bayes_corpus',
-		     'unclassified_probability', 'bayes_unclassified_probability',
-		     'piddir',                   'config_piddir',
-		     'debug',                    'GLOBAL_debug',
-		     'msgdir',                   'GLOBAL_msgdir',
-		     'timeout',                  'GLOBAL_timeout',
-		     'logdir',                   'logger_logdir',
-		     'localpop',                 'pop3_local',
-		     'port',                     'pop3_port',
-		     'sport',                    'pop3_secure_port',
-		     'server',                   'pop3_secure_server',
-		     'separator',                'pop3_separator',
-		     'toptoo',                   'pop3_toptoo',
-		     'archive',                  'history_archive',
-		     'archive_classes',          'history_archive_classes',
-		     'archive_dir',              'history_archive_dir',
-		     'history_days',             'history_history_days',
-		     'language',                 'html_language',
-		     'last_reset',               'html_last_reset',
-		     'last_update_check',        'html_last_update_check',
-		     'localui',                  'html_local',
-		     'page_size',                'html_page_size',
-		     'password',                 'html_password',
-		     'send_stats',               'html_send_stats',
-		     'skin',                     'html_skin',
-		     'test_language',            'html_test_language',
-		     'update_check',             'html_update_check',
+                     'unclassified_probability', 'bayes_unclassified_probability',
+                     'piddir',                   'config_piddir',
+                     'debug',                    'GLOBAL_debug',
+                     'msgdir',                   'GLOBAL_msgdir',
+                     'timeout',                  'GLOBAL_timeout',
+                     'logdir',                   'logger_logdir',
+                     'localpop',                 'pop3_local',
+                     'port',                     'pop3_port',
+                     'sport',                    'pop3_secure_port',
+                     'server',                   'pop3_secure_server',
+                     'separator',                'pop3_separator',
+                     'toptoo',                   'pop3_toptoo',
+                     'archive',                  'history_archive',
+                     'archive_classes',          'history_archive_classes',
+                     'archive_dir',              'history_archive_dir',
+                     'history_days',             'history_history_days',
+                     'language',                 'html_language',
+                     'last_reset',               'html_last_reset',
+                     'last_update_check',        'html_last_update_check',
+                     'localui',                  'html_local',
+                     'page_size',                'html_page_size',
+                     'password',                 'html_password',
+                     'send_stats',               'html_send_stats',
+                     'skin',                     'html_skin',
+                     'test_language',            'html_test_language',
+                     'update_check',             'html_update_check',
                      'ui_port',                  'html_port' );
 
 foreach my $param (sort keys %upgrades) {
@@ -244,22 +248,22 @@ test_assert_regexp( $line, 'Expected a command line option and got baz' );
 
 # path_join__
 
-test_assert_equal( $c->path_join__( 'foo', '/root', 0 ), '/root' );
-test_assert_equal( $c->path_join__( 'foo', '/', 0 ), '/' );
-test_assert_equal( $c->path_join__( 'foo', 'c:\\root', 0 ), 'c:\\root' );
-test_assert_equal( $c->path_join__( 'foo', 'c:\\', 0 ), 'c:\\' );
+test_assert_equal( $c->path_join( 'foo', '/root', 0 ), '/root' );
+test_assert_equal( $c->path_join( 'foo', '/', 0 ), '/' );
+test_assert_equal( $c->path_join( 'foo', 'c:\\root', 0 ), 'c:\\root' );
+test_assert_equal( $c->path_join( 'foo', 'c:\\', 0 ), 'c:\\' );
 
-test_assert( !defined( $c->path_join__( 'foo', '/root' ) ) );
-test_assert( !defined( $c->path_join__( 'foo', '/' ) ) );
-test_assert( !defined( $c->path_join__( 'foo', 'c:\\root' ) ) );
-test_assert( !defined( $c->path_join__( 'foo', 'c:\\' ) ) );
+test_assert( !defined( $c->path_join( 'foo', '/root' ) ) );
+test_assert( !defined( $c->path_join( 'foo', '/' ) ) );
+test_assert( !defined( $c->path_join( 'foo', 'c:\\root' ) ) );
+test_assert( !defined( $c->path_join( 'foo', 'c:\\' ) ) );
 
-test_assert_equal( $c->path_join__( '/foo', 'bar' ), '/foo/bar' );
-test_assert_equal( $c->path_join__( '/foo/', 'bar' ), '/foo/bar' );
-test_assert_equal( $c->path_join__( 'foo/', 'bar' ), 'foo/bar' );
-test_assert_equal( $c->path_join__( 'foo', 'bar' ), 'foo/bar' );
-test_assert_equal( $c->path_join__( 'foo', '\\\\bar', 0 ), '\\\\bar' );
-test_assert( !defined( $c->path_join__( 'foo', '\\\\bar' ) ) );
+test_assert_equal( $c->path_join( '/foo', 'bar' ), '/foo/bar' );
+test_assert_equal( $c->path_join( '/foo/', 'bar' ), '/foo/bar' );
+test_assert_equal( $c->path_join( 'foo/', 'bar' ), 'foo/bar' );
+test_assert_equal( $c->path_join( 'foo', 'bar' ), 'foo/bar' );
+test_assert_equal( $c->path_join( 'foo', '\\\\bar', 0 ), '\\\\bar' );
+test_assert( !defined( $c->path_join( 'foo', '\\\\bar' ) ) );
 
 # get_user_path (note Makefile sets POPFILE_USER to ../tests/)
 
@@ -296,6 +300,8 @@ test_assert_equal( $c->get_root_path( '/foo', 0 ), '/foo' );
 test_assert( !defined( $c->get_root_path( '/foo' ) ) );
 test_assert_equal( $c->get_root_path( 'foo/' ), './foo/' );
 $c->{popfile_root__} = '../';
+
+# TODO : multi user test
 
 $POPFile->CORE_stop();
 

@@ -29,11 +29,13 @@ test_assert( rec_cp( 'corpus.base', 'corpus' ) );
 rmtree( 'corpus/CVS' );
 
 unlink 'popfile.db';
+unlink 'popfile.pid';
 unlink 'stopwords';
 test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
+$POPFile->{debug__} = 1;
 $POPFile->CORE_loader_init();
 $POPFile->CORE_signals();
 
@@ -41,36 +43,42 @@ my %valid = ( 'POPFile/Database' => 1,
               'POPFile/Logger' => 1,
               'POPFile/MQ'     => 1,
               'Classifier/Bayes'     => 1,
-              'UI/XMLRPC'     => 1,
+#              'UI/XMLRPC'     => 1,
               'POPFile/Configuration' => 1 );
+
+use UI::XMLRPC;
+my $x = new UI::XMLRPC;
+$x->loader( $POPFile );
 
 $POPFile->CORE_load( 0, \%valid );
 $POPFile->CORE_initialize();
 $POPFile->CORE_config( 1 );
-my $x = $POPFile->get_module( 'POPFile/MQ' );
-$x->config_('enabled',1);
-my $xport = 12000 + int(rand(2000));
+#my $x = $POPFile->get_module( 'POPFile/MQ' );
+$x->initialize();
+$x->config_( 'enabled', 1 );
+my $xport = 12000 + int( rand( 2000 ) );
+$x->config_( 'port', $xport );
 $POPFile->CORE_start();
 
 my ( $pid, $handle ) = $POPFile->CORE_forker();
 
-if ($pid == 0) {
+if ( $pid == 0 ) {
     # CHILD THAT WILL RUN THE XMLRPC SERVER
-    $x->config_( 'port', $xport );
-    if ($x->start() == 1) {
+
+    if ( $x->start() == 1 ) {
         while ( $x->service() && $POPFile->CORE_service( 1 ) ) {
-            select(undef,undef,undef, 0.1);
+            select( undef, undef, undef, 0.1 );
         }
         $x->stop();
     } else {
-        test_assert(0,"start failed\n");
+        test_assert( 0, "start failed\n" );
     }
 
     exit(0);
 } else {
     # PARENT -- test the XMLRPC server
 
-    select(undef,undef,undef,1);
+    select( undef, undef, undef, 1 );
     use XMLRPC::Lite;
 
 print "Testing $xport\n";
@@ -89,7 +97,7 @@ print "Testing $xport\n";
 
     test_assert_equal( $set_bucket_color, 1 );
 
-    select(undef,undef,undef,.2);
+    select( undef, undef, undef, .2 );
 
     my $bucket_color = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
@@ -98,7 +106,7 @@ print "Testing $xport\n";
 
     test_assert_equal( $bucket_color, 'somecolour' );
 
-    select(undef,undef,undef,.2);
+    select( undef, undef, undef, .2 );
 
     my $buckets = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
@@ -109,13 +117,16 @@ print "Testing $xport\n";
     test_assert_equal( @$buckets[1], 'personal' );
     test_assert_equal( @$buckets[2], 'spam' );
 
-    select(undef,undef,undef,.2);
+    select( undef, undef, undef, .2 );
 
     XMLRPC::Lite 
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
     -> call('POPFile/API.release_session_key', $session );
 }
 
+$x->stop();
 $POPFile->CORE_stop();
 
+# TODO : terminate child process
 
+1;

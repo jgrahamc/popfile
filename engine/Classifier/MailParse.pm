@@ -349,7 +349,10 @@ sub compute_html_color_distance
     # a hh hh hh format and back is a waste as is repeatedly decoding
     # from hh hh hh format
 
-    $self->{htmlcolordistance__} = $self->compute_rgb_distance( $self->{htmlfontcolor__}, $self->{htmlbackcolor__} );
+    if ( $self->{htmlfontcolor__} ne '' && $self->{htmlbackcolor__} ne '' ) {
+        $self->{htmlcolordistance__} = $self->compute_rgb_distance(
+            $self->{htmlfontcolor__}, $self->{htmlbackcolor__} );
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -829,7 +832,7 @@ sub update_tag
     while ( $arg =~ s/[ \t]*((\w+)[ \t]*=[ \t]*(([\"\'])(.*?)\4|([^ \t>]+)($|([ \t>]))))// ) {
         $original  = $1;
         $attribute = $2;
-        $value     = $5 || $6;
+        $value     = $5 || $6 || '';
         $quote     = '';
         $end_quote = '[\> \t\&\n]';
         if (defined $4) {
@@ -2397,10 +2400,10 @@ sub parse_css_color
 
     $found = 0 if ($error);
 
-    if ( defined($r) && ( 0 <= $r) && ($r <= 255) && # PROFILE BLOCK START
+    if ( $found &&                                    # PROFILE BLOCK START
+         defined($r) && ( 0 <= $r) && ($r <= 255) &&
          defined($g) && ( 0 <= $g) && ($g <= 255) &&
-         defined($b) && ( 0 <= $b) && ($b <= 255) &&
-         $found ) {                                 # PROFILE BLOCK STOP
+         defined($b) && ( 0 <= $b) && ($b <= 255) ) { # PROFILE BLOCK STOP
         if (wantarray) {
             return ( $r, $g, $b );
         } else {

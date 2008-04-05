@@ -110,7 +110,8 @@ sub test_report
                         $fail_messages .= " ($context)";
                 }
                 $test_failures += 1;
-            print "Test fail at $file:$line ($test) ($context)\n";
+            print "Test fail at $file:$line ($test)";
+            print " ($context)\n" if ( defined($context) );
         } else {
 #            print "Test pass at $file:$line ($test) ($context)\n";
         }
@@ -167,7 +168,8 @@ sub test_assert_equal
     $test = '' unless (defined($test));
     $expected = '' unless (defined($expected));
 
-    if ( !( $expected =~ /[^0-9]/ ) && !( $test =~ /[^0-9]/ )) {
+    if ( ( $expected ne '' ) && ( $test ne '' ) &&
+         !( $expected =~ /[^0-9]/ ) && !( $test =~ /[^0-9]/ ) ) {
 
         # This int() and is so that we don't get bitten by odd
         # floating point problems
@@ -182,6 +184,11 @@ sub test_assert_equal
     $test =~ s/\012/0x0A/;
     $expected =~ s/\015/0x0D/;
     $expected =~ s/\012/0x0A/;
+
+    # snip long result
+
+    $test = substr( $test, 0, 100 ) . '...' if ( length( $test ) > 100 );
+    $test = substr( $expected, 0, 100 ) . '...' if ( length( $expected ) > 100 );
 
     test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
 
@@ -210,6 +217,11 @@ sub test_assert_regexp
 {
     my ( $file, $line, $test, $expected, $context ) = @_;
     my $result = ( $test =~ /$expected/m );
+
+    # snip long result
+
+    $test = substr( $test, 0, 100 ) . '...' if ( length( $test ) > 100 );
+    $test = substr( $expected, 0, 100 ) . '...' if ( length( $expected ) > 100 );
 
     test_report( $result, "expecting to match [$expected] and got [$test]", $file, $line, $context );
 
@@ -283,19 +295,20 @@ foreach my $test (@tests) {
         print "\b";
 
         if ( !defined( $ran ) ) {
-            print "Error in $test: $@";
+            print STDERR "Error in $test: $@";
             $code = 1;
         }
 
         if ( $test_failures > $current_error_count ) {
-                print "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
-                print $fail_messages . "\n";
+                print STDERR "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
+                print STDERR $fail_messages . "\n";
                 $code = 1;
         } else {
-                print "ok (" . ( $test_count - $current_test_count ) . " ok)";
+                print STDERR "ok (" . ( $test_count - $current_test_count ) . " ok)";
         }
     }
 }
 
-print "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";
+print STDERR "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";
+print "\n";
 exit $code;

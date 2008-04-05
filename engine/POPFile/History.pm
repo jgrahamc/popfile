@@ -1208,7 +1208,7 @@ sub upgrade_history_files__
                 $self->history_read_class__( $msg );
 
             if ( $bucket ne 'unknown_class' ) {
-                my ( $slot, $file ) = $self->reserve_slot();
+                my ( $slot, $file ) = $self->reserve_slot( $session, 1 );
                 rename $msg, $file;
                 my @message = ( $session, $slot, $bucket, 0 );
                 push ( @{$self->{commit_list__}}, \@message );

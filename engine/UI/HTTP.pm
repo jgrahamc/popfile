@@ -412,7 +412,10 @@ Click <a href=\"/\">here</a> to continue.
 
     $self->log_( 1, $text );
 
-    print $client "HTTP/1.0 200 OK$eol";
+    my $error_code = 500;
+    $error_code = $error if ( $error eq '404' );
+
+    print $client "HTTP/1.0 $error_code Error$eol";
     print $client "Content-Type: text/html$eol";
     print $client "Content-Length: ";
     print $client length( $text );

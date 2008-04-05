@@ -3,11 +3,11 @@ To: <dareka@dokoka.co.jp>
 Date: Sat, 25 Oct 2003 00:37:10 -0700
 Subject: [gomi] =?iso-2022-jp?B?GyRCTCQ+NUJ6OS05cBsoQg==?=
 X-Text-Classification: gomi
-X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=3
+X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=33
 MIME-Version: 1.0
-Content-Type: multipart/report; boundary="3"
+Content-Type: multipart/report; boundary="33"
 
---3
+--33
 Content-Type: text/plain; charset=iso-2022-jp
 
 POPFile has quarantined a message.  It is attached to this email.
@@ -17,12 +17,12 @@ Quarantined Message Detail
 Original From: "スパム太郎" <waru@spam.co.jp>
 Original To: <dareka@dokoka.co.jp>
 Original Subject: 未 承諾 広告
-To examine the email open the attachment. To change this mail's classification go to http://127.0.0.1:8080/jump_to_message?view=3
+To examine the email open the attachment. To change this mail's classification go to http://127.0.0.1:8080/jump_to_message?view=33
 
 The first 20 words found in the email are:
 
  これは スパム です
---3
+--33
 Content-Type: message/rfc822
 
 Return-Path: <waru@spam.co.jp>
@@ -47,5 +47,5 @@ X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2800.1165
 
 これはスパムです。
 
---3--
+--33--
 .

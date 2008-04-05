@@ -28,6 +28,9 @@ rmtree( 'corpus/CVS' );
 unlink 'stopwords';
 test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
+unlink 'popfile.db';
+unlink 'popfile.pid';
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -50,6 +53,7 @@ my $cl = new Classifier::MailParse;
 
 $cl->{mangle__} = $POPFile->get_module( 'Classifier/WordMangle' );
 $cl->{lang__} = "English";
+
 # map_color()
 test_assert_equal( $cl->map_color( 'red' ),     'ff0000' );
 test_assert_equal( $cl->map_color( 'ff0000' ),  'ff0000' );
@@ -102,7 +106,9 @@ test_assert_equal( $cl->{words__}{'trick:flexhex:f&f*'}, 1 );
 $cl->{htmlbackcolor__} = $cl->map_color( 'white' );
 $cl->{htmlfontcolor__} = $cl->map_color( 'black' );
 $cl->{words__}       = {};
+$cl->{first20count__} = 0;
 $cl->add_line( 'this is a test of,adding words: from a line of text!', 0, '' );
+
 test_assert_equal( $cl->{words__}{test},   1 );
 test_assert_equal( $cl->{words__}{adding}, 1 );
 test_assert_equal( $cl->{words__}{words},  1 );
@@ -145,7 +151,6 @@ test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'black' ) );
 $cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color=#00FF00></font>' ), 0 ); # test for empty tag removal interacting with font tags
 test_assert_equal( $cl->{htmlfontcolor__}, '' );
-
 
 # Check comment detection
 $cl->{words__}         = {};
@@ -267,7 +272,6 @@ $cl->parse_html( '<body style="color:#ffffff;background: white">' );
 test_assert_equal( $cl->{words__}{'html:cssfontcolorffffff'}, 1 );
 test_assert_equal( $cl->{words__}{'html:cssbackcolorffffff'}, 1 );
 
-
 test_assert_equal( $cl->{cssfontcolortag__}, 'body' );
 test_assert_equal( $cl->{cssbackcolortag__}, 'body' );
 test_assert_equal( $cl->{htmlfontcolor__}, 'ffffff' );
@@ -304,7 +308,6 @@ test_assert_equal( $cl->{words__}{'html:cssbackcolor010101'}, 1 );
 test_assert_equal( $cl->{htmlcolordistance__}, 1 );
 test_assert_equal( $cl->{htmlfontcolor__}, '000000' );
 test_assert_equal( $cl->{htmlbackcolor__}, '010101' );
-
 
 $cl->parse_html( '</P>');
 
@@ -441,8 +444,6 @@ test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ=
 test_assert_equal($cl->decode_string("abba =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= aaa"), "abba Aladdin:open sesameAladdin:open sesame aaa");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= a =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= aaa"), "Aladdin:open sesame a Aladdin:open sesame aaa");
 
-
-
 # test get_header
 
 $cl->parse_file( 'TestMailParse022.msg' );
@@ -522,6 +523,9 @@ if ( $have_text_kakasi ) {
     test_assert( $b->start() );
     $cl->{lang__} = 'Nihongo';
 
+    my $nihongo_parser = $cl->setup_nihongo_parser( 'kakasi' );
+    test_assert_equal( $nihongo_parser, 'kakasi' );
+
     # Test decode_string
     my $original_string = 'POPFile' . pack( "H*", "a4cfbcabc6b0a5e1a1bca5ebbfb6a4eacaaca4b1a5c4a1bca5eba4c7a4b9" );
 
@@ -541,18 +545,18 @@ if ( $have_text_kakasi ) {
 
     # Test kakasi wakachi-gaki
 
-    $cl->init_kakasi();
+    $cl->{nihongo_parser__}{init}($cl);
 
     my $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b020a5e1a1bca5eb20bfb6a4eacaaca4b120a5c4a1bca5eb20a4c7a4b9" );
-    test_assert_equal( $cl->parse_line_with_kakasi($original_string), $wakati_string );
+    test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
 
     $original_string = pack( "H*", "504f5046696c65a4cfbcab0a09c6b0a5e1a1bca5ebbfb609a4ea0dcaac202020a4b1a5c4a1bca5eba4c7a4b9" );
     $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b00a09a5e1a1bca5eb20bfb6a4eacaaca4b1090d202020a5c4a1bca5eb20a4c7a4b9" );
-    test_assert_equal( $cl->parse_line_with_kakasi($original_string), $wakati_string );
+    test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
 
-    $cl->close_kakasi();
+    $cl->{nihongo_parser__}{close}($cl);
 
-    # parse test for Japanese e-mails.
+    # Test for parsing Japanese e-mails.
 
     require POPFile::Mutex;
     $cl->{kakasi_mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
@@ -595,6 +599,49 @@ if ( $have_text_kakasi ) {
             }
             delete $cl->{words__}{$missed};
         }
+    }
+
+    # Test for the internal parser
+
+    $nihongo_parser = $cl->setup_nihongo_parser( 'internal' );
+    test_assert_equal( $nihongo_parser, 'internal' );
+
+    $cl->{nihongo_parser__}{init}($cl);
+
+    $original_string = pack( "H*", "504f5046696c65a4cfbcabc6b0a5e1a1bca5ebbfb6a4eacaaca4b1a5c4a1bca5eba4c7a4b9" );
+    $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b020a5e1a1bca5eb20bfb620a4ea20caac20a4b120a5c4a1bca5eb20a4c7a4b920" );
+    test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
+
+    $cl->{nihongo_parser__}{close}($cl);
+
+    # Test for MeCab
+
+    my $have_mecab = 0;
+
+    foreach my $prefix (@INC) {
+        my $realfilename = "$prefix/MeCab.pm";
+        if (-f $realfilename) {
+            $have_mecab = 1;
+            last;
+        }
+    }
+
+    $nihongo_parser = $cl->setup_nihongo_parser( 'mecab' );
+    if ( $have_mecab ) {
+        test_assert_equal( $nihongo_parser, 'mecab' );
+
+        $cl->{nihongo_parser__}{init}($cl);
+
+        $original_string = pack( "H*", "504f5046696c65a4cfbcabc6b0a5e1a1bca5ebbfb6a4eacaaca4b1a5c4a1bca5eba4c7a4b9" );
+        $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b020a5e1a1bca5eb20bfb6a4eacaaca4b120a5c4a1bca5eb20a4c7a4b9200a" );
+        test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
+
+        $cl->{nihongo_parser__}{close}($cl);
+
+    } else {
+        print "\nWarning: MeCab tests skipped because MeCab was not found\n";
+
+        test_assert_equal( $nihongo_parser, 'kakasi' );
     }
 
 } else {

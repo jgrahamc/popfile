@@ -328,12 +328,12 @@ sub start
         # Windows and using the fork.
 
         if ( ( $nihongo_parser eq 'kakasi' ) && ( $^O eq 'MSWin32' ) &&
-             ( ( ( $self->user_module_config_( 1, 'pop3', 'enabled' ) ) &&
-                 ( $self->user_module_config_( 1, 'pop3', 'force_fork' ) ) ) ||
-               ( ( $self->user_module_config_( 1, 'nntp', 'enabled' ) ) &&
-                 ( $self->user_module_config_( 1, 'nntp', 'force_fork' ) ) ) ||
-               ( ( $self->user_module_config_( 1, 'smtp', 'enabled' ) ) &&
-                 ( $self->user_module_config_( 1, 'smtp', 'force_fork' ) ) ) ) ) {
+             ( ( ( $self->module_config_( 'pop3', 'enabled' ) ) &&
+                 ( $self->module_config_( 'pop3', 'force_fork' ) ) ) ||
+               ( ( $self->module_config_( 'nntp', 'enabled' ) ) &&
+                 ( $self->module_config_( 'nntp', 'force_fork' ) ) ) ||
+               ( ( $self->module_config_( 'smtp', 'enabled' ) ) &&
+                 ( $self->module_config_( 'smtp', 'force_fork' ) ) ) ) ) {
 
             $self->{parser__}->{need_kakasi_mutex__} = 1;
 
@@ -1727,7 +1727,7 @@ sub get_session_key_from_token
 
     # Verify that the user has an administrator session set up
 
-    if ( $self->get_user_parameter( $session, 'GLOBAL_can_admin' ) != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
@@ -2815,9 +2815,7 @@ sub get_accounts
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
@@ -2854,9 +2852,7 @@ sub add_account
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return 0;
     }
 
@@ -2899,13 +2895,12 @@ sub remove_account
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return 0;
     }
 
-    my $result = $self->db_()->do( "delete from accounts where account = '$module:$account';" );
+    my $quoted_account = $self->db_()->quote( "$module:$account" );
+    my $result = $self->db_()->do( "delete from accounts where account = $quoted_account;" );
 
     return defined( $result );
 }
@@ -2956,6 +2951,7 @@ sub get_bucket_id
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
+    return undef if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) );
 
     return $self->{db_bucketid__}{$userid}{$bucket}{id};
 }
@@ -2983,7 +2979,7 @@ sub get_bucket_name
         }
     }
 
-    return '';
+    return undef;
 }
 
 #----------------------------------------------------------------------------
@@ -3373,9 +3369,7 @@ sub create_user
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return ( undef, undef );
     }
 
@@ -3389,7 +3383,9 @@ sub create_user
 
     my $password_hash = md5_hex( $new_user . '__popfile__' . $password );
 
-    $self->db_()->do( "insert into users ( name, password ) values ( '$new_user', '$password_hash' );" );
+    my $quoted_user = $self->db_()->quote( $new_user );
+    my $quoted_hash = $self->db_()->quote( $password_hash );
+    $self->db_()->do( "insert into users ( name, password ) values ( $quoted_user, $quoted_hash );" );
 
     my $id = $self->get_user_id( $session, $new_user );
 
@@ -3432,7 +3428,7 @@ sub create_user
         # Fetch new bucket ids and cloned bucket ids
 
         $h = $self->db_()->prepare(
-            "select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2
+            "select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2 
                  where bucket1.userid = $id and bucket1.name = bucket2.name and bucket2.userid = $clid;" );
         $h->execute;
         my %new_buckets;
@@ -3457,7 +3453,7 @@ sub create_user
             foreach my $btid ( keys %{$bucket_params{$bucketid}} ) {
                 my $val = $self->db_()->quote( $bucket_params{$bucketid}{$btid} );
                 $self->db_()->do(
-                    "insert into bucket_params ( bucketid, btid, val )
+                    "insert into bucket_params ( bucketid, btid, val ) 
                          values ( $bucketid, $btid, $val );" );
             }
         }
@@ -3521,9 +3517,7 @@ sub remove_user
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
@@ -3532,9 +3526,10 @@ sub remove_user
     my $id = $self->get_user_id( $session, $user );
 
     if ( defined( $id ) ) {
-        my ( $val, $def ) = $self->get_user_parameter_from_id( $id,'GLOBAL_can_admin' );
+        my ( $val, $def ) = $self->get_user_parameter_from_id( $id, 'GLOBAL_can_admin' );
         if ( $val == 0 ) {
-            $self->db_()->do( "delete from users where name = '$user';" );
+            my $quoted_user = $self->db_()->quote( $user );
+            $self->db_()->do( "delete from users where name = $quoted_user;" );
             return 0;
         } else {
             return 2;
@@ -3566,9 +3561,7 @@ sub initialize_users_password
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
@@ -3608,9 +3601,7 @@ sub change_users_password
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
@@ -3644,13 +3635,8 @@ sub validate_password
 
     # Lookup the user name from the session key
 
-    my $user;
-    my $h = $self->db_()->prepare( "select name from users where id = $self->{api_sessions__}{$session};" );
-    $h->execute;
-    if ( my $row = $h->fetchrow_arrayref ) {
-        $h->finish;
-        $user = $row->[0];
-    } else {
+    my $user = $self->get_user_name_from_session( $session );
+    if ( !defined( $user ) ) {
         return 0;
     }
 
@@ -3681,7 +3667,8 @@ sub set_password
 {
     my ( $self, $session, $password ) = @_;
 
-    my $userid = $self->{api_sessions__}{$session};
+    my $userid = $self->valid_session_key__( $session );
+    return 0 if ( !defined( $userid ) );
 
     return $self->set_password_for_user( $session, $userid, $password );
 }
@@ -3703,21 +3690,30 @@ sub set_password_for_user
 {
     my ( $self, $session, $userid, $password ) = @_;
 
-    # Lookup the user name from the session key
+    # Get user id for the session
 
-    my $user;
-    my $h = $self->db_()->prepare( "select name from users where id = $userid;" );
-    $h->execute;
-    if ( my $row = $h->fetchrow_arrayref ) {
-        $h->finish;
-        $user = $row->[0];
-    } else {
+    my $current_userid = $self->valid_session_key__( $session );
+    return 0 if ( !defined( $current_userid ) );
+
+    if ( $current_userid != $userid ) {
+        # If the current user id is not the specified user id, check can_admin
+
+        if ( !$self->is_admin_session( $session ) ) {
+            return 0;
+        }
+    }
+
+    # Lookup the user name from the user id
+
+    my $user = $self->get_user_name_from_id( $session, $userid );
+    if ( !defined( $user ) ) {
         return 0;
     }
 
     my $hash = md5_hex( $user . '__popfile__' . $password );
 
-    $self->db_()->do( "update users set password = '$hash' where id = $userid;" );
+    my $quoted_hash = $self->db_()->quote( $hash );
+    $self->db_()->do( "update users set password = $quoted_hash where id = $userid;" );
 
     return 1;
 }
@@ -3740,9 +3736,7 @@ sub get_user_list
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
@@ -3773,9 +3767,7 @@ sub get_user_parameter_list
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
@@ -3823,13 +3815,12 @@ sub get_user_id
 
     # Check that this user is an administrator
 
-    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
-
-    if ( $can_admin != 1 ) {
+    if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
-    my $h = $self->db_()->prepare( "select id from users where name = '$user';" );
+    my $quoted_user = $self->db_()->quote( $user );
+    my $h = $self->db_()->prepare( "select id from users where name = $quoted_user;" );
     $h->execute;
     if ( my $row = $h->fetchrow_arrayref ) {
         $h->finish;
@@ -3837,6 +3828,24 @@ sub get_user_id
     } else {
         return undef;
     }
+}
+
+#----------------------------------------------------------------------------
+#
+# is_admin_session
+#
+# Returns TRUE if the session is admin's
+#
+# $session     The valid session ID
+#
+#----------------------------------------------------------------------------
+sub is_admin_session
+{
+    my ( $self, $session ) = @_;
+
+    my $result = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    return ( defined($result) ? ( $result == 1 ) : undef );
 }
 
 #----------------------------------------------------------------------------
@@ -4126,10 +4135,11 @@ sub delete_bucket
         return 0;
     }
 
+    my $quoted_bucket = $self->db_()->quote( $bucket );
     $self->db_()->do(                                   # PROFILE BLOCK START
-        "delete from buckets where
-             buckets.userid = $userid and
-             buckets.name = '$bucket' and
+        "delete from buckets where 
+             buckets.userid = $userid and 
+             buckets.name = $quoted_bucket and 
              buckets.pseudo = 0;" );                    # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 
@@ -4158,6 +4168,11 @@ sub rename_bucket
 
     if ( !defined( $self->{db_bucketid__}{$userid}{$old_bucket} ) ) {
         $self->log_( 0, "Bad bucket name $old_bucket to rename_bucket" );
+        return 0;
+    }
+
+    if (  defined( $self->{db_bucketid__}{$userid}{$new_bucket} ) ) {
+        $self->log_( 0, "Bucket named $new_bucket already exists" );
         return 0;
     }
 
@@ -4310,12 +4325,13 @@ sub get_magnet_types_in_bucket
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->db_()->prepare( "select magnet_types.mtype from magnet_types, magnets, buckets
-        where magnet_types.id = magnets.mtid and
-              magnets.bucketid = buckets.id and
-              buckets.id = $bucketid
-              group by magnet_types.mtype
-              order by magnet_types.mtype;" );
+    my $h = $self->db_()->prepare(
+        "select magnet_types.mtype from magnet_types, magnets, buckets
+             where magnet_types.id = magnets.mtid and
+                   magnets.bucketid = buckets.id and
+                   buckets.id = $bucketid
+                   group by magnet_types.mtype
+                   order by magnet_types.mtype;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
@@ -4392,11 +4408,12 @@ sub get_magnets
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->db_()->prepare( "select magnets.val from magnets, magnet_types
-        where magnets.bucketid = $bucketid and
-              magnets.id != 0 and
-              magnet_types.id = magnets.mtid and
-              magnet_types.mtype = '$type' order by magnets.val;" );
+    my $h = $self->db_()->prepare(
+        "select magnets.val from magnets, magnet_types
+             where magnets.bucketid = $bucketid and
+                   magnets.id != 0 and
+                   magnet_types.id = magnets.mtid and
+                   magnet_types.mtype = '$type' order by magnets.val;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
@@ -4427,8 +4444,9 @@ sub create_magnet
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->db_()->selectrow_arrayref("select magnet_types.id from magnet_types
-                                                        where magnet_types.mtype = '$type';" );
+    my $result = $self->db_()->selectrow_arrayref(
+        "select magnet_types.id from magnet_types
+             where magnet_types.mtype = '$type';" );
 
     my $mtid = $result->[0];
 
@@ -4487,8 +4505,9 @@ sub delete_magnet
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->db_()->selectrow_arrayref("select magnet_types.id from magnet_types
-                                                        where magnet_types.mtype = '$type';" );
+    my $result = $self->db_()->selectrow_arrayref(
+        "select magnet_types.id from magnet_types
+             where magnet_types.mtype = '$type';" );
 
     my $mtid = $result->[0];
     $text = $self->db_()->quote( $text );
@@ -4534,10 +4553,11 @@ sub magnet_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $result = $self->db_()->selectrow_arrayref( "select count(*) from magnets, buckets
-        where buckets.userid = $userid and
-              magnets.id != 0 and
-              magnets.bucketid = buckets.id;" );
+    my $result = $self->db_()->selectrow_arrayref(
+        "select count(*) from magnets, buckets
+             where buckets.userid = $userid and
+                   magnets.id != 0 and
+                   magnets.bucketid = buckets.id;" );
 
     if ( defined( $result ) ) {
         return $result->[0];

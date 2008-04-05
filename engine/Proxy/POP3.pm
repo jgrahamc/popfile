@@ -747,7 +747,7 @@ sub validate_item
 
     if ( $name eq 'pop3_configuration' ) {
         if ( defined($$form{pop3_port}) ) {
-            if ( ( $$form{pop3_port} >= 1 ) && ( $$form{pop3_port} < 65536 ) ) {
+            if ( ( $$form{pop3_port} =~ /^\d+$/ ) && ( $$form{pop3_port} >= 1 ) && ( $$form{pop3_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{pop3_port} );
                 $status_message = sprintf( $$language{Configuration_POP3Update}, $self->config_( 'port' ) );
             } else {
@@ -791,7 +791,7 @@ sub validate_item
        }
 
         if ( defined($$form{sport}) ) {
-            if ( ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
+            if ( ( $$form{sport} =~ /^\d+$/ ) && ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
                 $self->config_( 'secure_port', $$form{sport} );
                 $status_message .= sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) );
             } else {

@@ -33,6 +33,7 @@ use locale;
 
 use IO::Socket;
 use IO::Select;
+use Digest::MD5 qw( md5_hex );
 use HTML::Template;
 use Date::Format;
 use Date::Parse;
@@ -1263,9 +1264,14 @@ sub administration_page
                                                                        \%{$self->{form_}} );
 
             # Tell the user anything the dynamic UI was interested in sharing
-            $self->log_( 3, "dynamic security UI $name had status/error $status_message/$error_message")  if (defined $status_message || defined $error_message);
-            $self->status_message__($templ,$status_message) if ( defined( $status_message ));
-            $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
+            if ( defined( $status_message ) ) {
+                $self->log_( 3, "dynamic security UI $name had status $status_message");
+                $self->status_message__($templ,$status_message);
+            }
+            if ( defined( $error_message ) ) {
+                $self->log_( 3, "dynamic security UI $name had error $error_message");
+                $self->error_message__($templ, $error_message);
+            }
         }
     }
 
@@ -1279,9 +1285,14 @@ sub administration_page
                                                                     \%{$self->{form_}} );
 
         # Tell the user anything the dynamic UI was interested in sharing
-        $self->log_( 3, "dynamic chain UI $name had status/error $status_message/$error_message")  if (defined $status_message || defined $error_message);
-        $self->status_message__($templ,$status_message) if ( defined( $status_message ));
-        $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
+        if ( defined( $status_message ) ) {
+            $self->log_( 3, "dynamic chain UI $name had status $status_message");
+            $self->status_message__($templ,$status_message);
+        }
+        if ( defined( $error_message ) ) {
+            $self->log_( 3, "dynamic chain UI $name had error $error_message");
+            $self->error_message__($templ, $error_message);
+        }
     }
 
     # Build Securty panel
@@ -1898,7 +1909,7 @@ sub magnet_page
 
                         if ( exists( $magnets{$current_mtext} ) ) {
                             $found  = 1;
-                            $error_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . '<br>';
+                            $error_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . "\n";
                             last;
                         }
                     }
@@ -1911,7 +1922,7 @@ sub magnet_page
                             for my $from (keys %magnets)  {
                                 if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
                                     $found = 1;
-                                    $error_message .= sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . '<br>';
+                                    $error_message .= sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . "\n";
                                     last;
                                 }
                             }
@@ -1943,7 +1954,7 @@ sub magnet_page
 
                     $self->classifier_()->create_magnet( $session, $mbucket, $mtype, $current_mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
-                        $status_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket )  . '<br>';
+                        $status_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket ) . "\n";
                     }
                 }
             }
@@ -2379,7 +2390,7 @@ sub corpus_page
                 my $bucket_param = $self->get_bucket_parameter__( $session, $bucket, $variable );
                 my $form_param = ( $self->{form_}{"${bucket}_$variable"} ) ? 1 : 0;
 
-                if ( $form_param ne $bucket_param ) {
+                if ( defined($form_param) && ( $form_param ne $bucket_param ) ) {
                     $self->set_bucket_parameter__( $session, $bucket, $variable, $form_param );
                 }
             }
@@ -2391,7 +2402,7 @@ sub corpus_page
                 my $bucket_color = $self->get_bucket_parameter__( $session, $bucket, 'color' );
                 my $form_color = $self->{form_}{"${bucket}_color"};
 
-                if ( $form_color ne $bucket_color ) {
+                if ( defined($form_color) && ( $form_color ne $bucket_color ) ) {
                     $self->set_bucket_parameter__( $session, $bucket, 'color', $form_color );
                 }
             }
@@ -2581,7 +2592,7 @@ sub set_history_navigator__
 {
     my ( $self, $templ, $start_message, $stop_message, $session ) = @_;
 
-    $templ->param( 'History_Navigator_Fields' => $self->print_form_fields_(0,1,('session','filter','search','sort','negate' ) ) );
+    $templ->param( 'History_Navigator_Fields' => $self->print_form_fields_(0,1,( 'filter','search','sort','negate' ) ) );
 
     if ( $start_message != 0 )  {
         $templ->param( 'History_Navigator_If_Previous' => 1 );
@@ -2609,7 +2620,7 @@ sub set_history_navigator__
             if ( $i == $start_message ) {
                 $row_data{History_Navigator_If_This_Page} = 1;
             } else {
-                $row_data{History_Navigator_Fields} = $self->print_form_fields_(0,1,('session','filter','search','sort','negate'));
+                $row_data{History_Navigator_Fields} = $self->print_form_fields_(0,1,('filter','search','sort','negate'));
             }
 
             $dots = 1;
@@ -3518,6 +3529,12 @@ sub status_message__
 {
     my ( $self, $templ, $message ) = @_;
 
+    $message =~ s/&/&amp;/g;
+    $message =~ s/</&lt;/g;
+    $message =~ s/>/&gt;/g;
+    $message =~ s/\"/&quot;/g;
+    $message =~ s/\n/<br \/>/g;
+
     my $old = $templ->param( 'Header_Message' ) || '';
     $templ->param( 'Header_If_Message' => 1 );
     $templ->param( 'Header_Message' =>($old ne '')?("$message<br />$old" ):$message);
@@ -3538,7 +3555,11 @@ sub error_message__
 {
     my ( $self, $templ, $message ) = @_;
 
-    $message =~ s/\n/<br \/>/;
+    $message =~ s/&/&amp;/g;
+    $message =~ s/</&lt;/g;
+    $message =~ s/>/&gt;/g;
+    $message =~ s/\"/&quot;/g;
+    $message =~ s/\n/<br \/>/g;
 
     my $old = $templ->param( 'Header_Error' ) || '';
     $templ->param( 'Header_If_Error' => 1 );

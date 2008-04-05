@@ -134,9 +134,13 @@ my $line = <FILE>;
 test_assert_equal( $line, "HTTP/1.0 404 Error$eol" );
 $line = <FILE>;
 test_assert( defined( $line ) );
-test_assert( $line =~ /^$eol$/ );
 $line = <FILE>;
-test_assert( !defined( $line ) );
+test_assert( defined( $line ) );
+$line = <FILE>;
+test_assert( defined( $line ) );
+test_assert( $line =~ /^$eol$/ );
+#$line = <FILE>;
+#test_assert( !defined( $line ) );
 close FILE;
 
 # http_file_ tests
@@ -149,9 +153,13 @@ my $line = <FILE>;
 test_assert_equal( $line, "HTTP/1.0 404 Error$eol" );
 $line = <FILE>;
 test_assert( defined( $line ) );
-test_assert( $line =~ /^$eol$/ );
 $line = <FILE>;
-test_assert( !defined( $line ) );
+test_assert( defined( $line ) );
+$line = <FILE>;
+test_assert( defined( $line ) );
+test_assert( $line =~ /^$eol$/ );
+#$line = <FILE>;
+#test_assert( !defined( $line ) );
 close FILE;
 
 open FILE, ">send.tmp";
@@ -249,7 +257,7 @@ if ( $pid == 0 ) {
     print $client "GET / HTTP/1.0$eol" . "Header: Mine$eol" . "~~~~~~: ~~~~~~~$eol$eol";
     select( undef, undef, undef, 0 );
     $line = <$client>;
-    test_assert_equal( $line, "HTTP/1.0 / GET  Error$eol" );
+    test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
 
     # Get a protocol error
@@ -285,7 +293,7 @@ if ( $pid == 0 ) {
     print $client "POST /body HTTP/1.0$eol" . "Content-Length: 12$eol$eol" . "1234567890$eol$eol";
     select( undef, undef, undef, 0 );
     $line = <$client>;
-    test_assert_equal( $line, "HTTP/1.0 /body POST 1234567890$eol" );
+    test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
 
     # kill child
@@ -305,7 +313,7 @@ if ( $pid == 0 ) {
     print $client "GET /stop HTTP/1.0$eol$eol";
     select( undef, undef, undef, 0.1 );
     $line = <$client>;
-    test_assert_equal( $line, "HTTP/1.0 /stop GET  Error$eol" );
+    test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
 
     while ( waitpid( $pid, &WNOHANG ) != $pid ) {

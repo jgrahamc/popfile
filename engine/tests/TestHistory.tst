@@ -59,8 +59,9 @@ $l->config_( 'level', 2 );
 # that get_slot_file returns the same file as reserve_slot
 
 my $h = $POPFile->get_module( 'POPFile/History' );
+my $session = $h->classifier_()->get_administrator_session_key();
 
-my ( $slot, $file ) = $h->reserve_slot();
+my ( $slot, $file ) = $h->reserve_slot( $session, 1 );
 
 test_assert( defined( $slot ) );
 test_assert( !( -e $file ) );
@@ -97,7 +98,7 @@ test_assert_equal( $#result, -1 );
 # then commit it and call service to get it added.  Ensure that the
 # slot is now committed and has the right fields
 
-( $slot, $file ) = $h->reserve_slot();
+( $slot, $file ) = $h->reserve_slot( $session, 1 );
 
 open FILE, ">$file";
 print FILE <<EOF;
@@ -118,7 +119,7 @@ my $slot1 = $slot;
 
 sleep(2);
 
-( $slot, $file ) = $h->reserve_slot();
+( $slot, $file ) = $h->reserve_slot( $session, 1 );
 open FILE, ">$file";
 print FILE <<EOF;
 From: Evil Spammer <nospam\@jgc.org>
@@ -150,7 +151,7 @@ sleep(2);
 
 my $slot2;
 
-( $slot2, $file ) = $h->reserve_slot();
+( $slot2, $file ) = $h->reserve_slot( $session, 1 );
 open FILE, ">$file";
 print FILE <<EOF;
 From: Evil Spammer who does tricks <nospam\@jgc.org>
@@ -166,8 +167,6 @@ EOF
 close FILE;
 my $size3 = -s $file;
 
-my $b = $POPFile->get_module( 'Classifier/Bayes' );
-my $session = $b->get_session_key( 'admin', '' );
 $h->commit_slot( $session, $slot, 'spam', 0 );
 $POPFile->CORE_service( 1 );
 $h->commit_slot( $session, $slot1, 'personal', 0 );
@@ -175,7 +174,6 @@ $POPFile->CORE_service( 1 );
 $h->commit_slot( $session, $slot2, 'spam', 0 );
 $POPFile->CORE_service( 1 );
 $POPFile->CORE_service( 1 );
-$b->release_session_key( $session );
 $POPFile->CORE_service( 1 );
 
 # Check that the message hash mechanism works
@@ -247,24 +245,23 @@ test_assert_equal( $result[17], $size3 ); # size
 
 # Try a reclassification and undo
 
-my $session = $b->get_session_key( 'admin', '' );
 $h->change_slot_classification( 1, 'spam', $session );
 
-my @fields = $h->get_slot_fields( 1 );
+my @fields = $h->get_slot_fields( 1, $session );
 test_assert_equal( $fields[10], 4 );
 test_assert_equal( $fields[9],  3 );
 test_assert_equal( $fields[8],  'spam' );
 
-$h->revert_slot_classification( 1 );
-@fields = $h->get_slot_fields( 1 );
+$h->revert_slot_classification( 1, $session );
+@fields = $h->get_slot_fields( 1, $session );
 test_assert_equal( $fields[10], 3 );
 test_assert_equal( $fields[9],  0 );
 test_assert_equal( $fields[8],  'personal' );
 
 # Check is_valid_slot
 
-test_assert( $h->is_valid_slot( 1 ) );
-test_assert( !$h->is_valid_slot( 100 ) );
+test_assert( $h->is_valid_slot( 1, $session ) );
+test_assert( !$h->is_valid_slot( 100, $session ) );
 
 # Now that we've got some data in the history test the query
 # interface
@@ -289,7 +286,7 @@ test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
 test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 
-my @slot_row = $h->get_slot_fields( $rows[0][0] );
+my @slot_row = $h->get_slot_fields( $rows[0][0], $session );
 test_assert_equal( join(':',@{$rows[0]}), join(':',@slot_row) );
 
 # Start with the most basic, give me everything query
@@ -470,7 +467,7 @@ test_assert_equal( $h->get_query_size( $q ), 4 );
 $file = $h->get_slot_file( 2 );
 test_assert( ( -e $file ) );
 $h->start_deleting();
-$h->delete_slot( 2, 0 );
+$h->delete_slot( 2, 0, $session, 0 );
 $h->stop_deleting();
 test_assert( !( -e $file ) );
 
@@ -504,7 +501,7 @@ test_assert( !( -e 'messages/00' ) );
 test_assert( !( -e 'messages/00/00' ) );
 test_assert( !( -e 'messages/00/00/00' ) );
 
-$b->release_session_key( $session );
+$h->classifier_()->release_session_key( $session );
 
 $POPFile->CORE_stop();
 
