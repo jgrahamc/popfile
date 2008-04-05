@@ -28,7 +28,7 @@ LanguageDirection                       ltr
 ManualLanguage                          zh-tw
 
 # This is where to find the FAQ on the Wiki
-FAQLink                                 FrequentlyAskedQuestions
+FAQLink                                 faq
 
 # Common words that are used on their own all over the interface
 Apply                                   套用
@@ -374,6 +374,6 @@ Imap_WatchedFolder                      被監視的郵件匣編號
 
 Shutdown_Message                        POPFile 已經被停掉了
 
-Help_Training                           當妳初次使用 POPFile 時, 她啥也不懂而需要被加以調教. POPFile 的每一個郵筒都需要用郵件訊息來加以調教, 祇有當妳重新把某個被 POPFile 錯誤分類的郵件訊息重新分類到正確的郵筒時, 纔真的是在調教她. 同時妳也得設定妳的郵件用戶端程式, 來按照 POPFile 的分類結果加以過濾郵件訊息. 關於設定用戶端過濾器的資訊可以在 <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile 文件計畫</a>裏被找到.
+Help_Training                           當妳初次使用 POPFile 時, 她啥也不懂而需要被加以調教. POPFile 的每一個郵筒都需要用郵件訊息來加以調教, 祇有當妳重新把某個被 POPFile 錯誤分類的郵件訊息重新分類到正確的郵筒時, 纔真的是在調教她. 同時妳也得設定妳的郵件用戶端程式, 來按照 POPFile 的分類結果加以過濾郵件訊息. 關於設定用戶端過濾器的資訊可以在 <a href="http://getpopfile.org/docs/faq/EmailSorting">POPFile 文件計畫</a>裏被找到.
 Help_Bucket_Setup                       POPFile 除了未分類 (unclassified) 的假郵筒外, 還需要至少兩個郵筒. 而 POPFile 的獨特之處正在於她對電子郵件的區分更勝於此, 妳甚至可以有任意數量的郵筒. 簡單的設定會是像 "垃圾 (spam)", "個人 (personal)", 和 "工作 (work)" 郵筒.
 Help_No_More                            別再顯示這個說明了

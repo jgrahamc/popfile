@@ -27,7 +27,7 @@ LanguageDirection                       ltr
 ManualLanguage                          en
 
 # This is where to find the FAQ on the Wiki
-FAQLink                                 FrequentlyAskedQuestions
+FAQLink                                 faq
 
 # Common words that are used on their own all over the interface
 Apply                                   Applica
@@ -371,6 +371,6 @@ Imap_WatchedFolder                      Sotto controllo cartella numero
 
 Shutdown_Message                        POPFile &egrave; stato disattivato
 
-Help_Training                           Quando usi POPFile per la prima volta, non sa niente e necessita di addestramento. POPFile ha bisogno di essere 'allenato' sui messaggi nei vari cesti, l'allenamento si ha quando riclassifichi nel cesto appropriato un messaggio che POPFile ha classificato male. Devi anche settare il tuo client di posta elettronica in modo che filtri i messaggi secondo la classificazione fatta da POPFile. Trovi informazioni su come settare il tuo programma di posta elettronica all'indirizzo <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Documentation Project</a>.
+Help_Training                           Quando usi POPFile per la prima volta, non sa niente e necessita di addestramento. POPFile ha bisogno di essere 'allenato' sui messaggi nei vari cesti, l'allenamento si ha quando riclassifichi nel cesto appropriato un messaggio che POPFile ha classificato male. Devi anche settare il tuo client di posta elettronica in modo che filtri i messaggi secondo la classificazione fatta da POPFile. Trovi informazioni su come settare il tuo programma di posta elettronica all'indirizzo <a href="http://getpopfile.org/docs/faq/EmailSorting">POPFile Documentation Project</a>.
 Help_Bucket_Setup                       POPFile richiede che ci siano almeno due cesti oltre allo pseudo-cesto 'unclassified'. Quel che rende POPFile unico &egrave; che pu&ograve; classificare email distribuendole in un numero qualunque di cesti. Un setup semplice pu&ograve; prevedere i cesti "spam", "personale", and a "lavoro" bucket.
 Help_No_More                            Non mostrare pi&ugrave;

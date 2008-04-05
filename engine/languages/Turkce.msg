@@ -28,7 +28,7 @@ LanguageDirection                       ltr
 ManualLanguage                          en
 
 # This is where to find the FAQ on the Wiki
-FAQLink                                 FrequentlyAskedQuestions
+FAQLink                                 faq
 
 # Common words that are used on their own all over the interface
 Apply                                   Uygula
@@ -372,6 +372,6 @@ Imap_WatchedFolder                      Ýzlenilen klasör numarasý
 
 Shutdown_Message                        POPFile kapatýldý
 
-Help_Training                           POPFile'ý ilk kullandýðýnýzda o hiçbir bilgiye sahip deðildir ve eðitime ihtiyacý vardýr. POPFile her kategori için mesajlar ile eðitilmelidir. Eðitim, POPFile bir mesajý yanlýþ sýnýflandýrdýðýnda bunu doðru kategori ile tekrar sýnýflandýrarak gerçekleþtirilir. Bunun dýþýnda, posta programýnýzýn mesajlarý POPFile'ýn sýnýflandýrmasýna göre filtrelemesi için ayarlamalýsýnýz. Posta programýnýzýn filtelerini ayarlamak hakkýnda bilgi <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Dökümantasyon Projesi</a> adresinde bulunabilir.
+Help_Training                           POPFile'ý ilk kullandýðýnýzda o hiçbir bilgiye sahip deðildir ve eðitime ihtiyacý vardýr. POPFile her kategori için mesajlar ile eðitilmelidir. Eðitim, POPFile bir mesajý yanlýþ sýnýflandýrdýðýnda bunu doðru kategori ile tekrar sýnýflandýrarak gerçekleþtirilir. Bunun dýþýnda, posta programýnýzýn mesajlarý POPFile'ýn sýnýflandýrmasýna göre filtrelemesi için ayarlamalýsýnýz. Posta programýnýzýn filtelerini ayarlamak hakkýnda bilgi <a href="http://getpopfile.org/docs/faq/EmailSorting">POPFile Dökümantasyon Projesi</a> adresinde bulunabilir.
 Help_Bucket_Setup                       POPFile, sýnýflandýrýlmamýþ pseudo-kategorisi dýþýnda en az iki kategori gerektirir. POPFile'ý eþsiz yapan, ikiden fazla, istediðiniz sayýda kategoriye sahip olabilmenizdir. Basit bir kurulum, "spam", "kiþisel", ve "iþ" kategorileri gibi olabilir.
 Help_No_More                            Bunu bir daha gösterme 

@@ -27,7 +27,7 @@ LanguageDirection                       ltr
 ManualLanguage                          en
 
 # This is where to find the FAQ on the Wiki
-FAQLink                                 FrequentlyAskedQuestions
+FAQLink                                 faq
 
 # Common words that are used on their own all over the interface
 Apply                                   Aplicar
@@ -373,6 +373,6 @@ Imap_WatchedFolder                      Carpeta mirada núm.
 
 Shutdown_Message                        S'ha aturat el POPFile
 
-Help_Training                           Quan useu per primer cop POPFile, no sap res i caldrà una mica d'entrenament. Cal entrenar POPFile per a cada cistella. L'anireu educant cada cop que reclassifiqueu un missatge que POPFile hagi classificat a una cistella incorrecta. També haureu de configurar el vostre client de correu perquè filtri els missatges segons la classificació de POPFile. Podeu trobar informació sobre com configurar el filtratge del vostre client de correu a <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">Projecte de Documentació POPFile</a> (en anglès).
+Help_Training                           Quan useu per primer cop POPFile, no sap res i caldrà una mica d'entrenament. Cal entrenar POPFile per a cada cistella. L'anireu educant cada cop que reclassifiqueu un missatge que POPFile hagi classificat a una cistella incorrecta. També haureu de configurar el vostre client de correu perquè filtri els missatges segons la classificació de POPFile. Podeu trobar informació sobre com configurar el filtratge del vostre client de correu a <a href="http://getpopfile.org/docs/faq/EmailSorting">Projecte de Documentació POPFile</a> (en anglès).
 Help_Bucket_Setup                       POPFile necessita al menys dues cistelles a més de la pseudo-cistella 'unclassified'. El que fa únic POPFile és que pot classificar els correus en tantes cistelles com volgueu. Una configuració senzilla pot ser una cistella "spam", una "personal" i una altra "feina".
 Help_No_More                            No mostrar-m'ho més

@@ -29,7 +29,7 @@ ManualLanguage                          jp
 WikiLink                                JP
 FAQLink                                 JP:FAQ
 RequestFeatureLink                      JP:RequestFeature
-MailingListLink                         JP:POPFileAnnounce
+MailingListLink                         JP:mailing_lists
 
 # Common words that are used on their own all over the interface
 Account                                 POP3 アカウント
@@ -321,7 +321,7 @@ Magnet_MagnetType                       マグネットタイプ
 Magnet_Value                            値
 Magnet_Always                           分類先のバケツ
 Magnet_Jump                             マグネットページにジャンプ
-Magnet_Note                             マグネットは POPFile の学習プロセスをバイパスすることになるため、慎重に使うべきです。マグネットを使用することにより、POPFile が高い精度に達するまでにより長い時間がかかることになるでしょう。<br /><br >マグネットについての詳細は<a href="http://popfile.sourceforge.net/wiki/jp:glossary:amagnet">POPFile ドキュメンテーションプロジェクト</a>をお読みください。
+Magnet_Note                             マグネットは POPFile の学習プロセスをバイパスすることになるため、慎重に使うべきです。マグネットを使用することにより、POPFile が高い精度に達するまでにより長い時間がかかることになるでしょう。<br /><br >マグネットについての詳細は<a href="http://getpopfile.org/docs/jp:glossary:amagnet">POPFile ドキュメンテーションプロジェクト</a>をお読みください。
 
 Bucket_Error1                           バケツ名にはアルファベットの小文字(a から z まで)か - (ハイフン)、または _ (アンダースコア)しか使えません。
 Bucket_Error2                           バケツ %s は既にあります。
@@ -443,7 +443,7 @@ Imap_Use_SSL							SSL 使用
 
 Shutdown_Message                        POPFile は終了しました。
 
-Help_Training                           POPFile をこれから使い始める場合、ある程度のトレーニングが必要となります。それは、POPFile はどのメールが必要なメールでどのメールが不要なメールかについてなにも知らないからです。トレーニングはそれぞれのバケツについて行う必要があり（最低でも１つのバケツについて、１つ以上のメッセージを再分類する）、POPFile が分類を間違えたメッセージを正しいバケツに再分類することによってトレーニングすることができます。また、POPFile が行った分類にあわせてフォルダに移動するなど、メールクライアントを設定する必要があります。メールクライアントの設定については、<a href="http://popfile.sourceforge.net/wiki/JP:FAQ:EmailSorting">POPFile ドキュメンテーションプロジェクト</a>を参照してください。
+Help_Training                           POPFile をこれから使い始める場合、ある程度のトレーニングが必要となります。それは、POPFile はどのメールが必要なメールでどのメールが不要なメールかについてなにも知らないからです。トレーニングはそれぞれのバケツについて行う必要があり（最低でも１つのバケツについて、１つ以上のメッセージを再分類する）、POPFile が分類を間違えたメッセージを正しいバケツに再分類することによってトレーニングすることができます。また、POPFile が行った分類にあわせてフォルダに移動するなど、メールクライアントを設定する必要があります。メールクライアントの設定については、<a href="http://getpopfile.org/docs/JP:FAQ:EmailSorting">POPFile ドキュメンテーションプロジェクト</a>を参照してください。
 Help_Bucket_Setup                       POPFile では、もともとある unclassified という仮想的なバケツ以外に、最低でも２つのバケツを作成する必要があります。POPFile の特徴は、（メールを spam とそれ以外に分類するというだけではなく）いくつでもバケツを作成し、それらにメールを分類することができることです。簡単な設定では、"spam"、"personal"、"work" といったバケツを設定することになるでしょう。
 Help_No_More                            次回から表示しない。
 

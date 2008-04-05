@@ -25,7 +25,7 @@ LanguageDirection                       rtl
 ManualLanguage                          ar
 
 # This is where to find the FAQ on the Wiki
-FAQLink                                 FrequentlyAskedQuestions
+FAQLink                                 faq
 
 # Common words that are used on their own all over the interface
 Apply                                   تطبيق
@@ -371,6 +371,6 @@ Imap_WatchedFolder                      مجلد مراقب رقم
 
 Shutdown_Message                        تم إقفال POPFile
 
-Help_Training                           عند إستعمالك POPFile لأول مرة، فإنه لا يعرف أي شيء ويحتاج لبعض التدريب. يحتاج POPFile للتدريب على رسائل لكل دلو، التدريب يتم عند إعادة تصنيف رسالة قام POPFile بتصنيفها بشكل خاطئ. ستحتاج أيضاً إلى إعداد برنامج البريد ليقوم بترتيب البريد حسب تصنيفات POPFile. يمكن العثور على التعليمات لإعداد برامج البريد في <a href="http://popfile.sourceforge.net/manual/ar/email.html">صفحات تعليمات POPFile</a>.
+Help_Training                           عند إستعمالك POPFile لأول مرة، فإنه لا يعرف أي شيء ويحتاج لبعض التدريب. يحتاج POPFile للتدريب على رسائل لكل دلو، التدريب يتم عند إعادة تصنيف رسالة قام POPFile بتصنيفها بشكل خاطئ. ستحتاج أيضاً إلى إعداد برنامج البريد ليقوم بترتيب البريد حسب تصنيفات POPFile. يمكن العثور على التعليمات لإعداد برامج البريد في <a href="http://getpopfile.org/manual/ar/email.html">صفحات تعليمات POPFile</a>.
 Help_Bucket_Setup                       يحتاج POPFile إلى دلوين على الأقل بالإضافة إلى دلو غير-المصنف. ما يجعل POPFile فريداً هو أنه يستطيع تصنيف بريد اكثر من هذا، تستطيع ان يكون عندك أي عدد من الدلاء. أبسط إعداد هو أن يكون عندك الدلاء "spam"، "personal"، "work".
 Help_No_More                            لا تعرض هذا مرة أخرى
