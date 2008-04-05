@@ -638,7 +638,7 @@ sub update_constants__
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    if ( $wc > 0 )  {
+    if ( defined $wc && $wc > 0 )  {
         $self->{not_likely__}{$userid} = -log( 10 * $wc );
 
         foreach my $bucket ($self->get_buckets( $session )) {
@@ -1886,7 +1886,7 @@ sub classify
     my @ok_buckets;
 
     for my $bucket (@buckets) {
-        if ( $self->{bucket_start__}{$userid}{$bucket} != 0 ) {
+        if ( defined $self->{bucket_start__}{$userid}{$bucket} && $self->{bucket_start__}{$userid}{$bucket} != 0 ) {
             $score{$bucket} = $self->{bucket_start__}{$userid}{$bucket};
             $matchcount{$bucket} = 0;
             push @ok_buckets, ( $bucket );
@@ -2018,7 +2018,7 @@ sub classify
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
 
     my %raw_score;
-    my $base_score = $score{$ranking[0]};
+    my $base_score = defined $ranking[0] ? $score{$ranking[0]} : 0;
     my $total = 0;
 
     # If the first and second bucket are too close in their
@@ -3432,7 +3432,7 @@ sub create_user
         # Fetch new bucket ids and cloned bucket ids
 
         $h = $self->db_()->prepare(
-            "select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2 
+            "select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2
                  where bucket1.userid = $id and bucket1.name = bucket2.name and bucket2.userid = $clid;" );
         $h->execute;
         my %new_buckets;
@@ -3457,7 +3457,7 @@ sub create_user
             foreach my $btid ( keys %{$bucket_params{$bucketid}} ) {
                 my $val = $self->db_()->quote( $bucket_params{$bucketid}{$btid} );
                 $self->db_()->do(
-                    "insert into bucket_params ( bucketid, btid, val ) 
+                    "insert into bucket_params ( bucketid, btid, val )
                          values ( $bucketid, $btid, $val );" );
             }
         }
@@ -4127,9 +4127,9 @@ sub delete_bucket
     }
 
     $self->db_()->do(                                   # PROFILE BLOCK START
-        "delete from buckets where 
-             buckets.userid = $userid and 
-             buckets.name = '$bucket' and 
+        "delete from buckets where
+             buckets.userid = $userid and
+             buckets.name = '$bucket' and
              buckets.pseudo = 0;" );                    # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 

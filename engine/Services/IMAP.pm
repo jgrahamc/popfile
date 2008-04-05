@@ -1388,11 +1388,10 @@ sub validate_bucket_folders {
                 $error_message = $language->{Imap_MapError}
             }
             else {
-                if ( $self->folder_for_bucket__( $bucket ) ne $folder ) {
+                if ( ! defined $self->folder_for_bucket__( $bucket ) || $self->folder_for_bucket__( $bucket ) ne $folder ) {
                     $self->folder_for_bucket__( $bucket, $folder );
                     $self->{folder_change_flag__} = 1;
                     $status_message .= sprintf $language->{Imap_MapUpdated}, $bucket, $folder;
-                    $status_message .= '<br />';
                 }
             }
         }
