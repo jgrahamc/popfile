@@ -966,7 +966,7 @@ sub can_reclassify__ {
 
     if ( $slot ne '' ) {
         my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted, $bucket, $reclassified, undef, $magnetized ) =
-                    $self->history_()->get_slot_fields( $slot );
+                    $self->history_()->get_slot_fields( $slot, $self->api_session() );
 
         $self->log_( 2, "get_slot_fields returned the following information:" );
         $self->log_( 2, "id:            $id" );
