@@ -83,7 +83,8 @@ sub initialize
     # database parameter above.
 
     $self->config_( 'dbconnect', 'dbi:SQLite2:dbname=$dbname' );
-    $self->config_( 'dbuser', '' ); $self->config_( 'dbauth', '' );
+    $self->config_( 'dbuser', '' );
+    $self->config_( 'dbauth', '' );
 
     # SQLite 1.05+ have some problems we are resolving.  This lets us
     # give a nice message and then disable the version checking later
@@ -173,7 +174,7 @@ sub backup_database__
     # If database backup is turned on and we are using SQLite then
     # backup the database by copying it
 
-    if ( ( $self->config_( 'sqlite_tweaks' ) & 2 ) && 
+    if ( ( $self->config_( 'sqlite_tweaks' ) & 2 ) &&
          $self->{db_is_sqlite__} ) {
         if ( !copy( $self->{db_name__}, $self->{db_name__} . ".backup" ) ) {
 	    $self->log_( 0, "Failed to backup database ".$self->{db_name__} );
@@ -196,7 +197,7 @@ sub tweak_sqlite
 {
     my ( $self, $tweak, $state, $db ) = @_;
 
-    if ( $self->{db_is_sqlite__} && 
+    if ( $self->{db_is_sqlite__} &&
          ( $self->config_( 'sqlite_tweaks' ) & $tweak ) ) {
 
         $self->log_( 1, "Performing tweak $tweak to $state" );
@@ -343,7 +344,7 @@ sub db_connect_helper__
         # retrieve the SQL_IDENTIFIER_QUOTE_CHAR for the database then use it
         # to strip off any sqlquotechars from the table names we retrieve
 
-        my $sqlquotechar = $db->get_info(29) || ''; 
+        my $sqlquotechar = $db->get_info(29) || '';
         my @tables = map { s/$sqlquotechar//g; $_ } ($db->tables());
 
         foreach my $table (@tables) {
