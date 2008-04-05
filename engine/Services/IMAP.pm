@@ -1456,7 +1456,7 @@ sub validate_options {
 
         # update interval
         my $form_interval = $form->{imap_options_update_interval};
-        if ( $form_interval =~ /^\d+$/ && $form_interval > 10 && $form_interval < 60*60 ) {
+        if ( $form_interval =~ /^\d+$/ && $form_interval >= 10 && $form_interval <= 60*60 ) {
             $self->user_config_( 1, 'update_interval', $form_interval );
         }
         else {
