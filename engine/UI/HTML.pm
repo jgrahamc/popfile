@@ -215,6 +215,8 @@ sub start
     # that any extensions to the user interface that have not yet been
     # translated will still appear
 
+    # TODO : hardcoded 1
+
     $self->load_language( 'English' );
     if ( $self->user_config_( 1, 'language' ) ne 'English' ) {
         $self->load_language( $self->user_config_( 1, 'language' ) );
@@ -222,6 +224,8 @@ sub start
 
     # Set the classifier option wmformat__ according to our
     # wordtable_format option.
+
+    # TODO : hardcoded 1
 
     $self->classifier_()->wmformat( $self->user_config_( 1,
                                         'wordtable_format' ) );

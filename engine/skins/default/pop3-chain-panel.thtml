@@ -4,14 +4,21 @@
     </label>
     <br />
     <input type="text" name="server" id="securitySecurePOP3Server" value="<TMPL_VAR NAME="POP3_Chain_Secure_Server">" />
-    <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
-</form>
+    <br />
 
-<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <label class="securityLabel" for="securitySecurePOP3Port">
         <TMPL_VAR NAME="Localize_Security_SecurePort">:
     </label>
     <br />
     <input type="text" name="sport" id="securitySecurePOP3Port" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port">" />
-    <input type="submit" class="submit" name="update_sport" value="<TMPL_VAR NAME="Localize_Apply">" />
+    <br />
+
+    <label class="securityLabel" for "securitySecurePOP3SSL">
+        <TMPL_VAR NAME="Localize_Security_SecureServerUseSSL">
+    </label>
+    
+    <input type="checkbox" name="sssl" id="securitySecurePOP3SSL" value="UseSSL" <TMPL_IF NAME="POP3_Chain_Secure_SSL">checked</TMPL_IF>" />
+    <br />
+
+    <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>

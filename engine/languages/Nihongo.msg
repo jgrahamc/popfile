@@ -255,7 +255,6 @@ History_Already                         <font color="%s">%s</font> ¤ËÊ¬Îà¤µ¤ì¤Þ¤
 History_RemoveAll                       Á´¤Æºï½ü
 History_RemovePage                      ¤³¤Î¥Ú¡¼¥¸¤òºï½ü
 History_RemoveChecked                   ¥Á¥§¥Ã¥¯¤µ¤ì¤¿¤â¤Î¤òºï½ü
-History_Remove                          ÍúÎò¤«¤é¥á¥Ã¥»¡¼¥¸¤òºï½ü
 History_SearchMessage                   º¹½Ð¿Í/·ïÌ¾ ¤ò¸¡º÷
 History_NoMessages                      ³ºÅö¥á¥Ã¥»¡¼¥¸¤Ï¤¢¤ê¤Þ¤»¤ó
 History_ShowMagnet                      ¥Þ¥°¥Í¥Ã¥È
@@ -277,7 +276,6 @@ History_Size_MegaBytes                  %.1f&nbsp;MB
 Password_Title                          ¥Ñ¥¹¥ï¡¼¥É
 Password_Password                       ¥Ñ¥¹¥ï¡¼¥É
 Password_Username                       ¥æ¡¼¥¶¡¼Ì¾
-Password_Enter                          ¥Ñ¥¹¥ï¡¼¥É¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤
 Password_Go                             ¥í¥°¥¤¥ó
 Password_Error1                         ¥æ¡¼¥¶¡¼Ì¾¤Þ¤¿¤Ï¥Ñ¥¹¥ï¡¼¥É¤¬´Ö°ã¤Ã¤Æ¤¤¤Þ¤¹
 
@@ -296,6 +294,9 @@ Security_SecureServer                   ¥ê¥â¡¼¥È POP3 ¥µ¡¼¥Ð¡¼ (SPA/AUTH ¤Þ¤¿¤Ï 
 Security_SecureServerUpdate             ¥ê¥â¡¼¥È POP3 ¥µ¡¼¥Ð¡¼¤ò %s ¤ËÊÑ¹¹¤·¤Þ¤·¤¿¡£
 Security_SecurePort                     ¥ê¥â¡¼¥È POP3 ¥Ý¡¼¥ÈÈÖ¹æ (SPA/AUTH ¤Þ¤¿¤Ï Æ©²á¥×¥í¥­¥·)
 Security_SecurePortUpdate               ¥ê¥â¡¼¥È POP3 ¥Ý¡¼¥ÈÈÖ¹æ¤ò %s ¤ËÊÑ¹¹¤·¤Þ¤·¤¿¡£
+Security_SecureServerUseSSL             SSL »ÈÍÑ
+Security_SecureServerUseSSLOn           ¥ê¥â¡¼¥È POP3 ¥µ¡¼¥Ð¡¼¤È¤ÎÀÜÂ³¤Ë SSL ¤ò»ÈÍÑ¤·¤Þ¤¹
+Security_SecureServerUseSSLOff          ¥ê¥â¡¼¥È POP3 ¥µ¡¼¥Ð¡¼¤È¤ÎÀÜÂ³¤Ë SSL ¤ò»ÈÍÑ¤·¤Þ¤»¤ó
 Security_SMTPServer                     SMTP ¥Á¥§¡¼¥ó¥µ¡¼¥Ð¡¼
 Security_SMTPServerUpdate               SMTP ¥Á¥§¡¼¥ó¥µ¡¼¥Ð¡¼¤ò %s ¤ËÊÑ¹¹¤·¤Þ¤·¤¿¡£¤³¤ÎÊÑ¹¹¤Ï POPFile ¤òºÆµ¯Æ°¤¹¤ë¤Þ¤ÇÍ­¸ú¤Ë¤Ê¤ê¤Þ¤»¤ó¡£
 Security_SMTPPort                       SMTP ¥Á¥§¡¼¥ó¥Ý¡¼¥ÈÈÖ¹æ
@@ -410,12 +411,12 @@ Users_AccountTableSummary               This table provides a list of POP3 accou
 Imap_Bucket2Folder                      <b>%s</b> ¥Ð¥±¥Ä¤ËÊ¬Îà¤µ¤ì¤¿¥á¡¼¥ë¤Î°ÜÆ°Àè
 Imap_MapError                           Ê£¿ô¤Î¥Ð¥±¥Ä¤ò¤Ò¤È¤Ä¤Î¥Õ¥©¥ë¥À¤ËÂÐ±þÉÕ¤±¤¹¤ë¤³¤È¤Ï¤Ç¤­¤Þ¤»¤ó¡£
 Imap_MapUpdated                         ¥Ð¥±¥Ä '%s' ¤ò ¥Õ¥©¥ë¥À '%s' ¤ËÂÐ±þÉÕ¤±¤Þ¤·¤¿¡£
-Imap_Server                             IMAP ¥µ¡¼¥Ð ¥Û¥¹¥ÈÌ¾:
-Imap_ServerNameError                    ¥µ¡¼¥Ð¤Î¥Û¥¹¥ÈÌ¾¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
-Imap_Port                               IMAP ¥µ¡¼¥Ð ¥Ý¡¼¥ÈÈÖ¹æ:
+Imap_Server                             IMAP ¥µ¡¼¥Ð¡¼ ¥Û¥¹¥ÈÌ¾:
+Imap_ServerNameError                    ¥µ¡¼¥Ð¡¼¤Î¥Û¥¹¥ÈÌ¾¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
+Imap_Port                               IMAP ¥µ¡¼¥Ð¡¼ ¥Ý¡¼¥ÈÈÖ¹æ:
 Imap_PortError                          Àµ¤·¤¤¥Ý¡¼¥ÈÈÖ¹æ¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
-Imap_Login                              IMAP ¥¢¥«¥¦¥ó¥È ¥æ¡¼¥¶Ì¾:
-Imap_LoginError                         ¥æ¡¼¥¶Ì¾¡¿¥í¥°¥¤¥óÌ¾¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
+Imap_Login                              IMAP ¥¢¥«¥¦¥ó¥È ¥æ¡¼¥¶¡¼Ì¾:
+Imap_LoginError                         ¥æ¡¼¥¶¡¼Ì¾¡¿¥í¥°¥¤¥óÌ¾¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
 Imap_Password                           IMAP ¥¢¥«¥¦¥ó¥È¤Î¥Ñ¥¹¥ï¡¼¥É:
 Imap_PasswordError                      ¥µ¡¼¥Ð¤ËÂÐ¤¹¤ë¥Ñ¥¹¥ï¡¼¥É¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
 Imap_ConnectionDetailsUpdated           IMAP ¤ÎÀÜÂ³ÀßÄê¤¬¹¹¿·¤µ¤ì¤Þ¤·¤¿¡£¼¡¤Ï¥Õ¥©¥ë¥À¥ê¥¹¥È¤ò¹¹¿·¤·¤Æ¤¯¤À¤µ¤¤¡£
@@ -423,14 +424,12 @@ Imap_Expunge                            ´Æ»ë¥Õ¥©¥ë¥À¤«¤é°ÜÆ°¤µ¤ì¤¿¥á¥Ã¥»¡¼¥¸¤òºï
 Imap_Interval                           ¹¹¿·¤Î´Ö³Ö¡ÊÉÃ¡Ë:
 Imap_IntervalError                      ¹¹¿·´Ö³Ö¤Ï10ÉÃ¤«¤é3600ÉÃ¤Î´Ö¤ÇÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
 Imap_OptionsUpdated                     IMAP ¤Î¥ª¥×¥·¥ç¥ó¤ÏÀµ¾ï¤Ë¹¹¿·¤µ¤ì¤Þ¤·¤¿¡£
-Imap_Bytelimit                          Ê¬Îà¤Î¤¿¤á¤Ë»ÈÍÑ¤¹¤ë¥á¥Ã¥»¡¼¥¸¤Î¥Ð¥¤¥È¿ô¡£0¡Ê¶õÇò¡Ë¤Î¾ì¹ç¡¢¥á¥Ã¥»¡¼¥¸¤ÎÁ´ÂÎ¤ò»ÈÍÑ¤·¤Þ¤¹:
-Imap_BytelimitError                     ¿ô»ú¤òÆþÎÏ¤·¤Æ¤¯¤À¤µ¤¤¡£
 Imap_RefreshFolders                     ¥Õ¥©¥ë¥À¥ê¥¹¥È¤Î¹¹¿·
 Imap_Now                                ¼Â¹Ô
-Imap_UpdateError1                       ¥í¥°¥¤¥ó¤Ç¤­¤Þ¤»¤ó¡£¥æ¡¼¥¶Ì¾¤È¥Ñ¥¹¥ï¡¼¥É¤ò³ÎÇ§¤·¤Æ¤¯¤À¤µ¤¤¡£
-Imap_UpdateError2                       ¥µ¡¼¥Ð¤ËÀÜÂ³¤Ç¤­¤Þ¤»¤ó¡£¥Û¥¹¥ÈÌ¾¤È¥Ý¡¼¥ÈÈÖ¹æ¤ò³ÎÇ§¤¹¤ë¤È¤È¤â¤Ë¡¢¥¤¥ó¥¿¡¼¥Í¥Ã¥È¤ËÀÜÂ³¤µ¤ì¤Æ¤¤¤ë¤«¤É¤¦¤«¤ò³ÎÇ§¤·¤Æ¤¯¤À¤µ¤¤¡£
-Imap_UpdateError3                       ¥µ¡¼¥Ð¤ËÀÜÂ³¤¹¤ë¤¿¤á¤Î¾ðÊó¤òÀè¤ËÀßÄê¤·¤Æ¤¯¤À¤µ¤¤¡£
-Imap_UpdateOK                           Successfully read the list of mailboxes/folders on the server.
+Imap_UpdateError1                       ¥í¥°¥¤¥ó¤Ç¤­¤Þ¤»¤ó¡£¥æ¡¼¥¶¡¼Ì¾¤È¥Ñ¥¹¥ï¡¼¥É¤ò³ÎÇ§¤·¤Æ¤¯¤À¤µ¤¤¡£
+Imap_UpdateError2                       ¥µ¡¼¥Ð¡¼¤ËÀÜÂ³¤Ç¤­¤Þ¤»¤ó¡£¥Û¥¹¥ÈÌ¾¤È¥Ý¡¼¥ÈÈÖ¹æ¤ò³ÎÇ§¤¹¤ë¤È¤È¤â¤Ë¡¢¥¤¥ó¥¿¡¼¥Í¥Ã¥È¤ËÀÜÂ³¤µ¤ì¤Æ¤¤¤ë¤«¤É¤¦¤«¤ò³ÎÇ§¤·¤Æ¤¯¤À¤µ¤¤¡£
+Imap_UpdateError3                       ¥µ¡¼¥Ð¡¼¤ËÀÜÂ³¤¹¤ë¤¿¤á¤Î¾ðÊó¤òÀè¤ËÀßÄê¤·¤Æ¤¯¤À¤µ¤¤¡£
+Imap_UpdateOK                           ¥µ¡¼¥Ð¡¼¤«¤é¥á¡¼¥ë¥Ü¥Ã¥¯¥¹¡¿¥Õ¥©¥ë¥À¤Î¥ê¥¹¥È¤ÎÆÉ¤ß¹þ¤ß¤ËÀ®¸ù¤·¤Þ¤·¤¿¡£
 Imap_NoConnectionMessage                ¥µ¡¼¥Ð¤ËÀÜÂ³¤¹¤ë¤¿¤á¤Î¾ðÊó¤òÀè¤ËÀßÄê¤·¤Æ¤¯¤À¤µ¤¤¡£¤½¤¦¤¹¤ë¤È¡¢¤µ¤é¤ËÂ¿¤¯¤Î¥ª¥×¥·¥ç¥ó¤¬ÀßÄê¤Ç¤­¤ë¤è¤¦¤Ë¤Ê¤ê¤Þ¤¹¡£
 Imap_WatchMore                          ´Æ»ë¥Õ¥©¥ë¥À¥ê¥¹¥È¤Ë¥Õ¥©¥ë¥À¤òÄÉ²Ã
 Imap_WatchedFolderAdded                 ´Æ»ë¥Õ¥©¥ë¥À¥ê¥¹¥È¤Î¹àÌÜ¤ò¤Ò¤È¤ÄÁý¤ä¤·¤Þ¤·¤¿¡£´Æ»ë¤·¤¿¤¤¥Õ¥©¥ë¥À¤òÁª¤ó¤Ç¤¯¤À¤µ¤¤¡£
@@ -488,9 +487,9 @@ tip_Bucket_FalsePos                     ¸í¤Ã¤Æ¤³¤Î¥Ð¥±¥Ä¤ËÊ¬Îà¤µ¤ì¤¿¥á¥Ã¥»¡¼¥¸
 tip_Bucket_FalseNeg                     ¸í¤Ã¤Æ¤³¤Î¥Ð¥±¥Ä¤ËÊ¬Îà<b>¤µ¤ì¤Ê¤«¤Ã¤¿</b>¥á¥Ã¥»¡¼¥¸
 tip_Bucket_ResetStats                   Ê¬ÎàÀºÅÙ¤ÎÅý·×¾ðÊó¤ò½é´ü²½¤·¤Þ¤¹
 
-tip_Magnet_Type                         Message header to match
-tip_Magnet_Value                        Text or address to match
-tip_Magnet_Bucket                       Bucket to send matches to
+tip_Magnet_Type                         °ìÃ×¤¹¤ë¥á¥Ã¥»¡¼¥¸¥Ø¥Ã¥À
+tip_Magnet_Value                        °ìÃ×¤¹¤ë¥Æ¥­¥¹¥È¤Þ¤¿¤Ï¥¢¥É¥ì¥¹
+tip_Magnet_Bucket                       °ìÃ×¤·¤¿¥á¥Ã¥»¡¼¥¸¤ò°ÜÆ°¤¹¤ë¥Ð¥±¥Ä
 
 tip_Config_Skin                         Change the look of POPFile
 tip_Config_Language                     Change the interface language
@@ -512,7 +511,10 @@ tip_Admin_Password                      Add a password to limit access to POPFil
 tip_Admin_UpdateCheck                   0.22 text should be put back
 tip_Admin_ReportStats                   0.22 text should be put back
 
-tip_Users_Remove                        POPFile ¤«¤é¥æ¡¼¥¶¡¼¤òºï½ü¤·¤Þ¤¹
+tip_Users_Remove                        POPFile ¤Î¥æ¡¼¥¶¡¼¤òºï½ü¤·¤Þ¤¹
+tip_Users_Change_Password               ¥æ¡¼¥¶¡¼¤Î¥Ñ¥¹¥ï¡¼¥É¤òÊÑ¹¹¤·¤Þ¤¹
+
+tip_Account_Remove                      ¥æ¡¼¥¶¡¼¤Î¥¢¥«¥¦¥ó¥È¤òºï½ü¤·¤Þ¤¹
 
 tip_Footer_HomePage                     POPFile ¥Û¡¼¥à¥Ú¡¼¥¸¤ËÀÜÂ³¤·¤Þ¤¹
 tip_Footer_Manual                       The original POPFile documentation (slightly outdated)

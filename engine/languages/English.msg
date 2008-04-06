@@ -25,7 +25,7 @@ LanguageDirection                       ltr
 ManualLanguage                          en
 
 # These are where to find the documents on the Wiki
-WikiLink
+WikiLink                                
 FAQLink                                 FAQ
 RequestFeatureLink                      RequestFeature
 MailingListLink                         mailing_lists
@@ -293,6 +293,9 @@ Security_SecureServer                   Remote POP3 server (SPA/AUTH or transpar
 Security_SecureServerUpdate             Updated remote POP3 server to %s
 Security_SecurePort                     Remote POP3 port (SPA/AUTH or transparent proxy)
 Security_SecurePortUpdate               Updated remote POP3 server port to %s
+Security_SecureServerUseSSL             Use SSL
+Security_SecureServerUseSSLOn           Updated remote POP3 server to use SSL connections
+Security_SecureServerUseSSLOff          Updated remote POP3 server not to use SSL connections
 Security_SMTPServer                     SMTP chain server
 Security_SMTPServerUpdate               Updated SMTP chain server to %s; this change will not take affect until you restart POPFile
 Security_SMTPPort                       SMTP chain port
@@ -509,6 +512,8 @@ tip_Admin_ReportStats                   0.22 text should be put back
 
 tip_Users_Remove                        Delete user from POPFile
 tip_Users_Change_Password               Change user's password
+
+tip_Account_Remove                      Delete account from the user
 
 tip_Footer_HomePage                     Visit the POPFile home page
 tip_Footer_Manual                       The original POPFile documentation (slightly outdated)

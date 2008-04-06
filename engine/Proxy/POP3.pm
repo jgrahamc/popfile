@@ -93,6 +93,7 @@ sub initialize
     # There is no default setting for the secure server
     $self->config_( 'secure_server', '' );
     $self->config_( 'secure_port', 110 );
+    $self->config_( 'secure_ssl', 0 );
 
     # Only accept connections from the local machine for POP3
     $self->config_( 'local', 1 );
@@ -195,7 +196,7 @@ sub child__
     my $s = $self->config_( 'separator' );
     $s =~ s/(\$|\@|\[|\]|\(|\)|\||\?|\*|\.|\^|\+)/\\$1/;
 
-    my $transparent  = "^USER ([^$s])+\$";
+    my $transparent  = "^USER ([^$s]+)\$";
     my $user_command = "USER ([^$s]+)($s(\\d+))?$s([^$s]+)($s([^$s]+))?";
     my $apop_command = "APOP ([^$s]+)($s(\\d+))?$s([^$s]+) (.*?)";
 
@@ -238,7 +239,12 @@ sub child__
         if ( $command =~ /$transparent/ ) {
             if ( $self->config_( 'secure_server' ) ne '' )  {
                 $token = $self->config_( 'secure_server' ). ":$1";
-                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
+                $self->log_( 2, "Set transparent proxy token : '$token'" );
+
+                if ( $mail = $self->verify_connected_( $mail, $client, 
+                        $self->config_( 'secure_server' ),
+                        $self->config_( 'secure_port' ),
+                        $self->config_( 'secure_ssl' ) ) ) {
                     last if ($self->echo_response_($mail, $client, $command) == 2 );
                 } else {
                     next;
@@ -346,20 +352,22 @@ sub child__
                     $self->tee_( $client, "+OK password ok$eol" );
                     $session = $self->get_session_key_( $token );
                     if ( !defined( $session ) ) {
+                        $self->tee_( $client, "-ERR Unknown account $token$eol" );
                         last;
                     }
                 } else {
                     $self->tee_( $client, $response );
                 }
-             } else {
-                 last if ($self->echo_response_($mail, $client,
-                              $command) == 2 );
-                 $session = $self->get_session_key_( $token );
-                 if ( !defined( $session ) ) {
-                     last;
-                 }
-             }
-             next;
+            } else {
+                last if ($self->echo_response_($mail, $client,
+                             $command) == 2 );
+                $session = $self->get_session_key_( $token );
+                if ( !defined( $session ) ) {
+                    $self->tee_( $client, "-ERR Unknown account $token$eol" );
+                    last;
+                }
+            }
+            next;
         }
 
         # User is issuing the APOP command to start a session with the
@@ -380,7 +388,10 @@ sub child__
 
         if ( $command =~ /AUTH ([^ ]+)/ ) {
             if ( $self->config_( 'secure_server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client,
+                     $self->config_( 'secure_server' ), 
+                     $self->config_( 'secure_port' ),
+                     $self->config_( 'secure_ssl' ) ) )  {
 
                     # Loop until we get -ERR or +OK
 
@@ -404,7 +415,10 @@ sub child__
 
         if ( $command =~ /AUTH/ ) {
             if ( $self->config_( 'secure_server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client, 
+                     $self->config_( 'secure_server' ),
+                     $self->config_( 'secure_port' ),
+                     $self->config_( 'secure_ssl' ) ) )  {
                     my $response = $self->echo_response_($mail, $client, "AUTH" );
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
@@ -536,7 +550,10 @@ sub child__
 
         if ( $command =~ /CAPA/i ) {
             if ( $mail || $self->config_( 'secure_server' ) ne '' )  {
-                if ( $mail || ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) ) )  {
+                if ( $mail || ( $mail = $self->verify_connected_( $mail, $client,
+                     $self->config_( 'secure_server' ),
+                     $self->config_( 'secure_port' ),
+                     $self->config_( 'secure_ssl' ) ) ) )  {
                     my $response = $self->echo_response_($mail, $client, "CAPA" );
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
@@ -603,7 +620,7 @@ sub child__
 
                 my ( $id, $from, $to, $cc, $subject,
                     $date, $hash, $inserted, $bucket, $reclassified ) =
-                    $self->history_()->get_slot_fields( $downloaded{$count} );
+                    $self->history_()->get_slot_fields( $downloaded{$count}, $session );
 
                 if ( $bucket ne 'unknown class' ) {
 
@@ -720,6 +737,7 @@ sub configure_item
             if ( $name eq 'pop3_chain' ) {
                 $templ->param( 'POP3_Chain_Secure_Server' => $self->config_( 'secure_server' ) );
                 $templ->param( 'POP3_Chain_Secure_Port' => $self->config_( 'secure_port' ) );
+                $templ->param( 'POP3_Chain_Secure_SSL' => ( $self->config_( 'secure_ssl' ) == 1 ) );
             } else {
                 $self->SUPER::configure_item( $name, $templ, $language );
             }
@@ -787,15 +805,29 @@ sub validate_item
     if ( $name eq 'pop3_chain' ) {
         if ( defined( $$form{server} ) ) {
             $self->config_( 'secure_server', $$form{server} );
+            $status_message .= "\n" if ( defined( $status_message ) );
             $status_message .= sprintf( $$language{Security_SecureServerUpdate}, $self->config_( 'secure_server' ) );
        }
 
         if ( defined($$form{sport}) ) {
             if ( ( $$form{sport} =~ /^\d+$/ ) && ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
                 $self->config_( 'secure_port', $$form{sport} );
+                $status_message .= "\n" if ( defined( $status_message ) );
                 $status_message .= sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) );
             } else {
                 $error_message .= $$language{Security_Error1};
+            }
+        }
+
+        if ( defined($$form{sssl}) ) {
+            if ( $$form{sssl} eq 'UseSSL' ) {
+                $self->config_( 'secure_ssl', 1 );
+                $status_message .= "\n" if ( defined( $status_message ) );
+                $status_message .= $$language{Security_SecureServerUseSSLOn};
+            } else {
+                $self->config_( 'secure_ssl', 0 );
+                $status_message .= "\n" if ( defined( $status_message ) );
+                $status_message .= $$language{Security_SecureServerUseSSLOff};
             }
         }
 

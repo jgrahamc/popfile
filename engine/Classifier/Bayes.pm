@@ -296,6 +296,8 @@ sub start
     # which is different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
 
+    # TODO : hardcoded 1
+
     if ( defined( $self->user_module_config_( 1, 'html', 'language' ) ) &&
        ( $self->user_module_config_( 1, 'html', 'language' ) =~ /^Nihongo|Korean$/ )) {
         use POSIX qw( locale_h );
@@ -303,6 +305,8 @@ sub start
     }
 
     # Pass in the current interface language for language specific parsing
+
+    # TODO : hardcoded 1
 
     $self->{parser__}->{lang__}  = $self->user_module_config_( 1, 'html', 'language' ) || '';
     $self->{unclassified__} = log( $self->user_config_( 1, 'unclassified_weight' ) );
@@ -1710,7 +1714,34 @@ sub get_administrator_session_key
 
 #----------------------------------------------------------------------------
 #
-# get_session_key_from_token
+# get_single_user_session_key
+#
+# Returns a string based session key for the administrator. WARNING
+# this is not for external use.  This function bypasses all
+# authentication checks and gives admin access.  Should only be called
+# in the top-level POPFile process.
+#
+#----------------------------------------------------------------------------
+sub get_single_user_session_key
+{
+    my ( $self ) = @_;
+
+    my $single_user_session = $self->generate_unique_session_key__();
+    $self->{api_sessions__}{$single_user_session} = 1;
+    $self->db_update_cache__( $single_user_session );
+    $self->log_( 1, "get_session_key_from_token returning key $single_user_session for the single user mode" );
+
+    # Send the session to the parent so that it is recorded and can
+    # be correctly shutdown
+
+    $self->mq_post_( 'CREAT', $single_user_session, 1 );
+
+    return $single_user_session;
+}
+
+#----------------------------------------------------------------------------
+#
+# get_session_key_from_token (ADMIN ONLY)
 #
 # Gets a session key from a account token
 #
@@ -1725,40 +1756,70 @@ sub get_session_key_from_token
 {
     my ( $self, $session, $module, $token ) = @_;
 
+    # If we are in single user mode then return the single user
+    # mode session (a new administrator session) for compatibility
+    # with old versions of POPFile.
+
+    if ( $self->global_config_( 'single_user' ) == 1 ) {
+        # Generate a new session for the single user mode
+
+        return $self->get_single_user_session_key();
+    }
+
     # Verify that the user has an administrator session set up
 
     if ( !$self->is_admin_session( $session ) ) {
         return undef;
     }
 
-    # If we are in single user mode then simply return the
-    # administrator session for compatibility with old versions of
-    # POPFile.
-
-    if ( $self->global_config_( 'single_user' ) == 1 ) {
-        return $session;
-    }
-
     # If the this is not the pop3 module then return the administrator
     # session since there is currently no token matching for non-POP3
     # accounts.
 
-    if ( $module ne 'pop3' ) {
-        return $session;
+    if ( ( $module ne 'pop3' ) && ( $module ne 'insert' ) ) {
+        return $self->get_single_user_session_key();
     }
 
-    # Check the token against the associations in the database and
-    # figure out which user is being talked about
+    my $user;
 
-    my $result = $self->{db_get_user_from_account__}->execute(
-                                                          "$module:$token" );
-    if ( !defined( $result ) ) {
-        $self->log_( 1, "Unknown account $module:$token" );
-        return undef;
+    if ( $module eq 'pop3' ) {
+        my ( $server, $username ) = split( /:/, $token );
+
+        my $secure_server = $self->module_config_( 'pop3', 'secure_server' );
+
+        if ( defined( $secure_server ) && ( $secure_server eq $server ) ) {
+
+            # transparent proxy mode
+
+            $self->log_( 2, "Connect $server via transparent proxy mode" );
+
+            if ( !defined($server) || !defined($username) ) {
+                $self->log_( 1, "Unknown account $module:$token" );
+                return undef;
+            }
+
+            $user = $self->get_user_id( $session, $username );
+
+        } else {
+
+            # Check the token against the associations in the database and
+            # figure out which user is being talked about
+
+            my $result = $self->{db_get_user_from_account__}->execute(
+                                                              "$module:$token" );
+            if ( !defined( $result ) ) {
+                $self->log_( 1, "Unknown account $module:$token" );
+                return undef;
+            }
+
+            my $rows = $self->{db_get_user_from_account__}->fetchrow_arrayref;
+            $user = defined( $rows )?$rows->[0]:undef;
+        }
+    } elsif ( $module eq 'insert' ) {
+        # insert.pl
+
+        $user = $self->get_user_id( $session, $token );
     }
-
-    my $rows = $self->{db_get_user_from_account__}->fetchrow_arrayref;
-    my $user = defined( $rows )?$rows->[0]:undef;
 
     if ( !defined( $user ) ) {
         $self->log_( 1, "Unknown account $module:$token" );
@@ -2399,12 +2460,14 @@ sub classify_and_modify
 
     my $msg_file;
 
+    # User's id of the current session
+    my $userid = $self->valid_session_key__( $session );
+
     # If we don't yet know the classification then start the parser
 
     $class = '' if ( !defined( $class ) );
     if ( $class eq '' ) {
         $self->{parser__}->start_parse();
-        my $userid = $self->valid_session_key__( $session );
         ( $slot, $msg_file ) = $self->history_()->reserve_slot( $session, $userid );
     } else {
         $msg_file = $self->history_()->get_slot_file( $slot );
@@ -2541,9 +2604,7 @@ sub classify_and_modify
     my $xpl_insertion        = $self->get_bucket_parameter( $session, $classification, 'xpl'        );
     my $quarantine           = $self->get_bucket_parameter( $session, $classification, 'quarantine' );
 
-    # TODO : Should we use user's configuration?
-
-    my $modification = $self->user_config_( 1, 'subject_mod_left' ) . $classification . $self->user_config_( 1, 'subject_mod_right' );
+    my $modification = $self->user_config_( $userid, 'subject_mod_left' ) . $classification . $self->user_config_( $userid, 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
     # Don't add the classification unless it is not present
@@ -2571,9 +2632,7 @@ sub classify_and_modify
 
     # Add the XPL header
 
-    # TODO : Should we use user's configuration?
-
-    my $xpl = $self->user_config_( 1, 'xpl_angle' )?'<':'';
+    my $xpl = $self->user_config_( $userid, 'xpl_angle' )?'<':'';
 
     my $xpl_localhost = ($self->config_( 'localhostname' ) eq '')?"127.0.0.1":$self->config_( 'localhostname' );
 
@@ -2581,9 +2640,7 @@ sub classify_and_modify
     $xpl .= $self->module_config_( 'html', 'local' )?$xpl_localhost:$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot";
 
-    # TODO : Should we use user's configuration?
-
-    if ( $self->user_config_( 1, 'xpl_angle' ) ) {
+    if ( $self->user_config_( $userid, 'xpl_angle' ) ) {
         $xpl .= '>';
     }
 
@@ -3570,6 +3627,7 @@ sub initialize_users_password
 
     if ( defined( $id ) ) {
         my $result = $self->set_password_for_user( $session, $id, $password );
+        $self->log_( 1, "Password initialized for user '$user' by user $userid" );
         if ( $result == 1 ) {
             return (0, $password);
         }
@@ -3609,6 +3667,7 @@ sub change_users_password
 
     if ( defined( $id ) ) {
         my $result = $self->set_password_for_user( $session, $id, $password );
+        $self->log_( 1, "Password changed for user '$user' by user $userid" );
         if ( $result == 1 ) {
             return 0;
         }
@@ -4587,7 +4646,7 @@ sub add_stopword
 
     # Pass language parameter to add_stopword()
 
-    # TODO : hard-coded 1
+    # TODO : hardcoded 1
 
     return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
 }
@@ -4601,7 +4660,7 @@ sub remove_stopword
 
     # Pass language parameter to remove_stopword()
 
-    # TODO : hard-coded 1
+    # TODO : hardcoded 1
 
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
 }

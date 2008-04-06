@@ -124,7 +124,7 @@
             <td>
             </td>
             <td align="center">
-                <input type="submit" class="submit deleteButton" name="delete" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Remove">')" value="<TMPL_VAR NAME="Localize_Remove">" />
+                <input type="submit" class="submit deleteButton" name="delete" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Accounts_Remove">')" value="<TMPL_VAR NAME="Localize_Remove">" />
             </td>
         </tr>
         </table>

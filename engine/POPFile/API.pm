@@ -101,11 +101,16 @@ sub create_user                { shift->{c}->create_user( @_ ); }
 sub remove_user                { shift->{c}->remove_user( @_ ); }
 sub get_user_id                { shift->{c}->get_user_id( @_ ); }
 sub get_user_id_from_session   { shift->{c}->get_user_id_from_session( @_ ); }
+sub get_user_name_from_session { shift->{c}->get_user_name_from_session( @_ ); }
 sub add_account                { shift->{c}->add_account( @_ ); }
 sub remove_account             { shift->{c}->remove_account( @_ ); }
 sub get_user_parameter         { shift->{c}->get_user_parameter( @_ ); }
-sub get_user_parameter_from_id { shift->{c}->get_user_parameter_from_id( @_ );}
-sub set_user_parameter_from_id { shift->{c}->get_user_parameter_from_id( @_ );}
+sub get_user_parameter_from_id { shift->{c}->get_user_parameter_from_id( @_ ); }
+sub set_user_parameter_from_id { shift->{c}->get_user_parameter_from_id( @_ ); }
+sub get_user_name_from_id      { shift->{c}->get_user_name_from_id( @_ ); }
+
+sub change_users_password      { shift->{c}->change_users_password( @_ ); }
+sub set_password_for_user      { shift->{c}->set_password_for_user( @_ ); }
 
 # These APIs return lists and need to be altered to arrays before returning
 # them through XMLRPC otherwise you get the wrong result.
@@ -121,6 +126,8 @@ sub get_stopword_list          { [ shift->{c}->get_stopword_list( @_ ) ]; }
 sub get_bucket_word_list       { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
 sub get_bucket_word_prefixes   { [ shift->{c}->get_bucket_word_prefixes( @_ ) ]; }
 sub get_user_parameter_list    { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
+
+sub initialize_users_password  { [ shift->{c}->initialize_users_password( @_ ) ]; }
 
 # This API is used to add a message to POPFile's history, process the message
 # and do all the things POPFile would have done if it had received the message

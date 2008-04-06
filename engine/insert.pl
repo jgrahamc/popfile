@@ -43,16 +43,7 @@ if ( $#ARGV > 0 ) {
     $POPFile->CORE_load( 1 );
     $POPFile->CORE_initialize();
 
-    my $bucket = shift @ARGV;
-
-    my @files;
-
-    if ($^O =~ /linux/) {
-        @files = @ARGV[0 .. $#ARGV];
-    } else {
-        @files = map { glob } @ARGV[0 .. $#ARGV];
-    }
-
+    my @argv_backup = @ARGV;
     @ARGV = ();
 
     if ( $POPFile->CORE_config() ) {
@@ -62,13 +53,26 @@ if ( $#ARGV > 0 ) {
         my $c = $POPFile->get_module('POPFile::Config');
         $c->config_( 'piddir', $c->config_( 'piddir' ) . 'insert.pl.' );
 
+        my $multiuser_mode = ( $c->global_config_( 'single_user' ) != 1 );
+
+        my $user   = shift @argv_backup if ( $multiuser_mode );
+        my $bucket = shift @argv_backup;
+
+        my @files;
+
+        if ($^O =~ /linux/) {
+            @files = @argv_backup[0 .. $#argv_backup];
+        } else {
+            @files = map { glob } @argv_backup[0 .. $#argv_backup];
+        }
+
         $POPFile->CORE_start();
 
         # TODO: interface violation
         $c->{save_needed__} = 0;
 
         my $b = $POPFile->get_module('Classifier::Bayes');
-        my $session = $b->get_session_key( 'admin', '' );
+        my $session = $b->get_administrator_session_key();
 
         # Check for the existence of each file first because the API
         # call we use does not care if a file is missing
@@ -81,22 +85,41 @@ if ( $#ARGV > 0 ) {
             }
         }
 
+        # Multiuser support
+
+        my $user_session;
+
+        if ( $multiuser_mode ) {
+
+            # Get user's session id
+
+            $user_session = $b->get_session_key_from_token( $session, 'insert', $user );
+            if ( !defined($user_session) ) {
+                print STDERR "Error: User `$user' does not exist, insert aborted.\n";
+                $code = 1;
+            }
+        } else {
+            $user_session = $session;
+        }
+
         if ( $code == 0 ) {
-            if ( !$b->is_bucket( $session, $bucket ) ) {
+            if ( !$b->is_bucket( $user_session, $bucket ) ) {
                 print STDERR "Error: Bucket `$bucket' does not exist, insert aborted.\n";
                 $code = 1;
             } else {
-                $b->add_messages_to_bucket( $session, $bucket, @files );
+                $b->add_messages_to_bucket( $user_session, $bucket, @files );
                 print "Added ", $#files+1, " files to `$bucket'\n";
             }
         }
 
+        $b->release_session_key( $user_session ) if ( $multiuser_mode && defined($user_session) );
         $b->release_session_key( $session );
         $POPFile->CORE_stop();
     }
 } else {
-    print "insert.pl - insert mail messages into a specific bucket\n\n";
-    print "Usage: insert.pl <bucket> <messages>\n";
+    print "insert.pl - insert mail messages into a specific bucket of the specific user\n\n";
+    print "Usage: insert.pl [<user>] <bucket> <messages>\n";
+    print "       <user>             The name of the user (multiuser mode only)\n";
     print "       <bucket>           The name of the bucket\n";
     print "       <messages>         Filename of message(s) to insert\n";
     $code = 1;

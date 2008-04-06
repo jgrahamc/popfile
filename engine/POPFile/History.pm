@@ -253,9 +253,6 @@ sub reserve_slot
         # Avoid another POPFile process using the same committed id
         $self->db_()->begin_work unless ($in_transaction);
 
-        # TODO Replace the hardcoded user ID 1 with the looked up
-        # user ID from the session key
-
         my $test = $self->db_()->selectrow_arrayref(
                  "select id from history where committed = $r limit 1;");
 
@@ -1027,7 +1024,6 @@ sub set_query
     my $select = $self->{queries__}{$id}{base};
     $select =~ s/XXX/$fields_slot/;
     $self->{queries__}{$id}{query} = $self->db_()->prepare( $select );
-    $self->{queries__}{$id}{query}->execute;
     $self->{queries__}{$id}{cache} = ();
 }
 
@@ -1112,9 +1108,11 @@ sub get_query_rows
     if ( ( $size < ( $start + $count - 1 ) ) ) {
         my $rows = $start + $count - $size;
         $self->log_( 2, "Getting $rows rows from database" );
-        push ( @{$self->{queries__}{$id}{cache}},
-            @{$self->{queries__}{$id}{query}->fetchall_arrayref(
-                undef, $start + $count - $size )} );
+        $self->{queries__}{$id}{query}->execute;
+        $self->{queries__}{$id}{cache} = 
+            $self->{queries__}{$id}{query}->fetchall_arrayref(
+                undef, $start + $count - 1 );
+        $self->{queries__}{$id}{query}->finish;
     }
 
     my ( $from, $to ) = ( $start-1, $start+$count-2 );
@@ -1208,6 +1206,8 @@ sub upgrade_history_files__
                 $self->history_read_class__( $msg );
 
             if ( $bucket ne 'unknown_class' ) {
+                # TODO : hardcoded userid 1
+
                 my ( $slot, $file ) = $self->reserve_slot( $session, 1 );
                 rename $msg, $file;
                 my @message = ( $session, $slot, $bucket, 0 );

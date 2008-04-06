@@ -44,16 +44,20 @@ my %valid = ( 'POPFile/Database'       => 1,
               'POPFile/History'        => 1,
               'Classifier/Bayes'       => 1,
               'Classifier/WordMangle'  => 1,
+              'Proxy/POP3'             => 1,
               'POPFile/Configuration'  => 1 );
 
 $POPFile->CORE_load( 0, \%valid );
 $POPFile->CORE_initialize();
 $POPFile->CORE_config( 1 );
-$POPFile->CORE_start();
 
 my $b = $POPFile->get_module( 'Classifier/Bayes' );
 my $h = $POPFile->get_module( 'POPFile/History'  );
 my $l = $POPFile->get_module( 'POPFile/Logger'   );
+
+$b->module_config_( 'pop3', 'port', 9110 );
+
+$POPFile->CORE_start();
 
 # Test the unclassified_probability parameter
 
@@ -136,22 +140,22 @@ $b->global_config_( 'single_user', 1 );
 # get_session_key_from_token
 
 my $session2 = $b->get_session_key_from_token( $session, 'smtp', 'token' );
-test_assert( $session2 eq $session );
+test_assert( $b->is_admin_session( $session2 ) );
 $session2    = $b->get_session_key_from_token( $session, 'nntp', 'token' );
-test_assert( $session2 eq $session );
+test_assert( $b->is_admin_session( $session2 ) );
 $session2    = $b->get_session_key_from_token( $session, 'pop',  'token' );
-test_assert( $session2 eq $session );
+test_assert( $b->is_admin_session( $session2 ) );
 $session2    = $b->get_session_key_from_token( $session, 'pop3', 'token' );
-test_assert( $session2 eq $session );
+test_assert( $b->is_admin_session( $session2 ) );
 
 $b->global_config_( 'single_user', 0 );
 
 $session2 = $b->get_session_key_from_token( $session, 'smtp', 'token' );
-test_assert( $session2 eq $session );
+test_assert( $b->is_admin_session( $session2 ) );
 $session2 = $b->get_session_key_from_token( $session, 'nntp', 'token' );
-test_assert( $session2 eq $session );
+test_assert( $b->is_admin_session( $session2 ) );
 $session2 = $b->get_session_key_from_token( $session, 'pop',  'token' );
-test_assert( $session2 eq $session );
+test_assert( $b->is_admin_session( $session2 ) );
 $session2 = $b->get_session_key_from_token( $session, 'pop3', 'token' );
 test_assert( !defined( $session2 ) );
 
@@ -164,9 +168,29 @@ test_assert( $b->add_account( $session, $id1, 'pop3', 'foo:bar' ) ==  1 );
 test_assert( $b->add_account( $session, $id1, 'pop3', 'foo:bar' ) == -1 );
 
 my $session1 = $b->get_session_key_from_token( $session, 'pop3', 'fooz:bar' );
-test_assert( !defined( $session1 ) ); 
+test_assert( !defined( $session1 ) );
 $session1    = $b->get_session_key_from_token( $session, 'pop3', 'foo:bar'  );
-test_assert(  defined( $session1 ) ); 
+test_assert(  defined( $session1 ) );
+$b->release_session_key( $session1 );
+
+# transparent proxy
+
+$session1 = $b->get_session_key_from_token( $session, 'pop3', 'example.com:testuser' );
+test_assert( !defined( $session1 ) );
+
+$b->module_config_( 'pop3', 'secure_server', 'example.com' );
+$b->module_config_( 'pop3', 'secure_port', '110' );
+
+$session1 = $b->get_session_key_from_token( $session, 'pop3', 'example.com:testuser' );
+test_assert(  defined( $session1 ) );
+
+$session1 = $b->get_session_key_from_token( $session, 'pop3', 'fooz:bar' );
+test_assert( !defined( $session1 ) );
+
+$session1 = $b->get_session_key_from_token( $session, 'pop3', 'foo:bar'  );
+test_assert(  defined( $session1 ) );
+
+$b->module_config_( 'pop3', 'secure_server', '' );
 
 # get_user_parameter_list
 
