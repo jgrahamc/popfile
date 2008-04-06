@@ -42,6 +42,7 @@ my %explain = ( 'Encode' => $japanese,
                 'BerkeleyDB' => 'Upgrades from v0.20.x',
                 'IO::Socket::SSL' => 'SSL Connection Support',
                 'IO::Socket::Socks' => 'Socks Proxy Support',
+                'MeCab' => $japanese,
                 'Text::Kakasi' => $japanese,
                 'XMLRPC::Transport::HTTP' => 'XML-RPC Server Support' );
 
@@ -56,7 +57,7 @@ foreach my $file (@ARGV) {
 
 open PACKAGE, ">$output";
 foreach my $module (sort keys %modules) {
-    if ( $module !~ /^Classifier|POPFile|Proxy|UI/ ) {
+    if ( $module !~ /^(Classifier|POPFile|Proxy|UI|Services)/ ) {
         print PACKAGE "$modules{$module}\t0.0.0\t$module\n";
     }
 }
