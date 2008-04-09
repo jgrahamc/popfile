@@ -44,6 +44,10 @@ test_assert( $code != 0 );
 my $line = shift @stdout;
 test_assert_regexp( $line, 'output the classification of a message' );
 
+# Save STDERR
+
+open my $old_stderr, ">&STDERR";
+
 # Bad file name
 open STDERR, ">temp.tmp";
 `$bayes doesnotexist`;
@@ -54,6 +58,10 @@ open TEMP, "<temp.tmp";
 $line = <TEMP>;
 close TEMP;
 test_assert_regexp( $line, 'Error: File `doesnotexist\' does not exist, classification aborted' );
+
+# Restore STDERR
+
+open STDERR, ">&", $old_stderr;
 
 # Check the output
 

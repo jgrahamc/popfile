@@ -45,7 +45,7 @@ Previous                                前へ
 Next                                    次へ
 From                                    差出人
 Subject                                 件名
-Cc                                      Cc 
+Cc                                      Cc
 Classification                          分類
 Reclassify                              再分類
 Probability                             確率
@@ -63,7 +63,7 @@ Bucket                                  バケツ
 Magnet                                  マグネット
 Delete                                  削除
 Create                                  作成
-To                                      宛て先
+To                                      宛先
 Total                                   合計
 Rename                                  名前変更
 Frequency                               頻度
@@ -273,11 +273,12 @@ History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
 
-Password_Title                          パスワード
+Password_Title                          ログイン
 Password_Password                       パスワード
 Password_Username                       ユーザー名
 Password_Go                             ログイン
-Password_Error1                         ユーザー名またはパスワードが間違っています
+Password_Error1                         パスワードが間違っています
+Password_Error2                         ユーザー名またはパスワードが間違っています
 
 Security_Error1                         認証ポート番号は1から65535までにしてください。
 Security_Stealth                        ステルスモード/サーバーオペレーション

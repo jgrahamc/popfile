@@ -68,6 +68,17 @@ use locale;
 
 use POSIX ":sys_wait_h";
 
+# Messages are handled in this order.
+
+my %message_type_list = (
+    'CREAT'     => 1,
+    'LOGIN'     => 2,
+    'UIREG'     => 3,
+    'COMIT'     => 4,
+    'TICKD'     => 5,
+    'RELSE'     => 6,
+);
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -124,14 +135,16 @@ sub service
 
     # Iterate through all the messages in all the queues
 
-    for my $type (sort keys %{$self->{queue__}}) {
-         while ( my $ref = shift @{$self->{queue__}{$type}} ) {
-             my @message = @$ref;
-             my $flat = join(':', @message);
+    for my $type ( sort sort_message__
+                   keys %{$self->{queue__}} ) {
 
-             $self->log_( 2, "Message $type ($flat) ready for delivery" );
+        while ( my $ref = shift @{$self->{queue__}{$type}} ) {
+            my @message = @$ref;
+            my $flat = join(':', @message);
 
-             for my $waiter (@{$self->{waiters__}{$type}}) {
+            $self->log_( 2, "Message $type ($flat) ready for delivery" );
+
+            for my $waiter (@{$self->{waiters__}{$type}}) {
                 $self->log_( 2, "Delivering message $type ($flat) to " .
                     $waiter->name() );
 
@@ -141,6 +154,24 @@ sub service
     }
 
     return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# sort_message__
+#
+# Sort message types
+#
+#----------------------------------------------------------------------------
+sub sort_message__
+{
+    if ( defined($message_type_list{$a}) && defined($message_type_list{$b}) ) {
+        $message_type_list{$a} <=> $message_type_list{$b};
+    } elsif ( !defined($message_type_list{$a}) && !defined($message_type_list{$b}) ) {
+        $a cmp $b;
+    } else {
+        !defined($message_type_list{$a}) <=> !defined($message_type_list{$b});
+    }
 }
 
 #----------------------------------------------------------------------------

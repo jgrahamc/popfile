@@ -205,9 +205,11 @@ $h2->initialize();
 $h2->name( 'simple' );
 $h2->config_( 'port', -1 );
 
+open my $old_stderr, ">&STDERR";
 open (STDERR, ">stdout.tmp");
 test_assert( !$h2->start() );
 close STDERR;
+open STDERR, ">&", $old_stderr;
 open TEMP, "<stdout.tmp";
 $line = <TEMP>;
 $line = <TEMP>;

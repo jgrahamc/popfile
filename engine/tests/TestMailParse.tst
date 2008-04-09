@@ -517,7 +517,7 @@ foreach my $prefix (@INC) {
 }
 
 if ( $have_text_kakasi ) {
-    $b->user_module_config_( 1, 'html', 'language', 'Nihongo' );
+    $b->global_config_( 'language', 'Nihongo' );
 #    $b->{parser__}->mangle( $w );
     $b->initialize();
     test_assert( $b->start() );

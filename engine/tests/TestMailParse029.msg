@@ -7,3 +7,4 @@ Received: from h24-85-91-39.vc.shawcable.net (24.85.91.39) by smtp8.libero.it (7
             id 3FD9B5E909B60A72 for foo.bar@inwind.it; Sun, 22 Feb 2004 04:10:52 +0100
 Received: from 67.172.52.188 by 24.85.91.39; Sun, 22 Feb 2004 04:03:40 +0100
 Message-ID: <H[20
+.

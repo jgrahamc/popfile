@@ -82,11 +82,11 @@ test_assert_equal( $h->url_encode_( '['     ), '%5b'       );
 test_assert_equal( $h->url_encode_( '[]'    ), '%5b%5d'    );
 test_assert_equal( $h->url_encode_( '[foo]' ), '%5bfoo%5d' );
 
-$h->{language__}{Locale_Thousands} = ',';
+$h->{language__}{global}{Locale_Thousands} = ',';
 test_assert_equal( $h->pretty_number( 1234 ), '1,234'      );
-$h->{language__}{Locale_Thousands} = '&nbsp;';
+$h->{language__}{global}{Locale_Thousands} = '&nbsp;';
 test_assert_equal( $h->pretty_number( 1234 ), '1&nbsp;234' );
-$h->{language__}{Locale_Thousands} = '';
+$h->{language__}{global}{Locale_Thousands} = '';
 
 
 our $port = 9001 + int(rand(1000));
@@ -159,8 +159,8 @@ if ( $pid == 0 ) {
 
     $mq->service();
 
-    my %lang = $h->language();
-    test_assert_equal( $lang{LanguageCode}, 'en' );
+    my $lang = $h->language();
+    test_assert_equal( $lang->{LanguageCode}, 'en' );
 
     while ( 1 ) {
         $h->service();

@@ -111,7 +111,7 @@
             <TMPL_LOOP NAME="Magnet_Loop_Types">
             
             <option value="<TMPL_VAR NAME="Magnet_Type">">
-                <TMPL_VAR NAME="Magnet_Type_Name">
+                <TMPL_VAR NAME="Magnet_Type_Localized">
             </option>
 
             </TMPL_LOOP>

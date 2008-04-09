@@ -61,15 +61,15 @@ $POPFile->CORE_start();
 
 # Test the unclassified_probability parameter
 
-test_assert_equal( $b->{unclassified__}, log(100) );
+test_assert_equal( $b->user_config_( 1, 'unclassified_weight' ), 100 );
 
 $b->user_config_( 1, 'unclassified_weight', 9 );
-test_assert( $b->start() );
-test_assert_equal( $b->{unclassified__}, log(  9) );
+#test_assert( $b->start() );
+test_assert_equal( $b->user_config_( 1, 'unclassified_weight' ),   9 );
 
 $b->user_config_( 1, 'unclassified_weight', 5 );
-test_assert( $b->start() );
-test_assert_equal( $b->{unclassified__}, log(  5) );
+#test_assert( $b->start() );
+test_assert_equal( $b->user_config_( 1, 'unclassified_weight' ),   5 );
 
 # test the API functions
 
@@ -1250,7 +1250,7 @@ foreach my $prefix (@INC) {
 
 if ( $have_text_kakasi ) {
 
-    $b->user_module_config_( 1, 'html', 'language', 'Nihongo' );
+    $b->global_config_( 'language', 'Nihongo' );
     $b->initialize();
     test_assert( $b->start() );
 

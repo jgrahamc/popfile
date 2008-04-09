@@ -140,6 +140,10 @@ sub initialize
 
     $self->global_config_( 'crypt_device', '' );
 
+    # GLOBAL language setting
+
+    $self->global_config_( 'language', 'English' );
+
     # Register for the TICKD message which is sent hourly by the
     # Logger module.   We use this to hourly save the configuration file
     # so that POPFile's configuration is saved in case of a hard crash.
@@ -489,6 +493,8 @@ sub upgrade_parameter__
                   'debug',                    'GLOBAL_debug',
                   'msgdir',                   'GLOBAL_msgdir',
                   'timeout',                  'GLOBAL_timeout',
+
+#                  'html_language',            'GLOBAL_language',
 
                   # Parameters that are now handled by POPFile::Logger
 

@@ -51,9 +51,9 @@ my $r = new Test::MQReceiver;
 # Register three different message types
 
 $mq->register( 'MESG1', $r );
-$mq->register( 'MSG1', $r );
-$mq->register( 'MSG2', $r );
-$mq->register( 'MSG3', $r );
+$mq->register( 'MSG1',  $r );
+$mq->register( 'MSG2',  $r );
+$mq->register( 'MSG3',  $r );
 
 # Now send messages and check for their receipt
 

@@ -21,6 +21,8 @@
 #
 # ----------------------------------------------------------------------------
 
+unlink 'popfile.cfg';
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();

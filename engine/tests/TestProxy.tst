@@ -22,18 +22,19 @@
 # ---------------------------------------------------------------------------------------------
 
 unlink 'popfile.db';
+unlink 'popfile.cfg';
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
 $POPFile->CORE_signals();
 
-my %valid = ( 'POPFile/Module' => 1,
-              'POPFile/Logger' => 1,
-              'POPFile/MQ'     => 1,
+my %valid = ( 'POPFile/Module'        => 1,
+              'POPFile/Logger'        => 1,
+              'POPFile/MQ'            => 1,
               'POPFile/Configuration' => 1,
-              'POPFile/Database' =>1,
-              'Classifier/Bayes' => 1 );
+              'POPFile/Database'      =>1,
+              'Classifier/Bayes'      => 1 );
 
 $POPFile->CORE_load( 0, \%valid );
 $POPFile->CORE_initialize();
@@ -641,9 +642,11 @@ $sp2->config_( 'port', -1 );
 
 #$sp2->classifier( $b );
 
-open (STDERR, ">stdout.tmp");
+open my $old_stderr, ">&STDERR";
+open STDERR, ">stdout.tmp";
 test_assert( !$sp2->start() );
 close STDERR;
+open STDERR, ">&", $old_stderr;
 open TEMP, "<stdout.tmp";
 $line = <TEMP>;
 $line = <TEMP>;

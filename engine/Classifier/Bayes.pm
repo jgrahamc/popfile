@@ -261,6 +261,11 @@ sub deliver
     }
 
     if ( $type eq 'RELSE' ) {
+        # Before releasing the session key we have to make sure that all of
+        # the histories are committed
+
+        $self->history_()->commit_history() if ( defined($self->history_()) );
+
         $self->release_session_key_private__( $message[0] );
     }
 
@@ -296,22 +301,20 @@ sub start
     # which is different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
 
-    # TODO : hardcoded 1
+    my $language = $self->global_config_( 'language' );
 
-    if ( defined( $self->user_module_config_( 1, 'html', 'language' ) ) &&
-       ( $self->user_module_config_( 1, 'html', 'language' ) =~ /^Nihongo|Korean$/ )) {
+    if ( defined( $language ) && ( $language =~ /^Nihongo|Korean$/ ) ) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
     }
 
     # Pass in the current interface language for language specific parsing
 
-    # TODO : hardcoded 1
-
-    $self->{parser__}->{lang__}  = $self->user_module_config_( 1, 'html', 'language' ) || '';
-    $self->{unclassified__} = log( $self->user_config_( 1, 'unclassified_weight' ) );
+    $self->{parser__}->{lang__}  = $language || '';
 
     $self->upgrade_predatabase_data__();
+
+    $self->upgrade_v1_data__();
 
     # Since Text::Kakasi is not thread-safe, we use it under the
     # control of a Mutex to avoid a crash if we are running on
@@ -1193,6 +1196,45 @@ sub upgrade_bucket__
 
 #----------------------------------------------------------------------------
 #
+# upgrade_v1_data__
+#
+# If the deprecated parameters found, upgrades them to the SQL database.
+#
+#----------------------------------------------------------------------------
+sub upgrade_v1_data__
+{
+    my ( $self ) = @_;
+
+    # Copy deprecated parameters to database
+
+    if ( defined($self->configuration_()->{deprecated_parameters__}) ) {
+        $self->log_( 1, "Upgrade the deprecated parameters in popfile.cfg to the admin's parameters\n" );
+
+        foreach my $parameter ( keys %{$self->configuration_()->{deprecated_parameters__}} ) {
+            $parameter =~ m/^([^_]+)_(.*)$/;
+            my $module = $1;
+            my $config = $2;
+            my $value  = $self->configuration_()->{deprecated_parameters__}{$parameter};
+
+            if ( defined($module) && defined($config) && defined($value) && 
+                    defined($self->user_module_config_( 1, $module, $config )) ) {
+
+                # Upgrade parameters to admin's
+
+                $self->user_module_config_( 1, $module, $config, $value );
+
+                # Upgrade language parameter to global
+
+                if ( ( $module eq 'html' ) && ( $config eq 'language' ) ) {
+                    $self->global_config_( 'language', $value );
+                }
+            }
+        }
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # magnet_match_helper__
 #
 # Helper the determines if a specific string matches a certain magnet
@@ -1212,10 +1254,6 @@ sub magnet_match_helper__
     return undef if ( !defined( $userid ) );
 
     $match = lc($match);
-
-    # In Japanese and Korean mode, disable locale.  Sorting Japanese
-    # and Korean with "use locale" is memory and time consuming, and
-    # may cause perl crash.
 
     my @magnets;
 
@@ -1904,7 +1942,7 @@ sub classify
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{unclassified__} = log( $self->user_config_( 1, 'unclassified_weight' ) );
+    $self->{unclassified__} = log( $self->user_config_( $userid, 'unclassified_weight' ) );
 
     $self->{magnet_used__}   = 0;
     $self->{magnet_detail__} = 0;
@@ -2468,7 +2506,7 @@ sub classify_and_modify
     $class = '' if ( !defined( $class ) );
     if ( $class eq '' ) {
         $self->{parser__}->start_parse();
-        ( $slot, $msg_file ) = $self->history_()->reserve_slot( $session, $userid );
+        ( $slot, $msg_file ) = $self->history_()->reserve_slot( $session );
     } else {
         $msg_file = $self->history_()->get_slot_file( $slot );
     }
@@ -3215,10 +3253,10 @@ sub get_bucket_word_prefixes
     # with "use locale" is memory and time consuming, and may cause
     # perl crash.
 
-    if ( $self->user_module_config_( 1, 'html', 'language' ) eq 'Nihongo' ) {
+    if ( $self->global_config_( 'language' ) eq 'Nihongo' ) {
         return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc__($_,0,1)} @{$result};
     } else {
-        if  ( $self->user_module_config_( 1, 'html', 'language' ) eq 'Korean' ) {
+        if  ( $self->global_config_( 'language' ) eq 'Korean' ) {
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} @{$result};
         } else {
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)}  @{$result};
@@ -4646,9 +4684,7 @@ sub add_stopword
 
     # Pass language parameter to add_stopword()
 
-    # TODO : hardcoded 1
-
-    return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
+    return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->global_config_( 'language' ) );
 }
 
 sub remove_stopword
@@ -4660,9 +4696,7 @@ sub remove_stopword
 
     # Pass language parameter to remove_stopword()
 
-    # TODO : hardcoded 1
-
-    return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
+    return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->global_config_( 'language' ) );
 }
 
 #----------------------------------------------------------------------------

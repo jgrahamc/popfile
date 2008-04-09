@@ -27,6 +27,7 @@ test_assert( rec_cp( 'corpus.base', 'corpus' ) );
 rmtree( 'corpus/CVS' );
 
 unlink 'popfile.db';
+unlink 'popfile.pid';
 unlink 'stopwords';
 test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
@@ -410,7 +411,7 @@ $h->set_query( $q, '', 's', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 3 );
 @rows = $h->get_query_rows( $q, 1, 2 );
 $h->set_query( $q, '', 's', '', 0 );
-test_assert_equal( $#{$h->{queries__}{$q}{cache}}, 2 );
+test_assert_equal( $#{$h->{queries__}{$q}{cache}}, 1 );
 $h->set_query( $q, '', 't', '', 0 );
 test_assert_equal( $#{$h->{queries__}{$q}{cache}}, -1 );
 

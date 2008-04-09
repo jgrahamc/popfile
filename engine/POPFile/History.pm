@@ -132,7 +132,7 @@ sub stop
     # possible that we get called with a stop after things have been
     # added to the queue and before service() is called
 
-    $self->commit_history__();
+    $self->commit_history();
 
     # Clean up the database handle
 
@@ -160,7 +160,7 @@ sub service
     # valid.  The easiest way will be to call it in deliver() when we get
     # a COMIT message.
 
-    $self->commit_history__();
+    $self->commit_history();
 
     return 1;
 }
@@ -186,6 +186,7 @@ sub deliver
 
     if ( $type eq 'COMIT' ) {
         push ( @{$self->{commit_list__}}, \@message );
+#        $self->commit_history();
     }
 }
 
@@ -466,13 +467,13 @@ sub is_valid_slot
 
 #---------------------------------------------------------------------------
 #
-# commit_history__
+# commit_history
 #
 # (private) Used internally to commit messages that have been committed
 # with a call to commit_slot to the database
 #
 #----------------------------------------------------------------------------
-sub commit_history__
+sub commit_history
 {
     my ( $self ) = @_;
 
@@ -1206,9 +1207,9 @@ sub upgrade_history_files__
                 $self->history_read_class__( $msg );
 
             if ( $bucket ne 'unknown_class' ) {
-                # TODO : hardcoded userid 1
+                # Import the message to the admin's history table
 
-                my ( $slot, $file ) = $self->reserve_slot( $session, 1 );
+                my ( $slot, $file ) = $self->reserve_slot( $session );
                 rename $msg, $file;
                 my @message = ( $session, $slot, $bucket, 0 );
                 push ( @{$self->{commit_list__}}, \@message );
@@ -1218,7 +1219,7 @@ sub upgrade_history_files__
 
         print "\nDone upgrading history\n";
 
-        $self->commit_history__();
+        $self->commit_history();
         $self->classifier_()->release_session_key( $session );
 
         unlink $self->get_user_path_(

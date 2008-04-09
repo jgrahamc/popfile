@@ -22,6 +22,7 @@
 # ----------------------------------------------------------------------------
 
 unlink 'popfile.cfg';
+unlink 'popfile.pid';
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
@@ -56,6 +57,11 @@ test_assert_equal( $c->initialize(), 1 );
 test_assert_equal( $c->config_( 'piddir' ), './' );
 test_assert_equal( $c->global_config_( 'timeout' ), 60 );
 test_assert_equal( $c->global_config_( 'msgdir' ), 'messages/' );
+
+# Save STDERR
+
+my $old_stderr;
+open $old_stderr, ">&STDERR";
 
 # Check that the PID file gets created and then deleted and
 # contains the correct process ID
@@ -117,6 +123,8 @@ $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_crypt_strength 0' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_debug 0' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_language English' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_message_cutoff 100000' );
 $line = <FILE>;
@@ -245,6 +253,10 @@ open OUTPUT, "<stdout.tmp";
 my $line = <OUTPUT>;
 close OUTPUT;
 test_assert_regexp( $line, 'Expected a command line option and got baz' );
+
+# Restore STDERR
+
+open STDERR, ">&", $old_stderr;
 
 # path_join__
 

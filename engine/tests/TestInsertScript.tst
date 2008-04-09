@@ -50,6 +50,10 @@ test_assert_regexp( $line, 'insert mail messages into' );
 test_assert( ($? >> 8) != 0 );
 test_assert_regexp( shift @stdout, 'insert mail messages into' );
 
+# Save STDERR
+
+open my $old_stderr, ">&STDERR";
+
 # Bad bucket name
 
 open STDERR, ">temp.tmp";
@@ -92,6 +96,10 @@ open STDERR, ">temp.tmp";
 @stdout =`$insert personal TestMailParse021.msg`;
 $code = ($? >> 8);
 close STDERR;
+
+# Restore STDERR
+
+open STDERR, ">&", $old_stderr;
 
 test_assert_equal( $code, 0 );
 

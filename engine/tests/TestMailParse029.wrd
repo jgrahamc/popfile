@@ -10,6 +10,7 @@ envelope 1
 foo.bar@inwind.it 2
 h24-85-91-39.vc.shawcable.net 1
 header:Date 1
+header:Message-ID 1
 header:Received 3
 header:Return-Path 1
 header:Sender 1

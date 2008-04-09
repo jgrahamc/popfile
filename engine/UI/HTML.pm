@@ -185,6 +185,7 @@ sub initialize
 
     $self->mq_register_( 'UIREG', $self );
     $self->mq_register_( 'LOGIN', $self );
+    $self->mq_register_( 'RELSE', $self );
 
     $self->calculate_today();
 
@@ -215,20 +216,10 @@ sub start
     # that any extensions to the user interface that have not yet been
     # translated will still appear
 
-    # TODO : hardcoded 1
-
     $self->load_language( 'English' );
-    if ( $self->user_config_( 1, 'language' ) ne 'English' ) {
-        $self->load_language( $self->user_config_( 1, 'language' ) );
+    if ( $self->global_config_( 'language' ) ne 'English' ) {
+        $self->load_language( $self->global_config_( 'language' ) );
     }
-
-    # Set the classifier option wmformat__ according to our
-    # wordtable_format option.
-
-    # TODO : hardcoded 1
-
-    $self->classifier_()->wmformat( $self->user_config_( 1,
-                                        'wordtable_format' ) );
 
     return $self->SUPER::start();
 }
@@ -273,6 +264,12 @@ sub deliver
 
     if ( $type eq 'LOGIN' ) {
         $self->{last_login__} = $message[0];
+    }
+
+    if ( $type eq 'RELSE' ) {
+        if ( defined( $message[0] ) && defined( $self->{language__}{$message[0]} ) ) {
+            delete $self->{language__}{$message[0]};
+        }
     }
 }
 
@@ -362,7 +359,20 @@ sub handle_cookie__
         $self->{sessions__}{$session}{negate} = '';
         $self->{sessions__}{$session}{q} = $self->history_()->start_query( $session );
 
+        # Load the current configuration from disk and then load up the
+        # appropriate language, note that we always load English first so
+        # that any extensions to the user interface that have not yet been
+        # translated will still appear
+
+        if ( $self->user_config_( $user, 'language' ) ne $self->global_config_( 'language' ) ) {
+            $self->load_language( 'English', $session );
+            if ( $self->user_config_( $user, 'language' ) ne 'English' ) {
+                $self->load_language( $self->user_config_( $user, 'language' ), $session );
+            }
+        }
+
         return $session;
+
     } else {
         return undef;
     }
@@ -419,7 +429,7 @@ sub set_cookie__
 
         my $http_header = "Set-Cookie: popfile=$cookie_string; ";
         $http_header   .= 'path=/; ';
-        $http_header   .= 'expires=' . $self->zulu_offset_( 14, 0 );
+#        $http_header   .= 'expires=' . $self->zulu_offset_( 14, 0 );
         $http_header   .= "\r\n";
 
         $self->log_( 2, "Sending cookie header: $http_header" );
@@ -463,14 +473,17 @@ sub url_handler__
 
     if ( !defined( $session ) &&
          $self->global_config_( 'single_user' ) ) {
-        $session = $self->classifier_()->get_administrator_session_key();
-        $self->{sessions__}{$session}{lastused} = time;
-        $self->{sessions__}{$session}{user} = 1;
-        $self->{sessions__}{$session}{sort} = '';
-        $self->{sessions__}{$session}{filter} = '';
-        $self->{sessions__}{$session}{search} = '';
-        $self->{sessions__}{$session}{negate} = '';
-        $self->{sessions__}{$session}{q} = $self->history_()->start_query( $session );
+
+        $session = $self->classifier_()->get_session_key( 'admin', '' );
+        if ( defined ( $session ) ) {
+            $self->{sessions__}{$session}{lastused} = time;
+            $self->{sessions__}{$session}{user} = 1;
+            $self->{sessions__}{$session}{sort} = '';
+            $self->{sessions__}{$session}{filter} = '';
+            $self->{sessions__}{$session}{search} = '';
+            $self->{sessions__}{$session}{negate} = '';
+            $self->{sessions__}{$session}{q} = $self->history_()->start_query( $session );
+        }
     }
 
     # See if there are any form parameters and if there are parse them
@@ -664,7 +677,8 @@ sub url_handler__
         $http_header .= "Cache-Control: no-cache\r\n";
         $http_header .= $self->set_cookie__( $session, $client );
         $http_header .= "Content-Type: text/html";
-        $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
+        my $charset = $self->language($session)->{LanguageCharset};
+        $http_header .= "; charset=$charset\r\n";
         $http_header .= "Content-Length: ";
 
         my $text = $self->shutdown_page__( $session );
@@ -896,7 +910,8 @@ sub http_ok
 
     $http_header .= $self->set_cookie__( $session, $client );
     $http_header .= "Content-Type: text/html";
-    $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
+    my $charset = $self->language($session)->{LanguageCharset};
+    $http_header .= "; charset=$charset\r\n";
     $http_header .= "Content-Length: ";
 
     my $text = $templ->output;
@@ -932,7 +947,7 @@ sub handle_history_bar__
                                  'page_size', $self->{form_}{page_size} );
         } else {
             $self->error_message__( $templ,
-                $self->{language__}{Configuration_Error4} );
+                $self->language($session)->{Configuration_Error4} );
             delete $self->{form_}{page_size};
         }
     }
@@ -949,7 +964,7 @@ sub handle_history_bar__
                                         $self->{form_}{history_days} );
         } else {
             $self->error_message__( $templ,
-                $self->{language__}{Configuration_Error5} );
+                $self->language($session)->{Configuration_Error5} );
             $templ->param( 'Configuration_If_History_Days_Error' => 1 );
             delete $self->{form_}{history_days};
         }
@@ -992,7 +1007,7 @@ sub handle_history_bar__
         $column =~ s/^.//;
         $row{Configuration_Field_Name} = $column;
         $row{Configuration_Localized_Field_Name} =
-           $self->{language__}{$headers_table{$column}};
+           $self->language($session)->{$headers_table{$column}};
         push ( @column_data, \%row );
     }
     $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
@@ -1056,15 +1071,19 @@ sub handle_configuration_bar__
         if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne
                  $self->{form_}{language} ) {
             $self->user_config_( $self->{sessions__}{$session}{user}, 'language', $self->{form_}{language} );
-            if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne 'English' ) {
-                $self->load_language( 'English', $session );
+            if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne $self->global_config_( 'language' ) ) {
+                if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne 'English' ) {
+                    $self->load_language( 'English', $session );
+                }
+                $self->load_language( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ), $session );
+            } else {
+                delete $self->{language__}{$session};
             }
-            $self->load_language( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ), $session );
 
             # Force a template relocalization because the language has been
             # changed which changes the localization of the template
 
-            $self->localize_template__( $templ );
+            $self->localize_template__( $templ, $session );
         }
     }
 
@@ -1131,7 +1150,7 @@ sub handle_configuration_bar__
              $self->{form_}{confirm_password} ) {
 
             $self->error_message__( $templ,
-                       $self->{language__}{Configuration_Password_Mismatch} );
+                       $self->language($session)->{Configuration_Password_Mismatch} );
         } else {
 
             # Check that the old password is correct
@@ -1140,15 +1159,15 @@ sub handle_configuration_bar__
                                         $self->{form_}{old_password} ) ) {
 
                 $self->error_message__( $templ,
-                           $self->{language__}{Configuration_Password_Bad} );
+                           $self->language($session)->{Configuration_Password_Bad} );
             } else {
                 if ( !$self->classifier_()->set_password( $session,
                                              $self->{form_}{new_password} ) ) {
                     $self->error_message__( $templ,
-                             $self->{language__}{Configuration_Password_Fail});
+                             $self->language($session)->{Configuration_Password_Fail});
                 } else {
                     $self->status_message__( $templ,
-                             $self->{language__}{Configuration_Set_Password} );
+                             $self->language($session)->{Configuration_Set_Password} );
                 }
             }
         }
@@ -1224,10 +1243,10 @@ sub administration_page
             if ( ( $self->{form_}{ui_port} >= 1 ) &&
                  ( $self->{form_}{ui_port} < 65536 ) ) {
                 $self->config_( 'port', $self->{form_}{ui_port} );
-                $self->status_message__( $templ, sprintf( $self->{language__}{Configuration_UIUpdate},
+                $self->status_message__( $templ, sprintf( $self->language($session)->{Configuration_UIUpdate},
                     $self->config_( 'port' ) ) );
             } else {
-                $self->error_message__( $templ, $self->{language__}{Configuration_Error2} );
+                $self->error_message__( $templ, $self->language($session)->{Configuration_Error2} );
                 delete $self->{form_}{ui_port};
             }
         }
@@ -1237,7 +1256,7 @@ sub administration_page
                 $self->global_config_( 'timeout', $self->{form_}{timeout} );
             }
             else {
-                $self->error_message__( $templ, $self->{language__}{Configuration_Error6} );
+                $self->error_message__( $templ, $self->language($session)->{Configuration_Error6} );
                 delete $self->{form_}{timeout};
             }
         }
@@ -1264,7 +1283,7 @@ sub administration_page
         if ( $self->{form_}->{apply_stealth} ) {
             ($status_message, $error_message) = $self->{dynamic_ui__}{security}{$name}{object}->validate_item( $name,
                                                                        $security_templates{$name},
-                                                                       \%{$self->{language__}},
+                                                                       \%{$self->language($session)},
                                                                        \%{$self->{form_}} );
 
             # Tell the user anything the dynamic UI was interested in sharing
@@ -1285,7 +1304,7 @@ sub administration_page
         $chain_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{chain}{$name}{template}, $page, $session );
         ($status_message, $error_message) = $self->{dynamic_ui__}{chain}{$name}{object}->validate_item( $name,
                                                                     $chain_templates{$name},
-                                                                    \%{$self->{language__}},
+                                                                    \%{$self->language($session)},
                                                                     \%{$self->{form_}} );
 
         # Tell the user anything the dynamic UI was interested in sharing
@@ -1305,7 +1324,7 @@ sub administration_page
 
     for my $name (sort keys %{$self->{dynamic_ui__}{security}}) {
         my $local = $self->{dynamic_ui__}{security}{$name}{object}->configure_item(
-            $name, $security_templates{$name}, \%{$self->{language__}} );
+            $name, $security_templates{$name}, \%{$self->language($session)} );
         $all_local &&= $local;
     }
 
@@ -1322,7 +1341,7 @@ sub administration_page
 
     for my $name (sort keys %{$self->{dynamic_ui__}{chain}}) {
         $self->{dynamic_ui__}{chain}{$name}{object}->configure_item(
-            $name, $chain_templates{$name}, \%{$self->{language__}} );
+            $name, $chain_templates{$name}, \%{$self->language($session)} );
         $chain_html .= $chain_templates{$name}->output;
     }
 
@@ -1344,7 +1363,7 @@ sub administration_page
         ($status_message, $error_message) = $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
             $name,
             $dynamic_templates{$name},
-            \%{$self->{language__}},
+            \%{$self->language($session)},
             \%{$self->{form_}} );
 
         # Tell the user anything the dynamic UI was interested in sharing
@@ -1359,7 +1378,7 @@ sub administration_page
     }
 
 
-    $self->status_message__( $templ, sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
+    $self->status_message__( $templ, sprintf( $self->language($session)->{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
     $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
 
     # Insert all the items that are dynamically created from the
@@ -1377,7 +1396,7 @@ sub administration_page
             $configuration_html .= "</h2>\n";
         }
         $self->{dynamic_ui__}{configuration}{$name}{object}->configure_item(
-            $name, $dynamic_templates{$name}, \%{$self->{language__}} );
+            $name, $dynamic_templates{$name}, \%{$self->language($session)} );
         $configuration_html .= $dynamic_templates{$name}->output;
     }
 
@@ -1408,9 +1427,9 @@ sub administration_page
 #----------------------------------------------------------------------------
 sub pretty_number
 {
-    my ( $self, $number ) = @_;
+    my ( $self, $number, $session ) = @_;
 
-    my $c = reverse $self->{language__}{Locale_Thousands};
+    my $c = reverse $self->language($session)->{Locale_Thousands};
 
     $number = reverse $number;
     $number =~ s/(\d{3})/$1$c/g;
@@ -1443,7 +1462,7 @@ sub pretty_date__
     my $format = $self->user_config_( $user, 'date_format' );
 
     if ( $format eq '' ) {
-        $format = $self->{language__}{Locale_Date};
+        $format = $self->language($session)->{Locale_Date};
     }
 
     if ( $format =~ /[\t ]*(.+)[\t ]*\|[\t ]*(.+)/ ) {
@@ -1487,19 +1506,19 @@ sub users_page
         my ( $result, $password ) = $self->classifier_()->create_user( $session, $self->{form_}{newuser}, $self->{form_}{clone} );
         if ( $result == 0 ) {
             if ( $self->{form_}{clone} ne '' ) {
-                 $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created_And_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
+                 $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Created_And_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
             } else {
-                $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created}, $self->{form_}{newuser}, $password ) );
+                $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Created}, $self->{form_}{newuser}, $password ) );
             }
         }
         if ( $result == 1 ) {
-            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Not_Created_Exists}, $self->{form_}{newuser} ) );
+            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Not_Created_Exists}, $self->{form_}{newuser} ) );
         }
         if ( $result == 2 ) {
-            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Not_Created}, $self->{form_}{newuser} ) );
+            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Not_Created}, $self->{form_}{newuser} ) );
         }
         if ( $result == 3 ) {
-            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Created_Not_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
+            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Created_Not_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
         }
     }
 
@@ -1509,13 +1528,13 @@ sub users_page
          ( $self->{form_}{toremove} ne '' ) ) {
         my $result = $self->classifier_()->remove_user( $session, $self->{form_}{toremove} );
         if ( $result == 0 ) {
-            $self->status_message__( $templ, sprintf( $self->{language__}{Users_Removed}, $self->{form_}{toremove} ) );
+            $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Removed}, $self->{form_}{toremove} ) );
         }
         if ( $result == 1 ) {
-            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Removed_Failed}, $self->{form_}{toremove} ) );
+            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Removed_Failed}, $self->{form_}{toremove} ) );
         }
         if ( $result == 2 ) {
-            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Removed_Failed_Admin}, $self->{form_}{toremove} ) );
+            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Removed_Failed_Admin}, $self->{form_}{toremove} ) );
         }
     }
 
@@ -1530,10 +1549,10 @@ sub users_page
             # Initialize user's password
             my ($result, $new_password) = $self->classifier_()->initialize_users_password( $session, $self->{form_}{tochangepassword} );
             if ( $result == 0 ) {
-                $self->status_message__( $templ, sprintf( $self->{language__}{Users_Reset_Password}, $self->{form_}{tochangepassword}, $new_password ) );
+                $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Reset_Password}, $self->{form_}{tochangepassword}, $new_password ) );
             }
             if ( $result == 1 ) {
-                $self->error_message__( $templ, sprintf( $self->{language__}{Users_Reset_Password_Failed}, $self->{form_}{tochangepassword} ) );
+                $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Reset_Password_Failed}, $self->{form_}{tochangepassword} ) );
             }
 
         } else {
@@ -1545,13 +1564,13 @@ sub users_page
             if ( $new_password eq $confirm_password ) {
                 my $result = $self->classifier_()->change_users_password( $session, $self->{form_}{tochangepassword}, $new_password );
                 if ( $result == 0 ) {
-                    $self->status_message__( $templ, sprintf( $self->{language__}{Users_Changed_Password}, $self->{form_}{tochangepassword} ) );
+                    $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Changed_Password}, $self->{form_}{tochangepassword} ) );
                 }
                 if ( $result == 1 ) {
-                    $self->error_message__( $templ, sprintf( $self->{language__}{Users_Change_Password_Failed}, $self->{form_}{tochangepassword} ) );
+                    $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Change_Password_Failed}, $self->{form_}{tochangepassword} ) );
                 }
             } else {
-                $self->error_message__( $templ, sprintf( $self->{language__}{Users_Change_Password_Failed_Mismatch}, $self->{form_}{tochangepassword} ) );
+                $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Change_Password_Failed_Mismatch}, $self->{form_}{tochangepassword} ) );
             }
         }
     }
@@ -1576,14 +1595,14 @@ sub users_page
             my $id = $self->classifier_()->get_user_id( $session, $self->{form_}{editname} );
             my $result = $self->classifier_()->add_account( $session, $id, 'pop3', $self->{form_}{newaccount} );
             if ( $result == -1 ) {
-                $self->error_message__( $templ, $self->{language__}{Users_Duplicate_Account} );
+                $self->error_message__( $templ, $self->language($session)->{Users_Duplicate_Account} );
             } else {
                 if ( $result == 0 ) {
-                    $self->error_message__( $templ, $self->{language__}{Users_Failed_Account} );
+                    $self->error_message__( $templ, $self->language($session)->{Users_Failed_Account} );
                 }
             }
         } else {
-            $self->error_message__( $templ, $self->{language__}{Users_Bad_Account} );
+            $self->error_message__( $templ, $self->language($session)->{Users_Bad_Account} );
         }
     }
 
@@ -1698,9 +1717,9 @@ sub advanced_page
         my $result = $self->classifier_()->add_stopword( $session,
                          $self->{form_}{newword} );
         if ( $result == 0 ) {
-            $self->error_message__( $templ, $self->{language__}{Advanced_Error2} );
+            $self->error_message__( $templ, $self->language($session)->{Advanced_Error2} );
         } else {
-            $self->status_message__( $templ, sprintf $self->{language__}{Advanced_Error3}, $self->{form_}{newword} );
+            $self->status_message__( $templ, sprintf $self->language($session)->{Advanced_Error3}, $self->{form_}{newword} );
         }
     }
 
@@ -1708,9 +1727,9 @@ sub advanced_page
         my $result = $self->classifier_()->remove_stopword( $session,
                          $self->{form_}{word} );
         if ( $result == 0 ) {
-            $self->error_message__( $templ, $self->{language__}{Advanced_Error2} );
+            $self->error_message__( $templ, $self->language($session)->{Advanced_Error2} );
         } else {
-            $self->status_message__( $templ, sprintf $self->{language__}{Advanced_Error5}, $self->{form_}{word} );
+            $self->status_message__( $templ, sprintf $self->language($session)->{Advanced_Error5}, $self->{form_}{word} );
         }
     }
 
@@ -1727,12 +1746,12 @@ sub advanced_page
     @words = sort @words;
     push ( @words, ' ' );
     for my $word (@words) {
-        if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) =~ /^Korean$/ ) {
+        if ( $self->global_config_( 'language' ) =~ /^Korean$/ ) {
             no locale;
             $word =~ /^(.)/;
             $c = $1;
         } else {
-                if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) =~ /^Nihongo$/ ) {
+                if ( $self->global_config_( 'language' ) =~ /^Nihongo$/ ) {
                no locale;
                $word =~ /^($euc_jp)/o;
                $c = $1;
@@ -1913,7 +1932,7 @@ sub magnet_page
 
                         if ( exists( $magnets{$current_mtext} ) ) {
                             $found  = 1;
-                            $error_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . "\n";
+                            $error_message .= sprintf( $self->language($session)->{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . "\n";
                             last;
                         }
                     }
@@ -1926,7 +1945,7 @@ sub magnet_page
                             for my $from (keys %magnets)  {
                                 if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
                                     $found = 1;
-                                    $error_message .= sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . "\n";
+                                    $error_message .= sprintf( $self->language($session)->{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . "\n";
                                     last;
                                 }
                             }
@@ -1958,7 +1977,7 @@ sub magnet_page
 
                     $self->classifier_()->create_magnet( $session, $mbucket, $mtype, $current_mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
-                        $status_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket ) . "\n";
+                        $status_message .= sprintf( $self->language($session)->{Magnet_Error3}, "$mtype: $current_mtext", $mbucket ) . "\n";
                     }
                 }
             }
@@ -2005,7 +2024,7 @@ sub magnet_page
     foreach my $type (keys %magnet_types) {
         my %row_data;
         $row_data{Magnet_Type} = $type;
-        $row_data{Magnet_Type_Name} = $magnet_types{$type};
+        $row_data{Magnet_Type_Localized} = $self->language($session)->{$magnet_types{$type}};
         push ( @magnet_type_loop, \%row_data );
     }
     $templ->param( 'Magnet_Loop_Types' => \@magnet_type_loop );
@@ -2064,7 +2083,7 @@ sub magnet_page
                     my %type_data;
                     my $selected = ( $mtype eq $type )?"selected":"";
                     $type_data{Magnet_Type_Name} = $mtype;
-                    $type_data{Magnet_Type_Localized} = $self->{language__}{$magnet_types{$mtype}};
+                    $type_data{Magnet_Type_Localized} = $self->language($session)->{$magnet_types{$mtype}};
                     $type_data{Magnet_Type_Selected} = $selected;
                     push ( @type_loop, \%type_data );
                 }
@@ -2116,12 +2135,12 @@ sub bucket_page
                                                     $page, $session );
 
     my $color = $self->classifier_()->get_bucket_color( $session, $bucket );
-    $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<span style=\"color:$color\">$bucket</span>" ) );
+    $templ->param( 'Bucket_Main_Title' => sprintf( $self->language($session)->{SingleBucket_Title}, "<span style=\"color:$color\">$bucket</span>" ) );
 
     my $bucket_count = $self->classifier_()->get_bucket_word_count( $session, $bucket );
-    $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count ) );
-    $templ->param( 'Bucket_Unique_Count' => sprintf( $self->{language__}{SingleBucket_Unique}, $self->pretty_number( $self->classifier_()->get_bucket_unique_count( $session, $bucket ) ) ) );
-    $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->classifier_()->get_word_count( $session ) ) );
+    $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count, $session ) );
+    $templ->param( 'Bucket_Unique_Count' => sprintf( $self->language($session)->{SingleBucket_Unique}, $self->pretty_number( $self->classifier_()->get_bucket_unique_count( $session, $bucket ), $session ) ) );
+    $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->classifier_()->get_word_count( $session ), $session ) );
     $templ->param( 'Bucket_Bucket' => $bucket );
 
     my $percent = '0%';
@@ -2148,7 +2167,7 @@ sub bucket_page
             my $letter = $self->{form_}{showletter};
 
             $templ->param( 'Bucket_If_Show_Letter'   => 1 );
-            $templ->param( 'Bucket_Word_Table_Title' => sprintf( $self->{language__}{SingleBucket_WordTable}, $bucket ) );
+            $templ->param( 'Bucket_Word_Table_Title' => sprintf( $self->language($session)->{SingleBucket_WordTable}, $bucket ) );
             $templ->param( 'Bucket_Letter'           => $letter );
 
             my %word_count;
@@ -2223,11 +2242,11 @@ sub bar_chart_100
         for my $s (@series) {
             my %series_row_data;
             my $value = $values{$bucket}{$s} || 0;
-            my $count   = $self->pretty_number( $value );
+            my $count   = $self->pretty_number( $value, $session );
             my $percent = '';
 
             if ( $s == 0 ) {
-                my $d = $self->{language__}{Locale_Decimal};
+                my $d = $self->language($session)->{Locale_Decimal};
                 if ( $total_count == 0 ) {
                     $percent = " (  0$d" . "00%)";
                 } else {
@@ -2329,14 +2348,14 @@ sub corpus_page
 
     if ( ( defined($self->{form_}{cname}) ) && ( $self->{form_}{cname} ne '' ) ) {
         if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
-            $self->error_message__( $templ, $self->{language__}{Bucket_Error1} );
+            $self->error_message__( $templ, $self->language($session)->{Bucket_Error1} );
         } else {
             if ( $self->classifier_()->is_bucket( $session, $self->{form_}{cname} ) ||
                 $self->classifier_()->is_pseudo_bucket( $session, $self->{form_}{cname} ) ) {
-                $self->error_message__( $templ, sprintf( $self->{language__}{Bucket_Error2}, $self->{form_}{cname} ) );
+                $self->error_message__( $templ, sprintf( $self->language($session)->{Bucket_Error2}, $self->{form_}{cname} ) );
             } else {
                 $self->classifier_()->create_bucket( $session, $self->{form_}{cname} );
-                $self->status_message__( $templ, sprintf( $self->{language__}{Bucket_Error3}, $self->{form_}{cname} ) );
+                $self->status_message__( $templ, sprintf( $self->language($session)->{Bucket_Error3}, $self->{form_}{cname} ) );
             }
        }
     }
@@ -2344,19 +2363,19 @@ sub corpus_page
     if ( ( defined($self->{form_}{delete}) ) && ( $self->{form_}{name} ne '' ) ) {
         $self->{form_}{name} = lc($self->{form_}{name});
         $self->classifier_()->delete_bucket( $session, $self->{form_}{name} );
-        $self->status_message__( $templ, sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) );
+        $self->status_message__( $templ, sprintf( $self->language($session)->{Bucket_Error6}, $self->{form_}{name} ) );
     }
 
     if ( ( defined($self->{form_}{newname}) ) &&
          ( $self->{form_}{oname} ne '' ) ) {
         if ( ( $self->{form_}{newname} eq '' ) ||
              ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) )  {
-            $self->error_message__( $templ, $self->{language__}{Bucket_Error1} );
+            $self->error_message__( $templ, $self->language($session)->{Bucket_Error1} );
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
             $self->{form_}{newname} = lc($self->{form_}{newname});
             if ( $self->classifier_()->rename_bucket( $session, $self->{form_}{oname}, $self->{form_}{newname} ) == 1 ) {
-                $self->status_message__( $templ, sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) );
+                $self->status_message__( $templ, sprintf( $self->language($session)->{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) );
             } else {
                 $self->error_message__( $templ, 'Internal error: rename failed' );
             }
@@ -2418,7 +2437,7 @@ sub corpus_page
         my %row_data;
         $row_data{Corpus_Bucket}        = $bucket;
         $row_data{Corpus_Bucket_Color}  = $self->get_bucket_parameter__( $session, $bucket, 'color' );
-        $row_data{Corpus_Bucket_Unique} = $self->pretty_number(  $self->classifier_()->get_bucket_unique_count( $session, $bucket ) );
+        $row_data{Corpus_Bucket_Unique} = $self->pretty_number( $self->classifier_()->get_bucket_unique_count( $session, $bucket ), $session );
         $row_data{Corpus_If_Bucket_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $session, $bucket );
         $row_data{Corpus_If_Subject}    = $self->get_bucket_parameter__( $session, $bucket, 'subject' );
         $row_data{Corpus_If_XTC}        = $self->get_bucket_parameter__( $session, $bucket, 'xtc' );
@@ -2458,16 +2477,16 @@ sub corpus_page
 
     $templ->param( 'Corpus_Bar_Chart_Word_Counts' => $self->bar_chart_100( $session, %bar_values ) );
 
-    my $number = $self->pretty_number(  $self->classifier_()->get_unique_word_count( $session ) );
+    my $number = $self->pretty_number( $self->classifier_()->get_unique_word_count( $session ), $session );
     $templ->param( 'Corpus_Total_Unique' => $number );
 
-    my $pmcount = $self->pretty_number(  $self->mcount__( $session ) );
+    my $pmcount = $self->pretty_number(  $self->mcount__( $session ), $session );
     $templ->param( 'Corpus_Message_Count' => $pmcount );
 
-    my $pecount = $self->pretty_number(  $self->ecount__( $session ) );
+    my $pecount = $self->pretty_number(  $self->ecount__( $session ), $session );
     $templ->param( 'Corpus_Error_Count' => $pecount );
 
-    my $accuracy = $self->{language__}{Bucket_NotEnoughData};
+    my $accuracy = $self->language($session)->{Bucket_NotEnoughData};
     my $percent = 0;
     if ( $self->mcount__( $session ) > $self->ecount__( $session ) ) {
         $percent = int( 10000 * ( $self->mcount__( $session ) - $self->ecount__( $session ) ) / $self->mcount__( $session ) ) / 100;
@@ -2526,7 +2545,7 @@ sub corpus_page
                     my $prob    = exp( $val );
                       my $n       = ($total > 0)?$prob / $total:0;
                     my $score   = ($#buckets >= 0)?($val - $self->classifier_()->get_not_likely_( $session ) )/log(10.0):0;
-                    my $d = $self->{language__}{Locale_Decimal};
+                    my $d = $self->language($session)->{Locale_Decimal};
                     my $normal  = sprintf("%.10f", $n);
                     $normal =~ s/\./$d/;
                     $score      = sprintf("%.10f", $score);
@@ -2550,9 +2569,9 @@ sub corpus_page
             $templ->param( 'Corpus_Loop_Lookup' => \@lookup_data );
 
             if ( $max_bucket ne '' ) {
-                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->{language__}{Bucket_LookupMostLikely}, $word, $self->classifier_()->get_bucket_color( $session, $max_bucket ), $max_bucket ) );
+                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->language($session)->{Bucket_LookupMostLikely}, $word, $self->classifier_()->get_bucket_color( $session, $max_bucket ), $max_bucket ) );
             } else {
-                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->{language__}{Bucket_DoesNotAppear}, $word ) );
+                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->language($session)->{Bucket_DoesNotAppear}, $word ) );
             }
         }
     }
@@ -2730,7 +2749,7 @@ sub history_reclassify
 
         while ( my ( $slot, $newbucket ) = each %messages ) {
             $self->{feedback}{$slot} = sprintf(
-                 $self->{language__}{History_ChangedTo},
+                 $self->language($session)->{History_ChangedTo},
                  $self->classifier_()->get_bucket_color(
                      $session, $newbucket ), $newbucket );
         }
@@ -2996,7 +3015,7 @@ sub history_page
     my $c = $self->history_()->get_query_size( $q );
     if ( $c > 0 ) {
         $templ->param( 'History_If_Some_Messages' => 1 );
-        $templ->param( 'History_Count' => $self->pretty_number( $c ) );
+        $templ->param( 'History_Count' => $self->pretty_number( $c, $session ) );
 
         my $start_message = 0;
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
@@ -3037,8 +3056,8 @@ sub history_page
             $row_data{History_Header} = $header;
 
             my $label = '';
-            if ( defined $self->{language__}{ $headers_table{$header} }) {
-                $label = $self->{language__}{ $headers_table{$header} };
+            if ( defined $self->language($session)->{ $headers_table{$header} }) {
+                $label = $self->language($session)->{ $headers_table{$header} };
             } else {
                 $label = $headers_table{$header};
             }
@@ -3049,10 +3068,10 @@ sub history_page
                 ( $self->{form_}{sort} !~ /^-/ );
             $row_data{History_If_MoveLeft} = ( $header ne $columns[0] );
             $row_data{History_If_MoveRight} = ( $header ne $columns[$#columns] );
-            $row_data{Localize_tip_History_RemoveColumn} = $self->{language__}{tip_History_RemoveColumn};
-            $row_data{Localize_tip_History_Sort} = $self->{language__}{tip_History_Sort};
-            $row_data{Localize_tip_History_MoveLeft} = $self->{language__}{tip_History_MoveLeft};
-            $row_data{Localize_tip_History_MoveRight} = $self->{language__}{tip_History_MoveRight};
+            $row_data{Localize_tip_History_RemoveColumn} = $self->language($session)->{tip_History_RemoveColumn};
+            $row_data{Localize_tip_History_Sort} = $self->language($session)->{tip_History_Sort};
+            $row_data{Localize_tip_History_MoveLeft} = $self->language($session)->{tip_History_MoveLeft};
+            $row_data{Localize_tip_History_MoveRight} = $self->language($session)->{tip_History_MoveRight};
             push ( @header_data, \%row_data );
             $length -= 10;
         }
@@ -3157,11 +3176,11 @@ sub history_page
                      my $v = '?';
                      if ( defined $size ) {
                          if ( $size >= 1024 * 1024 ) {
-                             $v = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
+                             $v = sprintf $self->language($session)->{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
                          } elsif ( $size >= 1024 ) {
-                             $v = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
+                             $v = sprintf $self->language($session)->{History_Size_KiloBytes}, $size / 1024;
                          } else {
-                             $v =sprintf $self->{language__}{History_Size_Bytes}, $size;
+                             $v =sprintf $self->language($session)->{History_Size_Bytes}, $size;
                          }
                      }
 
@@ -3222,8 +3241,8 @@ sub history_page
             $last = $$row[7];
 
             $row_data{Localize_History_Reclassified} =
-                $self->{language__}{History_Reclassified};
-            $row_data{Localize_Undo} = $self->{language__}{Undo};
+                $self->language($session)->{History_Reclassified};
+            $row_data{Localize_Undo} = $self->language($session)->{Undo};
             push ( @history_data, \%row_data );
         }
         $templ->param( 'History_Loop_Messages' => \@history_data );
@@ -3341,7 +3360,7 @@ sub view_page
 
     $templ->param( 'View_If_Reclassified'  => $reclassified );
     if ( $reclassified ) {
-        $templ->param( 'View_Already' => sprintf( $self->{language__}{History_Already}, ($color || ''), ($bucket || '') ) );
+        $templ->param( 'View_Already' => sprintf( $self->language($session)->{History_Already}, ($color || ''), ($bucket || '') ) );
     } else {
         $templ->param( 'View_If_Magnetized' => ( $magnet ne '' ) );
         if ( $magnet eq '' ) {
@@ -3398,12 +3417,12 @@ sub view_page
         # the right place, which we can replace by the link.  (There's
         # probably a better way.)
 
-        my $view = $self->{language__}{View_WordProbabilities};
+        my $view = $self->language($session)->{View_WordProbabilities};
         if ( $self->{form_}{format} eq 'freq' ) {
-            $view = $self->{language__}{View_WordFrequencies};
+            $view = $self->language($session)->{View_WordFrequencies};
         }
         if ( $self->{form_}{format} eq 'score' ) {
-            $view = $self->{language__}{View_WordScores};
+            $view = $self->language($session)->{View_WordScores};
         }
 
         if ( $self->{form_}{format} ne '' ) {
@@ -3470,7 +3489,7 @@ sub view_page
     }
 
     if ($magnet ne '') {
-        $templ->param( 'View_Magnet_Reason' => sprintf( $self->{language__}{History_MagnetBecause},  # PROFILE BLOCK START
+        $templ->param( 'View_Magnet_Reason' => sprintf( $self->language($session)->{History_MagnetBecause},  # PROFILE BLOCK START
                           $color, $bucket,
                           Classifier::MailParse->splitline($magnet,0)
             ) );                                                                                     # PROFILE BLOCK STOP
@@ -3495,9 +3514,13 @@ sub password_page
 
     my $session;
     my $templ = $self->load_template__( 'password-page.thtml' );
+    my $single_user = $self->global_config_( 'single_user' );
 
     $templ->param( 'Header_If_Password' => 1 );
     $templ->param( 'Next_Url' => $url );
+    $templ->param( 'Password_If_SingleUser' => $single_user );
+
+    $self->{form_}{username} = 'admin' if ( $single_user );
 
     if ( exists( $self->{form_}{username} ) &&
          exists( $self->{form_}{password} ) ) {
@@ -3509,7 +3532,9 @@ sub password_page
             return ($session, $self->url_decode_($self->{form_}{next}));
         } else {
             $self->error_message__( $templ,
-                       $self->{language__}{Password_Error1} );
+                       ( $single_user ? 
+                         $self->language($session)->{Password_Error1} :
+                         $self->language($session)->{Password_Error2} ) );
         }
     }
 
@@ -3636,7 +3661,7 @@ sub load_template__
                        $self->user_global_config_( $user, 'can_admin' ),
                    'If_Javascript_OK'        => $self->config_( 'allow_javascript' ),
                    'If_Language_RTL'         =>
-                       ( $self->{language__}{LanguageDirection} eq 'rtl' ),
+                       ( ${$self->language($session)}{LanguageDirection} eq 'rtl' ),
                    'Configuration_Action'    => $page,
                    'Header_If_SingleUser'    =>
                        $self->global_config_( 'single_user' ),
@@ -3650,7 +3675,7 @@ sub load_template__
         }
     }
 
-    $self->localize_template__( $templ );
+    $self->localize_template__( $templ, $session );
 
     return $templ;
 }
@@ -3665,7 +3690,7 @@ sub load_template__
 #----------------------------------------------------------------------------
 sub localize_template__
 {
-    my ( $self, $templ ) = @_;
+    my ( $self, $templ, $session ) = @_;
 
     # Localize the template in use.
     #
@@ -3683,7 +3708,7 @@ sub localize_template__
 
     foreach my $var (@vars) {
         if ( $var =~ /^Localize_(.*)/ ) {
-            $templ->param( $var => $self->{language__}{$1} );
+            $templ->param( $var => $self->language($session)->{$1} );
         }
     }
 }
@@ -3744,6 +3769,8 @@ sub load_language
 
     if ( defined( $session ) ) {
         $user = $self->{sessions__}{$session}{user};
+    } else {
+        $session = 'global';
     }
 
     if ( open LANG, '<' . $self->get_root_path_( "languages/$lang.msg" ) ) {
@@ -3758,7 +3785,7 @@ sub load_language
                 my $msg = ($self->user_config_( $user, 'test_language' )) ? $id : $value;
                 $msg =~ s/[\r\n]//g;
 
-                $self->{language__}{$id} = $msg;
+                $self->{language__}{$session}{$id} = $msg;
             }
         }
         close LANG;
@@ -3969,9 +3996,13 @@ sub set_bucket_parameter__
 
 sub language
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
 
-    return %{$self->{language__}};
+    if ( defined($session) && defined($self->{language__}{$session}) ) {
+        return $self->{language__}{$session};
+    } else {
+        return $self->{language__}{global};
+    }
 }
 
 #----------------------------------------------------------------------------
