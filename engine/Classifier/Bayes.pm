@@ -1767,7 +1767,7 @@ sub get_single_user_session_key
     my $single_user_session = $self->generate_unique_session_key__();
     $self->{api_sessions__}{$single_user_session} = 1;
     $self->db_update_cache__( $single_user_session );
-    $self->log_( 1, "get_session_key_from_token returning key $single_user_session for the single user mode" );
+    $self->log_( 1, "get_single_user_session_key returning key $single_user_session for the single user mode" );
 
     # Send the session to the parent so that it is recorded and can
     # be correctly shutdown
