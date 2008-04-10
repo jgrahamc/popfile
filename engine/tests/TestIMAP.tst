@@ -684,9 +684,7 @@ sub test_imap_ui {
     ( $status, $error ) = $im->validate_item('imap_3_bucket_folders', $tmpl, $language, $form );
     test_assert( ! $error );
     my $expected = sprintf $language->{Imap_MapUpdated}, 'other', 'personal';
-    $expected .= '<br />';
     $expected .= sprintf $language->{Imap_MapUpdated}, 'personal', 'other';
-    $expected .= '<br />';
     test_assert_equal( $status, $expected );
     test_assert_equal( $im->{folder_change_flag__}, 1 );
     test_assert_equal( $im->folder_for_bucket__( 'other' ), 'personal' );
