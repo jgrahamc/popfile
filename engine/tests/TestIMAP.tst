@@ -55,7 +55,6 @@ if ( $pid == 0 ) {
 else {
     # First, start POPFile.
     my ( $c, $mq, $l, $b, $h, $im ) = start_popfile();
-    my $session = $b->get_session_key( 'admin', '' );
 
     # Configure the IMAP module so it will
     # talk to the server.
@@ -81,7 +80,7 @@ else {
 sub test_imap_module {
     my ( $im, $c, $mq, $l, $b, $h ) = @_;
 
-    my $session = $b->get_session_key( 'admin', '' );
+    my $session = $b->get_administrator_session_key();
     test_assert( $im->start() );
 
     # The module is not supposed to do anything when the update
@@ -143,7 +142,7 @@ sub test_imap_module {
 
     # The module should not allow reclassification to the same
     # bucket.
-    my $hash = ( $h->get_slot_fields( 1 ) )[6];
+    my $hash = ( $h->get_slot_fields( 1, $session ) )[6];
     test_assert( ! $im->can_reclassify__( $hash, 'spam' ) );
     # If the hash is unknown, it should reclassify either
     test_assert( ! $im->can_reclassify__( 'hash', 'other' ) );
@@ -170,26 +169,26 @@ sub test_imap_module {
     $h->service();
 
     # check classification stored in history
-    test_assert_equal( ($h->get_slot_fields( 1 ))[8], 'personal' );
-    test_assert_equal( ($h->get_slot_fields( 2 ))[8], 'personal' );
-    test_assert_equal( ($h->get_slot_fields( 3 ))[8], 'personal' );
-    test_assert_equal( ($h->get_slot_fields( 4 ))[8], 'other' );
-    test_assert_equal( ($h->get_slot_fields( 5 ))[8], 'other' );
+    test_assert_equal( ($h->get_slot_fields( 1, $session ))[8], 'personal' );
+    test_assert_equal( ($h->get_slot_fields( 2, $session ))[8], 'personal' );
+    test_assert_equal( ($h->get_slot_fields( 3, $session ))[8], 'personal' );
+    test_assert_equal( ($h->get_slot_fields( 4, $session ))[8], 'other' );
+    test_assert_equal( ($h->get_slot_fields( 5, $session ))[8], 'other' );
 
     # check that history knows that the msgs were reclassfified
-    test_assert_equal( ($h->get_slot_fields( 1 ))[9], 4 );
-    test_assert_equal( ($h->get_slot_fields( 2 ))[9], 4 );
-    test_assert_equal( ($h->get_slot_fields( 3 ))[9], 4 );
-    test_assert_equal( ($h->get_slot_fields( 4 ))[9], 4 );
-    test_assert_equal( ($h->get_slot_fields( 5 ))[9], 4 );
+    test_assert_equal( ($h->get_slot_fields( 1, $session ))[9], 4 );
+    test_assert_equal( ($h->get_slot_fields( 2, $session ))[9], 4 );
+    test_assert_equal( ($h->get_slot_fields( 3, $session ))[9], 4 );
+    test_assert_equal( ($h->get_slot_fields( 4, $session ))[9], 4 );
+    test_assert_equal( ($h->get_slot_fields( 5, $session ))[9], 4 );
 
     # history should also know about the used manget
-    test_assert_equal( ($h->get_slot_fields( 6 ))[11], 'cxcse231@yahoo.com' );
+    test_assert_equal( ($h->get_slot_fields( 6, $session ))[11], 'cxcse231@yahoo.com' );
 
     # get the msgs hashes and ask the imap module whether those messages
     # can be reclassified. It should say 'no!'
     foreach ( 1 .. 6 ) {
-        $hash = ($h->get_slot_fields( $_ ))[6];
+        $hash = ($h->get_slot_fields( $_, $session ))[6];
         test_assert_equal( $im->can_reclassify__( $hash, 'spam' ), undef );
         test_assert( ! $im->can_classify__( $hash ) );
     }
@@ -430,10 +429,10 @@ sub test_imap_ui {
     test_assert_equal( $tmpl->query( name => 'IMAP_login' ), 'VAR' );
 
     # Now let the IMAP module populate the template
-    $im->user_config_( 1,  hostname => 'some host' );
-    $im->user_config_( 1,  port => 1234 );
-    $im->user_config_( 1,  password => 'some password' );
-    $im->user_config_( 1,  login => 'some login' );
+    $im->user_config_( 1, hostname => 'some host' );
+    $im->user_config_( 1, port => 1234 );
+    $im->user_config_( 1, password => 'some password' );
+    $im->user_config_( 1, login => 'some login' );
 
     $im->configure_item( 'imap_0_connection_details', $tmpl, $language );
 
@@ -456,7 +455,7 @@ sub test_imap_ui {
 
     # We set both, the mailboxes__ arrayref and the list of watched folders, to be empty
     $im->{mailboxes__} = [];
-    $im->user_config_( 1,  'watched_folders', '' );
+    $im->user_config_( 1, 'watched_folders', '' );
     $im->configure_item( 'imap_1_watch_folders', $tmpl, $language );
     test_assert( ! $tmpl->param( 'IMAP_if_mailboxes' ) );
 
@@ -804,18 +803,20 @@ sub load_language {
 sub configure_imap_module {
     my ( $im, $c, $mq, $l, $b, $h ) = @_;
 
+	$im->user_id( 1 );
     $im->initialize();
+    my $s = $b->get_administrator_session_key();
 
     # We should not do anything when we're not enabled:
     $im->config_( 'enabled', 0 );
     test_assert_equal( $im->start(), 2 );
     $im->config_( 'enabled', 1 );
-    $im->user_config_( 1,  'expunge', 1 );
-    $im->user_config_( 1,  'hostname', '127.0.0.1' );
-    $im->user_config_( 1,  'password', 'password' );
-    $im->user_config_( 1,  'port', '1143' );
-    $im->user_config_( 1,  'update_interval', 10 );
-    $im->user_config_( 1,  'watched_folders', '' );
+    $im->user_config_( 1, 'expunge', 1 );
+    $im->user_config_( 1, 'hostname', '127.0.0.1' );
+    $im->user_config_( 1, 'password', 'password' );
+    $im->user_config_( 1, 'port', '1143' );
+    $im->user_config_( 1, 'update_interval', 10 );
+    $im->user_config_( 1, 'watched_folders', '' );
 
     $im->global_config_( 'message_cutoff', 100000 );
     $im->global_config_( 'timeout', 4 );
@@ -871,9 +872,10 @@ sub start_popfile {
     my $c  = $POPFile->get_module( 'POPFile/Configuration' );
 
     $im->config_( enabled => 1 );
-    $l->config_( 'level', 1 );
-    $l->config_( logdir => '/tmp/' );
-
+    #$l->config_( 'level', 2 );
+    #$l->config_( logdir => '/tmp' );
+    #$h->global_config_( 'debug', 1 );
+    $h->global_config_( 'single_user', 1 );
     $im->module_config_( 'html', 'port', 8082 );
 
     $POPFile->CORE_start();

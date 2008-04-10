@@ -209,56 +209,67 @@ sub stop {
 sub service {
     my $self = shift;
 
-    if ( time - $self->{last_update__} >= $self->user_config_( 1, 'update_interval' ) ) {
+    # We have to get a session key first, then loop over all users that
+    # wish to use our services.
 
-        # Since the IMAP-Client module can throw an exception, i.e. die if
-        # it detects a lost connection, we eval the following code to be able
-        # to catch the exception. We also tell Perl to ignore broken pipes.
+    my $sessionKey = $self->classifier_()->get_administrator_session_key();
+    my $users = $self->classifier_()->get_user_list( $sessionKey );
 
-        eval {
-            local $SIG{'PIPE'} = 'IGNORE';
-            local $SIG{'__DIE__'};
+    foreach my $userId ( keys %{$users} ) {
+    	$self->log_( 1, "Checking user $users->{$userId} for IMAP settings." );
+    	$self->user_id( $userId );
 
-            if ( $self->user_config_( 1, 'training_mode' ) == 1 ) {
-                $self->train_on_archive__();
-            }
-            else {
-                # If we haven't yet set up a list of serviced folders,
-                # or if the list was changed by the user, build up a
-                # list of folder in $self->{folders__}
-                if ( ( keys %{$self->{folders__}} == 0 ) || ( $self->{folder_change_flag__} == 1 ) ) {
-                    $self->build_folder_list__();
-                }
+		if ( time - $self->{last_update__} >= $self->user_config_( $userId, 'update_interval' ) ) {
 
-                $self->connect_server__();
+			# Since the IMAP-Client module can throw an exception, i.e. die if
+			# it detects a lost connection, we eval the following code to be able
+			# to catch the exception. We also tell Perl to ignore broken pipes.
 
-                # Reset the hash containing the hash values we have seen the
-                # last time through service.
-                $self->{hash_values__} = ();
+			eval {
+				local $SIG{'PIPE'} = 'IGNORE';
+				local $SIG{'__DIE__'};
 
-                # Now do the real job
-                foreach my $folder ( keys %{$self->{folders__}} ) {
-                    $self->scan_folder( $folder ) if exists $self->{folders__}{$folder}{imap};
-                }
-            }
-        };
-        # if an exception occurred, we try to catch it here
-        if ( $@ ) {
-            $self->disconnect_folders__();
-            # If we caught an exception, we better reset training_mode
-            $self->user_config_( 1, 'training_mode', 0 );
+				if ( $self->user_config_( $userId, 'training_mode' ) == 1 ) {
+					$self->train_on_archive__();
+				}
+				else {
+					# If we haven't yet set up a list of serviced folders,
+					# or if the list was changed by the user, build up a
+					# list of folder in $self->{folders__}
+					if ( ( keys %{$self->{folders__}} == 0 ) || ( $self->{folder_change_flag__} == 1 ) ) {
+						$self->build_folder_list__();
+					}
 
-            # say__() and get_response__() will die with this message:
-            if ( $@ =~ /^POPFILE-IMAP-EXCEPTION: (.+\)\))/ ) {
-                $self->log_( 0, $1 );
-            }
-            # If we didn't die but somebody else did, we have empathy.
-            else {
-                die $@;
-            }
-        }
-        # Save the current time.
-        $self->{last_update__} = time;
+					$self->connect_server__();
+
+					# Reset the hash containing the hash values we have seen the
+					# last time through service.
+					$self->{hash_values__} = ();
+
+					# Now do the real job
+					foreach my $folder ( keys %{$self->{folders__}} ) {
+						$self->scan_folder( $folder ) if exists $self->{folders__}{$folder}{imap};
+					}
+				}
+			};
+			# if an exception occurred, we try to catch it here
+			if ( $@ ) {
+				$self->disconnect_folders__();
+				# If we caught an exception, we better reset training_mode
+				$self->user_config_( $userId, 'training_mode', 0 );
+
+				# say__() and get_response__() will die with this message:
+				if ( $@ =~ /^POPFILE-IMAP-EXCEPTION: (.+\)\))/ ) {
+					$self->log_( 0, $1 );
+				}
+				# If we didn't die but somebody else did, we have empathy.
+				else {
+					die $@;
+				}
+			}
+			# Save the current time.
+			$self->{last_update__} = time;
+		}
     }
 
     return 1;
@@ -558,7 +569,7 @@ sub scan_folder {
 
     # After we are done with the folder, we issue an EXPUNGE command
     # if we were told to do so.
-    if ( $moved_message && $self->user_config_( 1, 'expunge' ) ) {
+    if ( $moved_message && $self->user_config_( $self->user_id(), 'expunge' ) ) {
         $imap->expunge();
     }
 }
@@ -774,7 +785,7 @@ sub folder_for_bucket__ {
     my $bucket = shift;
     my $folder = shift;
 
-    my $all = $self->user_config_( 1, 'bucket_folder_mappings' );
+    my $all = $self->user_config_( $self->user_id(), 'bucket_folder_mappings' );
     my %mapping = split /$cfg_separator/, $all;
 
     # set
@@ -785,7 +796,7 @@ sub folder_for_bucket__ {
         while ( my ( $k, $v ) = each %mapping ) {
             $all .= "$k$cfg_separator$v$cfg_separator";
         }
-        $self->user_config_( 1, 'bucket_folder_mappings', $all );
+        $self->user_config_( $self->user_id(), 'bucket_folder_mappings', $all );
     }
     # get
     else {
@@ -812,7 +823,7 @@ sub watched_folders__ {
     my $self = shift;
     my @folders = @_;
 
-    my $all = $self->user_config_( 1, 'watched_folders' );
+    my $all = $self->user_config_( $self->user_id(), 'watched_folders' );
 
     # set
     if ( @folders ) {
@@ -820,7 +831,7 @@ sub watched_folders__ {
         foreach ( @folders ) {
             $all .= "$_$cfg_separator";
         }
-        $self->user_config_( 1, 'watched_folders', $all );
+        $self->user_config_( $self->user_id(), 'watched_folders', $all );
     }
     # get
     else {
@@ -840,12 +851,30 @@ sub api_session {
     my $self = shift;
 
     if ( ! $self->{api_session__} ) {
+    	# TODO: Where the hell should I get a session from??
+     #   my $user = $self->classifier_()->valid_session_key__( $session );
         $self->{api_session__} = $self->classifier_()->get_session_key( 'admin', '' );
     }
 
     return $self->{api_session__};
 }
 
+#----------------------------------------------------------------------------
+#
+# user_id
+#
+# Get or set the id of the user that we are currently working for.
+#----------------------------------------------------------------------------
+
+sub user_id {
+	my $self = shift;
+
+	if ( @_ ) {
+		$self->{ current_userid } = shift;
+	}
+
+	return $self->{ current_userid };
+}
 
 #----------------------------------------------------------------------------
 # get hash
@@ -1031,13 +1060,16 @@ sub configure_item {
     my $templ = shift;
     my $language = shift;
 
+    my $userId = $self->user_id();
+
     # conection details
     if ( $name eq 'imap_0_connection_details' ) {
-        $templ->param( 'IMAP_hostname',    $self->user_config_( 1, 'hostname' ) );
-        $templ->param( 'IMAP_port',        $self->user_config_( 1, 'port' ) );
-        $templ->param( 'IMAP_login',       $self->user_config_( 1, 'login' ) );
-        $templ->param( 'IMAP_password',    $self->user_config_( 1, 'password' ) );
-        $templ->param( 'IMAP_ssl_checked', $self->user_config_( 1, 'use_ssl' ) ? 'checked="checked"' : '' );
+    	
+        $templ->param( 'IMAP_hostname',    $self->user_config_( $userId, 'hostname' ) );
+        $templ->param( 'IMAP_port',        $self->user_config_( $userId, 'port' ) );
+        $templ->param( 'IMAP_login',       $self->user_config_( $userId, 'login' ) );
+        $templ->param( 'IMAP_password',    $self->user_config_( $userId, 'password' ) );
+        $templ->param( 'IMAP_ssl_checked', $self->user_config_( $userId, 'use_ssl' ) ? 'checked="checked"' : '' );
     }
 
     # Which mailboxes/folders should we be watching?
@@ -1157,7 +1189,7 @@ sub configure_item {
 
     # Read the list of mailboxes from the server. Now!
     if ( $name eq 'imap_4_update_mailbox_list' ) {
-        if ( $self->user_config_( 1, 'hostname' ) eq '' ) {
+        if ( $self->user_config_( $userId, 'hostname' ) eq '' ) {
             $templ->param( IMAP_if_connection_configured => 0 );
         }
         else {
@@ -1169,16 +1201,16 @@ sub configure_item {
     if ( $name eq 'imap_5_options' ) {
 
         # Are we expunging after moving messages?
-        my $checked = $self->user_config_( 1, 'expunge' ) ? 'checked="checked"' : '';
+        my $checked = $self->user_config_( $userId, 'expunge' ) ? 'checked="checked"' : '';
         $templ->param( IMAP_expunge_is_checked => $checked );
 
         # Update interval in seconds
-        $templ->param( IMAP_interval => $self->user_config_( 1, 'update_interval' ) );
+        $templ->param( IMAP_interval => $self->user_config_( $userId, 'update_interval' ) );
     }
 
     # Switch the module to training mode
     if ( $name eq 'imap_6_training' ) {
-        $templ->param( imap_currently_training => $self->user_config_( 1, 'training_mode' ) );
+        $templ->param( imap_currently_training => $self->user_config_( $userId, 'training_mode' ) );
     }
 }
 
@@ -1222,7 +1254,7 @@ sub validate_item
     }
     if ( $name eq 'imap_6_training' ) {
         if ( defined $form->{do_imap_training} ) {
-            $self->user_config_( 1, 'training_mode', 1 );
+            $self->user_config_( $self->user_id(), 'training_mode', 1 );
             return ( $language->{Imap_DoingTraining}, undef );
         }
         else {
@@ -1239,12 +1271,14 @@ sub validate_connection_details {
     my ( $self, $name, $templ, $language, $form ) = @_;
     my ( $status_message, $error_message );
 
+    my $userId = $self->user_id();
+
     if ( defined $form->{update_imap_0_connection_details} ) {
         my $something_happened = 0;
 
         if ( $form->{imap_hostname} && $form->{imap_hostname} =~ /^\S+/ ) {
-            if ( $self->user_config_( 1, 'hostname' ) ne $form->{imap_hostname} ) {
-                $self->user_config_( 1, 'hostname', $form->{imap_hostname} );
+            if ( $self->user_config_( $userId, 'hostname' ) ne $form->{imap_hostname} ) {
+                $self->user_config_( $userId, 'hostname', $form->{imap_hostname} );
                 $something_happened++;
             }
         }
@@ -1253,8 +1287,8 @@ sub validate_connection_details {
         }
 
         if ( $form->{imap_port} && $form->{imap_port} =~ m/^\d+$/ && $form->{imap_port} >= 1 && $form->{imap_port} < 65536 ) {
-            if ( $self->user_config_( 1, 'port' ) != $form->{imap_port} ) {
-                $self->user_config_( 1, 'port', $form->{imap_port} );
+            if ( $self->user_config_( $userId, 'port' ) != $form->{imap_port} ) {
+                $self->user_config_( $userId, 'port', $form->{imap_port} );
                 $something_happened++;
             }
         }
@@ -1263,8 +1297,8 @@ sub validate_connection_details {
         }
 
         if ( defined $form->{imap_login} && $form->{imap_login} =~ /^\S/ ) {
-            if ( $self->user_config_( 1, 'login' ) ne $form->{imap_login} ) {
-                $self->user_config_( 1, 'login', $form->{imap_login} );
+            if ( $self->user_config_( $userId, 'login' ) ne $form->{imap_login} ) {
+                $self->user_config_( $userId, 'login', $form->{imap_login} );
                 $something_happened++;
             }
         }
@@ -1273,8 +1307,8 @@ sub validate_connection_details {
         }
 
         if ( defined $form->{imap_password} && $form->{imap_password} =~ /^\S/ ) {
-            if ( $self->user_config_( 1, 'password' ) ne $form->{imap_password} ) {
-                $self->user_config_( 1, 'password', $form->{imap_password} );
+            if ( $self->user_config_( $userId, 'password' ) ne $form->{imap_password} ) {
+                $self->user_config_( $userId, 'password', $form->{imap_password} );
                 $something_happened++;
             }
         }
@@ -1282,15 +1316,15 @@ sub validate_connection_details {
             $error_message = $language->{Imap_PasswordError};
         }
 
-        my $use_ssl_now = $self->user_config_( 1, 'use_ssl' );
+        my $use_ssl_now = $self->user_config_( $userId, 'use_ssl' );
         if ( $form->{imap_use_ssl} ) {
-            $self->user_config_( 1, 'use_ssl', 1 );
+            $self->user_config_( $userId, 'use_ssl', 1 );
             if ( ! $use_ssl_now ) {
                 $something_happened = 1;
             }
         }
         else {
-            $self->user_config_( 1, 'use_ssl', 0 );
+            $self->user_config_( $userId, 'use_ssl', 0 );
             if ( $use_ssl_now ) {
                 $something_happened = 1;
             }
@@ -1404,12 +1438,14 @@ sub validate_update_mailbox_list {
     my ( $self, $name, $templ, $language, $form ) = @_;
     my ( $status_message, $error_message );
 
+    my $userId = $self->user_id();
+
     if ( defined $form->{do_imap_4_update_mailbox_list} ) {
-        if ( $self->user_config_( 1, 'hostname' )
-            && $self->user_config_( 1, 'login' )
-            && $self->user_config_( 1, 'login' )
-            && $self->user_config_( 1, 'port' )
-            && $self->user_config_( 1, 'password' ) ) {
+        if ( $self->user_config_( $userId, 'hostname' )
+            && $self->user_config_( $userId, 'login' )
+            && $self->user_config_( $userId, 'login' )
+            && $self->user_config_( $userId, 'port' )
+            && $self->user_config_( $userId, 'password' ) ) {
 
             my $imap = $self->new_imap_client();
             if ( defined $imap ) {
@@ -1444,19 +1480,20 @@ sub validate_options {
     my ( $status_message, $error_message );
 
     if ( defined $form->{update_imap_5_options} ) {
+    	my $userId = $self->user_id();
 
         # expunge or not?
         if ( defined $form->{imap_options_expunge} ) {
-            $self->user_config_( 1, 'expunge', 1 );
+            $self->user_config_( $userId, 'expunge', 1 );
         }
         else {
-            $self->user_config_( 1, 'expunge', 0 );
+            $self->user_config_( $userId, 'expunge', 0 );
         }
 
         # update interval
         my $form_interval = $form->{imap_options_update_interval};
         if ( $form_interval =~ /^\d+$/ && $form_interval >= 10 && $form_interval <= 60*60 ) {
-            $self->user_config_( 1, 'update_interval', $form_interval );
+            $self->user_config_( $userId, 'update_interval', $form_interval );
         }
         else {
             $error_message = $language->{Imap_IntervalError};
@@ -1545,7 +1582,7 @@ sub train_on_archive__ {
     %{$self->{folders__}} = ();
 
     # And disable training mode so we won't do this again the next time service is called.
-    $self->user_config_( 1, 'training_mode', 0 );
+    $self->user_config_( $self->user_id(), 'training_mode', 0 );
 }
 
 # ----------------------------------------------------------------------------
@@ -1567,7 +1604,7 @@ sub new_imap_client {
     my $self = shift;
 
     my $imap = Services::IMAP::Client->new(
-                sub { $self->user_config_( 1, @_ ) },
+                sub { $self->user_config_( $self->user_id(), @_ ) },
                 $self->get_module__( 'logger', 'POPFile::Logger' ),
                 sub { $self->global_config_( @_ ) },
     );
