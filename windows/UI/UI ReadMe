@@ -2,7 +2,7 @@
 NOTES ON HOW THE CUSTOMISED UI FILES FOR THE POPFILE INSTALLER WERE CREATED
 =============================================================================
 
-Last updated: 16 August 2004 (17:24 GMT)
+Last updated: 13 April 2008 (17:52 GMT)
 
 =============================================================================
 INTRODUCTION
@@ -21,7 +21,7 @@ To solve this problem, the following customised UI files have been created:
 (3) pfi_headerbmpr.exe based upon ${NSISDIR}\Contrib\UIs\modern_headerbmpr.exe
 
 The current versions of these customised UI files are based upon the UI files
-provided in the NSIS 2.0b4 release (dated 19 November 2003).
+provided in the NSIS 2.36 release (nsis-2.36-setup.exe, dated 29 March 2008).
 
 Future updates to the NSIS compiler may not be compatible with these customised
 UI files. These notes describe in detail how these files were created, to make
@@ -49,8 +49,8 @@ buttons at the foot of the page have been increased in width.
 
 Details:
 
-'pfi_modern.exe' v1.3 was created by modifying 'modern.exe', NSIS CVS v1.37
-(dated 24-Oct-2003), as follows:
+'pfi_modern.exe' v1.4 was created by modifying 'modern.exe' from the NSIS 2.36
+release (dated 29-Mar-2008), as follows:
 
 [1] Dialog 111, Control 103 (the icon image)
 
@@ -122,8 +122,8 @@ buttons at the foot of the page have been increased in width.
 'PFI_HEADERBMP.EXE' CHANGES (bitmap appears at the left of the header area)
 =============================================================================
 
-'pfi_headerbmp.exe' v1.3 was created by modifying 'modern_headerbmp.exe',
-NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
+'pfi_headerbmp.exe' v1.4 was created by modifying 'modern_headerbmp.exe' from
+the NSIS 2.36 release (dated 29-Mar-2008), as follows:
 
 [1] Dialog 105, Control 1037 (the TITLE text area)
 
@@ -171,8 +171,8 @@ NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
 'PFI_HEADERBMPR.EXE' CHANGES (bitmap appears at the right of the header area)
 =============================================================================
 
-'pfi_headerbmpr.exe' v1.3 was created by modifying 'modern_headerbmpr.exe',
-NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
+'pfi_headerbmpr.exe' v1.4 was created by modifying 'modern_headerbmpr.exe'
+from the NSIS 2.36 release (dated 29-Mar-2008), as follows:
 
 [1] Dialog 105, Control 1037 (the TITLE text area)
 
