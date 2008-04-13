@@ -36,7 +36,6 @@ use IO::Select;
 # We use crypto to secure the contents of POPFile's cookies
 
 use Crypt::CBC;
-use Crypt::Random qw/makerandom_octet/;
 use MIME::Base64;
 
 # A handy variable containing the value of an EOL for the network
@@ -99,11 +98,15 @@ EOM
     $self->{selector_} = new IO::Select( $self->{server_} );
 
     # Think of an encryption key for encrypting cookies using Blowfish
-    $self->log_( 1, "Generating random octet" );
-    my $key = makerandom_octet(
-                Length => 56,
-                Strength => $self->global_config_( 'crypt_strength' ),
-                Device   => $self->global_config_( 'crypt_device' )
+
+    my $module = $self->global_config_( 'random_module' );
+    $self->log_( 1, "Generating random octet using $module" );
+
+    my $key = $self->random_()->generate_random_string(
+                $module,
+                56,
+                $self->global_config_( 'crypt_strength' ),
+                $self->global_config_( 'crypt_devide' )
               );
     $self->{crypto__} = new Crypt::CBC( { 'key'            => $key,
                                           'cipher'         => 'Blowfish',
@@ -454,7 +457,18 @@ sub http_file_
         # like graphics and style sheets in cache.
 
         my $expires = $self->zulu_offset_( 0, 1 );
-        my $header = "HTTP/1.0 200 OK$eol" . "Content-Type: $type$eol" . "Expires: $expires$eol" . "Content-Length: ";
+        my $header = "HTTP/1.0 200 OK$eol";
+        $header .= "Content-Type: $type$eol";
+        if ( $file =~ /\.log$/ ) {
+            # The log files should not been cached
+
+            $header .= "Pragma: no-cache$eol";
+            $header .= "Cache-Control: no-cache$eol";
+            $header .= "Expires: 0$eol";
+        } else {
+            $header .= "Expires: $expires$eol";
+        }
+        $header .= "Content-Length: ";
         $header .= length($contents);
         $header .= "$eol$eol";
         print $client $header . $contents;

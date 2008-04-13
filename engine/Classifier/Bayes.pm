@@ -39,7 +39,6 @@ use DBI;
 use Digest::MD5 qw( md5_hex );
 use Digest::SHA qw( sha256_hex );
 use MIME::Base64;
-use Crypt::Random qw( makerandom_octet );
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -1543,11 +1542,14 @@ sub generate_unique_session_key__
     # Generate a long random number, hash it and the time together to
     # get a random session key in hex
 
-    $self->log_( 1, "Generating random octet" );
-    my $random = makerandom_octet(
-                    Length   => 128,
-                    Strength => $self->global_config_( 'crypt_strength' ),
-                    Device   => $self->global_config_( 'crypt_device' ),
+    my $module = $self->global_config_( 'random_module' );
+    $self->log_( 1, "Generating random octet using $module" );
+
+    my $random = $self->random_()->generate_random_string(
+                        $module,
+                        128,
+                        $self->global_config_( 'crypt_strength' ),
+                        $self->global_config_( 'crypt_device' )
                  );
     my $now = time;
     return sha256_hex( "$$" . "$random$now" );
@@ -1867,7 +1869,7 @@ sub get_session_key_from_token
     my $user_session = $self->generate_unique_session_key__();
     $self->{api_sessions__}{$user_session} = $user;
     $self->db_update_cache__( $user_session );
-    $self->log_( 1, "get_session_key_from_token returning key $user_session for user $self->{api_sessions__}{$user_session}" );
+    $self->log_( 1, "get_session_key_from_token returning key $user_session for user $user" );
 
     # Send the session to the parent so that it is recorded and can
     # be correctly shutdown
@@ -3449,6 +3451,8 @@ sub get_bucket_parameter
 # $session     A valid session ID for an administrator
 # $new_user    The name for the new user
 # $clone       (optional) Name of user to clone
+# $copy_magnets (optional) If 1 copy user's magnets
+# $copy_corpus (optional) If 1 copy user's corpus (words in buckets)
 #
 # Returns 0 for success, 1 for user already exists, 2 for other error,
 # 3 for clone failure and undef if caller isn't an admin.  If
@@ -3457,7 +3461,7 @@ sub get_bucket_parameter
 # ----------------------------------------------------------------------------
 sub create_user
 {
-    my ( $self, $session, $new_user, $clone ) = @_;
+    my ( $self, $session, $new_user, $clone, $copy_magnets, $copy_corpus ) = @_;
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
@@ -3496,36 +3500,54 @@ sub create_user
         if ( !defined( $clid ) ) {
             return ( 3, undef );
         }
-        my $h = $self->db_()->prepare( "select utid, val from user_params where userid = $clid;" );
-        $h->execute;
+
+        # Begin transaction
+
+        $self->log_( 1, "Start cloning user..." );
+        $self->db_()->begin_work;
+
+        # Clone user's parameters
+
+        my $h = $self->db_()->prepare( "select utid, val from user_params where userid = ?;" );
+        $h->execute( $clid );
+
         my %add;
         while ( my $row = $h->fetchrow_arrayref ) {
             $add{$row->[0]} = $row->[1];
         }
         $h->finish;
+
+        $h = $self->db_()->prepare( "insert into user_params ( userid, utid, val )
+                                            values ( ?, ?, ? );" );
         foreach my $utid (keys %add) {
-            $self->db_()->do( "insert into user_params ( userid, utid, val ) values ( $id, $utid, '$add{$utid}' );" );
+            $h->execute( $id, $utid, $add{$utid} );
         }
+        $h->finish;
 
-        # Clone buckets
+        # Clone buckets (optional)
 
-        $h = $self->db_()->prepare( "select name, pseudo from buckets where userid = $clid;" );
-        $h->execute;
+        $h = $self->db_()->prepare( "select name, pseudo from buckets where userid = ?;" );
+        $h->execute( $clid );
         my %buckets;
         while ( my $row = $h->fetchrow_arrayref ) {
             $buckets{$row->[0]} = $row->[1];
         }
         $h->finish;
+
+        $h = $self->db_()->prepare( "insert into buckets ( userid, name, pseudo )
+                                            values ( ?, ?, ? );" );
         foreach my $name (keys %buckets) {
-            $self->db_()->do( "insert into buckets ( userid, name, pseudo ) values ( $id, '$name', $buckets{$name} );" );
+            $h->execute( $id, $name, $buckets{$name} );
         }
+        $h->finish;
 
         # Fetch new bucket ids and cloned bucket ids
 
         $h = $self->db_()->prepare(
             "select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2 
-                 where bucket1.userid = $id and bucket1.name = bucket2.name and bucket2.userid = $clid;" );
-        $h->execute;
+                 where bucket1.userid = $id and bucket1.name = bucket2.name and bucket2.userid = ?;" );
+        $h->execute( $clid );
+
         my %new_buckets;
         while ( my $row = $h->fetchrow_arrayref ) {
             $new_buckets{$row->[1]} = $row->[0];
@@ -3536,26 +3558,79 @@ sub create_user
 
         $h = $self->db_()->prepare(
             "select bucketid, btid, val from buckets, bucket_params
-                 where userid = $clid and buckets.id = bucket_params.bucketid;" );
-        $h->execute;
+                 where userid = ? and buckets.id = bucket_params.bucketid;" );
+        $h->execute( $clid );
+
         my %bucket_params;
-        while (my $row = $h->fetchrow_arrayref ) {
+        while ( my $row = $h->fetchrow_arrayref ) {
             $bucket_params{$new_buckets{$row->[0]}}{$row->[1]} = $row->[2];
         }
         $h->finish;
 
+        $h = $self->db_()->prepare( "insert into bucket_params ( bucketid, btid, val)
+                                            values ( ?, ?, ? );" );
         foreach my $bucketid ( keys %bucket_params ) {
             foreach my $btid ( keys %{$bucket_params{$bucketid}} ) {
-                my $val = $self->db_()->quote( $bucket_params{$bucketid}{$btid} );
-                $self->db_()->do(
-                    "insert into bucket_params ( bucketid, btid, val ) 
-                         values ( $bucketid, $btid, $val );" );
+                my $val = $bucket_params{$bucketid}{$btid};
+                $h->execute( $bucketid, $btid, $val );
             }
         }
+        $h->finish;
 
-        # TODO : Clone magnets
+        # Clone magnets (optional)
 
-        # TODO : Clone corpus data (optional)
+        if ( $copy_magnets ) {
+            $h = $self->db_()->prepare(
+                "select magnets.bucketid, magnets.mtid, magnets.val from magnets, buckets
+                        where magnets.bucketid = buckets.id and buckets.userid = ?;" );
+            $h->execute( $clid );
+
+            my %magnets;
+            while ( my $row = $h->fetchrow_arrayref ) {
+                $magnets{$new_buckets{$row->[0]}}{$row->[1]} = $row->[2];
+            }
+            $h->finish;
+
+            $h = $self->db_()->prepare( "insert into magnets ( bucketid, mtid, val )
+                                                values ( ?, ?, ? );" );
+            foreach my $bucketid ( keys %magnets ) {
+                foreach my $mtid ( keys %{$magnets{$bucketid}} ) {
+                    my $val = $magnets{$bucketid}{$mtid};
+                    $h->execute( $bucketid, $mtid, $val );
+                }
+            }
+            $h->finish;
+        }
+
+        # Clone corpus data (optional)
+
+        if ( $copy_corpus ) {
+            $h = $self->db_()->prepare(
+                "select matrix.bucketid, matrix.wordid, matrix.times from matrix, buckets
+                        where matrix.bucketid = buckets.id and buckets.userid = ?;" );
+            $h->execute( $clid );
+
+            my %matrix;
+            while ( my $row = $h->fetchrow_arrayref ) {
+                $matrix{$new_buckets{$row->[0]}}{$row->[1]} = $row->[2];
+            }
+            $h->finish;
+
+            $h = $self->db_()->prepare( "insert into matrix ( bucketid, wordid, times )
+                                                values ( ?, ?, ? );" );
+            foreach my $bucketid ( keys %matrix ) {
+                foreach my $wordid ( keys %{$matrix{$bucketid}} ) {
+                    my $times = $matrix{$bucketid}{$wordid};
+                    $h->execute( $bucketid, $wordid, $times );
+                }
+            }
+            $h->finish;
+        }
+
+        # Commit transaction
+
+        $self->db_()->commit;
+        $self->log_( 1, "Finish cloning user" );
 
     } else {
 
@@ -3888,7 +3963,7 @@ sub get_user_parameter
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my ( $val, $def )= $self->get_user_parameter_from_id( $userid,$parameter );
+    my ( $val, $def )= $self->get_user_parameter_from_id( $userid, $parameter );
 
     return $val;
 }
@@ -3939,6 +4014,9 @@ sub get_user_id
 sub is_admin_session
 {
     my ( $self, $session ) = @_;
+
+#    my ( $package, $filename, $line, $subroutine ) = caller;
+#    $self->log_( 1, "is_admin_session is called from $package @ $line to check the session key $session" );
 
     my $result = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
 

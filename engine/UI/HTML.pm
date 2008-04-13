@@ -42,7 +42,6 @@ use Date::Parse;
 
 use MIME::Base64;
 use Crypt::CBC;
-use Crypt::Random qw( makerandom_octet );
 use Digest::MD5 qw( md5_hex );
 
 # This is used to get the hostname of the current machine
@@ -216,10 +215,7 @@ sub start
     # that any extensions to the user interface that have not yet been
     # translated will still appear
 
-    $self->load_language( 'English' );
-    if ( $self->global_config_( 'language' ) ne 'English' ) {
-        $self->load_language( $self->global_config_( 'language' ) );
-    }
+    $self->cache_global_language( $self->global_config_( 'language' ) );
 
     return $self->SUPER::start();
 }
@@ -364,12 +360,8 @@ sub handle_cookie__
         # that any extensions to the user interface that have not yet been
         # translated will still appear
 
-        if ( $self->user_config_( $user, 'language' ) ne $self->global_config_( 'language' ) ) {
-            $self->load_language( 'English', $session );
-            if ( $self->user_config_( $user, 'language' ) ne 'English' ) {
-                $self->load_language( $self->user_config_( $user, 'language' ), $session );
-            }
-        }
+        $self->cache_language_for_user( $self->user_config_( $user, 'language' ),
+                                        $session );
 
         return $session;
 
@@ -404,14 +396,18 @@ sub set_cookie__
         # Value of the $session variable
         # The IP address of the client that set the cookie
         # MD5 checksum of the data (hex encoded)
-        $self->log_( 1, "Generating random octet" );
-        $cookie_string =  encode_base64(
-                            makerandom_octet(
-                                Length   => 16,
-                                Strength => $self->global_config_( 'crypt_strength' ),
-                                Device   => $self->global_config_( 'crypt_device' )
-                             ),
-                        '' );
+
+        my $module = $self->global_config_( 'random_module' );
+        $self->log_( 1, "Generating random octet using $module" );
+
+        $cookie_string = encode_base64(
+                            $self->random_()->generate_random_string(
+                                $module,
+                                16,
+                                $self->global_config_( 'crypt_strength' ),
+                                $self->global_config_( 'crypt_device' )
+                            ),
+                         '' );
         $cookie_string .= ' ';
         $cookie_string .= time;
         $cookie_string .= ' ';
@@ -495,6 +491,10 @@ sub url_handler__
 
     $url =~ s/#.*//;
 
+    # Save the original URL
+
+    my $original_url = $url;
+
     # If the URL was passed in through a GET then it may contain form
     # arguments separated by & signs, which we parse out into the
     # $self->{form_} where the key is the argument name and the value
@@ -521,7 +521,7 @@ sub url_handler__
     # from the path if possible (including the skin name in the URL helps
     # prevent caching
 
-    if ( $url =~ /skins\/(([^\/]+)\/(([^\/]+\/)+)?)?([^\/]+)$/ ) {
+    if ( $url =~ /^\/skins\/(([^\/]+)\/(([^\/]+\/)+)?)?([^\/]+)$/ ) {
         my $user = 1;
         my $path = ( $1 || '');
         my $path_skin = ( $2 || '');
@@ -592,29 +592,49 @@ sub url_handler__
         return 1;
     }
 
-    if ( $url =~ /\/autogen_(.+)\.bmp/ ) {
+    if ( $url =~ /^\/autogen_(.+)\.bmp/ ) {
         $self->bmp_file__( $client, $1 );
         return 1;
     }
 
-    if ( $url =~ /\/(.+\.gif)/ ) {
+    if ( $url =~ /^\/(.+\.gif)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/gif' );
         return 1;
     }
 
-    if ( $url =~ /\/(.+\.png)/ ) {
+    if ( $url =~ /^\/(.+\.png)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/png' );
         return 1;
     }
 
-    if ( $url =~ /\/(.+\.ico)/ ) {
+    if ( $url =~ /^\/(.+\.ico)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ),
              'image/x-icon' );
         return 1;
     }
 
-    if ( $url =~ /(manual\/.+\.html)/ ) {
+    if ( $url =~ /^\/(manual\/.+\.html)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/html' );
+        return 1;
+    }
+
+    # If we don't have a valid session key, then insist that the user
+    # log in, or check the username and password for validity, if they
+    # are valid then create the session now.  In single user mode get
+    # the key
+
+    if ( !defined( $session ) ) {
+        my $continue;
+
+        ( $session, $continue ) = $self->password_page( $client, $original_url );
+        if ( !defined( $continue ) ||
+             $continue eq '/password' ) {
+            $continue = '/';
+        }
+        if ( defined( $session ) ) {
+            $self->http_redirect_( $client, $continue , $session );
+        }
+
         return 1;
     }
 
@@ -637,26 +657,8 @@ sub url_handler__
         return 1;
     }
 
-    # If we don't have a valid session key, then insist that the user
-    # log in, or check the username and password for validity, if they
-    # are valid then create the session now.  In single user mode get
-    # the key
-
-    if ( !defined( $session ) ) {
-        my $continue;
-        ( $session, $continue ) = $self->password_page( $client, $url );
-        if ( !defined( $continue ) ||
-             $continue eq '/password' ) {
-            $continue = '/';
-        }
-        if ( defined( $session ) ) {
-            $self->http_redirect_( $client, $continue , $session );
-        }
-
-        return 1;
-    }
-
-    if ( $url =~ /(popfile.*\.log)/ ) {
+    if ( ( $url =~ /^\/popfile.*\.log$/ ) &&
+         ( $self->classifier_()->is_admin_session( $session ) ) )  {
         $self->http_file_( $client, $self->logger_()->debug_filename(),
             'text/plain' );
         return 1;
@@ -668,8 +670,7 @@ sub url_handler__
     }
 
     if ( ( $url eq '/shutdown' ) &&
-         ( $self->user_global_config_( $self->{sessions__}{$session}{user},
-               'can_admin' ) ) )  {
+         ( $self->classifier_()->is_admin_session( $session ) ) )  {
         my $http_header = "HTTP/1.1 200 OK\r\n";
         $http_header .= "Connection: close\r\n";
         $http_header .= "Pragma: no-cache\r\n";
@@ -740,7 +741,7 @@ sub url_handler__
     # Check to see if this user has administration rights, if they do
     # not then remove the administration and advanced URLs
 
-    if ( !$self->user_global_config_( $self->{sessions__}{$session}{user}, 'can_admin' ) ) {
+    if ( !$self->classifier_()->is_admin_session( $session ) ) {
         delete $url_table{'/administration'};
         delete $url_table{'/advanced'};
         delete $url_table{'/users'};
@@ -1062,23 +1063,33 @@ sub handle_configuration_bar__
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
+    my $userid = $self->classifier_()->valid_session_key__( $session );
+
     if ( defined($self->{form_}{skin}) ) {
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'skin', $self->{form_}{skin} );
+        $self->user_config_( $userid, 'skin', $self->{form_}{skin} );
         $templ = $self->load_template__( $template, $page, $session );
     }
 
     if ( defined($self->{form_}{language}) ) {
-        if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne
+        if ( $self->user_config_( $userid, 'language' ) ne
                  $self->{form_}{language} ) {
-            $self->user_config_( $self->{sessions__}{$session}{user}, 'language', $self->{form_}{language} );
-            if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne $self->global_config_( 'language' ) ) {
-                if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne 'English' ) {
-                    $self->load_language( 'English', $session );
-                }
-                $self->load_language( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ), $session );
-            } else {
-                delete $self->{language__}{$session};
+            my $language = $self->{form_}{language};
+
+            $self->user_config_( $userid, 'language', $language );
+
+            # If the language setting of the administrator is changed in the
+            # multiuser mode, update the global language setting
+
+            if ( $self->global_config_( 'single_user' ) &&
+                 ( $userid eq 1 ) ) {
+                $self->global_config_( 'language', $language );
+
+                $self->cache_language_for_user( $language, 'global' );
             }
+
+            # Reload language cache
+
+            $self->cache_language_for_user( $language, $session );
 
             # Force a template relocalization because the language has been
             # changed which changes the localization of the template
@@ -1095,7 +1106,7 @@ sub handle_configuration_bar__
         my $name = $self->{skins__}[$i];
         $name =~ /\/([^\/]+)\/$/;
         $name = $1;
-        my $selected = ( $name eq $self->user_config_( $self->{sessions__}{$session}{user}, 'skin' ) )?'selected':'';
+        my $selected = ( $name eq $self->user_config_( $userid, 'skin' ) )?'selected':'';
 
         if ( $name =~ /tiny/ ) {
             $type = 'Tiny';
@@ -1120,7 +1131,7 @@ sub handle_configuration_bar__
     foreach my $lang (@{$self->{languages__}}) {
         my %row_data;
         $row_data{Configuration_Language} = $lang;
-        $row_data{Configuration_Selected_Language} = ( $lang eq $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) )?'selected':'';
+        $row_data{Configuration_Selected_Language} = ( $lang eq $self->user_config_( $userid, 'language' ) )?'selected':'';
         push ( @language_loop, \%row_data );
     }
     $templ->param( 'Configuration_Loop_Languages' => \@language_loop );
@@ -1131,12 +1142,12 @@ sub handle_configuration_bar__
     $templ->param( 'Is_history_page' => ( $template eq 'history-page.thtml' ? 1 : 0 ) );
 
     if ( defined($self->{form_}{hide_configbar}) ) {
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'show_configbars', 0 );
+        $self->user_config_( $userid, 'show_configbars', 0 );
         $templ->param( 'If_Show_Config_Bars' => 0 );
     }
 
     if ( defined ($self->{form_}{show_configbar}) ) {
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'show_configbars', 1 );
+        $self->user_config_( $userid, 'show_configbars', 1 );
         $templ->param( 'If_Show_Config_Bars' => 1 );
     }
 
@@ -1503,7 +1514,12 @@ sub users_page
 
     if ( exists( $self->{form_}{create} ) &&
          ( $self->{form_}{newuser} ne '' ) ) {
-        my ( $result, $password ) = $self->classifier_()->create_user( $session, $self->{form_}{newuser}, $self->{form_}{clone} );
+        my ( $result, $password ) = $self->classifier_()->create_user(
+                $session,
+                $self->{form_}{newuser},
+                $self->{form_}{clone},
+                $self->{form_}{users_copy_magnets},
+                $self->{form_}{users_copy_corpus} );
         if ( $result == 0 ) {
             if ( $self->{form_}{clone} ne '' ) {
                  $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Created_And_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
@@ -3616,9 +3632,11 @@ sub load_template__
     # POPFile with duplicating that entire set of templates
 
     my $user = 1;
+    my $can_admin = 0;
 
     if ( defined( $session ) ) {
         $user = $self->{sessions__}{$session}{user};
+        $can_admin = $self->classifier_()->is_admin_session( $session );
     }
 
     my $root = 'skins/' . $self->user_config_( $user, 'skin' ) . '/';
@@ -3657,8 +3675,7 @@ sub load_template__
                        $self->user_config_( $user, 'show_training_help' ),
                    'If_Show_Config_Bars'     =>
                        $self->user_config_( $user, 'show_configbars' ),
-                   'Common_Middle_If_CanAdmin' =>
-                       $self->user_global_config_( $user, 'can_admin' ),
+                   'Common_Middle_If_CanAdmin' => $can_admin,
                    'If_Javascript_OK'        => $self->config_( 'allow_javascript' ),
                    'If_Language_RTL'         =>
                        ( ${$self->language($session)}{LanguageDirection} eq 'rtl' ),
@@ -3753,25 +3770,90 @@ sub load_languages__
 
 #----------------------------------------------------------------------------
 #
+# cache_global_language
+#
+# Cache the language file
+#
+# $lang    - The language to cache
+#
+#----------------------------------------------------------------------------
+sub cache_global_language
+{
+    my ( $self, $lang ) = @_;
+
+    $self->load_language( 'English', 'global', 0 );
+    if ( $lang ne 'English' ) {
+        $self->load_language( $lang, 'global', 0 );
+    }
+    $self->{language__}{global}{lang} = $lang;
+}
+
+#----------------------------------------------------------------------------
+#
+# cache_language_for_user
+#
+# Cache the language file for the user
+#
+# $lang    - The language to cache
+# $session - A valid session key
+#
+#----------------------------------------------------------------------------
+sub cache_language_for_user
+{
+    my ( $self, $lang, $session ) = @_;
+
+    my $test_language = 0;
+    my $need_to_load = 0;
+
+    my $user = $self->classifier_()->valid_session_key__( $session );
+    return if ( !defined($user) );
+
+    $test_language = $self->user_config_( $user, 'test_language' );
+
+    if ( $test_language ) {
+        $need_to_load = 1;
+    } else {
+        if ( $self->{language__}{global}{lang} ne $self->user_config_( $user, 'language' ) ) {
+            if ( !defined($self->{language__}{$session}) ) {
+                $need_to_load = 1;
+            } else {
+                if ( $self->{language__}{$session}{lang} ne $self->user_config_( $user, 'language' ) ) {
+                    $need_to_load = 1;
+                }
+            }
+        } else {
+            if ( defined($self->{language__}{$session}) ) {
+                delete $self->{language__}{$session};
+            }
+        }
+    }
+
+    if ( $need_to_load ) {
+        $self->load_language( 'English', $session, $test_language );
+        if ( $lang ne 'English' ) {
+            $self->load_language( $lang, $session, $test_language );
+        }
+        $self->{language__}{$session}{lang} = $lang;
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # load_language
 #
 # Fill the language hash with the language strings that are from the
 # named language file
 #
-# $lang    - The language to load (no .msg extension)
+# 
+#
+# $lang          - The language to load (no .msg extension)
+# $session       - A valid session key
+# $test_language - If 1, language file test mode
 #
 #----------------------------------------------------------------------------
 sub load_language
 {
-    my ( $self, $lang, $session ) = @_;
-
-    my $user = 1;
-
-    if ( defined( $session ) ) {
-        $user = $self->{sessions__}{$session}{user};
-    } else {
-        $session = 'global';
-    }
+    my ( $self, $lang, $session, $test_language ) = @_;
 
     if ( open LANG, '<' . $self->get_root_path_( "languages/$lang.msg" ) ) {
         while ( <LANG> ) {
@@ -3782,7 +3864,7 @@ sub load_language
                 if ( $value =~ /^\"(.+)\"$/ ) {
                     $value = $1;
                 }
-                my $msg = ($self->user_config_( $user, 'test_language' )) ? $id : $value;
+                my $msg = $test_language ? $id : $value;
                 $msg =~ s/[\r\n]//g;
 
                 $self->{language__}{$session}{$id} = $msg;

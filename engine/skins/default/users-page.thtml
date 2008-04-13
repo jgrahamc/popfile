@@ -19,6 +19,17 @@
             <option><TMPL_VAR NAME="Users_Name"></option>
             </TMPL_LOOP>
             </select>
+            <br />
+            <input type="checkbox" name="users_copy_magnets" id="usersCopyMagnet" />
+            <label class="usersLabel" for="usersCopyMagnet">
+              <TMPL_VAR NAME="Localize_Users_CopyMagnets">
+            </label>
+            <br />
+            <input type="checkbox" name="users_copy_corpus" id="usersCopyCorpus" />
+            <label class="usersLabel" for="usersCopyCorpus">
+              <TMPL_VAR NAME="Localize_Users_CopyCorpus">
+            </label>
+            <br />
 
             <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
             </form>
@@ -38,8 +49,8 @@
 
                 <input type="submit" class="submit" name="remove" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Remove">')" value="<TMPL_VAR NAME="Localize_Remove">" />
                 </form>
-            </TMPL_IF>
             <br />
+            </TMPL_IF>
             <TMPL_IF NAME="Users_If_Remove">
                 <hr />
                 <h2 class="users"><TMPL_VAR NAME="Localize_Users_Change_Password"></h2>

@@ -130,6 +130,8 @@ test_assert_regexp( $line, 'GLOBAL_message_cutoff 100000' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_msgdir messages/' );
 $line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_random_module Crypt::OpenSSL::Random' );
+$line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_single_user 1' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_timeout 60' );

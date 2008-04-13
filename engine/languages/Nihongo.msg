@@ -177,7 +177,7 @@ Configuration_SOCKSServer               SOCKS V プロキシ サーバ
 Configuration_SOCKSPort                 SOCKS V プロキシ ポート番号
 Configuration_SOCKSPortUpdate           SOCKS V プロキシのポート番号を %s に変更しました。
 Configuration_SOCKSServerUpdate         SOCKS V プロキシのサーバを %s に変更しました。
-Configuration_Fields                    履歴タブに表示する項目
+Configuration_Fields                    履歴タブ項目を追加
 Configuration_ChangePassword            パスワードの変更
 Configuration_OldPassword               旧パスワード
 Configuration_NewPassword               新パスワード
@@ -212,11 +212,13 @@ Users_Remove                            既存ユーザーの削除
 Users_Edit                              ユーザー設定の編集
 Users_Change_Password                   ユーザーパスワードの変更/初期化
 Users_CopyFrom                          設定をコピーするユーザー
+Users_CopyMagnets                       ユーザーのマグネットをコピーする
+Users_CopyCorpus                        ユーザーのコーパスをコピーする(この処理には長い時間がかかるかもしれません)
 Users_RemoveUser                        ユーザーの削除
 Users_CreateUser                        ユーザーの作成
 Users_EditUser                          編集するユーザー
 Users_ChangePasswordUser                パスワードを変更するユーザー
-Users_ResetPassword                     パスワードの初期化
+Users_ResetPassword                     パスワードを初期化する
 Users_Parameters                        パラメーター
 Users_Created                           ユーザー '%s' を作成しました（初期パスワードは '%s'）
 Users_Not_Created                       ユーザー '%s' を作成できませんでした
@@ -266,7 +268,7 @@ History_ChangedClass                    現在のコーパスによる分類
 History_Purge                           すぐに削除
 History_Increase                        広く
 History_Decrease                        狭く
-History_Column_Characters               From、To、Cc、件名欄の幅を変更
+History_Column_Characters               履歴の列の幅
 History_Automatic                       自動
 History_Reclassified                    再分類されました
 History_Size_Bytes                      %d&nbsp;B
@@ -515,7 +517,7 @@ tip_Admin_ReportStats                   0.22 text should be put back
 tip_Users_Remove                        POPFile のユーザーを削除します
 tip_Users_Change_Password               ユーザーのパスワードを変更します
 
-tip_Account_Remove                      ユーザーのアカウントを削除します
+tip_Accounts_Remove                     ユーザーのアカウントを削除します
 
 tip_Footer_HomePage                     POPFile ホームページに接続します
 tip_Footer_Manual                       The original POPFile documentation (slightly outdated)

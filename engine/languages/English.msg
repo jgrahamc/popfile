@@ -211,6 +211,8 @@ Users_Remove                            Remove Existing User
 Users_Edit                              Edit User Settings
 Users_Change_Password                   Change/Initialize User's Password
 Users_CopyFrom                          Copying settings from user
+Users_CopyMagnets                       Copy user's magnets
+Users_CopyCorpus                        Copy user's corpus (this may take a long time)
 Users_RemoveUser                        Remove user
 Users_CreateUser                        Create user named
 Users_EditUser                          Edit user
@@ -514,7 +516,7 @@ tip_Admin_ReportStats                   0.22 text should be put back
 tip_Users_Remove                        Delete user from POPFile
 tip_Users_Change_Password               Change user's password
 
-tip_Account_Remove                      Delete account from the user
+tip_Accounts_Remove                     Delete account from the user
 
 tip_Footer_HomePage                     Visit the POPFile home page
 tip_Footer_Manual                       The original POPFile documentation (slightly outdated)

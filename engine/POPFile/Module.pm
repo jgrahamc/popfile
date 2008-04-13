@@ -25,6 +25,7 @@ package POPFile::Module;
 
 use strict;
 use IO::Select;
+use POPFile::Random;
 
 # ----------------------------------------------------------------------------
 #
@@ -946,6 +947,17 @@ sub db_
     }
 
     return $self->{db_handle__};
+}
+
+sub random_
+{
+    my ( $self ) = @_;
+
+    if ( !defined( $self->{random__} ) ) {
+        $self->{random__} = new POPFile::Random();
+    }
+
+    return $self->{random__};
 }
 
 sub history_

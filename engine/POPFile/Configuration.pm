@@ -124,9 +124,14 @@ sub initialize
 
     $self->global_config_( 'single_user', 1 );
 
+    # The module to use to generate random string.
+    # This can be 'Crypt::OpenSSL::Random' (default) or 'Crypt::Random'
+
+    $self->global_config_( 'random_module', 'Crypt::OpenSSL::Random' );
+
     # The Strength value used in calls to Crypt::Random::makerandom_octet
     # The default is weak (0), but should work on all systems without
-    # blocking POPFile. Set this to 1 if your syste provides enough
+    # blocking POPFile. Set this to 1 if your system provides enough
     # entropy and you need extra-random randomness.
 
     $self->global_config_( 'crypt_strength', 0 );
