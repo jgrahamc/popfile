@@ -138,7 +138,8 @@ sub connect {
                                 PeerAddr => $hostname,
                                 PeerPort => $port,
                                 Timeout  => $timeout,
-                    );
+                    )
+                    or $self->log_(0, "IO::Socket::SSL error: $@");
         }
         else {
             $imap = IO::Socket::INET->new(
@@ -146,7 +147,8 @@ sub connect {
                                 PeerAddr => $hostname,
                                 PeerPort => $port,
                                 Timeout  => $timeout,
-                    );
+                    )
+                    or $self->log_(0, "IO::Socket::INET error: $@");
         }
 
 
