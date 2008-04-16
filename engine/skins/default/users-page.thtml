@@ -16,7 +16,7 @@
             <select name="clone">
             <option value="">&nbsp;</option>
             <TMPL_LOOP NAME="Users_Loop_Copy">
-            <option><TMPL_VAR NAME="Users_Name"></option>
+            <option><TMPL_VAR NAME="Users_Name" ESCAPE=HTML></option>
             </TMPL_LOOP>
             </select>
             <br />
@@ -30,10 +30,34 @@
               <TMPL_VAR NAME="Localize_Users_CopyCorpus">
             </label>
             <br />
-
             <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
             </form>
             <br />
+
+            <TMPL_IF NAME="Users_If_Rename">
+                <hr />
+                <h2 class="users"><TMPL_VAR NAME="Localize_Users_Rename"></h2>
+
+                <form action="/users" method="post">
+                <TMPL_VAR NAME="Localize_Users_RenameUser">:
+                <select name="torename">
+                <option value="">&nbsp;</option>
+                <TMPL_LOOP NAME="Users_Loop_Rename">
+                <option><TMPL_VAR NAME="Users_Name" ESCAPE=HTML></option>
+                </TMPL_LOOP>
+                </select>
+                <br />
+                <TMPL_VAR NAME="Localize_Users_RenameUserNewName">:
+                <input type="text" id="usersRenameNewName" name="newname" />
+                <br />
+                <TMPL_VAR NAME="Localize_Users_RenameNotes">
+                <br />
+
+                <input type="submit" class="submit" name="rename" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Rename">')" value="<TMPL_VAR NAME="Localize_Rename">" />
+                </form>
+            <br />
+            </TMPL_IF>
+
             <TMPL_IF NAME="Users_If_Remove">
                 <hr />
                 <h2 class="users"><TMPL_VAR NAME="Localize_Users_Remove"></h2>
@@ -43,7 +67,7 @@
                 <select name="toremove">
                 <option value="">&nbsp;</option>
                 <TMPL_LOOP NAME="Users_Loop_Remove">
-                <option><TMPL_VAR NAME="Users_Name"></option>
+                <option><TMPL_VAR NAME="Users_Name" ESCAPE=HTML></option>
                 </TMPL_LOOP>
                 </select>
 
@@ -51,7 +75,7 @@
                 </form>
             <br />
             </TMPL_IF>
-            <TMPL_IF NAME="Users_If_Remove">
+
                 <hr />
                 <h2 class="users"><TMPL_VAR NAME="Localize_Users_Change_Password"></h2>
 
@@ -60,7 +84,7 @@
                 <select name="tochangepassword">
                 <option value="">&nbsp;</option>
                 <TMPL_LOOP NAME="Users_Loop_ChangePassword">
-                <option><TMPL_VAR NAME="Users_Name"></option>
+                <option><TMPL_VAR NAME="Users_Name" ESCAPE=HTML></option>
                 </TMPL_LOOP>
                 </select>
                 <br />
@@ -79,7 +103,6 @@
 
                 <input type="submit" class="submit" name="users_change_password" onClick="return confirmClick('<TMPL_VAR NAME="Localize_tip_Users_Change_Password">')" value="<TMPL_VAR NAME="Localize_Update">" />
                 </form>
-            </TMPL_IF>
         </td>
         <td class="settingsPanel" valign="top">
             <h2 class="users"><TMPL_VAR NAME="Localize_Users_Edit"></h2>
@@ -89,7 +112,7 @@
             <select name="editname">
             <option value="">&nbsp;</option>
             <TMPL_LOOP NAME="Users_Loop_Edit">
-            <option><TMPL_VAR NAME="Users_Name"></option>
+            <option><TMPL_VAR NAME="Users_Name" ESCAPE=HTML></option>
             </TMPL_LOOP>
             </select>
 

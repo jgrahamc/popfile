@@ -1301,17 +1301,18 @@ sub cleanup_history
     my $seconds_per_day = 24 * 60 * 60;
 
     my @ids;
+    my $d = $self->db_()->prepare( "select id from history
+                                         where userid = ? and
+                                               inserted < ?;" );
     foreach my $userid ( keys %$users ) {
         my $old = time - $self->user_config_( $userid, 'history_days' )*$seconds_per_day;
-        my $d = $self->db_()->prepare( "select id from history
-                                             where userid = $userid and
-                                                   inserted < $old;" );
-        $d->execute;
+        $d->execute( $userid, $old );
         my @row;
         while ( @row = $d->fetchrow_array ) {
             push ( @ids, $row[0] );
         }
     }
+    $d->finish;
     foreach my $id (@ids) {
         $self->delete_slot( $id, 1, $session, 1 );
     }

@@ -97,7 +97,6 @@ sub add_stopword               { shift->{c}->add_stopword( @_ ); }
 sub remove_stopword            { shift->{c}->remove_stopword( @_ ); }
 sub get_html_colored_message   { shift->{c}->get_html_colored_message( @_ ); }
 
-sub create_user                { shift->{c}->create_user( @_ ); }
 sub remove_user                { shift->{c}->remove_user( @_ ); }
 sub get_user_id                { shift->{c}->get_user_id( @_ ); }
 sub get_user_id_from_session   { shift->{c}->get_user_id_from_session( @_ ); }
@@ -127,6 +126,8 @@ sub get_bucket_word_list       { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
 sub get_bucket_word_prefixes   { [ shift->{c}->get_bucket_word_prefixes( @_ ) ]; }
 sub get_user_parameter_list    { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
 
+sub create_user                { [ shift->{c}->create_user( @_ ) ]; }
+sub rename_user                { [ shift->{c}->rename_user( @_ ) ]; }
 sub initialize_users_password  { [ shift->{c}->initialize_users_password( @_ ) ]; }
 
 # This API is used to add a message to POPFile's history, process the message

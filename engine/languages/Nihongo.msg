@@ -208,14 +208,18 @@ Advanced_Warning                        °Ê²¼¤Ï POPFile ¤ÎÁ´¤Æ¤Î¥Ñ¥é¥á¡¼¥¿¡¼¤Î¥ê¥
 Advanced_ConfigFile                     ÀßÄê¥Õ¥¡¥¤¥ë:
 
 Users_Create                            ¿·¤·¤¤¥æ¡¼¥¶¡¼¤ÎºîÀ®
+Users_Rename                            ¥æ¡¼¥¶¡¼Ì¾¤ÎÊÑ¹¹
 Users_Remove                            ´ûÂ¸¥æ¡¼¥¶¡¼¤Îºï½ü
 Users_Edit                              ¥æ¡¼¥¶¡¼ÀßÄê¤ÎÊÔ½¸
 Users_Change_Password                   ¥æ¡¼¥¶¡¼¥Ñ¥¹¥ï¡¼¥É¤ÎÊÑ¹¹/½é´ü²½
 Users_CopyFrom                          ÀßÄê¤ò¥³¥Ô¡¼¤¹¤ë¥æ¡¼¥¶¡¼
 Users_CopyMagnets                       ¥æ¡¼¥¶¡¼¤Î¥Þ¥°¥Í¥Ã¥È¤ò¥³¥Ô¡¼¤¹¤ë
 Users_CopyCorpus                        ¥æ¡¼¥¶¡¼¤Î¥³¡¼¥Ñ¥¹¤ò¥³¥Ô¡¼¤¹¤ë(¤³¤Î½èÍý¤Ë¤ÏÄ¹¤¤»þ´Ö¤¬¤«¤«¤ë¤«¤â¤·¤ì¤Þ¤»¤ó)
-Users_RemoveUser                        ¥æ¡¼¥¶¡¼¤Îºï½ü
-Users_CreateUser                        ¥æ¡¼¥¶¡¼¤ÎºîÀ®
+Users_RenameUser                        Ì¾Á°¤òÊÑ¹¹¤¹¤ë¥æ¡¼¥¶¡¼
+Users_RenameUserNewName                 ¿·¤·¤¤Ì¾Á°
+Users_RenameNotes                       Ãí°Õ : ¥æ¡¼¥¶¡¼¤ÎÌ¾Á°¤òÊÑ¹¹¤¹¤ë¤È¥Ñ¥¹¥ï¡¼¥É¤¬½é´ü²½¤µ¤ì¤Þ¤¹
+Users_RemoveUser                        ºï½ü¤¹¤ë¥æ¡¼¥¶¡¼
+Users_CreateUser                        ºîÀ®¤¹¤ë¥æ¡¼¥¶¡¼
 Users_EditUser                          ÊÔ½¸¤¹¤ë¥æ¡¼¥¶¡¼
 Users_ChangePasswordUser                ¥Ñ¥¹¥ï¡¼¥É¤òÊÑ¹¹¤¹¤ë¥æ¡¼¥¶¡¼
 Users_ResetPassword                     ¥Ñ¥¹¥ï¡¼¥É¤ò½é´ü²½¤¹¤ë
@@ -225,6 +229,9 @@ Users_Not_Created                       ¥æ¡¼¥¶¡¼ '%s' ¤òºîÀ®¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿
 Users_Created_And_Cloned                ¥æ¡¼¥¶¡¼ '%s' ¤ò '%s' ¤ÎÀßÄê¤ò¥³¥Ô¡¼¤·¤ÆºîÀ®¤·¤Þ¤·¤¿¡Ê½é´ü¥Ñ¥¹¥ï¡¼¥É¤Ï '%s'¡Ë
 Users_Not_Created_Exists                ¥æ¡¼¥¶¡¼ '%s' ¤ÏºîÀ®¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿¡£¤¹¤Ç¤ËÂ¸ºß¤·¤Æ¤¤¤Þ¤¹
 Users_Created_Not_Cloned                ¥æ¡¼¥¶¡¼ '%s' ¤òºîÀ®¤·¤Þ¤·¤¿¤¬¡¢'%s' ¤ÎÀßÄê¤Ï¥³¥Ô¡¼¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿¡Ê½é´ü¥Ñ¥¹¥ï¡¼¥É¤Ï '%s'¡Ë
+Users_Renamed                           ¥æ¡¼¥¶¡¼ '%s' ¤ÎÌ¾Á°¤ò '%s' ¤ËÊÑ¹¹¤·¤Þ¤·¤¿¡Ê½é´ü¥Ñ¥¹¥ï¡¼¥É¤Ï '%s'¡Ë
+Users_Rename_Failed_Exists              ¥æ¡¼¥¶¡¼ '%s' ¤ÎÌ¾Á°¤ò '%s' ¤ËÊÑ¹¹¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿¡£¤¹¤Ç¤ËÂ¸ºß¤·¤Æ¤¤¤Þ¤¹
+Users_Rename_Failed                     ¥æ¡¼¥¶¡¼ '%s' ¤ÎÌ¾Á°¤òÊÑ¹¹¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿¡£
 Users_Removed                           ¥æ¡¼¥¶¡¼ '%s' ¤òºï½ü¤·¤Þ¤·¤¿
 Users_Removed_Failed                    ¥æ¡¼¥¶¡¼ '%s' ¤òºï½ü¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿
 Users_Removed_Failed_Admin              ¥æ¡¼¥¶¡¼ '%s' ¤òºï½ü¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿¡£Àè¤Ë´ÉÍý¼Ô¸¢¸Â¤òÌµ¸ú¤Ë¤·¤Æ¤¯¤À¤µ¤¤
@@ -515,6 +522,7 @@ tip_Admin_UpdateCheck                   0.22 text should be put back
 tip_Admin_ReportStats                   0.22 text should be put back
 
 tip_Users_Remove                        POPFile ¤Î¥æ¡¼¥¶¡¼¤òºï½ü¤·¤Þ¤¹
+tip_Users_Rename                        ¥æ¡¼¥¶¡¼¤ÎÌ¾Á°¤òÊÑ¹¹¤·¤Þ¤¹
 tip_Users_Change_Password               ¥æ¡¼¥¶¡¼¤Î¥Ñ¥¹¥ï¡¼¥É¤òÊÑ¹¹¤·¤Þ¤¹
 
 tip_Accounts_Remove                     ¥æ¡¼¥¶¡¼¤Î¥¢¥«¥¦¥ó¥È¤òºï½ü¤·¤Þ¤¹

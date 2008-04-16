@@ -1538,6 +1538,25 @@ sub users_page
         }
     }
 
+    # Handle user rename
+
+    if ( exists( $self->{form_}{rename} ) &&
+         ( $self->{form_}{torename} ne '' ) && ( $self->{form_}{newname} ne '' ) ) {
+        my ( $result, $password ) = $self->classifier_()->rename_user(
+                $session,
+                $self->{form_}{torename},
+                $self->{form_}{newname} );
+        if ( $result == 0 ) {
+            $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Renamed}, $self->{form_}{torename}, $self->{form_}{newname}, $password ) );
+        }
+        if ( $result == 1 ) {
+            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Rename_Failed_Exists}, $self->{form_}{torename}, $self->{form_}{newname} ) );
+        }
+        if ( $result == 2 ) {
+            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Rename_Failed}, $self->{form_}{torename} ) );
+        }
+    }
+
     # Handle user removal
 
     if ( exists( $self->{form_}{remove} ) &&
@@ -1647,6 +1666,8 @@ sub users_page
     if ( $#remove_user_loop != -1 ) {
         $templ->param( 'Users_Loop_Remove' => \@remove_user_loop );
         $templ->param( 'Users_If_Remove' => 1 );
+        $templ->param( 'Users_Loop_Rename' => \@remove_user_loop );
+        $templ->param( 'Users_If_Rename' => 1 );
     }
     $templ->param( 'Users_Loop_Edit' => \@user_loop );
     $templ->param( 'Users_Loop_Copy' => \@user_loop );

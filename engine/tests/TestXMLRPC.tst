@@ -66,13 +66,18 @@ if ( $pid == 0 ) {
     # CHILD THAT WILL RUN THE XMLRPC SERVER
 
     if ( $x->start() == 1 ) {
+        my $count = 100;
         while ( $x->service() && $POPFile->CORE_service( 1 ) ) {
             select( undef, undef, undef, 0.1 );
+            last if ( $count-- <= 0 );
         }
         $x->stop();
     } else {
         test_assert( 0, "start failed\n" );
     }
+
+    $x->stop();
+    $POPFile->CORE_stop();
 
     exit(0);
 } else {
@@ -81,7 +86,7 @@ if ( $pid == 0 ) {
     select( undef, undef, undef, 1 );
     use XMLRPC::Lite;
 
-print "Testing $xport\n";
+    print "Testing $xport\n";
 
     my $session = XMLRPC::Lite 
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
@@ -122,10 +127,9 @@ print "Testing $xport\n";
     XMLRPC::Lite 
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
     -> call('POPFile/API.release_session_key', $session );
-}
 
-$x->stop();
-$POPFile->CORE_stop();
+    wait();
+}
 
 # TODO : terminate child process
 

@@ -207,12 +207,16 @@ Advanced_Warning                        This is the complete list of POPFile par
 Advanced_ConfigFile                     Configuration file:
 
 Users_Create                            Create New User
+Users_Rename                            Rename Existing User
 Users_Remove                            Remove Existing User
 Users_Edit                              Edit User Settings
 Users_Change_Password                   Change/Initialize User's Password
 Users_CopyFrom                          Copying settings from user
 Users_CopyMagnets                       Copy user's magnets
 Users_CopyCorpus                        Copy user's corpus (this may take a long time)
+Users_RenameUser                        Rename user
+Users_RenameUserNewName                 New name
+Users_RenameNotes                       Note : Renaming user will initialize user's password
 Users_RemoveUser                        Remove user
 Users_CreateUser                        Create user named
 Users_EditUser                          Edit user
@@ -224,6 +228,9 @@ Users_Not_Created                       Failed to create user '%s'
 Users_Created_And_Cloned                Created user '%s' as clone of '%s' (initial password '%s')
 Users_Not_Created_Exists                User '%s' not created: already exists
 Users_Created_Not_Cloned                Created user '%s' but clone of '%s' failed (initial password '%s')
+Users_Renamed                           Renamed user '%s' to '%s' (initial password '%s')
+Users_Rename_Failed_Exists              Failed to rename user '%s' to '%s': already exists
+Users_Rename_Failed                     Failed to rename user '%s'
 Users_Removed                           Removed user '%s'
 Users_Removed_Failed                    Failed to remove user '%s'
 Users_Removed_Failed_Admin              Failed to remove user '%s': disable admin rights first
@@ -514,6 +521,7 @@ tip_Admin_UpdateCheck                   0.22 text should be put back
 tip_Admin_ReportStats                   0.22 text should be put back
 
 tip_Users_Remove                        Delete user from POPFile
+tip_Users_Rename                        Rename user
 tip_Users_Change_Password               Change user's password
 
 tip_Accounts_Remove                     Delete account from the user

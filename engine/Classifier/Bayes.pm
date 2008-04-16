@@ -1263,10 +1263,10 @@ sub magnet_match_helper__
                    magnets.id != 0 and
                    users.id = buckets.userid and
                    magnets.bucketid = buckets.id and
-                   magnet_types.mtype = '$type' and
+                   magnet_types.mtype = ? and
                    magnets.mtid = magnet_types.id order by magnets.val;" );   # PROFILE BLOCK STOP
 
-    $h->execute;
+    $h->execute( $type );
     while ( my $row = $h->fetchrow_arrayref ) {
         push @magnets, [$row->[0], $row->[1]];
     }
@@ -2918,8 +2918,8 @@ sub get_accounts
 
     # If user is an admin then grab the accounts for the user requested
 
-    my $h = $self->db_()->prepare( "select account from accounts where userid = $id;" );
-    $h->execute;
+    my $h = $self->db_()->prepare( "select account from accounts where userid = ?;" );
+    $h->execute( $id );
     my @accounts;
     while ( my $row = $h->fetchrow_arrayref ) {
         push ( @accounts, $row->[0] );
@@ -2964,9 +2964,8 @@ sub add_account
         return -1;
     }
 
-    $account = $self->db_()->quote( "$module:$account" );
-    my $h = $self->db_()->prepare( "insert into accounts ( userid, account ) values ( $id, $account );" );
-    if ( !defined( $h->execute ) ) {
+    my $h = $self->db_()->prepare( "insert into accounts ( userid, account ) values ( ?, ? );" );
+    if ( !defined( $h->execute( $id, "$module:$account" ) ) ) {
         return 0;
     }
 
@@ -3469,7 +3468,7 @@ sub create_user
     # Check that this user is an administrator
 
     if ( !$self->is_admin_session( $session ) ) {
-        return ( undef, undef );
+        return undef;
     }
 
     # Check to see if we already have a user with that name
@@ -3638,6 +3637,11 @@ sub create_user
         # default settings
 
         $self->db_()->do( "insert into buckets ( name, pseudo, userid ) values ( 'unclassified', 1, $id );" );
+
+        # Copy the global language setting to the user's language setting
+
+        $self->user_module_config_( $id, 'html', 'language', 
+                                    $self->global_config_( 'language' ) );
     }
 
     return ( 0, $password );
@@ -3664,6 +3668,63 @@ sub generate_users_password
     }
     return $password;
 }
+
+#----------------------------------------------------------------------------
+#
+# rename_user (ADMIN ONLY)
+#
+# Renames an existing user
+#
+# $session     A valid session ID for an administrator
+# $user        The name of the user to rename
+# $newname     The new name for the user
+#
+# Returns 0 for sucess, undef for wrong permissions and 1 for newname
+# already exists, 2 means tried to rename 'admin' or user does not exist
+#
+#----------------------------------------------------------------------------
+sub rename_user
+{
+    my ( $self, $session, $user, $newname ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    if ( !defined( $user ) || !defined( $newname ) ) {
+        return undef;
+    }
+
+    # Check that this user is an administrator
+
+    if ( !$self->is_admin_session( $session ) ) {
+        return undef;
+    }
+
+    # Check that the user is 'admin'
+
+    my $id = $self->get_user_id( $session, $user );
+    if ( defined( $id ) ) {
+        if ( $id == 1 ) {
+            return ( 2, undef );
+        } else {
+            if ( defined( $self->get_user_id( $session, $newname ) ) ) {
+                return ( 1, undef );
+            }
+
+            my $password = $self->generate_users_password();
+
+            my $password_hash = md5_hex( $newname . '__popfile__' . $password );
+            my $h = $self->db_()->prepare( "update users set name = ?, password = ? where id = ?" );
+            $h->execute( $newname, $password_hash, $id );
+            $h->finish;
+
+            return ( 0, $password );
+        }
+    }
+
+    return ( 2, undef );
+}
+
 
 #----------------------------------------------------------------------------
 #
@@ -3983,7 +4044,7 @@ sub get_user_id
     my ( $self, $session, $user ) = @_;
 
     my $userid = $self->valid_session_key__( $session );
-    return undef if ( !defined( $userid ) );
+    return undef if ( !defined( $userid ) || !defined( $user ) );
 
     # Check that this user is an administrator
 
@@ -3991,9 +4052,8 @@ sub get_user_id
         return undef;
     }
 
-    my $quoted_user = $self->db_()->quote( $user );
-    my $h = $self->db_()->prepare( "select id from users where name = $quoted_user;" );
-    $h->execute;
+    my $h = $self->db_()->prepare( "select id from users where name = ?;" );
+    $h->execute( $user );
     if ( my $row = $h->fetchrow_arrayref ) {
         $h->finish;
         return $row->[0];
@@ -4092,8 +4152,8 @@ sub get_user_name_from_id
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $h = $self->db_()->prepare( "select name from users where id = $id;" );
-    $h->execute;
+    my $h = $self->db_()->prepare( "select name from users where id = ?;" );
+    $h->execute( $id );
     if ( my $row = $h->fetchrow_arrayref ) {
         $h->finish;
         return $row->[0];
@@ -4504,11 +4564,11 @@ sub get_magnet_types_in_bucket
         "select magnet_types.mtype from magnet_types, magnets, buckets
              where magnet_types.id = magnets.mtid and
                    magnets.bucketid = buckets.id and
-                   buckets.id = $bucketid
+                   buckets.id = ?
                    group by magnet_types.mtype
                    order by magnet_types.mtype;" );
 
-    $h->execute;
+    $h->execute( $bucketid );
     while ( my $row = $h->fetchrow_arrayref ) {
         push @result, ($row->[0]);
     }
@@ -4588,9 +4648,9 @@ sub get_magnets
              where magnets.bucketid = $bucketid and
                    magnets.id != 0 and
                    magnet_types.id = magnets.mtid and
-                   magnet_types.mtype = '$type' order by magnets.val;" );
+                   magnet_types.mtype = ? order by magnets.val;" );
 
-    $h->execute;
+    $h->execute( $type );
     while ( my $row = $h->fetchrow_arrayref ) {
         push @result, ($row->[0]);
     }
@@ -4649,7 +4709,9 @@ sub get_magnet_types
 
     my %result;
 
-    my $h = $self->db_()->prepare( "select magnet_types.mtype, magnet_types.header from magnet_types order by mtype;" );
+    my $h = $self->db_()->prepare(
+            "select magnet_types.mtype, magnet_types.header
+                    from magnet_types order by mtype;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {

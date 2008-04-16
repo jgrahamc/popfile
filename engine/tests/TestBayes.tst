@@ -26,6 +26,7 @@ rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
 rmtree( 'corpus/CVS' );
 
+unlink 'popfile.cfg';
 unlink 'popfile.db';
 unlink 'popfile.pid';
 unlink 'stopwords';
@@ -111,7 +112,7 @@ my ( $success2, $password2 ) = $b->create_user( $session, 'testuser2' );
 test_assert_equal( $success2, 0 );
 test_assert( $password2 ne '' );
 
-my ( $success3, $password3 )  = $b->create_user( $session, 'testuser'  );
+my ( $success3, $password3 ) = $b->create_user( $session, 'testuser'  );
 test_assert_equal( $success3, 1 );
 test_assert( !defined( $password3 ) );
 
@@ -223,10 +224,12 @@ $b->set_user_parameter_from_id( $id1, 'GLOBAL_can_admin', 0 );
 test_assert_equal( $val, 0 );
 test_assert_equal( $def, 1 );
 
+# validate_password and set_password
+
 test_assert_equal( $b->validate_password( $session1, '1234'    ), 0 );
 test_assert_equal( $b->validate_password( $session1, $password ), 1 );
-test_assert_equal( $b->validate_password( $session, '1234'     ), 0 );
-test_assert_equal( $b->validate_password( $session, ''         ), 1 );
+test_assert_equal( $b->validate_password( $session,  '1234'    ), 0 );
+test_assert_equal( $b->validate_password( $session,  ''        ), 1 );
 
 test_assert_equal( $b->set_password( $session1, ''    ), 1 );
 test_assert_equal( $b->validate_password( $session1, '1234'    ), 0 );
@@ -247,14 +250,14 @@ test_assert( defined($session1) );
 test_assert( !$b->is_admin_session( $session1 ) );
 
 test_assert( !defined($b->create_user( $session1, 'testuser3' )) );
-test_assert( !defined($b->remove_user( $session1, 'testuser'     )) );
+test_assert( !defined($b->remove_user( $session1, 'testuser'  )) );
 
 test_assert( !defined($b->get_user_list( $session1 )) );
 test_assert( !defined($b->get_user_id( $session1, 'testuser' )) );
 
 test_assert( !defined($b->get_accounts( $session1, $id1 )) );
-test_assert_equal( $b->add_account( $session1, $id1, 'pop3', 'foo:bar2' ), 0 );
-test_assert_equal( $b->remove_account( $session1, $id1, 'pop3', 'foo:bar' ), 0 );
+test_assert_equal( $b->add_account(    $session1, $id1, 'pop3', 'foo:bar2' ), 0 );
+test_assert_equal( $b->remove_account( $session1, $id1, 'pop3', 'foo:bar'  ), 0 );
 
 test_assert( !defined($b->get_session_key_from_token( $session1, 'smtp', 'token' )) );
 
@@ -336,6 +339,8 @@ foreach my $bucket (@buckets4) {
 
 $b->release_session_key( $session4 );
 
+# TODO : cloning with magnets and corpus option
+
 # initialize_users_password
 
 my ( $success5, $password5 ) = $b->initialize_users_password( $session,  'testuser4' );
@@ -359,6 +364,24 @@ test_assert( defined($session4) );
 $b->release_session_key( $session4 );
 
 test_assert_equal( $b->change_users_password( $session, 'baduser', 'badpassword' ), 1 );
+
+# rename_user
+
+my ( $success7, $password7 ) = $b->rename_user( $session, 'testuser', 'changeduser' );
+test_assert_equal( $success7, 0 );
+test_assert(  defined($password7) );
+
+my $session7 = $b->get_session_key( 'changeduser', $password7 );
+test_assert(  defined($session7) );
+$b->release_session_key( $session7 );
+
+( $success7, $password7 ) = $b->rename_user( $session, 'admin', 'admincannotberenamed' );
+test_assert_equal( $success7, 2 );
+test_assert( !defined($password7) );
+
+( $success7, $password7 ) = $b->rename_user( $session, 'changeduser', 'admin' );
+test_assert_equal( $success7, 1 );
+test_assert( !defined($password7) );
 
 # get_user_name_from_id
 
