@@ -726,7 +726,7 @@ sub configure_item
     my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'pop3_configuration' ) {
-        $templ->param( 'POP3_Configuration_If_Force_Fork' => ( $self->config_( 'force_fork' ) == 0 ) );
+        $templ->param( 'POP3_Configuration_If_Force_Fork' => ( $self->config_( 'force_fork' ) == 1 ) );
         $templ->param( 'POP3_Configuration_Port'          => $self->config_( 'port' ) );
         $templ->param( 'POP3_Configuration_Separator'     => $self->config_( 'separator' ) );
     } else {
@@ -736,8 +736,8 @@ sub configure_item
         } else {
             if ( $name eq 'pop3_chain' ) {
                 $templ->param( 'POP3_Chain_Secure_Server' => $self->config_( 'secure_server' ) );
-                $templ->param( 'POP3_Chain_Secure_Port' => $self->config_( 'secure_port' ) );
-                $templ->param( 'POP3_Chain_Secure_SSL' => ( $self->config_( 'secure_ssl' ) == 1 ) );
+                $templ->param( 'POP3_Chain_Secure_Port'   => $self->config_( 'secure_port' ) );
+                $templ->param( 'POP3_Chain_Secure_SSL'    => ( $self->config_( 'secure_ssl' ) == 1 ) );
             } else {
                 $self->SUPER::configure_item( $name, $templ, $language );
             }
@@ -777,22 +777,26 @@ sub validate_item
             if ( length($$form{pop3_separator}) == 1 ) {
                 $self->config_( 'separator', $$form{pop3_separator} );
                 $status_message .= "\n" if ( defined( $status_message ) );
-                $status_message .= sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) )
+                $status_message .= sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) );
             } else {
                 $error_message .= "\n" if ( defined( $error_message ) );
                 $error_message .= $$language{Configuration_Error1};
             }
         }
 
-        if ( defined($$form{pop3_force_fork}) ) {
-            $self->config_( 'force_fork', $$form{pop3_force_fork} ) if ($$form{pop3_force_fork} eq 1 || $$form{pop3_force_fork} eq 0);
+        if ( defined($$form{update_pop3_configuration}) ) {
+            if ( $$form{pop3_force_fork} ) {
+                $self->config_( 'force_fork', 1 );
+            } else {
+                $self->config_( 'force_fork', 0 );
+            }
         }
 
         return($status_message, $error_message);
     }
 
     if ( $name eq 'pop3_security' ) {
-        if ( $form->{serveropt_pop3} ) {
+        if ( $$form{serveropt_pop3} ) {
             $self->config_( 'local', 0 );
         }
         else {
@@ -819,8 +823,8 @@ sub validate_item
             }
         }
 
-        if ( defined($$form{sssl}) ) {
-            if ( $$form{sssl} eq 'UseSSL' ) {
+        if ( defined($$form{update_server}) ) {
+            if ( $$form{sssl} ) {
                 $self->config_( 'secure_ssl', 1 );
                 $status_message .= "\n" if ( defined( $status_message ) );
                 $status_message .= $$language{Security_SecureServerUseSSLOn};

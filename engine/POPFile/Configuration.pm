@@ -146,8 +146,16 @@ sub initialize
     $self->global_config_( 'crypt_device', '' );
 
     # GLOBAL language setting
+    # The global language is used as the default language setting for
+    # users.
+    # If this setting is set to 'Nihongo', POPFile handles Japanese
+    # messages correctly.
 
     $self->global_config_( 'language', 'English' );
+
+    # The default session timeout in seconds.
+
+    $self->global_config_( 'session_timeout', 1800 );
 
     # Register for the TICKD message which is sent hourly by the
     # Logger module.   We use this to hourly save the configuration file

@@ -24,6 +24,7 @@ function serverMode(state) {
                                 <TMPL_VAR NAME="Localize_Users_SingleUserMode">
                             </label>
                             <br />
+                            <br />
                             <input type="radio" name="servermode" id="StealthMode" value="StealthMode" onClick="serverMode(false)" <TMPL_IF NAME="Security_If_Local">checked="checked"</TMPL_IF> />
                             <label class="administrationLabel" for="StealthMode">
                                 <TMPL_VAR NAME="Localize_Security_StealthMode">

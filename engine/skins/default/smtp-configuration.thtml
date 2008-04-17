@@ -1,45 +1,17 @@
-<label class="configurationLabel" for="configSMTPPort">
-    <TMPL_VAR NAME="Localize_Configuration_SMTPPort">:
-</label>
-<table border="0" cellpadding="0" cellspacing="0" summary="">
-    <tr>
-        <td>
-            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <input name="smtp_port" type="text" id="configSMTPPort" value="<TMPL_VAR NAME="smtp_port">" />
-                <input type="submit" class="submit" name="update_smtp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-            </form>
-        </td>
-    </tr>
-</table>
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+    <label class="configurationLabel" for="configSMTPPort">
+        <TMPL_VAR NAME="Localize_Configuration_SMTPPort">:
+    </label>
+    <br />
+    <input name="smtp_port" type="text" id="configSMTPPort" value="<TMPL_VAR NAME="smtp_port">" />
+    <br />
 
-<label class="configurationLabel" for="smtpForceFork">
-    <TMPL_VAR NAME="Localize_Configuration_SMTPFork">:
-</label>
-<br />
-<table border="0" cellpadding="0" cellspacing="0" summary="">
-    <tr>
-        <td nowrap="nowrap">
-            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <TMPL_IF NAME="smtp_force_fork_on">
+    <input name="smtp_force_fork" id="smtpForceFork" type="checkbox" value="1" <TMPL_IF NAME="smtp_force_fork_on">checked</TMPL_IF> />
+    <label class="configurationLabel" for="smtpForceFork">
+        <TMPL_VAR NAME="Localize_Configuration_SMTPFork">
+    </label>
 
-                <span class="securityWidgetStateOn">
-                    <TMPL_VAR NAME="Localize_Yes">
-                </span>
-                <input type="submit" class="toggleOff" id="smtpForceFork" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
-                <input type="hidden" name="smtp_force_fork" value="0" />
-
-                <TMPL_ELSE>
-
-                <span class="securityWidgetStateOff">
-                    <TMPL_VAR NAME="Localize_No">
-                </span>
-                <input type="submit" class="toggleOn" id="smtpForceFork" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                <input type="hidden" name="smtp_force_fork" value="1" />
-
-                </TMPL_IF>
-
-            </form>
-        </td>
-    </tr>
-</table>
+    <br /><br />
+    <input type="submit" class="submit" name="update_smtp_configuration" value="<TMPL_VAR NAME="Localize_Apply">" />
+</form>
 <br />

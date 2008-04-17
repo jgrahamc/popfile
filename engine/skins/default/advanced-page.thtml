@@ -42,7 +42,8 @@
         </td>
         <td class="settingsPanel" width="50%" valign="top">
             <h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_AllParameters"></h2>
-            <p><TMPL_VAR NAME="Localize_Advanced_Warning">
+            <p><TMPL_VAR NAME="Localize_Advanced_AllParametersNotes"><br />
+            <TMPL_VAR NAME="Localize_Advanced_Warning">
             <p><TMPL_VAR NAME="Localize_Advanced_ConfigFile"> <TMPL_VAR NAME="Advanced_POPFILE_CFG">
 
             <form action="/advanced" method="post">
@@ -92,6 +93,52 @@
 
                     <input type="submit" class="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params">
             </form>
+
+            <TMPL_IF NAME="Advanced_If_SingleUser">
+            <hr />
+            <h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_SingleUserModeParameters"></h2>
+            <p><TMPL_VAR NAME="Localize_Advanced_SingleUserModeParametersNotes"><br />
+            <TMPL_VAR NAME="Localize_Advanced_Warning">
+
+            <form action="/advanced" method="post">
+                <table width="100%">
+                    <tr>
+                        <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
+                        <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Value"></th>
+                    </tr>
+                <TMPL_LOOP NAME="Users_Loop_Parameter">
+
+                <TMPL_IF NAME="Users_If_New_Module">
+
+                    <tr>
+                        <td colspan="2">
+                            <hr />
+                        </td>
+                    </tr>
+
+                </TMPL_IF>
+
+                <tr>
+                    <td>
+                        <TMPL_IF NAME="Users_If_Changed">
+                            <b>
+                        </TMPL_IF>
+                        <TMPL_VAR NAME="Users_Parameter">
+                        <TMPL_IF NAME="Users_If_Changed">
+                            </b>
+                        </TMPL_IF>
+                    </td>
+                    <td>
+                        <input type="text" name="parameter_<TMPL_VAR NAME="Users_Parameter">" value="<TMPL_VAR NAME="Users_Value">">
+                    </td>
+                </tr>
+
+                </TMPL_LOOP>
+                </table>
+                <br />
+                <input type="submit" class="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_single_user_params">
+            </form>
+            </TMPL_IF>
         </td>
     </tr>
 </table>

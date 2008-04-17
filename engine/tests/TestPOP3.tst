@@ -180,9 +180,9 @@ $templ->{params__} = {};
 $p->configure_item( 'pop3_configuration', $templ );
 $params = $templ->{params__};
 test_assert_equal( scalar( keys( %{$params} ) ), 3 );
-test_assert_equal( $templ->param( 'POP3_Configuration_If_Force_Fork' ), !$p->config_( 'force_fork' ) );
-test_assert_equal( $templ->param( 'POP3_Configuration_Port'          ),  $p->config_( 'port'       ) );
-test_assert_equal( $templ->param( 'POP3_Configuration_Separator'     ),  $p->config_( 'separator'  ) );
+test_assert_equal( $templ->param( 'POP3_Configuration_If_Force_Fork' ), ( $p->config_( 'force_fork' ) == 1 ) );
+test_assert_equal( $templ->param( 'POP3_Configuration_Port'          ),   $p->config_( 'port'       ) );
+test_assert_equal( $templ->param( 'POP3_Configuration_Separator'     ),   $p->config_( 'separator'  ) );
 
 delete $templ->{params__};
 
@@ -302,7 +302,8 @@ test_assert_equal( $p->config_( 'separator' ), ':' );
 
 delete $form->{pop3_separator};
 
-test_assert_equal( $p->config_( 'force_fork' ), 0);
+test_assert_equal( $p->config_( 'force_fork' ), 0 );
+$form->{update_pop3_configuration} = 1;
 $form->{pop3_force_fork} = 1;
 
 ($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
@@ -318,6 +319,7 @@ test_assert( !defined( $error ) );
 test_assert_equal( $p->config_( 'force_fork' ), 1 );
 
 delete $form->{pop3_force_fork};
+delete $form->{update_pop3_configuration};
 $p->config_( 'force_fork', 0 );
 
 test_assert_equal( $p->config_( 'local' ), 1 );
@@ -372,7 +374,8 @@ $p->config_('secure_port', $old_config_value );
 
 $old_config_value = $p->config_( 'secure_ssl' );
 
-$form->{sssl} = "UseSSL";
+$form->{update_server} = 1;
+$form->{sssl} = "1";
 $language->{Security_SecureServerUseSSLOn} = "use SSL connections";
 $language->{Security_SecureServerUseSSLOff} = "not use SSL connections";
 
@@ -389,6 +392,7 @@ test_assert( !defined( $error ) );
 test_assert_equal( $p->config_( 'secure_ssl' ), 0 );
 
 delete $form->{server};
+delete $form->{update_server};
 $p->config_('secure_ssl', $old_config_value );
 
 

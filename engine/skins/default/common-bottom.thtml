@@ -16,9 +16,6 @@
             <a class="bottomLink" href="http://getpopfile.org/" title="<TMPL_VAR NAME="Localize_tip_Footer_HomePage">">
                 <TMPL_VAR NAME="Localize_Footer_HomePage"></a>
             <br />
-            <a class="bottomLink" href="http://getpopfile.org/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html" title="<TMPL_VAR NAME="Localize_tip_Footer_Manual">">
-                <TMPL_VAR NAME="Localize_Footer_Manual"></a>
-            <br />
             <a class="bottomLink" href="http://getpopfile.org/wiki/<TMPL_VAR NAME="Localize_WikiLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_Wiki">">
                 <TMPL_VAR NAME="Localize_Footer_Wiki"></a>
             <br />

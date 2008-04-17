@@ -132,6 +132,8 @@ test_assert_regexp( $line, 'GLOBAL_msgdir messages/' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_random_module Crypt::OpenSSL::Random' );
 $line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_session_timeout 1800' );
+$line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_single_user 1' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_timeout 60' );

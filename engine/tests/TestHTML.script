@@ -189,7 +189,7 @@ GET /history?setfilter=
 MATCH foo-magnet\@magnetmania.com
 MATCH Magnetic Attraction for Ferrous Females
 MATCH personal
-MATCH <img title="foo" alt="foo" src="/skins/magnet.png">
+MATCH <img title="From:foo" alt="From:foo" src="/skins/magnet.png">
 
 GET /view?view=32&amp;start_message=0
 MATCH Single Message View
@@ -201,7 +201,7 @@ Magnet used:
 </b>
 </font>
 <font size="+1">
-foo
+From:foo
 </font>
 ENDMATCH
 
@@ -601,12 +601,12 @@ MAGNETIS  spam subject newmagnet
 SETINPUT text0 foo
 SETINPUT type0 from
 SETSUBMIT bucket0 personal
-MATCH Magnet 'from: foo' already exists in bucket 'personal'
+MATCH Magnet &#39;from: foo&#39; already exists in bucket &#39;personal&#39;
 
 SETINPUT text0 fo
 SETINPUT type0 from
 SETSUBMIT bucket0 personal
-MATCH New magnet 'from: fo' clashes with magnet 'from: foo' in bucket 'personal' and could cause ambiguous results.  New magnet was not added.
+MATCH New magnet &#39;from: fo&#39; clashes with magnet &#39;from: foo&#39; in bucket &#39;personal&#39; and could cause ambiguous results.  New magnet was not added.
 
 # Check magnet change value
 
@@ -806,15 +806,15 @@ INPUTIS   pop3_port 111
 
 # Check fork for POP3
 
-HIDDEN 1
-INPUTIS   pop3_force_fork 1
-CONFIGIS  pop3_force_fork 0
-SETSUBMIT pop3_force_fork 0
-INPUTIS   pop3_force_fork 1
+#HIDDEN 1
+INPUTIS   pop3_force_fork 
 CONFIGIS  pop3_force_fork 0
 SETSUBMIT pop3_force_fork 1
-INPUTIS   pop3_force_fork 0
-HIDDEN 0
+INPUTIS   pop3_force_fork 1
+CONFIGIS  pop3_force_fork 1
+SETSUBMIT pop3_force_fork off
+INPUTIS   pop3_force_fork 
+#HIDDEN 0
 
 # Check UI port
 
@@ -831,26 +831,26 @@ INPUTIS   ui_port 8082
 # Check POP3 stealth
 
 #HIDDEN 1
-INPUTIS serveropt_pop3 
-CONFIGIS pop3_local 1
+INPUTIS   serveropt_pop3 
+CONFIGIS  pop3_local 1
 SETSUBMIT serveropt_pop3 on
-INPUTIS serveropt_pop3 on
-CONFIGIS pop3_local 0
+INPUTIS   serveropt_pop3 on
+CONFIGIS  pop3_local 0
 SETSUBMIT serveropt_pop3 off
-INPUTIS serveropt_pop3 
-CONFIGIS pop3_local 1
+INPUTIS   serveropt_pop3 
+CONFIGIS  pop3_local 1
 #HIDDEN 0
 
 # Check UI stealth
 #HIDDEN 1
-INPUTIS serveropt_html 
-CONFIGIS html_local 1
+INPUTIS   serveropt_html 
+CONFIGIS  html_local 1
 SETSUBMIT serveropt_html on
-INPUTIS serveropt_html on
-CONFIGIS html_local 0
+INPUTIS   serveropt_html on
+CONFIGIS  html_local 0
 SETSUBMIT serveropt_html off
-INPUTIS serveropt_html 
-CONFIGIS html_local 1
+INPUTIS   serveropt_html 
+CONFIGIS  html_local 1
 #HIDDEN 0
 
 # Check POP3 AUTH options
@@ -876,26 +876,26 @@ MATCH The port must be a number between 1 and 65535
 # Check autoupdate
 
 #HIDDEN 1
-INPUTIS update_check 
+INPUTIS      update_check 
 USERCONFIGIS html_update_check 0
-SETSUBMIT update_check on
-INPUTIS update_check on
+SETSUBMIT    update_check on
+INPUTIS      update_check on
 USERCONFIGIS html_update_check 1
-SETSUBMIT update_check off
-INPUTIS update_check 
+SETSUBMIT    update_check off
+INPUTIS      update_check 
 USERCONFIGIS html_update_check 0
 #HIDDEN 0
 
 # Check statistics sending
 
 #HIDDEN 1
-INPUTIS send_stats 
+INPUTIS      send_stats 
 USERCONFIGIS html_send_stats 0
-SETSUBMIT send_stats on
-INPUTIS send_stats on
+SETSUBMIT    send_stats on
+INPUTIS      send_stats on
 USERCONFIGIS html_send_stats 1
-SETSUBMIT send_stats off
-INPUTIS send_stats 
+SETSUBMIT    send_stats off
+INPUTIS      send_stats 
 USERCONFIGIS html_send_stats 0
 #HIDDEN 0
 
@@ -904,10 +904,10 @@ USERCONFIGIS html_send_stats 0
 
 GET /history
 ISVALIDPASSWORD 
-SETINPUT new_password secret
-SETSUBMIT confirm_password secret
+SETINPUT        new_password secret
+SETSUBMIT       confirm_password secret
 ISVALIDPASSWORD secret
-SETSUBMIT old_password secret
+SETSUBMIT       old_password secret
 ISVALIDPASSWORD 
 
 # Advanced Page
@@ -922,9 +922,9 @@ MATCH smtp
 
 # Check add ignore word
 
-INPUTIS newword
+INPUTIS   newword
 SETSUBMIT newword four11@.-_
-MATCH 'four11@.-_' added to the Ignored Words list
+MATCH &#39;four11@.-_&#39; added to the Ignored Words list
 # reload
 GET /advanced
 MATCH four11@.-_
@@ -933,12 +933,12 @@ MATCH Ignored words can only contain alphanumeric, ., _, -, or @ characters
 
 # Check remove ignore word
 
-INPUTIS word
+INPUTIS   word
 SETSUBMIT word four11@.-_
-MATCH 'four11@.-_' removed from the Ignored Words list
+MATCH &#39;four11@.-_&#39; removed from the Ignored Words list
 # reload
 GET /advanced
-NOTMATCH four11@.-_
+NOTMATCH  four11@.-_
 SETSUBMIT word ba"d
 MATCH Ignored words can only contain alphanumeric, ., _, -, or @ characters
 
@@ -966,8 +966,8 @@ SETSUBMIT language English
 
 GET /advanced
 SETSUBMIT parameter_bayes_hostname testhostname
-CONFIGIS bayes_hostname testhostname
-INPUTIS parameter_bayes_hostname testhostname
+CONFIGIS  bayes_hostname testhostname
+INPUTIS   parameter_bayes_hostname testhostname
 
 # Buckets Page
 

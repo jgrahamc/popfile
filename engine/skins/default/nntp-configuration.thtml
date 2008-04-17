@@ -1,50 +1,24 @@
-<form action="/administration" method="post">
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <label class="configurationLabel" for="configNNTPPort">
         <TMPL_VAR NAME="Localize_Configuration_NNTPPort">:
     </label>
     <br />
     <input name="nntp_port" type="text" id="configNNTPPort" value="<TMPL_VAR NAME="nntp_port">" />
-    <input type="submit" class="submit" name="update_nntp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-</form>
+    <br />
 
-<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <label class="configurationLabel" for="configNntpSeparator">
         <TMPL_VAR NAME="Localize_Configuration_NNTPSeparator">:
     </label>
     <br />
-    <input name="nntp_separator" id="configNntpSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" />
-    <input type="submit" class="submit" name="update_nntp_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
+    <input name="nntp_separator" id="configNntpSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" maxlength="1" />
+    <br />
+
+    <input name="nntp_force_fork" id="nntpForceFork" type="checkbox" value="1" <TMPL_IF NAME="nntp_force_fork_on">checked</TMPL_IF> />
+    <label class="configurationLabel" for="nntpForceFork">
+        <TMPL_VAR NAME="Localize_Configuration_NNTPFork">
+    </label>
+
+    <br /><br />
+    <input type="submit" class="submit" name="update_nntp_configuration" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
-
-<label class="configurationLabel" for="nntpForceFork">
-    <TMPL_VAR NAME="Localize_Configuration_NNTPFork">:
-</label>
-<br />
-<table border="0" cellpadding="0" cellspacing="0" summary="">
-    <tr>
-        <td nowrap="nowrap">
-            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-
-                <TMPL_IF NAME="nntp_force_fork_on">
-
-                <span class="securityWidgetStateOn">
-                    <TMPL_VAR NAME="Localize_Yes">
-                </span>
-                <input type="submit" class="toggleOff" id="nntpForceFork" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
-                <input type="hidden" name="nntp_force_fork" value="0" />
-
-                <TMPL_ELSE>
-
-                <span class="securityWidgetStateOff">
-                    <TMPL_VAR NAME="Localize_No">
-                </span>
-                <input type="submit" class="toggleOn" id="nntpForceFork" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                <input type="hidden" name="nntp_force_fork" value="1" />
-
-                </TMPL_IF>
-
-            </form>
-        </td>
-    </tr>
-</table>
 <br />

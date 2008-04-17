@@ -1,9 +1,14 @@
-                <input id="windows_console" type="checkbox" name="toggle" <TMPL_IF NAME="windows_console_on">checked</TMPL_IF> />
-                <label for="windows_console" class="administrationLabel">
-                    <TMPL_VAR NAME="Localize_Windows_Console">
-                </label>
-                <br />
-                <input id="windows_trayicon" type="checkbox" name="toggle" <TMPL_IF NAME="windows_icon_on">checked</TMPL_IF> />
-                <label for="windows_trayicon" class="administrationLabel">
-                    <TMPL_VAR NAME="Localize_Windows_TrayIcon">
-                </label>
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+    <input id="windows_console" type="checkbox" name="windows_console" <TMPL_IF NAME="windows_console_on">checked</TMPL_IF> />
+    <label for="windows_console" class="administrationLabel">
+        <TMPL_VAR NAME="Localize_Windows_Console">
+    </label>
+    <br />
+    <input id="windows_trayicon" type="checkbox" name="windows_trayicon" <TMPL_IF NAME="windows_icon_on">checked</TMPL_IF> />
+    <label for="windows_trayicon" class="administrationLabel">
+        <TMPL_VAR NAME="Localize_Windows_TrayIcon">
+    </label>
+
+    <br /><br />
+    <input type="submit" class="submit" name="update_windows_configuration" value="<TMPL_VAR NAME="Localize_Apply">" />
+</form>

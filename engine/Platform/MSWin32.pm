@@ -153,13 +153,19 @@ sub validate_item
 
     if ( $name eq 'windows_trayicon_and_console' ) {
 
-        if ( defined($$form{windows_trayicon}) ) {
-            $self->config_( 'trayicon', $$form{windows_trayicon} );
-            $status_message = $$language{Windows_NextTime};
-        }
+        if ( defined( $$form{update_windows_configuration} ) ) {
+            if ( $$form{windows_trayicon} ) {
+                $self->config_( 'trayicon', 1 );
+            } else {
+                $self->config_( 'trayicon', 0 );
+            }
 
-        if ( defined($$form{windows_console}) ) {
-            $self->config_( 'console', $$form{windows_console} );
+            if ( $$form{windows_console} ) {
+                $self->config_( 'console', 1 );
+            } else {
+                $self->config_( 'console', 0 );
+            }
+
             $status_message = $$language{Windows_NextTime};
         }
     }

@@ -270,7 +270,8 @@ sub deliver
 
     if ( $type eq 'CREAT' ) {
         my ( $session, $user ) = ( $message[0], $message[1] );
-        $self->{api_sessions__}{$session} = $user;
+        $self->{api_sessions__}{$session}{userid} = $user;
+        $self->{api_sessions__}{$session}{lastused} = time;
         $self->db_update_cache__( $session );
         $self->log_( 1, "CREAT message on $session for $user" );
     }
@@ -313,7 +314,7 @@ sub start
 
     $self->upgrade_predatabase_data__();
 
-    $self->upgrade_v1_data__();
+    $self->upgrade_v1_parameters__();
 
     # Since Text::Kakasi is not thread-safe, we use it under the
     # control of a Mutex to avoid a crash if we are running on
@@ -367,6 +368,24 @@ sub stop
     $self->db_cleanup__();
     delete $self->{parser__};
     $self->SUPER::stop();
+}
+
+#----------------------------------------------------------------------------
+#
+# service
+#
+# service() is a called periodically to give the module a chance to do
+# housekeeping work.
+#
+#
+#----------------------------------------------------------------------------
+sub service
+{
+    my ( $self ) = @_;
+
+    $self->release_expired_sessions__();
+
+    return 1;
 }
 
 #----------------------------------------------------------------------------
@@ -472,9 +491,12 @@ sub reclassified
 
 
 #----------------------------------------------------------------------------
+#
 # cleanup_orphan_words__
+#
 # Removes Words from (words) no longer associated with a bucket
 # Called when the TICKD message is received each hour.
+#
 #----------------------------------------------------------------------------
 sub cleanup_orphan_words__
 {
@@ -735,17 +757,17 @@ sub db_prepare__
              'select bucket_template.def from bucket_template
                   where bucket_template.id = ?;' );                                     # PROFILE BLOCK STOP
 
-    $self->{db_get_user_parameter__} = $self->db_()->prepare(                        # PROFILE BLOCK START
+    $self->{db_get_user_parameter__} = $self->db_()->prepare(                          # PROFILE BLOCK START
              'select user_params.val from user_params
                   where user_params.userid = ? and
-                        user_params.utid = ?;' );                                     # PROFILE BLOCK STOP
+                        user_params.utid = ?;' );                                       # PROFILE BLOCK STOP
 
-    $self->{db_set_user_parameter__} = $self->db_()->prepare(                        # PROFILE BLOCK START
-           'replace into user_params ( userid, utid, val ) values ( ?, ?, ? );' );  # PROFILE BLOCK STOP
+    $self->{db_set_user_parameter__} = $self->db_()->prepare(                          # PROFILE BLOCK START
+           'replace into user_params ( userid, utid, val ) values ( ?, ?, ? );' );      # PROFILE BLOCK STOP
 
-    $self->{db_get_user_parameter_default__} = $self->db_()->prepare(                # PROFILE BLOCK START
+    $self->{db_get_user_parameter_default__} = $self->db_()->prepare(                  # PROFILE BLOCK START
              'select user_template.def from user_template
-                  where user_template.id = ?;' );                                     # PROFILE BLOCK STOP
+                  where user_template.id = ?;' );                                       # PROFILE BLOCK STOP
 
     $self->{db_get_buckets_with_magnets__} = $self->db_()->prepare(                    # PROFILE BLOCK START
              'select buckets.name from buckets, magnets
@@ -956,9 +978,9 @@ sub upgrade_predatabase_data__
 
     # There's an assumption here that this is the single user version
     # of POPFile and hence what we do is cheat and get a session key
-    # assuming that the user name is admin with password ''
+    # for the single user mode
 
-    my $session = $self->get_administrator_session_key();
+    my $session = $self->get_single_user_session_key();
 
     if ( !defined( $session ) ) {
         $self->log_( 0, "Tried to get the session key for user admin and failed; cannot upgrade old data" );
@@ -1195,12 +1217,12 @@ sub upgrade_bucket__
 
 #----------------------------------------------------------------------------
 #
-# upgrade_v1_data__
+# upgrade_v1_parameters__
 #
 # If the deprecated parameters found, upgrades them to the SQL database.
 #
 #----------------------------------------------------------------------------
-sub upgrade_v1_data__
+sub upgrade_v1_parameters__
 {
     my ( $self ) = @_;
 
@@ -1575,7 +1597,7 @@ sub release_session_key_private__
     my ( $self, $session ) = @_;
 
     if ( defined( $self->{api_sessions__}{$session} ) ) {
-        $self->log_( 1, "release_session_key releasing key $session for user $self->{api_sessions__}{$session}" );
+        $self->log_( 1, "release_session_key releasing key $session for user $self->{api_sessions__}{$session}{userid}" );
         delete $self->{api_sessions__}{$session};
     }
 }
@@ -1607,9 +1629,39 @@ sub valid_session_key__
         my ( $package, $filename, $line, $subroutine ) = caller;
         $self->log_( 0, "Invalid session key $session provided in $package @ $line" );
         select( undef, undef, undef, 1 );
+
+        return undef;
     }
 
-    return $self->{api_sessions__}{$session};
+    # Update the last access time
+
+    $self->{api_sessions__}{$session}{lastused} = time;
+
+    return $self->{api_sessions__}{$session}{userid};
+}
+
+#----------------------------------------------------------------------------
+#
+# release_expired_sessions__
+#
+# Releases the expired session keys
+# Called when the TICKD message is received each hour.
+#
+#----------------------------------------------------------------------------
+sub release_expired_sessions__
+{
+    my ( $self ) = @_;
+
+    my $timeout = time - $self->global_config_( 'session_timeout' );
+
+    foreach my $session ( keys %{$self->{api_sessions__}} ) {
+        next if ( defined( $self->{api_sessions__}{$session}{notexpired} ) );
+
+        if ( $self->{api_sessions__}{$session}{lastused} < $timeout ) {
+            $self->log_( 1, "Session key $session will be expired due to a timeout" );
+            $self->release_session_key( $session );
+        }
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -1667,11 +1719,12 @@ sub get_session_key
 
     my $session = $self->generate_unique_session_key__();
 
-    $self->{api_sessions__}{$session} = $result->[0];
+    $self->{api_sessions__}{$session}{userid} = $result->[0];
+    $self->{api_sessions__}{$session}{lastused} = time;
 
     $self->db_update_cache__( $session );
 
-    $self->log_( 1, "get_session_key returning key $session for user $self->{api_sessions__}{$session}" );
+    $self->log_( 1, "get_session_key returning key $session for user $self->{api_sessions__}{$session}{userid}" );
 
     return $session;
 }
@@ -1746,7 +1799,9 @@ sub get_administrator_session_key
     my ( $self ) = @_;
 
     my $session = $self->generate_unique_session_key__();
-    $self->{api_sessions__}{$session} = 1;
+    $self->{api_sessions__}{$session}{userid} = 1;
+    $self->{api_sessions__}{$session}{lastused} = time;
+    $self->{api_sessions__}{$session}{notexpired} = 1; # does not be expired
     $self->db_update_cache__( $session );
     $self->log_( 1, "get_administrator_session_key returning key $session" );
     return $session;
@@ -1767,7 +1822,8 @@ sub get_single_user_session_key
     my ( $self ) = @_;
 
     my $single_user_session = $self->generate_unique_session_key__();
-    $self->{api_sessions__}{$single_user_session} = 1;
+    $self->{api_sessions__}{$single_user_session}{userid} = 1;
+    $self->{api_sessions__}{$single_user_session}{lastused} = time;
     $self->db_update_cache__( $single_user_session );
     $self->log_( 1, "get_single_user_session_key returning key $single_user_session for the single user mode" );
 
@@ -1867,7 +1923,8 @@ sub get_session_key_from_token
     }
 
     my $user_session = $self->generate_unique_session_key__();
-    $self->{api_sessions__}{$user_session} = $user;
+    $self->{api_sessions__}{$user_session}{userid} = $user;
+    $self->{api_sessions__}{$user_session}{lastused} = time;
     $self->db_update_cache__( $user_session );
     $self->log_( 1, "get_session_key_from_token returning key $user_session for user $user" );
 
@@ -4753,6 +4810,41 @@ sub delete_magnet
                             where magnets.bucketid = $bucketid and
                                   magnets.mtid = $mtid and
                                   magnets.val  = $text;" );
+}
+
+#----------------------------------------------------------------------------
+#
+# get_magnet_header_and_value
+#
+# Get the header and value of the magnet
+#
+# $session         A valid session key returned by a call to get_session_key
+# $magnetid        The ID for the magnet
+#
+#----------------------------------------------------------------------------
+sub get_magnet_header_and_value
+{
+    my ( $self, $session, $magnetid ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    my $m = $self->db_()->prepare(
+        "select magnet_types.header, magnets.val from magnet_types, magnets
+                where magnet_types.id = magnets.mtid and magnets.id = ?;" );
+
+    $m->execute( $magnetid );
+    my $result = $m->fetchrow_arrayref;
+    $m->finish;
+
+    if ( defined( $result ) ) {
+        my $header = $result->[0];
+        my $value  = $result->[1];
+
+        return ( $header, $value );
+    }
+
+    return undef;
 }
 
 #----------------------------------------------------------------------------

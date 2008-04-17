@@ -419,9 +419,9 @@ sub configure_item
     my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'nntp_config' ) {
-        $templ->param( 'nntp_port' => $self->config_( 'port' ) );
-        $templ->param( 'nntp_separator' => $self->config_( 'separator' ) );
-        $templ->param( 'nntp_force_fork_on' => $self->config_( 'force_fork' ) );
+        $templ->param( 'nntp_port'          => $self->config_( 'port' ) );
+        $templ->param( 'nntp_separator'     => $self->config_( 'separator' ) );
+        $templ->param( 'nntp_force_fork_on' => ( $self->config_( 'force_fork' ) == 1 ) );
     }
     
     if ( $name eq 'nntp_local' ) {
@@ -453,7 +453,7 @@ sub validate_item
     if ( $name eq 'nntp_config' ) {
         
         if ( defined $$form{nntp_port} ) {
-            if ( ( $$form{nntp_port} >= 1 ) && ( $$form{nntp_port} < 65536 ) ) {
+            if ( ( $$form{nntp_port} =~ /^\d+$/ ) && ( $$form{nntp_port} >= 1 ) && ( $$form{nntp_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{nntp_port} );
                 $status = sprintf $$language{Configuration_NNTPUpdate}, $self->config_( 'port' );
              } else {
@@ -464,14 +464,20 @@ sub validate_item
         if ( defined $$form{nntp_separator} ) {
             if ( length($$form{nntp_separator}) == 1 ) {
                 $self->config_( 'separator', $$form{nntp_separator} );
-                $status = sprintf $$language{Configuration_NNTPSepUpdate}, $self->config_( 'separator' );
+                $status .= "\n" if ( defined( $status ) );
+                $status .= sprintf $$language{Configuration_NNTPSepUpdate}, $self->config_( 'separator' );
             } else {
-               $error = $$language{Configuration_Error1};
+                $error .= "\n" if ( defined( $error ) );
+                $error .= $$language{Configuration_Error1};
             }
         }
 
-        if ( defined $$form{nntp_force_fork} ) {
-            $self->config_( 'force_fork', $$form{nntp_force_fork} );
+        if ( defined $$form{update_nntp_configuration} ) {
+            if ( $$form{nntp_force_fork} ) {
+                $self->config_( 'force_fork', 1 );
+            } else {
+                $self->config_( 'force_fork', 0 );
+            }
         }
         
         return( $status, $error );

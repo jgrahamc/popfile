@@ -263,8 +263,18 @@ sub deliver
     }
 
     if ( $type eq 'RELSE' ) {
-        if ( defined( $message[0] ) && defined( $self->{language__}{$message[0]} ) ) {
-            delete $self->{language__}{$message[0]};
+        my $session = $message[0];
+
+        # Purge the language cache
+
+        if ( exists( $self->{language__}{$session} ) ) {
+            delete $self->{language__}{$session};
+        }
+
+        # Purge the session cache and stop query
+        if ( exists( $self->{sessions__}{$session} ) ) {
+            $self->history_()->stop_query( $self->{sessions__}{$session}{q} );
+            delete $self->{sessions__}{$session};
         }
     }
 }
@@ -326,15 +336,6 @@ sub handle_cookie__
         return undef;
     }
 
-    # Now see if this session has been recorded in the current
-    # sessions, if so then return it, because we can assume that it is
-    # valid
-
-    if ( exists( $self->{sessions__}{$session} ) ) {
-        $self->{sessions__}{$session}{lastused} = time;
-        return $session;
-    }
-
     # Let's see if the session key is the magic string LOGGED-OUT
     # in which case there's no session
 
@@ -342,12 +343,29 @@ sub handle_cookie__
         return undef;
     }
 
-    # Otherwise check that the session ID is still valid in the API.
+    # Check that the session ID is still valid in the API.
 
     my $user = $self->classifier_()->valid_session_key__( $session );
 
+    # Now see if this session has been recorded in the current
+    # sessions, if so then return it, because we can assume that it is
+    # valid
+
+    if ( exists( $self->{sessions__}{$session} ) ) {
+        if ( defined($user) ) {
+#            $self->{sessions__}{$session}{lastused} = time;
+            return $session;
+        } else {
+            $self->history_()->stop_query( $self->{sessions__}{$session}{q} );
+            delete $self->{sessions__}{$session};
+            return undef;
+        }
+    }
+
+    # Check that the session ID is still valid in the API.
+
     if ( defined( $user ) ) {
-        $self->{sessions__}{$session}{lastused} = time;
+#        $self->{sessions__}{$session}{lastused} = time;
         $self->{sessions__}{$session}{user} = $user;
         $self->{sessions__}{$session}{sort} = '';
         $self->{sessions__}{$session}{filter} = '';
@@ -465,14 +483,14 @@ sub url_handler__
         $session = $self->handle_cookie__( $cookie, $client );
     }
 
-    # In single user mode get the administrator key
+    # In single user mode get the single user mode key
 
     if ( !defined( $session ) &&
-         $self->global_config_( 'single_user' ) ) {
+        $self->global_config_( 'single_user' ) ) {
 
-        $session = $self->classifier_()->get_session_key( 'admin', '' );
+        $session = $self->classifier_()->get_single_user_session_key();
         if ( defined ( $session ) ) {
-            $self->{sessions__}{$session}{lastused} = time;
+#            $self->{sessions__}{$session}{lastused} = time;
             $self->{sessions__}{$session}{user} = 1;
             $self->{sessions__}{$session}{sort} = '';
             $self->{sessions__}{$session}{filter} = '';
@@ -1737,7 +1755,9 @@ sub advanced_page
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
                                                     $page, $session );
 
-    # Handle updating the parameter table
+    my $single_mode = $self->global_config_( 'single_user' );
+
+    # Handle updating the global parameter table
 
     if ( defined( $self->{form_}{update_params} ) ) {
         foreach my $param (sort keys %{$self->{form_}}) {
@@ -1749,6 +1769,19 @@ sub advanced_page
 
         $self->configuration_()->save_configuration();
     }
+
+    # Handle updating the single user mode parameter table
+
+    if ( $single_mode && defined( $self->{form_}{update_single_user_params} ) ) {
+        foreach my $param (sort keys %{$self->{form_}}) {
+            if ( $param =~ /parameter_(.*)/ ) {
+                $self->classifier_()->set_user_parameter_from_id( 1,
+                    $1, $self->{form_}{$param} );
+            }
+        }
+    }
+
+    # Handle adding/removing words to/from stopwords
 
     if ( defined($self->{form_}{newword}) ) {
         my $result = $self->classifier_()->add_stopword( $session,
@@ -1770,7 +1803,8 @@ sub advanced_page
         }
     }
 
-    # the word census
+    # the word census ( stopword )
+
     my $last = '';
     my $need_comma = 0;
     my $groupCounter = 0;
@@ -1832,6 +1866,8 @@ sub advanced_page
         }
     }
 
+    # POPFile global parameters
+
     $templ->param( 'Advanced_Loop_Word' => \@word_loop );
 
     $templ->param( 'Advanced_POPFILE_CFG' =>
@@ -1866,6 +1902,33 @@ sub advanced_page
     }
 
     $templ->param( 'Advanced_Loop_Parameter' => \@param_loop );
+
+    # Single user mode parameters
+
+    $templ->param( 'Advanced_If_SingleUser' => $single_mode );
+
+    if ( $single_mode ) {
+        my @parameters = $self->classifier_()->get_user_parameter_list( $session );
+
+        my @parameter_list;
+        my $last = '';
+        foreach my $param (sort @parameters) {
+            my %row_data;
+            $param =~ /^([^_]+)_/;
+            if ( ( $last ne '' ) && ( $last ne $1 ) ) {
+                $row_data{Users_If_New_Module} = 1;
+            } else {
+                $row_data{Users_If_New_Module} = 0;
+            }
+            $last = $1;
+            $row_data{Users_Parameter} = $param;
+            my ( $val, $default ) = $self->classifier_()->get_user_parameter_from_id( 1, $param );
+            $row_data{Users_Value} = $val;
+            $row_data{Users_If_Changed} = !$default;
+            push ( @parameter_list, \%row_data );
+        }
+        $templ->param( 'Users_Loop_Parameter' => \@parameter_list );
+    }
 
     $self->http_ok( $client, $templ, 5, $session );
 }
@@ -2097,17 +2160,12 @@ sub magnet_page
                 # function to make text safe for inclusion in a form
                 # field
 
-                my $validatingMagnet = $magnet;
-                $validatingMagnet =~ s/&/&amp;/g;
-                $validatingMagnet =~ s/</&lt;/g;
-                $validatingMagnet =~ s/>/&gt;/g;
-
                 # escape quotation characters to avoid orphan data
                 # within tags todo: function to make arbitrary data
                 # safe for inclusion within a html tag attribute
                 # (inside double-quotes)
 
-                $validatingMagnet =~ s/\"/\&quot\;/g;
+                my $validatingMagnet = $self->escape_html_( $magnet );
 
                 $row_data{Magnet_Row_ID}     = $i;
                 $row_data{Magnet_Bucket}     = $bucket;
@@ -2606,9 +2664,15 @@ sub corpus_page
             $templ->param( 'Corpus_Loop_Lookup' => \@lookup_data );
 
             if ( $max_bucket ne '' ) {
-                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->language($session)->{Bucket_LookupMostLikely}, $word, $self->classifier_()->get_bucket_color( $session, $max_bucket ), $max_bucket ) );
+                $templ->param( 'Corpus_Lookup_Message' => 
+                               sprintf( $self->language($session)->{Bucket_LookupMostLikely},
+                                        $self->escape_html_( $word ),
+                                        $self->classifier_()->get_bucket_color( $session, $max_bucket ),
+                                        $max_bucket ) );
             } else {
-                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->language($session)->{Bucket_DoesNotAppear}, $word ) );
+                $templ->param( 'Corpus_Lookup_Message' => 
+                               sprintf( $self->language($session)->{Bucket_DoesNotAppear},
+                                        $self->escape_html_( $word ) ) );
             }
         }
     }
@@ -3015,7 +3079,7 @@ sub history_page
     }
 
     $templ->param( 'History_Field_Search'  => $self->{form_}{search} );
-    $templ->param( 'History_Field_Not'  => $self->{form_}{negate} );
+    $templ->param( 'History_Field_Not'     => $self->{form_}{negate} );
     $templ->param( 'History_If_Search'     => defined( $self->{form_}{search} ) );
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
@@ -3240,7 +3304,10 @@ sub history_page
                      my $bucket = $col_data{History_Bucket} = $$row[8];
                      if ( $$row[11] ne '' ) {
                         $col_data{History_If_Magnetized} = 1;
-                        $col_data{History_Magnet}        = $$row[11];
+                        my ( $header, $value ) =
+                            $self->classifier_()->get_magnet_header_and_value( $session, $$row[13] );
+                        $col_data{History_Magnet}        =
+                            $self->language($session)->{$header} . ':' . $value;
                      }
                      $col_data{History_If_Not_Pseudo} =
                          !$self->classifier_()->is_pseudo_bucket(
@@ -3341,8 +3408,14 @@ sub view_page
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
     my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted,
-        $bucket, $reclassified, $bucketid, $magnet ) =
+        $bucket, $reclassified, $bucketid, $magnet, $size, $magnetid ) =
         $self->history_()->get_slot_fields( $self->{form_}{view}, $session );
+
+    my ( $header, $value );
+    if ( $magnet ne '' ) {
+        ( $header, $value ) =
+            $self->classifier_()->get_magnet_header_and_value( $session, $magnetid );
+    }
 
     if ( !defined($id) ) {
         $self->http_redirect_( $client, "/history", $session );
@@ -3410,7 +3483,7 @@ sub view_page
             }
             $templ->param( 'View_Loop_Buckets' => \@bucket_data );
         } else {
-            $templ->param( 'View_Magnet' => $magnet );
+            $templ->param( 'View_Magnet' => $self->language($session)->{$header} . ':' . $value );
         }
     }
 
@@ -3477,46 +3550,33 @@ sub view_page
         }
     } else {
 
-        # TODO: See comment below for details
-
-        # $magnet =~ /(.+): ([^\r\n]+)/;
-        # my $header = $1;
-        # my $text   = $2;
-
         my $body = '<tt>';
 
         open MESSAGE, '<' . $mail_file;
         my $line;
 
         while ($line = <MESSAGE>) {
-            $line =~ s/</&lt;/g;
-            $line =~ s/>/&gt;/g;
+            $line = $self->escape_html_( $line );
 
             $line =~ s/([^\r\n]{100,150} )/$1<br \/>/g;
             $line =~ s/([^ \r\n]{150})/$1<br \/>/g;
             $line =~ s/[\r\n]+/<br \/>/g;
+            $line =~ s/\t/&nbsp;&nbsp;/g;
 
-            # TODO: This code is now useless because the magnet itself
-            # doesn't contain the information about which header we
-            # are looking for.  Ultimately, we need to fix this but I
-            # decided for v0.22.0 release to not make further changes
-            # and leave this code as unfixed.
-
-            # if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
-            #    my $head = $1;
-            #    my $arg  = $2;
-            #
-            #    if ( $head =~ /\Q$header\E/i ) {
-            #
-            #        $text =~ s/</&lt;/g;
-            #        $text =~ s/>/&gt;/g;
-            #
-            #        if ( $arg =~ /\Q$text\E/i ) {
-            #            my $new_color = $self->classifier_()->get_bucket_color( $session, $bucket );
-            #            $line =~ s/(\Q$text\E)/<b style=\"color:$new_color\">$1<\/b>/;
-            #        }
-            #    }
-            # }
+            if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
+                my $head = $1;
+                my $arg  = $2;
+            
+                if ( $head =~ /\Q$header\E/i ) {
+            
+                    $value = $self->escape_html_( $value );
+            
+                    if ( $arg =~ /\Q$value\E/i ) {
+                        my $new_color = $self->classifier_()->get_bucket_color( $session, $bucket );
+                        $line =~ s/(\Q$header\E|\Q$value\E)/<b style=\"color:$new_color\">$1<\/b>/g;
+                    }
+                }
+            }
 
             $body .= $line;
         }
@@ -3525,10 +3585,10 @@ sub view_page
         $templ->param( 'View_Message' => $body );
     }
 
-    if ($magnet ne '') {
+    if ( $magnet ne '' ) {
         $templ->param( 'View_Magnet_Reason' => sprintf( $self->language($session)->{History_MagnetBecause},  # PROFILE BLOCK START
                           $color, $bucket,
-                          Classifier::MailParse->splitline($magnet,0)
+                          Classifier::MailParse->splitline( $self->language($session)->{$header} . ':' . $value, 0 )
             ) );                                                                                     # PROFILE BLOCK STOP
     }
 
@@ -3595,10 +3655,7 @@ sub status_message__
 {
     my ( $self, $templ, $message ) = @_;
 
-    $message =~ s/&/&amp;/g;
-    $message =~ s/</&lt;/g;
-    $message =~ s/>/&gt;/g;
-    $message =~ s/\"/&quot;/g;
+    $message = $self->escape_html_( $message );
     $message =~ s/\n/<br \/>/g;
 
     my $old = $templ->param( 'Header_Message' ) || '';
@@ -3621,10 +3678,7 @@ sub error_message__
 {
     my ( $self, $templ, $message ) = @_;
 
-    $message =~ s/&/&amp;/g;
-    $message =~ s/</&lt;/g;
-    $message =~ s/>/&gt;/g;
-    $message =~ s/\"/&quot;/g;
+    $message = $self->escape_html_( $message );
     $message =~ s/\n/<br \/>/g;
 
     my $old = $templ->param( 'Header_Error' ) || '';

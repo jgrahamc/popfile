@@ -36,7 +36,7 @@ use Date::Parse;
 use Digest::MD5 qw( md5_hex );
 
 my $fields_slot = 'history.id, hdr_from, hdr_to, hdr_cc, hdr_subject,
-hdr_date, hash, inserted, buckets.name, usedtobe, history.bucketid, magnets.val, size';
+hdr_date, hash, inserted, buckets.name, usedtobe, history.bucketid, magnets.val, size, history.magnetid';
 
 #----------------------------------------------------------------------------
 # new
@@ -1186,7 +1186,7 @@ sub upgrade_history_files__
                           'popfile*.msg' ), 0 );
 
     if ( $#msgs != -1 ) {
-        my $session = $self->classifier_()->get_administrator_session_key();
+        my $session = $self->classifier_()->get_single_user_session_key();
 
         print "\nFound old history files, moving them into database\n    ";
 
@@ -1294,7 +1294,6 @@ sub cleanup_history
 {
     my ( $self ) = @_;
 
-    # TODO : multi-user support
     my $session = $self->classifier_()->get_administrator_session_key();
     my $users = $self->classifier_()->get_user_list( $session );
 
@@ -1305,7 +1304,8 @@ sub cleanup_history
                                          where userid = ? and
                                                inserted < ?;" );
     foreach my $userid ( keys %$users ) {
-        my $old = time - $self->user_config_( $userid, 'history_days' )*$seconds_per_day;
+        my $old = time - $self->user_config_( $userid, 'history_days' ) *
+                         $seconds_per_day;
         $d->execute( $userid, $old );
         my @row;
         while ( @row = $d->fetchrow_array ) {
@@ -1316,6 +1316,8 @@ sub cleanup_history
     foreach my $id (@ids) {
         $self->delete_slot( $id, 1, $session, 1 );
     }
+
+    $self->classifier_()->release_session_key( $session );
 }
 
 # ---------------------------------------------------------------------------

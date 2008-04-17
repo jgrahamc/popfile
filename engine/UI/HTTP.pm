@@ -390,6 +390,28 @@ sub url_decode_
 
 # ----------------------------------------------------------------------------
 #
+# escape_html_
+#
+# $text     Text to HTML-escaped
+#
+# Escape &, ", >, <, '
+#
+# ----------------------------------------------------------------------------
+sub escape_html_
+{
+    my ( $self, $text ) = @_;
+
+    $text =~ s/&/&amp;/g;
+    $text =~ s/\"/&quot;/g;
+    $text =~ s/>/&gt;/g;
+    $text =~ s/</&lt;/g;
+    $text =~ s/'/&#39;/g;
+
+    return $text;
+}
+
+# ----------------------------------------------------------------------------
+#
 # http_error_ - Output a standard HTTP error message
 #
 # $client     The web browser to send the results to

@@ -13,12 +13,11 @@
     <input type="text" name="sport" id="securitySecurePOP3Port" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port">" />
     <br />
 
-    <label class="securityLabel" for "securitySecurePOP3SSL">
+    <input type="checkbox" name="sssl" id="securitySecurePOP3SSL" value="1" <TMPL_IF NAME="POP3_Chain_Secure_SSL">checked</TMPL_IF> />
+    <label class="securityLabel" for="securitySecurePOP3SSL">
         <TMPL_VAR NAME="Localize_Security_SecureServerUseSSL">
     </label>
-    
-    <input type="checkbox" name="sssl" id="securitySecurePOP3SSL" value="UseSSL" <TMPL_IF NAME="POP3_Chain_Secure_SSL">checked</TMPL_IF> />
-    <br />
 
+    <br /><br />
     <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>

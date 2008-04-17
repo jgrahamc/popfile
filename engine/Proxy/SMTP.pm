@@ -339,8 +339,8 @@ sub configure_item
     my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'smtp_fork_and_port' ) {
-        $templ->param( 'smtp_port' => $self->config_( 'port' ) );
-        $templ->param( 'smtp_force_fork_on' => $self->config_( 'force_fork' ) );
+        $templ->param( 'smtp_port'          => $self->config_( 'port' ) );
+        $templ->param( 'smtp_force_fork_on' => ( $self->config_( 'force_fork' ) == 1 ) );
     }
 
     if ( $name eq 'smtp_local' ) {
@@ -380,12 +380,16 @@ sub validate_item
 
     if ( $name eq 'smtp_fork_and_port' ) {
 
-        if ( defined($$form{smtp_force_fork}) ) {
-            $self->config_( 'force_fork', $$form{smtp_force_fork} );
+        if ( defined($$form{update_smtp_configuration}) ) {
+            if ( $$form{smtp_force_fork} ) {
+                $self->config_( 'force_fork', 1 );
+            } else {
+                $self->config_( 'force_fork', 0 );
+            }
         }
 
         if ( defined($$form{smtp_port}) ) {
-            if ( ( $$form{smtp_port} >= 1 ) && ( $$form{smtp_port} < 65536 ) ) {
+            if ( ( $$form{smtp_port} =~ /^\d+$/ ) && ( $$form{smtp_port} >= 1 ) && ( $$form{smtp_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{smtp_port} );
                 $status = sprintf( $$language{Configuration_SMTPUpdate}, $self->config_( 'port' ) );
              } else {
