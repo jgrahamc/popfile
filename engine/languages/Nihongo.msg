@@ -202,10 +202,13 @@ Advanced_Message1                       POPFile は以下の頻繁に使われる単語を無視
 Advanced_AddWord                        単語追加
 Advanced_RemoveWord                     単語削除
 Advanced_AllParameters                  POPFile 全パラメーター
+Advanced_AllParametersNotes             以下は POPFile の全体的なパラメーターの全リストです。
 Advanced_Parameter                      パラメーター
 Advanced_Value                          値
-Advanced_Warning                        以下は POPFile の全てのパラメーターのリストです。アドバンスド・ユーザーに限り、必要時、値を変更して更新ボタンをクリックして下さい。バリディティー（妥当性）チェックは行いません。
+Advanced_Warning                        アドバンスド・ユーザーに限り、必要時、値を変更して更新ボタンをクリックして下さい。バリディティー（妥当性）チェックは行いません。太字になっている項目は初期設定から変更されています。オプションの詳細については <a href="http://getpopfile.org/docs/JP:OptionReference">オプション・リファレンス</a> を参照してください。
 Advanced_ConfigFile                     設定ファイル:
+Advanced_SingleUserModeParameters       シングルユーザーモードのパラメーター
+Advanced_SingleUserModeParametersNotes  以下はシングルユーザーモードのパラメータの全リストです。
 
 Users_Create                            新しいユーザーの作成
 Users_Rename                            ユーザー名の変更

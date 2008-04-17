@@ -201,10 +201,13 @@ Advanced_Message1                       POPFile ignores the following frequently
 Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
 Advanced_AllParameters                  Global POPFile Parameters
+Advanced_AllParametersNotes             This is the complete list of POPFile parameters.  
 Advanced_Parameter                      Parameter
 Advanced_Value                          Value
-Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.  See <a href="http://getpopfile.org/docs/OptionReference">OptionReference</a> for more information on options.
 Advanced_ConfigFile                     Configuration file:
+Advanced_Warning                        Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.  See <a href="http://getpopfile.org/docs/OptionReference">OptionReference</a> for more information on options.
+Advanced_SingleUserModeParameters       Single User Mode Parameters
+Advanced_SingleUserModeParametersNotes  This is the complete list of Single User Mode parameters.  
 
 Users_Create                            Create New User
 Users_Rename                            Rename Existing User
