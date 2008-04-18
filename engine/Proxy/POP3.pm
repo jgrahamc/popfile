@@ -761,26 +761,24 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
-    my ($status_message,$error_message);
+    my ( $status_message , $error_message );
 
     if ( $name eq 'pop3_configuration' ) {
         if ( defined($$form{pop3_port}) ) {
             if ( ( $$form{pop3_port} =~ /^\d+$/ ) && ( $$form{pop3_port} >= 1 ) && ( $$form{pop3_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{pop3_port} );
-                $status_message = sprintf( $$language{Configuration_POP3Update}, $self->config_( 'port' ) );
+                $status_message .= sprintf( $$language{Configuration_POP3Update}, $self->config_( 'port' ) ) . "\n";
             } else {
-                $error_message .= $$language{Configuration_Error3};
+                $error_message .= $$language{Configuration_Error3} . "\n";
             }
         }
 
         if ( defined($$form{pop3_separator}) ) {
             if ( length($$form{pop3_separator}) == 1 ) {
                 $self->config_( 'separator', $$form{pop3_separator} );
-                $status_message .= "\n" if ( defined( $status_message ) );
-                $status_message .= sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) );
+                $status_message .= sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) ) . "\n";
             } else {
-                $error_message .= "\n" if ( defined( $error_message ) );
-                $error_message .= $$language{Configuration_Error1};
+                $error_message .= $$language{Configuration_Error1} . "\n";
             }
         }
 
@@ -792,32 +790,35 @@ sub validate_item
             }
         }
 
-        return($status_message, $error_message);
+        $status_message =~ s/\n$// if ( defined( $status_message ) );
+        $error_message =~ s/\n// if ( defined( $error_message) );
+
+        return( $status_message, $error_message );
     }
 
     if ( $name eq 'pop3_security' ) {
         if ( $$form{serveropt_pop3} ) {
             $self->config_( 'local', 0 );
+            $status_message = $$language{Security_ServerModeUpdatePOP3};
         }
         else {
             $self->config_( 'local', 1 );
+            $status_message = $$language{Security_StealthModeUpdatePOP3};
         }
 
-        return(undef, undef);
+        return( $status_message, $error_message );
     }
 
     if ( $name eq 'pop3_chain' ) {
         if ( defined( $$form{server} ) ) {
             $self->config_( 'secure_server', $$form{server} );
-            $status_message .= "\n" if ( defined( $status_message ) );
-            $status_message .= sprintf( $$language{Security_SecureServerUpdate}, $self->config_( 'secure_server' ) );
+            $status_message .= sprintf( $$language{Security_SecureServerUpdate}, $self->config_( 'secure_server' ) ) . "\n";
        }
 
         if ( defined($$form{sport}) ) {
             if ( ( $$form{sport} =~ /^\d+$/ ) && ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
                 $self->config_( 'secure_port', $$form{sport} );
-                $status_message .= "\n" if ( defined( $status_message ) );
-                $status_message .= sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) );
+                $status_message .= sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) ) . "\n";
             } else {
                 $error_message .= $$language{Security_Error1};
             }
@@ -826,14 +827,15 @@ sub validate_item
         if ( defined($$form{update_server}) ) {
             if ( $$form{sssl} ) {
                 $self->config_( 'secure_ssl', 1 );
-                $status_message .= "\n" if ( defined( $status_message ) );
-                $status_message .= $$language{Security_SecureServerUseSSLOn};
+                $status_message .= $$language{Security_SecureServerUseSSLOn} . "\n";
             } else {
                 $self->config_( 'secure_ssl', 0 );
-                $status_message .= "\n" if ( defined( $status_message ) );
-                $status_message .= $$language{Security_SecureServerUseSSLOff};
+                $status_message .= $$language{Security_SecureServerUseSSLOff} . "\n";
             }
         }
+
+        $status_message =~ s/\n$// if ( defined( $status_message ) );
+        $error_message =~ s/\n// if ( defined( $error_message) );
 
         return( $status_message, $error_message );
     }

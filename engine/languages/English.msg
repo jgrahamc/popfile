@@ -186,10 +186,16 @@ Configuration_Password_Bad              The old password entered is incorrect
 Configuration_Password_Fail             Failed to set new password
 Configuration_Set_Password              New password has been set
 Configuration_ConfigBar                 Config Bar
-Configuration_Logger_Level0				Low
-Configuration_Logger_Level1				Medium
-Configuration_Logger_Level2				High
+Configuration_Logger_Level0             Low
+Configuration_Logger_Level1             Medium
+Configuration_Logger_Level2             High
 Configuration_Logger_Level              Logger level:
+Configuration_LoggerOutputUpdate        The current logger output : '%s'
+Configuration_Logger_LevelUpdate        The current logger level : '%s'
+Configuration_CurrentSessions           Current Active User Sessions
+Configuration_CurrentSessions_UserName  User
+Configuration_CurrentSessions_LastUsed  Last access
+Configuration_CurrentSessions_IdleTime  Idle time
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters
@@ -201,13 +207,13 @@ Advanced_Message1                       POPFile ignores the following frequently
 Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
 Advanced_AllParameters                  Global POPFile Parameters
-Advanced_AllParametersNotes             This is the complete list of POPFile parameters.  
+Advanced_AllParametersNotes             This is the complete list of Global POPFile parameters.  
 Advanced_Parameter                      Parameter
 Advanced_Value                          Value
-Advanced_ConfigFile                     Configuration file:
 Advanced_Warning                        Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.  See <a href="http://getpopfile.org/docs/OptionReference">OptionReference</a> for more information on options.
+Advanced_ConfigFile                     Configuration file:
 Advanced_SingleUserModeParameters       Single User Mode Parameters
-Advanced_SingleUserModeParametersNotes  This is the complete list of Single User Mode parameters.  
+Advanced_SingleUserModeParametersNotes  This is the complete list of the Single User Mode parameters.  
 
 Users_Create                            Create New User
 Users_Rename                            Rename Existing User
@@ -318,14 +324,29 @@ Security_SMTP                           Accept SMTP connections from remote mach
 Security_NNTP                           Accept NNTP connections from remote machines (requires POPFile restart)
 Security_UI                             Accept HTTP (User Interface) connections from remote machines  (requires POPFile restart)
 Security_XMLRPC                         Accept XML-RPC connections from remote machines (requires POPFile restart)
+Security_StealthModeUpdatePOP3          POPFile POP3 proxy WON'T be accessed from another machine; this change will not take affect until you restart POPFile
+Security_ServerModeUpdatePOP3           POPFile POP3 proxy ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
+Security_StealthModeUpdateSMTP          POPFile SMTP proxy WON'T be accessed from another machine; this change will not take affect until you restart POPFile
+Security_ServerModeUpdateSMTP           POPFile SMTP proxy ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
+Security_StealthModeUpdateNNTP          POPFile NNTP proxy WON'T be accessed from another machine; this change will not take affect until you restart POPFile
+Security_ServerModeUpdateNNTP           POPFile NNTP proxy ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
+Security_StealthModeUpdateUI            POPFile UI (Control center) WON'T be accessed from another machine; this change will not take affect until you restart POPFile
+Security_ServerModeUpdateUI             POPFile UI (Control center) ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
+Security_StealthModeUpdateXMLRPC        POPFile XML-RPC interface WON'T be accessed from another machine; this change will not take affect until you restart POPFile
+Security_ServerModeUpdateXMLRPC         POPFile XML-RPC interface ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
 Security_UpdateTitle                    Automatic Update Checking
 Security_Update                         Check daily for updates to POPFile
 Security_StatsTitle                     Reporting Statistics
 Security_Stats                          Send statistics daily
+Security_UpdateOn                       POPFile checks for updates daily
+Security_UpdateOff                      POPFile does not check for updates automatically
+Security_StatsOn                        POPFile sends classification statistics daily
+Security_StatsOff                       POPFile does not send classification statistics
 
 Magnet_Error1                           Magnet '%s' already exists in bucket '%s'
 Magnet_Error2                           New magnet '%s' clashes with magnet '%s' in bucket '%s' and could cause ambiguous results.  New magnet was not added.
-Magnet_Error3                           Create new magnet '%s' in bucket '%s'
+Magnet_Error3                           Created a new magnet '%s' in bucket '%s'
+Magnet_RemovedMagnets                   Removed the magnet '%s' from bucket '%s'
 Magnet_CurrentMagnets                   Current Magnets
 Magnet_Message1                         The following magnets cause mail to always be classified into the specified bucket.
 Magnet_CreateNew                        Create New Magnet
@@ -450,7 +471,7 @@ Imap_WatchedFoldersUpdated              Updated the list of watched folders
 Imap_WatchedFolderRemoved               Removed folder '%s' from list of watched folders
 Imap_DoingTraining                      The IMAP module is now going to start training on your message archive. The POPFile UI will remain unresponsive until training is completed. Depending on the size of your archive and the speed of the connection to the IMAP server, this may take a while.
 Imap_DoTraining                         Train from existing mail archive.
-Imap_Use_SSL							Use SSL
+Imap_Use_SSL                            Use SSL
 
 Shutdown_Message                        POPFile has shut down
 

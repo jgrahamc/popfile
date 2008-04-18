@@ -1938,6 +1938,37 @@ sub get_session_key_from_token
 
 #----------------------------------------------------------------------------
 #
+# get_current_sessions
+#
+# Gets the current active user session list (ADMIN ONLY)
+#
+# $session          Valid administrator session
+#
+# Returns current active sessions as an array
+#
+#----------------------------------------------------------------------------
+sub get_current_sessions
+{
+    my ( $self, $session ) = @_;
+
+    return undef if ( !$self->is_admin_session( $session ) );
+
+    my @result;
+    foreach my $current_session ( keys %{$self->{api_sessions__}} ) {
+        next if ( defined( $self->{api_sessions__}{$current_session}{notexpired} ) );
+
+        my %row;
+        $row{session}  = $current_session;
+        $row{userid}   = $self->{api_sessions__}{$current_session}{userid};
+        $row{lastused} = $self->{api_sessions__}{$current_session}{lastused};
+        push ( @result, \%row );
+    }
+
+    return \@result;
+}
+
+#----------------------------------------------------------------------------
+#
 # get_top_bucket__
 #
 # Helper function used by classify to get the bucket with the highest
@@ -2999,6 +3030,7 @@ sub get_accounts
 #
 # Returns 1 if the account was added successfully, or 0 for an error,
 # -1 if another user already has that account associated with it
+#
 # ----------------------------------------------------------------------------
 sub add_account
 {
@@ -3477,7 +3509,9 @@ sub get_bucket_parameter
 
     # If there is a non-default value for this parameter then return it.
 
-    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id}, $self->{db_parameterid__}{$parameter} );
+    $self->{db_get_bucket_parameter__}->execute(
+            $self->{db_bucketid__}{$userid}{$bucket}{id},
+            $self->{db_parameterid__}{$parameter} );
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
     # If this parameter has not been defined for this specific bucket then
@@ -3540,7 +3574,8 @@ sub create_user
 
     my $quoted_user = $self->db_()->quote( $new_user );
     my $quoted_hash = $self->db_()->quote( $password_hash );
-    $self->db_()->do( "insert into users ( name, password ) values ( $quoted_user, $quoted_hash );" );
+    $self->db_()->do( "insert into users ( name, password )
+                                  values ( $quoted_user, $quoted_hash );" );
 
     my $id = $self->get_user_id( $session, $new_user );
 
@@ -3564,7 +3599,8 @@ sub create_user
 
         # Clone user's parameters
 
-        my $h = $self->db_()->prepare( "select utid, val from user_params where userid = ?;" );
+        my $h = $self->db_()->prepare(
+                "select utid, val from user_params where userid = ?;" );
         $h->execute( $clid );
 
         my %add;
@@ -3573,8 +3609,9 @@ sub create_user
         }
         $h->finish;
 
-        $h = $self->db_()->prepare( "insert into user_params ( userid, utid, val )
-                                            values ( ?, ?, ? );" );
+        $h = $self->db_()->prepare(
+             "insert into user_params ( userid, utid, val )
+                               values ( ?, ?, ? );" );
         foreach my $utid (keys %add) {
             $h->execute( $id, $utid, $add{$utid} );
         }
@@ -3582,7 +3619,8 @@ sub create_user
 
         # Clone buckets (optional)
 
-        $h = $self->db_()->prepare( "select name, pseudo from buckets where userid = ?;" );
+        $h = $self->db_()->prepare(
+             "select name, pseudo from buckets where userid = ?;" );
         $h->execute( $clid );
         my %buckets;
         while ( my $row = $h->fetchrow_arrayref ) {
@@ -3590,8 +3628,9 @@ sub create_user
         }
         $h->finish;
 
-        $h = $self->db_()->prepare( "insert into buckets ( userid, name, pseudo )
-                                            values ( ?, ?, ? );" );
+        $h = $self->db_()->prepare(
+             "insert into buckets ( userid, name, pseudo )
+                           values ( ?, ?, ? );" );
         foreach my $name (keys %buckets) {
             $h->execute( $id, $name, $buckets{$name} );
         }
@@ -3623,8 +3662,9 @@ sub create_user
         }
         $h->finish;
 
-        $h = $self->db_()->prepare( "insert into bucket_params ( bucketid, btid, val)
-                                            values ( ?, ?, ? );" );
+        $h = $self->db_()->prepare(
+             "insert into bucket_params ( bucketid, btid, val)
+                                 values ( ?, ?, ? );" );
         foreach my $bucketid ( keys %bucket_params ) {
             foreach my $btid ( keys %{$bucket_params{$bucketid}} ) {
                 my $val = $bucket_params{$bucketid}{$btid};
@@ -3647,8 +3687,9 @@ sub create_user
             }
             $h->finish;
 
-            $h = $self->db_()->prepare( "insert into magnets ( bucketid, mtid, val )
-                                                values ( ?, ?, ? );" );
+            $h = $self->db_()->prepare(
+                 "insert into magnets ( bucketid, mtid, val )
+                               values ( ?, ?, ? );" );
             foreach my $bucketid ( keys %magnets ) {
                 foreach my $mtid ( keys %{$magnets{$bucketid}} ) {
                     my $val = $magnets{$bucketid}{$mtid};
@@ -3662,8 +3703,8 @@ sub create_user
 
         if ( $copy_corpus ) {
             $h = $self->db_()->prepare(
-                "select matrix.bucketid, matrix.wordid, matrix.times from matrix, buckets
-                        where matrix.bucketid = buckets.id and buckets.userid = ?;" );
+                 "select matrix.bucketid, matrix.wordid, matrix.times from matrix, buckets
+                         where matrix.bucketid = buckets.id and buckets.userid = ?;" );
             $h->execute( $clid );
 
             my %matrix;
@@ -3672,8 +3713,9 @@ sub create_user
             }
             $h->finish;
 
-            $h = $self->db_()->prepare( "insert into matrix ( bucketid, wordid, times )
-                                                values ( ?, ?, ? );" );
+            $h = $self->db_()->prepare(
+                 "insert into matrix ( bucketid, wordid, times )
+                              values ( ?, ?, ? );" );
             foreach my $bucketid ( keys %matrix ) {
                 foreach my $wordid ( keys %{$matrix{$bucketid}} ) {
                     my $times = $matrix{$bucketid}{$wordid};
@@ -3693,7 +3735,8 @@ sub create_user
         # If we are not cloning a user then they need at least the
         # default settings
 
-        $self->db_()->do( "insert into buckets ( name, pseudo, userid ) values ( 'unclassified', 1, $id );" );
+        $self->db_()->do( "insert into buckets ( name, pseudo, userid )
+                                        values ( 'unclassified', 1, $id );" );
 
         # Copy the global language setting to the user's language setting
 
@@ -3986,7 +4029,8 @@ sub set_password_for_user
     return 0 if ( !defined( $current_userid ) );
 
     if ( $current_userid != $userid ) {
-        # If the current user id is not the specified user id, check can_admin
+        # If the current user id is not the specified user id, check if the
+        # user is admin
 
         if ( !$self->is_admin_session( $session ) ) {
             return 0;
@@ -4132,9 +4176,6 @@ sub is_admin_session
 {
     my ( $self, $session ) = @_;
 
-#    my ( $package, $filename, $line, $subroutine ) = caller;
-#    $self->log_( 1, "is_admin_session is called from $package @ $line to check the session key $session" );
-
     my $result = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
 
     return ( defined($result) ? ( $result == 1 ) : undef );
@@ -4174,7 +4215,7 @@ sub get_user_parameter_from_id
     my $default = 0;
     if ( !defined( $result ) ) {
         $self->{db_get_user_parameter_default__}->execute(  # PROFILE BLOCK START
-            $self->{db_user_parameterid__}{$parameter} );          # PROFILE BLOCK STOP
+            $self->{db_user_parameterid__}{$parameter} );    # PROFILE BLOCK STOP
         $result = $self->{db_get_user_parameter_default__}->fetchrow_arrayref;
         $default = 1;
     }
@@ -4897,7 +4938,7 @@ sub magnet_count
 
 #----------------------------------------------------------------------------
 #
-# add_stopword, remove_stopword
+# add_stopword, remove_stopword (ADMIN ONLY)
 #
 # Adds or removes a stop word
 #
@@ -4914,6 +4955,10 @@ sub add_stopword
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    if ( !$self->is_admin_session( $session ) ) {
+        return undef;
+    }
+
     # Pass language parameter to add_stopword()
 
     return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->global_config_( 'language' ) );
@@ -4925,6 +4970,10 @@ sub remove_stopword
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
+
+    if ( !$self->is_admin_session( $session ) ) {
+        return undef;
+    }
 
     # Pass language parameter to remove_stopword()
 

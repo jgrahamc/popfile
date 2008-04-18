@@ -60,7 +60,7 @@ function serverMode(state) {
         </td>
         <td class="settingsPanel" width="33%" valign="top">
             <div class="securityUpdateWidget">
-                 <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_UpdateTitle"></h2>
+                 <h2 class="configuration"><TMPL_VAR NAME="Localize_Security_UpdateTitle">/<TMPL_VAR NAME="Localize_Security_StatsTitle"></h2>
                         <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                             <input type="checkbox" id="securityUpdateCheck" name="update_check" <TMPL_IF NAME="Security_If_Update_Check">checked</TMPL_IF> />
                             <label class="administrationLabel" for="securityUpdateCheck">
@@ -74,7 +74,6 @@ function serverMode(state) {
                             <br /><br />
                             <input type="submit" class="submit" name="privacy" value="<TMPL_VAR NAME="Localize_Apply">" />
                             <br /><br />
-                            <i><TMPL_VAR NAME="Localize_Security_ExplainUpdate"></i>
                         </form>
                  <hr />
             </div>
@@ -124,6 +123,38 @@ function serverMode(state) {
             <br />
             <a href="popfile_current_log.log" class="downloadLogLink"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
 
+            </TMPL_IF>
+            <TMPL_IF NAME="If_Single_User"><TMPL_ELSE>
+            <hr />
+
+            <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_CurrentSessions"></h2>
+            <TMPL_IF NAME="Configuration_If_Show_CurrentSessions">
+            <table width="100%" summary="">
+                <tr>
+                    <th align="left"><TMPL_VAR NAME="Localize_Configuration_CurrentSessions_UserName"></th>
+                    <th align="left"><TMPL_VAR NAME="Localize_Configuration_CurrentSessions_LastUsed"></th>
+                    <th align="left"><TMPL_VAR NAME="Localize_Configuration_CurrentSessions_IdleTime"></th>
+                </tr>
+
+                <TMPL_LOOP NAME="Configuration_Loop_CurrentSessions">
+                <TMPL_IF NAME="__odd__">
+                <tr class="rowOdd">
+                <TMPL_ELSE>
+                <tr class="rowEven">
+                </TMPL_IF>
+                    <td aligh="left" ><TMPL_VAR NAME="CurrentSessions_UserName"></td>
+                    <td align="left" ><TMPL_VAR NAME="CurrentSessions_LastUsed"></td>
+                    <td align="right"><TMPL_VAR NAME="CurrentSessions_IdleTime"></td>
+                </tr>
+                </TMPL_LOOP>
+
+            </table>
+            <br/>
+            </TMPL_IF>
+
+            <form action="/administration" method="post">
+                <input type="submit" class="submit" name="refresh_current_sessions" value="<TMPL_VAR NAME="Localize_Refresh">" />
+            </form>
             </TMPL_IF>
 
         </td>

@@ -125,6 +125,7 @@ sub get_stopword_list          { [ shift->{c}->get_stopword_list( @_ ) ]; }
 sub get_bucket_word_list       { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
 sub get_bucket_word_prefixes   { [ shift->{c}->get_bucket_word_prefixes( @_ ) ]; }
 sub get_user_parameter_list    { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
+sub get_current_sessions       { [ shift->{c}->get_current_sessions( @_ ) ]; }
 
 sub create_user                { [ shift->{c}->create_user( @_ ) ]; }
 sub rename_user                { [ shift->{c}->rename_user( @_ ) ]; }

@@ -256,12 +256,8 @@ sub configure_item
     }
 
     if ( $name eq 'xmlrpc_local' ) {
-        if ( $self->config_( 'local' ) == 1 ) {
-            $templ->param( 'XMLRPC_local_on' => 1 );
-        }
-        else {
-            $templ->param( 'XMLRPC_local_on' => 0 );
-        }
+        $templ->param( 'XMLRPC_local_on' => $self->config_( 'local' ) );
+        return $self->config_( 'local' );
     }
 }
 
@@ -288,7 +284,7 @@ sub validate_item
 
     if ( $name eq 'xmlrpc_port' ) {
         if ( defined($$form{xmlrpc_port}) ) {
-            if ( ( $$form{xmlrpc_port} >= 1 ) && ( $$form{xmlrpc_port} < 65536 ) ) {
+            if ( ( $$form{xmlrpc_port} =~ /^\d+$/ ) && ( $$form{xmlrpc_port} >= 1 ) && ( $$form{xmlrpc_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{xmlrpc_port} );
                 $status = sprintf( $$language{Configuration_XMLRPCUpdate}, $self->config_( 'port' ) );
             } else {
@@ -298,7 +294,16 @@ sub validate_item
     }
 
     if ( $name eq 'xmlrpc_local' ) {
-        $self->config_( 'local', $$form{xmlrpc_local}-1 ) if ( defined($$form{xmlrpc_local}) );
+        if ( $$form{serveropt_xmlrpc} ) {
+            $self->config_( 'local', 0 );
+            $status = $$language{Security_ServerModeUpdateXMLRPC};
+        }
+        else {
+            $self->config_( 'local', 1 );
+            $status = $$language{Security_StealthModeUpdateXMLRPC};
+        }
+
+        return( $status, $error );
     }
 
     return ( $status, $error );

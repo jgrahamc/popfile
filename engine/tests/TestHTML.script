@@ -655,18 +655,18 @@ INPUTIS   bucket5 personal
 INPUTIS   text5 newmagnetvalue
 INPUTIS   type5 to
 MAGNETIS  personal to newmagnetvalue
-INPUTIS text1 foo
-INPUTIS bucket1 personal
-INPUTIS type1 from
-INPUTIS text2 oldstyle
-INPUTIS bucket2 personal
-INPUTIS type2 from
-INPUTIS text3 bar
-INPUTIS bucket3 personal
-INPUTIS type3 subject
-INPUTIS text4 baz\@baz.com
-INPUTIS bucket4 personal
-INPUTIS type4 to
+INPUTIS   text1 foo
+INPUTIS   bucket1 personal
+INPUTIS   type1 from
+INPUTIS   text2 oldstyle
+INPUTIS   bucket2 personal
+INPUTIS   type2 from
+INPUTIS   text3 bar
+INPUTIS   bucket3 personal
+INPUTIS   type3 subject
+INPUTIS   text4 baz\@baz.com
+INPUTIS   bucket4 personal
+INPUTIS   type4 to
 
 # Check the magnet navigator
 
@@ -697,7 +697,8 @@ SETSUBMIT page_size 20
 GET /magnets
 SETINPUT remove5 on
 CLICK delete
-NOTMATCH newmagnetvalue
+MATCH Removed the magnet &#39;to: newmagnetvalue&#39; from bucket &#39;personal&#39;
+NOTMATCH "newmagnetvalue"
 NOTMATCH type5
 
 SETINPUT remove1 on

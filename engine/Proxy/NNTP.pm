@@ -486,10 +486,12 @@ sub validate_item
     if ( $name eq 'nntp_local' ) {
         if ( $form->{serveropt_nntp} ) {
             $self->config_( 'local', 0 );
+            $status = $$language{Security_ServerModeUpdateNNTP};
         } else {
             $self->config_( 'local', 1 );
+            $status = $$language{Security_StealthModeUpdateNNTP};
         }
-        return( undef, undef);
+        return( $status, $error );
     }    
 
     return $self->SUPER::validate_item( $name, $templ, $language, $form );

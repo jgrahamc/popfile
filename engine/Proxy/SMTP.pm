@@ -402,8 +402,10 @@ sub validate_item
     if ( $name eq 'smtp_local' ) {
         if ( $form->{serveropt_smtp} ) {
             $self->config_( 'local', 0 );
+            $status = $$language{Security_ServerModeUpdateSMTP};
         } else {
             $self->config_( 'local', 1 );
+            $status = $$language{Security_StealthModeUpdateSMTP};
         }
         return ( $status, $error );
     }

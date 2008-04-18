@@ -42,7 +42,6 @@ use Date::Parse;
 
 use MIME::Base64;
 use Crypt::CBC;
-use Digest::MD5 qw( md5_hex );
 
 # This is used to get the hostname of the current machine
 # in a cross platform way to return in cookies
@@ -488,7 +487,9 @@ sub url_handler__
     if ( !defined( $session ) &&
         $self->global_config_( 'single_user' ) ) {
 
-        $session = $self->classifier_()->get_single_user_session_key();
+        # If admin has a password, then redirect to the password page
+
+        $session = $self->classifier_()->get_session_key( 'admin', '' );
         if ( defined ( $session ) ) {
 #            $self->{sessions__}{$session}{lastused} = time;
             $self->{sessions__}{$session}{user} = 1;
@@ -1233,15 +1234,18 @@ sub administration_page
 
     # Read the CGI parameters and set the configuration vars accordingly
     # Server / Stealth mode
+
     if ( defined $self->{form_}->{apply_stealth} ) {
         my $current_single_user = $self->global_config_( 'single_user' );
         $self->global_config_( 'single_user', $self->{form_}->{usermode} ? 1 : 0 );
 
         if ( $self->{form_}->{ serveropt_html } ) {
             $self->config_( 'local',  0 );
+            $self->status_message__( $templ, $self->language($session)->{Security_ServerModeUpdateUI} );
         }
         else {
             $self->config_( 'local',  1 );
+            $self->status_message__( $templ, $self->language($session)->{Security_StealthModeUpdateUI} );
         }
 
         # If the single user mode (POPFile classic) is enabled or disabled
@@ -1251,22 +1255,59 @@ sub administration_page
             $single_user_mode_changed = 1;
         }
     }
-    # Privacy options
-    elsif ( $self->{form_}->{privacy} ) {
-        $self->user_config_( $user, 'send_stats', $self->{form_}->{send_stats} ? 1 : 0 );
-        $self->user_config_( $user, 'update_check', $self->{form_}->{update_check} ? 1 : 0 );
-    }
-    # Logger options
-    elsif ( $self->{form_}->{submit_debug} ) {
-        $self->module_config_( 'logger', 'level', $self->{form_}->{level} );
 
-        if ( ( defined($self->{form_}->{debug}) ) &&
-            ( ( $self->{form_}{debug} >= 1 ) &&
-            ( $self->{form_}{debug} <= 4 ) ) ) {
-           $self->global_config_( 'debug', $self->{form_}{debug}-1 );
+    # Privacy options
+
+    elsif ( $self->{form_}->{privacy} ) {
+        if ( $self->{form_}->{send_stats} ) {
+            $self->user_config_( $user, 'send_stats', 1 );
+            $self->status_message__( $templ, $self->language($session)->{Security_StatsOn} . "\n" .
+                                             $self->language($session)->{Security_ExplainStats} );
+        } else {
+            $self->user_config_( $user, 'send_stats', 0 );
+            $self->status_message__( $templ, $self->language($session)->{Security_StatsOff} );
+        }
+        if ( $self->{form_}->{update_check} ) {
+            $self->user_config_( $user, 'update_check', 1 );
+            $self->status_message__( $templ, $self->language($session)->{Security_UpdateOn} . "\n" .
+                                             $self->language($session)->{Security_ExplainUpdate} );
+        } else {
+            $self->user_config_( $user, 'update_check', 0 );
+            $self->status_message__( $templ, $self->language($session)->{Security_UpdateOff} );
         }
     }
+
+    # Logger options
+
+    elsif ( $self->{form_}->{submit_debug} ) {
+        my $logger_level = $self->{form_}->{level};
+
+        $self->module_config_( 'logger', 'level', $logger_level );
+        $self->status_message__(
+                $templ,
+                sprintf( $self->language($session)->{Configuration_Logger_LevelUpdate},
+                         $self->language($session)->{"Configuration_Logger_Level$logger_level"} ) );
+
+        if ( ( defined($self->{form_}->{debug}) ) &&
+           ( ( $self->{form_}{debug} >= 1 ) &&
+             ( $self->{form_}{debug} <= 4 ) ) ) {
+            my $debug = $self->{form_}{debug} - 1;
+            my %debug_options = (
+                    0 => 'Configuration_None',
+                    1 => 'Configuration_ToFile',
+                    2 => 'Configuration_ToScreen',
+                    3 => 'Configuration_ToScreenFile' );
+
+            $self->global_config_( 'debug', $debug );
+            $self->status_message__(
+                    $templ,
+                    sprintf( $self->language($session)->{Configuration_LoggerOutputUpdate},
+                             $self->language($session)->{$debug_options{$debug}} ) );
+        }
+    }
+
     # HTML module options
+
     elsif ( $self->{form_}->{update_modules} ) {
         if ( defined($self->{form_}{ui_port}) ) {
             if ( ( $self->{form_}{ui_port} >= 1 ) &&
@@ -1292,6 +1333,7 @@ sub administration_page
     }
 
     # Set the template parameters
+
     #$templ->param( 'Security_If_Password_Updated' => ( defined($self->{form_}{password} ) ) );
     $templ->param( 'Configuration_UI_Port'    => $self->config_( 'port' ) );
     $templ->param( 'If_Single_User'           => $self->global_config_( 'single_user' ) );
@@ -1316,13 +1358,14 @@ sub administration_page
                                                                        \%{$self->{form_}} );
 
             # Tell the user anything the dynamic UI was interested in sharing
+
             if ( defined( $status_message ) ) {
                 $self->log_( 3, "dynamic security UI $name had status $status_message");
-                $self->status_message__($templ,$status_message);
+                $self->status_message__( $templ, $status_message );
             }
             if ( defined( $error_message ) ) {
                 $self->log_( 3, "dynamic security UI $name had error $error_message");
-                $self->error_message__($templ, $error_message);
+                $self->error_message__( $templ, $error_message );
             }
         }
     }
@@ -1337,13 +1380,14 @@ sub administration_page
                                                                     \%{$self->{form_}} );
 
         # Tell the user anything the dynamic UI was interested in sharing
+
         if ( defined( $status_message ) ) {
             $self->log_( 3, "dynamic chain UI $name had status $status_message");
-            $self->status_message__($templ,$status_message);
+            $self->status_message__( $templ, $status_message );
         }
         if ( defined( $error_message ) ) {
             $self->log_( 3, "dynamic chain UI $name had error $error_message");
-            $self->error_message__($templ, $error_message);
+            $self->error_message__( $templ, $error_message );
         }
     }
 
@@ -1396,12 +1440,13 @@ sub administration_page
             \%{$self->{form_}} );
 
         # Tell the user anything the dynamic UI was interested in sharing
+
         if ( defined( $status_message )) {
-            $self->status_message__($templ,$status_message);
+            $self->status_message__( $templ, $status_message );
             $self->log_( 2, "dynamic config UI $name had status $status_message");
         }
         if ( defined( $error_message )) {
-            $self->error_message__($templ, $error_message);
+            $self->error_message__( $templ, $error_message );
             $self->log_( 2, "dynamic config UI $name had error $error_message");
         }
     }
@@ -1435,6 +1480,37 @@ sub administration_page
     if ( $self->global_config_( 'debug' ) & 1 ) {
         $templ->param( 'Configuration_If_Show_Log' => 1 );
     }
+
+    # Current active sessions
+
+    $templ->param( 'Configuration_If_Show_CurrentSessions' => 1);
+    my $active_sessions = $self->classifier_()->get_current_sessions( $session );
+    my @active_sessions_data;
+    my $current_time = time;
+    my $odd = 1;
+    foreach my $active_session (@{$active_sessions}) {
+        my %row;
+        $row{CurrentSessions_UserName} =
+            $self->classifier_()->get_user_name_from_id( $session, $active_session->{userid} );
+        $row{CurrentSessions_LastUsed} =
+            $self->pretty_date__( $active_session->{lastused}, 0, $session );
+        my $idletime = $current_time - $active_session->{lastused};
+        my $h = int( $idletime / 3600 );
+        my $m = int( ( $idletime % 3600 ) / 60 );
+        my $s = $idletime % 60;
+        if ( $h > 0 ) {
+            $row{CurrentSessions_IdleTime} =
+                sprintf( "%d:%02d:%02d", $h, $m, $s );
+        } elsif ( $m > 0 ) {
+            $row{CurrentSessions_IdleTime} =
+                sprintf( "%02d:%02d", $m, $s );
+        } else {
+            $row{CurrentSessions_IdleTime} =
+                sprintf( ":%02d", $s );
+        }
+        push( @active_sessions_data, \%row );
+    }
+    $templ->param( 'Configuration_Loop_CurrentSessions' => \@active_sessions_data );
 
     # If the single user mode (POPFile classic) is enabled or disabled
     # we should reflesh the UI
@@ -1958,9 +2034,6 @@ sub magnet_page
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
                                                     $page, $session );
 
-    my $error_message = '';
-    my $status_message = '';
-
     if ( defined( $self->{form_}{delete} ) ) {
         for my $i ( 1 .. $self->{form_}{count} ) {
             if ( defined( $self->{form_}{"remove$i"} ) &&
@@ -1970,6 +2043,10 @@ sub magnet_page
                 my $mbucket = $self->{form_}{"bucket$i"};
 
                 $self->classifier_()->delete_magnet( $session, $mbucket, $mtype, $mtext );
+                $self->status_message__(
+                        $templ,
+                        sprintf( $self->language($session)->{Magnet_RemovedMagnets},
+                                 "$mtype: $mtext", $mbucket ) );
             }
         }
     }
@@ -2032,7 +2109,10 @@ sub magnet_page
 
                         if ( exists( $magnets{$current_mtext} ) ) {
                             $found  = 1;
-                            $error_message .= sprintf( $self->language($session)->{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . "\n";
+                            $self->error_message__(
+                                    $templ,
+                                    sprintf( $self->language($session)->{Magnet_Error1},
+                                             "$mtype: $current_mtext", $bucket ) );
                             last;
                         }
                     }
@@ -2045,7 +2125,10 @@ sub magnet_page
                             for my $from (keys %magnets)  {
                                 if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
                                     $found = 1;
-                                    $error_message .= sprintf( $self->language($session)->{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . "\n";
+                                    $self->error_message__(
+                                            $templ,
+                                            sprintf( $self->language($session)->{Magnet_Error2},
+                                                     "$mtype: $current_mtext", "$mtype: $from", $bucket ) );
                                     last;
                                 }
                             }
@@ -2077,21 +2160,15 @@ sub magnet_page
 
                     $self->classifier_()->create_magnet( $session, $mbucket, $mtype, $current_mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
-                        $status_message .= sprintf( $self->language($session)->{Magnet_Error3}, "$mtype: $current_mtext", $mbucket ) . "\n";
+                        $self->status_message__(
+                                $templ,
+                                sprintf( $self->language($session)->{Magnet_Error3},
+                                         "$mtype: $current_mtext", $mbucket ) );
                     }
                 }
             }
             }
         }
-    }
-
-    # Show error/status message
-
-    if ( $error_message ne '' ) {
-        $self->error_message__( $templ, $error_message );
-    }
-    if ( $status_message ne '' ) {
-        $self->status_message__( $templ, $status_message );
     }
 
     # Current Magnets panel
@@ -3411,15 +3488,15 @@ sub view_page
         $bucket, $reclassified, $bucketid, $magnet, $size, $magnetid ) =
         $self->history_()->get_slot_fields( $self->{form_}{view}, $session );
 
+    if ( !defined($id) ) {
+        $self->http_redirect_( $client, "/history", $session );
+        return 1;
+    }
+
     my ( $header, $value );
     if ( $magnet ne '' ) {
         ( $header, $value ) =
             $self->classifier_()->get_magnet_header_and_value( $session, $magnetid );
-    }
-
-    if ( !defined($id) ) {
-        $self->http_redirect_( $client, "/history", $session );
-        return 1;
     }
 
     my $mail_file = $self->history_()->get_slot_file( $self->{form_}{view} );
@@ -3613,6 +3690,14 @@ sub password_page
     my $templ = $self->load_template__( 'password-page.thtml' );
     my $single_user = $self->global_config_( 'single_user' );
 
+    if ( defined( $url ) ) {
+        # If the URL is '/logout' or '/shutdown', remove it
+
+        if ( ( $url eq '/logout' ) || ( $url eq '/shutdown' ) ) {
+            $url = '/';
+        }
+    }
+
     $templ->param( 'Header_If_Password' => 1 );
     $templ->param( 'Next_Url' => $url );
     $templ->param( 'Password_If_SingleUser' => $single_user );
@@ -3707,10 +3792,12 @@ sub load_template__
     # POPFile with duplicating that entire set of templates
 
     my $user = 1;
+    my $username = '';
     my $can_admin = 0;
 
     if ( defined( $session ) ) {
         $user = $self->{sessions__}{$session}{user};
+        $username = $self->classifier_()->get_user_name_from_session( $session );
         $can_admin = $self->classifier_()->is_admin_session( $session );
     }
 
@@ -3742,7 +3829,10 @@ sub load_template__
     # throughout POPFile's pages
 
     my %fixups = ( 'Skin_Root'               => $root,
-                   'Common_Bottom_LastLogin' => $self->{last_login__},
+                   'Common_Bottom_LastLogin' =>
+                       ( $self->global_config_( 'single_user' ) ?
+                         $self->{last_login__} :
+                         $username ),
                    'Common_Bottom_Version'   => $self->version(),
                    'If_Show_Bucket_Help'     =>
                        $self->user_config_( $user, 'show_bucket_help' ),

@@ -12,7 +12,7 @@
 <TMPL_ELSE>
     <table class="footer" summary="">
     <tr>
-        <td class="footerBody">
+        <td class="footerBody" width="30%">
             <a class="bottomLink" href="http://getpopfile.org/" title="<TMPL_VAR NAME="Localize_tip_Footer_HomePage">">
                 <TMPL_VAR NAME="Localize_Footer_HomePage"></a>
             <br />
@@ -23,15 +23,15 @@
                 <TMPL_VAR NAME="Localize_FAQ"></a>
             <br />
         </td>
-        <td class="footerBody">
+        <td class="footerBody" width="40%">
             <a class="bottomLink" href="http://getpopfile.org/">
-                <img src="<TMPL_VAR NAME="Skin_Root">otto.png" border="0" alt="" /></a>
+                <img src="<TMPL_VAR NAME="Skin_Root">otto.png" border="0" title="<TMPL_VAR NAME="Localize_tip_Footer_HomePage">" alt="<TMPL_VAR NAME="Localize_tip_Footer_HomePage">" /></a>
             <br />
             <span title="<TMPL_VAR NAME="Localize_tip_Footer_Version">"><TMPL_VAR NAME="Common_Bottom_Version"></span>
             <br />
             <span title="<TMPL_VAR NAME="Localize_tip_Footer_Login">">(<TMPL_VAR NAME="Common_Bottom_Date"> - <TMPL_VAR NAME="Common_Bottom_LastLogin">)</span>
         </td>
-        <td class="footerBody">
+        <td class="footerBody" width="30%">
             <a class="bottomLink" href="http://getpopfile.org/wiki/<TMPL_VAR NAME="Localize_RequestFeatureLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_RFE">">
                 <TMPL_VAR NAME="Localize_Footer_RequestFeature"></a>
             <br />
