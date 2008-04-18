@@ -791,7 +791,7 @@ sub validate_item
         }
 
         $status_message =~ s/\n$// if ( defined( $status_message ) );
-        $error_message =~ s/\n// if ( defined( $error_message) );
+        $error_message =~ s/\n$// if ( defined( $error_message) );
 
         return( $status_message, $error_message );
     }
@@ -835,7 +835,7 @@ sub validate_item
         }
 
         $status_message =~ s/\n$// if ( defined( $status_message ) );
-        $error_message =~ s/\n// if ( defined( $error_message) );
+        $error_message =~ s/\n$// if ( defined( $error_message) );
 
         return( $status_message, $error_message );
     }
