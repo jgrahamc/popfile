@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2006 John Graham-Cumming
+# Copyright (c) 2001-2008 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -18,13 +18,20 @@
 
 # Identify the language and character set used for the interface
 LanguageCode                            de
-LanguageCharset                         ISO-8859-1
-LanguageDirection                       ltr
+
+
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          de
 
+
+
+
+
+
+
 # Common words that are used on their own all over the interface
+Account									Konto
 Apply                                   Anwenden
 ApplyChanges                            Änderungen übernehmen
 On                                      Ein
@@ -170,8 +177,25 @@ Configuration_SOCKSPort                 SOCKS V Proxy Port
 Configuration_SOCKSPortUpdate           SOCKS V Proxy Port geändert auf %s
 Configuration_SOCKSServerUpdate         SOCKS V Proxy Host geändert auf %s
 Configuration_Fields                    Spalten im Verlauf
-Configuration_Hide_Bar                  Konfigurationsleiste ausblenden
-Configuration_Show_Bar                  Konfigurationsleites anzeigen
+Configuration_ChangePassword            Passwort &auml;ndern
+Configuration_OldPassword               Alt
+Configuration_NewPassword               Neu
+Configuration_ConfirmPassword           Wiederholung
+Configuration_Password_Mismatch         Das neue Passwort muss in den Eingabefeldern "Neu" und "Wiederholung" &uuml;bereinstimmen
+Configuration_Password_Bad              Das alte Passwort war falsch
+Configuration_Password_Fail             Neues Passwort konnte nicht gesetzt werden
+Configuration_Set_Password              Das neue Passwort wurde gesetzt
+Configuration_ConfigBar                 Konfigurationszeile
+Configuration_Logger_Level0             Niedrig
+Configuration_Logger_Level1             Mittle
+Configuration_Logger_Level2             Hoch
+Configuration_Logger_Level              Logger Level:
+Configuration_LoggerOutputUpdate        Die momentane Loggerausgabe : '%s'
+Configuration_Logger_LevelUpdate        Das momentane Logger-Niveau : '%s'
+Configuration_CurrentSessions           Aktive Benutzer-Sessions
+Configuration_CurrentSessions_UserName  Benutzer
+Configuration_CurrentSessions_LastUsed  Letzter Zugriff
+Configuration_CurrentSessions_IdleTime  Keine Aktivit&auml;t seit
 
 Advanced_Error1                         '%s' ist bereits in der Liste der ignorierten Wörter
 Advanced_Error2                         Ignorierte Wörtern können nur alphanumerische, ., _, -, oder @ Zeichen enthalten
@@ -183,27 +207,53 @@ Advanced_Message1                       POPFile ignoriert die folgenden, häufig 
 Advanced_AddWord                        Wort hinzufügen
 Advanced_RemoveWord                     Wort löschen
 Advanced_AllParameters                  POPFile Konfigurationsparameter
+Advanced_AllParametersNotes             Dies ist eine vollst&auml;ndige Liste aller globalen POPFile Parameter
 Advanced_Parameter                      Parameter
 Advanced_Value                          Wert
 Advanced_Warning                        Dies ist eine komplette Liste aller Parameter Ihrer POPFile Konfiguration. Nur für fortgeschrittene Anwender: Sie können jeden Wert ändern und durch einen Klick auf "Ändern" bestätigen. Eingaben werden nicht auf Gültigkeit überprüft! Mehr Informationen finden Sie in der <a href="http://getpopfile.org/docs/OptionReference">online Dokumentation</a>.
 Advanced_ConfigFile                     Konfigurationsdatei:
+Advanced_SingleUserModeParameters       Parameter f&uuml;r den Einzelbenutzer-Modus
+Advanced_SingleUserModeParametersNotes  Dies ist eine vollst&auml;ndige Liste aller Parameter f&uuml;r den Einzelbenutzer-Modus.
 
 Users_Create                            Neuen Benutzer anlegen
+Users_Rename                            Bestehenden Benutzer umbenennen
 Users_Remove                            Bestehenden Benutzer löschen
 Users_Edit                              Benutzereinstellungen bearbeiten
-Users_CopyFrom                          Einstellungen übernehmen von Benutzer
-Users_RemoveUser                        Benutzer löschen
+Users_Change_Password                   Change/Initialize User's Password
+Users_CopyFrom                          Einstellungen &uuml;bernehmen von Benutzer
+Users_CopyMagnets                       Magnete kopieren
+Users_CopyCorpus                        Korpus des Benutzers kopieren (kann sehr lange dauern)
+Users_RenameUser                        Benutzer umbenennen
+Users_RenameUserNewName                 Neuer Name
+Users_RenameNotes                       Hinweis: Umbenennen des Benutzers wird das Passwort initialisieren
+Users_RemoveUser                        Benutzer l&ouml;schen
 Users_CreateUser                        Anlegen des neuen Bentuzers
 Users_EditUser                          Benutzer bearbeiten
+Users_ChangePasswordUser                Passwort für Benutzer ändern
+Users_ResetPassword                     Passwort initialisieren
 Users_Parameters                        Parameter
 Users_Created                           Benutzer '%s' wurde angelegt
 Users_Not_Created                       Benutzer '%s' konnte nicht angelegt werden
 Users_Created_And_Cloned                Benutzer '%s' wurde als Klon von '%s' angelegt
 Users_Not_Created_Exists                Benutzer '%s' existiert bereits
 Users_Created_Not_Cloned                Benutzer '%s' wurde angelegt, aber Übernahme der Einstellungen von '%s' schlug fehl
+Users_Renamed                           Bentuzer '%s' wurde in '%s' umbenannt (initiales Passwort '%s')
+Users_Rename_Failed_Exists              Bentuzer '%s' konnte nicht in '%s' umbenannt werde: Benutzer existiert bereits
+Users_Rename_Failed                     Benutzer '%s' konnte nicht umbenannt werden
 Users_Removed                           Benutzer '%s' wurde gelöscht
 Users_Removed_Failed                    Benutzer '%s' konnte nicht entfernt werden
 Users_Removed_Failed_Admin              Benutzer '%s' konnte nicht entfernt werden: zuerst die Administrationsrechte entfernen
+Users_Changed_Password                  Passwort von Benutzer '%s' wurde geändert
+Users_Change_Password_Failed            Passwort von Benutzer '%s' konnte nicht geändert werden
+Users_Change_Password_Failed_Mismatch   Passwort von Benutzer '%s' konnte nicht geändert werden: Das neue Passwort muss in beiden Eingabefeldern übereinstimmen
+Users_Reset_Password                    Passwort von Benutzer '%s' wurde initialisiert (initiales Passwort '%s')
+Users_Reset_Password_Failed             Passwort von Benutzer '%s' konnte nicht initialisiert werden
+Users_SingleUserMode                    Einzelbenutzer-Modus (POPFile Classic)
+Users_Accounts                          Zugehöriges POP3-Konto
+Users_AddAccount                        POP3-Konto hinzufügen (host:benutzer)
+Users_Bad_Account                       Der Name des neuen Kontos muss in der Form 'Host:Benutzer' eingegeben werden
+Users_Duplicate_Account                 Konto konnte nicht hinzugefügt werden, weil es einem anderen Benutzer zugeordnet ist
+Users_Failed_Account                    Konto konnte nicht hinzugefügt werden
 
 History_Filter                          &nbsp;(zeige nur Kategorie <font color="%s">%s</font>)
 History_FilterBy                        Filtern nach
