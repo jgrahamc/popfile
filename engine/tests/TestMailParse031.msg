@@ -1,7 +1,7 @@
 X-Auth-No:
 Return-Path: <phrekiesomeone@home.se>
 Received: from mail.nex.net.au not authenticated [207.35.102.29]
-	by smtp-send.myrealbox.com with NetMail SMTP Agent $Revision$ on Novell NetWare;
+	by smtp-send.myrealbox.com with NetMail SMTP Agent Revision on Novell NetWare;
 	Mon, 08 Jul 2002 05:57:14 -0600
 From: "Dr. Robert Ezenshtein" <phrekiesomeone@home.se>
 To: sirkaisomeone@myrealbox.com
