@@ -271,7 +271,7 @@ sub service
                 }
             }
 
-            close $client;
+            close $client if ( $self->name() ne 'pop3s' );
         }
     }
 

@@ -341,7 +341,7 @@ sub child__
                 my $md5hex = $md5->hexdigest;
                 $self->log_( 2, "digest='$md5hex'" );
 
-                my ($response, $ok) =                                # PROFILE BLOCK START
+                my ( $response, $ok ) =                              # PROFILE BLOCK START
                     $self->get_response_( $mail, $client,
                         "APOP $self->{apop_user__} $md5hex", 0, 1 ); # PROFILE BLOCK STOP
                 if ( ( $ok == 1 ) &&                                # PROFILE BLOCK START
