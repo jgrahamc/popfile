@@ -122,7 +122,7 @@ Footer_Wiki                             е╔енехесеєе╚
 
 Configuration_Error1                    ╢ш└┌дъ╩╕╗·д╧ 1 ╩╕╗·д└д▒д╦д╖д╞дпд└д╡ддбг
 Configuration_Error2                    ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣═╤е▌б╝е╚╚╓╣цд╧ 1 длдщ 65535 д▐д╟д╦д╖д╞дпд└д╡ддбг
-Configuration_Error3                    POP3 е▌б╝е╚╚╓╣цд╧ 1 длдщ 65535 д▐д╟д╦д╖д╞дпд└д╡ддбг
+Configuration_Error3                    POP3/POP3S е▌б╝е╚╚╓╣цд╧ 1 длдщ 65535 д▐д╟д╦д╖д╞дпд└д╡ддбг
 Configuration_Error4                    1 е┌б╝е╕д╦╔╜╝ид╣дыесб╝еыд╬┐Їд╧ 1 длдщ 1000 д▐д╟д╦д╖д╞дпд└д╡ддбг
 Configuration_Error5                    ═·╬ЄдЄ╗─д╣╞№┐Їд╧ 1 длдщ 366 д▐д╟д╦д╖д╞дпд└д╡ддбг
 Configuration_Error6                    TCP е│е═епе╖ечеєе┐едеревеже╚д╬╔├┐Їд╧ 10 длдщ 300 д╦д╖д╞дпд└д╡ддбг
@@ -130,6 +130,8 @@ Configuration_Error7                    XML RPC е▌б╝е╚╚╓╣цд╧ 1 длдщ 65535 д▐д╟д╦
 Configuration_Error8                    SOCKS V е╫еэене╖д╬е▌б╝е╚╚╓╣цд╧ 1 длдщ 65535 д▐д╟д╦д╖д╞дпд└д╡ддбг
 Configuration_POP3Port                  POP3 е▌б╝е╚╚╓╣ц
 Configuration_POP3Update                POP3 е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
+Configuration_POP3SPort                 POP3S е▌б╝е╚╚╓╣ц
+Configuration_POP3SUpdate               POP3S е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Configuration_XMLRPCUpdate              XML-RPC е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Configuration_XMLRPCPort                XML-RPC е▌б╝е╚╚╓╣ц
 Configuration_SMTPPort                  SMTP е▌б╝е╚╚╓╣ц
@@ -137,14 +139,29 @@ Configuration_SMTPUpdate                SMTP е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бг
 Configuration_NNTPPort                  NNTP е▌б╝е╚╚╓╣ц
 Configuration_NNTPUpdate                NNTP е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Configuration_POPFork                   POP3 ╞▒╗■└▄┬│д╬╡Ў▓─
+Configuration_POP3SFork                 POP3S ╞▒╗■└▄┬│д╬╡Ў▓─
 Configuration_SMTPFork                  SMTP ╞▒╗■└▄┬│д╬╡Ў▓─
 Configuration_NNTPFork                  NNTP ╞▒╗■└▄┬│д╬╡Ў▓─
+Configuration_POPForkEnabled            POP3 е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓═н╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
+Configuration_POP3SForkEnabled          POP3S (POP3 over SSL) е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓═н╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
+Configuration_SMTPForkEnabled           SMTP е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓═н╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
+Configuration_NNTPForkEnabled           NNTP е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓═н╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
+Configuration_POPForkDisabled           POP3 е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓╠╡╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
+Configuration_POP3SForkDisabled         POP3S (POP3 over SSL) е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓╠╡╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
+Configuration_SMTPForkDisabled          SMTP е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓╠╡╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
+Configuration_NNTPForkDisabled          NNTP е╫еэене╖д╪д╬╞▒╗■└▄┬│дЄб╓╠╡╕·б╫д╦╩╤╣╣д╖д▐д╖д┐
 Configuration_POP3Separator             POP3 е█е╣е╚╠╛бве▌б╝е╚╚╓╣цбвецб╝е╢╠╛д╬╢ш└┌дъ╩╕╗·
 Configuration_NNTPSeparator             NNTP е█е╣е╚╠╛бве▌б╝е╚╚╓╣цбвецб╝е╢╠╛д╬╢ш└┌дъ╩╕╗·
 Configuration_POP3SepUpdate             POP3 ╢ш└┌дъ╩╕╗·дЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бг
 Configuration_NNTPSepUpdate             NNTP ╢ш└┌дъ╩╕╗·дЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бг
 Configuration_UI                        ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣═╤е▌б╝е╚╚╓╣ц
 Configuration_UIUpdate                  ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣═╤е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
+Configuration_UIHTTPS                   UI д╪д╬ SSL └▄┬│дЄ╝їд▒╞■дьды
+Configuration_UIHTTPSEnabled            ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣(UI) д╪д╬ SSL └▄┬│дЄб╓═н╕·б╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
+Configuration_UIHTTPSDisabled           ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣(UI) д╪д╬ SSL └▄┬│дЄб╓╠╡╕·б╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
+Configuration_UIHTTPSPort               ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣б╩SSLб╦═╤е▌б╝е╚╚╓╣ц
+Configuration_UIUpdate                  ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣═╤е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
+Configuration_UIHTTPSPortUpdate         ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣б╩SSLб╦═╤е▌б╝е╚╚╓╣цдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Configuration_History                   1 е┌б╝е╕д╦╔╜╝ид╣дыесб╝еыд╬┐Ї
 Configuration_HistoryUpdate             1 е┌б╝е╕д╦╔╜╝ид╣дыесб╝еыд╬┐ЇдЄ б╓%sб╫д╦╩╤╣╣д╖д▐д╖д┐бг
 Configuration_Days                      ═·╬ЄдЄ╗─д╣╞№┐Ї
@@ -154,7 +171,7 @@ Configuration_Skins                     е╣енеє
 Configuration_SkinsChoose               е╣енеєдЄ┴к┬Єд╖д╞дпд└д╡дд
 Configuration_Language                  ╕└╕ь
 Configuration_LanguageChoose            ╕└╕ьдЄ┴к┬Єд╖д╞дпд└д╡дд
-Configuration_ListenPorts               е▌б╝е╚╚╓╣ц
+Configuration_ListenPorts               ете╕ехб╝еыд╬еке╫е╖ечеє
 Configuration_HistoryView               ═·╬Є
 Configuration_TCPTimeout                TCP е│е═епе╖ечеєе┐едеревеже╚
 Configuration_TCPTimeoutSecs            TCP е│е═епе╖ечеєе┐едеревеже╚д╬╔├┐Ї
@@ -321,12 +338,15 @@ Security_SMTPServerUpdate               SMTP е┴езб╝еєе╡б╝е╨б╝дЄ б╓%sб╫ д╦╩╤╣╣д╖д
 Security_SMTPPort                       SMTP е┴езб╝еєе▌б╝е╚╚╓╣ц
 Security_SMTPPortUpdate                 SMTP е┴езб╝еєе▌б╝е╚╚╓╣цдЄ б╓%sб╫ д╦╩╤╣╣д╖д▐д╖д┐бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Security_POP3                           еъетб╝е╚е▐е╖еєдлдщд╬ POP3 └▄┬│дЄ╟здсды (POPFile д╬║╞╡п╞░дм╔м═╫)
+Security_POP3S                          еъетб╝е╚е▐е╖еєдлдщд╬ POP3S └▄┬│дЄ╟здсды (POPFile д╬║╞╡п╞░дм╔м═╫)
 Security_SMTP                           еъетб╝е╚е▐е╖еєдлдщд╬ SMTP └▄┬│дЄ╟здсды (POPFile д╬║╞╡п╞░дм╔м═╫)
 Security_NNTP                           еъетб╝е╚е▐е╖еєдлдщд╬ NNTP └▄┬│дЄ╟здсды (POPFile д╬║╞╡п╞░дм╔м═╫)
 Security_UI                             еъетб╝е╚е▐е╖еєдлдщд╬ HTTP └▄┬│(ецб╝е╢б╝едеєе┐б╝е╒езб╝е╣д╬═°═╤)дЄ╟здсды (POPFile д╬║╞╡п╞░дм╔м═╫)
 Security_XMLRPC                         еъетб╝е╚е▐е╖еєдлдщд╬ XML-RPC └▄┬│дЄ╟здсды (POPFile д╬║╞╡п╞░дм╔м═╫)
 Security_StealthModeUpdatePOP3          POPFile POP3 е╫еэене╖ д╧┬╛д╬е▐е╖еєдлдщд╬└▄┬│дЄб╓╡ё╚▌б╫д╖д▐д╣бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Security_ServerModeUpdatePOP3           POPFile POP3 е╫еэене╖ д╧┬╛д╬е▐е╖еєдлдщд╬└▄┬│дЄб╓╡Ў▓─б╫д╖д▐д╣бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
+Security_StealthModeUpdatePOP3S         POPFile POP3S е╫еэене╖ д╧┬╛д╬е▐е╖еєдлдщд╬└▄┬│дЄб╓╡ё╚▌б╫д╖д▐д╣бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
+Security_ServerModeUpdatePOP3S          POPFile POP3S е╫еэене╖ д╧┬╛д╬е▐е╖еєдлдщд╬└▄┬│дЄб╓╡Ў▓─б╫д╖д▐д╣бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Security_StealthModeUpdateSMTP          POPFile SMTP е╫еэене╖ д╧┬╛д╬е▐е╖еєдлдщд╬└▄┬│дЄб╓╡ё╚▌б╫д╖д▐д╣бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Security_ServerModeUpdateSMTP           POPFile SMTP е╫еэене╖ д╧┬╛д╬е▐е╖еєдлдщд╬└▄┬│дЄб╓╡Ў▓─б╫д╖д▐д╣бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг
 Security_StealthModeUpdateNNTP          POPFile NNTP е╫еэене╖ д╧┬╛д╬е▐е╖еєдлдщд╬└▄┬│дЄб╓╡ё╚▌б╫д╖д▐д╣бгд│д╬╩╤╣╣д╧ POPFile дЄ║╞╡п╞░д╣дыд▐д╟═н╕·д╦д╩дъд▐д╗дєбг

@@ -114,25 +114,20 @@ sub start
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->register_configuration_item_( 'configuration',
+    $self->register_configuration_item_( 'configuration',   # PROFILE BLOCK START
                                          'smtp_fork_and_port',
                                          'smtp-configuration.thtml',
-                                         $self );
+                                         $self );           # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'security',
+    $self->register_configuration_item_( 'security',        # PROFILE BLOCK START
                                          'smtp_local',
                                          'smtp-security-local.thtml',
-                                         $self );
+                                         $self );           # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'chain',
+    $self->register_configuration_item_( 'chain',           # PROFILE BLOCK START
                                          'smtp_server',
                                          'smtp-chain-server.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'chain',
-                                         'smtp_server_port',
-                                         'smtp-chain-server-port.thtml',
-                                         $self );
+                                         $self );           # PROFILE BLOCK STOP
 
     if ( $self->config_( 'welcome_string' ) =~ /^SMTP POPFile \(v\d+\.\d+\.\d+\) welcome$/ ) { # PROFILE BLOCK START
         $self->config_( 'welcome_string', "SMTP POPFile ($self->{version_}) welcome" );        # PROFILE BLOCK STOP
@@ -234,13 +229,13 @@ sub child__
             next;
         }
 
-        if ( ( $command =~ /MAIL FROM:/i )    ||
+        if ( ( $command =~ /MAIL FROM:/i )    ||   # PROFILE BLOCK START
              ( $command =~ /RCPT TO:/i )      ||
              ( $command =~ /VRFY/i )          ||
              ( $command =~ /EXPN/i )          ||
              ( $command =~ /NOOP/i )          ||
              ( $command =~ /HELP/i )          ||
-             ( $command =~ /RSET/i ) ) {
+             ( $command =~ /RSET/i ) ) {           # PROFILE BLOCK STOP
             $self->smtp_echo_response_( $mail, $client, $command );
             next;
         }
@@ -350,9 +345,6 @@ sub configure_item
 
     if ( $name eq 'smtp_server' ) {
         $templ->param( 'smtp_chain_server' => $self->config_( 'chain_server' ) );
-    }
-
-    if ( $name eq 'smtp_server_port' ) {
         $templ->param( 'smtp_chain_port' => $self->config_( 'chain_port' ) );
     }
 
@@ -382,48 +374,71 @@ sub validate_item
 
         if ( defined($$form{update_smtp_configuration}) ) {
             if ( $$form{smtp_force_fork} ) {
-                $self->config_( 'force_fork', 1 );
+                if ( $self->config_( 'force_fork' ) ne 1 ) {
+                    $self->config_( 'force_fork', 1 );
+                    $status = $$language{Configuration_SMTPForkEnabled} . "\n";
+                }
             } else {
-                $self->config_( 'force_fork', 0 );
+                if ( $self->config_( 'force_fork' ) ne 0 ) {
+                    $self->config_( 'force_fork', 0 );
+                    $status = $$language{Configuration_SMTPForkDisabled} . "\n";
+                }
             }
         }
 
         if ( defined($$form{smtp_port}) ) {
-            if ( ( $$form{smtp_port} =~ /^\d+$/ ) && ( $$form{smtp_port} >= 1 ) && ( $$form{smtp_port} < 65536 ) ) {
-                $self->config_( 'port', $$form{smtp_port} );
-                $status = sprintf( $$language{Configuration_SMTPUpdate}, $self->config_( 'port' ) );
-             } else {
+            if ( ( $$form{smtp_port} =~ /^\d+$/ ) &&       # PROFILE BLOCK START
+                 ( $$form{smtp_port} >= 1 ) &&
+                 ( $$form{smtp_port} < 65536 ) ) {         # PROFILE BLOCK STOP
+                if ( $self->config_( 'port' ) ne $$form{smtp_port} ) {
+                    $self->config_( 'port', $$form{smtp_port} );
+                    $status .= sprintf(                    # PROFILE BLOCK START
+                            $$language{Configuration_SMTPUpdate},
+                            $self->config_( 'port' ) );    # PROFILE BLOCK STOP
+                }
+            } else {
                 $error = $$language{Configuration_Error3};
-             }
+            }
         }
         return( $status, $error );
     }
 
     if ( $name eq 'smtp_local' ) {
         if ( $form->{serveropt_smtp} ) {
-            $self->config_( 'local', 0 );
-            $status = $$language{Security_ServerModeUpdateSMTP};
+            if ( $self->config_( 'local' ) ne 0 ) {
+                $self->config_( 'local', 0 );
+                $status = $$language{Security_ServerModeUpdateSMTP};
+            }
         } else {
-            $self->config_( 'local', 1 );
-            $status = $$language{Security_StealthModeUpdateSMTP};
+            if ( $self->config_( 'local' ) ne 1 ) {
+                $self->config_( 'local', 1 );
+                $status = $$language{Security_StealthModeUpdateSMTP};
+            }
         }
         return ( $status, $error );
     }
 
     if ( $name eq 'smtp_server' ) {
         if ( defined $$form{smtp_chain_server} ) {
-            $self->config_( 'chain_server', $$form{smtp_chain_server} );
-            $status = sprintf( $$language{Security_SMTPServerUpdate}, $self->config_( 'chain_server' ) );
+            if ( $self->config_( 'chain_server' ) ne $$form{smtp_chain_server} ) {
+                $self->config_( 'chain_server', $$form{smtp_chain_server} );
+                $status = sprintf(                                 # PROFILE BLOCK START
+                        $$language{Security_SMTPServerUpdate},
+                        $self->config_( 'chain_server' ) ) . "\n"; # PROFILE BLOCK STOP
+            }
         }
-        return( $status, $error );
-    }
 
-    if ( $name eq 'smtp_server_port' ) {
         if ( defined $$form{smtp_chain_server_port} ) {
 
-            if ( ( $$form{smtp_chain_server_port} >= 1 ) && ( $$form{smtp_chain_server_port} < 65536 ) ) {
-                $self->config_( 'chain_port', $$form{smtp_chain_server_port} );
-                $status = sprintf( $$language{Security_SMTPPortUpdate}, $self->config_( 'chain_port' ) )
+            if ( ( $$form{smtp_chain_server_port} =~ /^\d+$/ ) && # PROFILE BLOCK START
+                 ( $$form{smtp_chain_server_port} >= 1 ) &&
+                 ( $$form{smtp_chain_server_port} < 65536 ) ) {   # PROFILE BLOCK STOP
+                if ( $self->config_( 'chain_port' ) ne $$form{smtp_chain_server_port} ) {
+                    $self->config_( 'chain_port', $$form{smtp_chain_server_port} );
+                    $status .= sprintf(                       # PROFILE BLOCK START
+                            $$language{Security_SMTPPortUpdate},
+                            $self->config_( 'chain_port' ) ); # PROFILE BLOCK STOP
+                }
             } else {
                 $error = $$language{Security_Error1};
             }
@@ -435,5 +450,3 @@ sub validate_item
 }
 
 1;
-
-

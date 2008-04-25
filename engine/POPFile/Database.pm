@@ -174,10 +174,10 @@ sub backup_database__
     # If database backup is turned on and we are using SQLite then
     # backup the database by copying it
 
-    if ( ( $self->config_( 'sqlite_tweaks' ) & 2 ) &&
-         $self->{db_is_sqlite__} ) {
+    if ( ( $self->config_( 'sqlite_tweaks' ) & 2 ) && # PROFILE BLOCK START
+         $self->{db_is_sqlite__} ) {                  # PROFILE BLOCK STOP
         if ( !copy( $self->{db_name__}, $self->{db_name__} . ".backup" ) ) {
-	    $self->log_( 0, "Failed to backup database ".$self->{db_name__} );
+            $self->log_( 0, "Failed to backup database ".$self->{db_name__} );
         }
     }
 }
@@ -197,8 +197,8 @@ sub tweak_sqlite
 {
     my ( $self, $tweak, $state, $db ) = @_;
 
-    if ( $self->{db_is_sqlite__} &&
-         ( $self->config_( 'sqlite_tweaks' ) & $tweak ) ) {
+    if ( $self->{db_is_sqlite__} &&                         # PROFILE BLOCK START
+         ( $self->config_( 'sqlite_tweaks' ) & $tweak ) ) { # PROFILE BLOCK STOP
 
         $self->log_( 1, "Performing tweak $tweak to $state" );
 
@@ -349,8 +349,8 @@ sub db_connect_helper__
 
         foreach my $table (@tables) {
             if ( $table eq 'popfile' ) {
-                my @row = $db->selectrow_array(
-                   'select version from popfile;' );
+                my @row = $db->selectrow_array(      # PROFILE BLOCK START
+                   'select version from popfile;' ); # PROFILE BLOCK STOP
 
                 if ( $#row == 0 ) {
                     $need_upgrade = ( $row[0] != $version );

@@ -94,8 +94,8 @@ sub initialize
 
     # The welcome string from the proxy is configurable
 
-    $self->config_( 'welcome_string',
-        "NNTP POPFile ($self->{version_}) server ready" );
+    $self->config_( 'welcome_string',                      # PROFILE BLOCK START
+        "NNTP POPFile ($self->{version_}) server ready" ); # PROFILE BLOCK STOP
 
     if ( !$self->SUPER::initialize() ) {
         return 0;
@@ -126,15 +126,15 @@ sub start
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->register_configuration_item_( 'configuration',
+    $self->register_configuration_item_( 'configuration',   # PROFILE BLOCK START
                                          'nntp_config',
                                          'nntp-configuration.thtml',
-                                         $self );
+                                         $self );           # PROFILE BLOCK STOP
     
-    $self->register_configuration_item_( 'security',
+    $self->register_configuration_item_( 'security',        # PROFILE BLOCK START
                                          'nntp_local',
                                          'nntp-security-local.thtml',
-                                         $self );                                         
+                                         $self );           # PROFILE BLOCK STOP 
 
     if ( $self->config_( 'welcome_string' ) =~ /^NNTP POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK START
         $self->config_( 'welcome_string', "NNTP POPFile ($self->{version_}) server ready" );        # PROFILE BLOCK STOP
@@ -197,8 +197,8 @@ sub child__
 
         if ( $command =~ /^ *QUIT/i ) {
             if ( $news )  {
-                last if ( $self->echo_response_( $news, $client, $command ) ==
-                         2 );
+                last if ( $self->echo_response_( $news, $client, $command ) == # PROFILE BLOCK START
+                         2 );                                                  # PROFILE BLOCK STOP
                 close $news;
             } else {
                 $self->tee_( $client, "205 goodbye$eol" );
@@ -214,8 +214,8 @@ sub child__
             # change your kludged username appropriately (syntax would
             # then be server[:port][/username])
 
-            my $user_command = '^ *AUTHINFO USER ([^:]+)(:([\d]{1,5}))?(\\' .
-                $self->config_( 'separator' ) . '(.+))?';
+            my $user_command = '^ *AUTHINFO USER ([^:]+)(:([\d]{1,5}))?(\\' . # PROFILE BLOCK START
+                $self->config_( 'separator' ) . '(.+))?';                     # PROFILE BLOCK STOP
 
             if ( $command =~ /$user_command/i ) {
                 my $server = $1;
@@ -226,8 +226,8 @@ sub child__
                 my $username = $5;
 
                 if ( $server ne '' )  {
-                    if ( $news = $self->verify_connected_( $news, $client,
-                        $server, $port || 119 ) )  {
+                    if ( $news = $self->verify_connected_( $news, $client, # PROFILE BLOCK START
+                        $server, $port || 119 ) )  {                       # PROFILE BLOCK STOP
                         if (defined $username) {
 
                             # Pass through the AUTHINFO command with
@@ -235,8 +235,8 @@ sub child__
                             # one is defined, and send the reply
                             # straight to the client
 
-                            $self->get_response_( $news, $client,
-                                'AUTHINFO USER ' . $username );
+                            $self->get_response_( $news, $client, # PROFILE BLOCK START
+                                'AUTHINFO USER ' . $username );   # PROFILE BLOCK STOP
                             $connection_state = "password needed";
                         } else {
 
@@ -249,8 +249,8 @@ sub child__
                         last;
                     }
                 } else {
-                    $self->tee_( $client,
-                        "482 Authentication rejected server name not specified in AUTHINFO USER command$eol" );
+                    $self->tee_( $client,                                                                       # PROFILE BLOCK START
+                        "482 Authentication rejected server name not specified in AUTHINFO USER command$eol" ); # PROFILE BLOCK STOP
                     last;
                 }
 
@@ -265,8 +265,8 @@ sub child__
             }
         } elsif ( $connection_state eq "password needed" ) {
             if ($command =~ /^ *AUTHINFO PASS (.*)/i) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client,
-                                            $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, # PROFILE BLOCK START
+                                            $command);                        # PROFILE BLOCK STOP
 
                 if ($response =~ /^281 .*/) {
                     $connection_state = "connected";
@@ -299,14 +299,14 @@ sub child__
             # insert classification headers.
 
             if ( $command =~ /^ *ARTICLE (.*)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client,
-                                            $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, # PROFILE BLOCK START
+                                            $command);                        # PROFILE BLOCK STOP
                 if ( $response =~ /^220 (.*) (.*)$/i) {
                     $count += 1;
 
                     my ( $class, $history_file ) =
-                        $self->classifier_()->classify_and_modify( $session,
-                            $news, $client, 0, '', 0 );
+                        $self->classifier_()->classify_and_modify( $session, # PROFILE BLOCK START
+                            $news, $client, 0, '', 0 );                      # PROFILE BLOCK STOP
                 }
 
                 next;
@@ -331,8 +331,8 @@ sub child__
             # Exceptions to 200 code above
 
             if ( $ command =~ /^ *(HELP)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client,
-                                            $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, # PROFILE BLOCK START
+                                            $command);                        # PROFILE BLOCK STOP
                 if ( $response =~ /^1\d\d/ ) {
                     $self->echo_to_dot_( $news, $client, 0 );
                 }
@@ -350,8 +350,8 @@ sub child__
             # Commands followed by multi-line client response
 
             if ( $command =~ /^ *(IHAVE|POST|XRELPIC)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client,
-                                            $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, # PROFILE BLOCK START
+                                            $command);                        # PROFILE BLOCK STOP
 
                 # 3xx (300) series response indicates multi-line text
                 # should be sent, up to .crlf
@@ -453,30 +453,44 @@ sub validate_item
     if ( $name eq 'nntp_config' ) {
         
         if ( defined $$form{nntp_port} ) {
-            if ( ( $$form{nntp_port} =~ /^\d+$/ ) && ( $$form{nntp_port} >= 1 ) && ( $$form{nntp_port} < 65536 ) ) {
-                $self->config_( 'port', $$form{nntp_port} );
-                $status = sprintf $$language{Configuration_NNTPUpdate}, $self->config_( 'port' );
-             } else {
-                $error = $$language{Configuration_Error3};
-             }
+            if ( ( $$form{nntp_port} =~ /^\d+$/ ) &&       # PROFILE BLOCK START
+                 ( $$form{nntp_port} >= 1 ) &&
+                 ( $$form{nntp_port} < 65536 ) ) {         # PROFILE BLOCK STOP
+                if ( $self->config_( 'port' ) ne $$form{nntp_port} ) {
+                    $self->config_( 'port', $$form{nntp_port} );
+                    $status = sprintf(                         # PROFILE BLOCK START
+                            $$language{Configuration_NNTPUpdate},
+                            $self->config_( 'port' ) ) . "\n"; # PROFILE BLOCK STOP
+                }
+            } else {
+                $error = $$language{Configuration_Error3} . "\n";
+            }
         }
 
         if ( defined $$form{nntp_separator} ) {
             if ( length($$form{nntp_separator}) == 1 ) {
-                $self->config_( 'separator', $$form{nntp_separator} );
-                $status .= "\n" if ( defined( $status ) );
-                $status .= sprintf $$language{Configuration_NNTPSepUpdate}, $self->config_( 'separator' );
+                if ( $self->config_( 'separator' ) ne $$form{nntp_separator} ) {
+                    $self->config_( 'separator', $$form{nntp_separator} );
+                    $status .= sprintf(                             # PROFILE BLOCK START
+                            $$language{Configuration_NNTPSepUpdate},
+                            $self->config_( 'separator' ) ) . "\n"; # PROFILE BLOCK STOP
+                }
             } else {
-                $error .= "\n" if ( defined( $error ) );
-                $error .= $$language{Configuration_Error1};
+                $error .= $$language{Configuration_Error1} . "\n";
             }
         }
 
         if ( defined $$form{update_nntp_configuration} ) {
             if ( $$form{nntp_force_fork} ) {
-                $self->config_( 'force_fork', 1 );
+                if ( $self->config_( 'force_fork' ) ne 1 ) {
+                    $self->config_( 'force_fork', 1 );
+                    $status .= $$language{Configuration_NNTPForkEnabled};
+                }
             } else {
-                $self->config_( 'force_fork', 0 );
+                if ( $self->config_( 'force_fork' ) ne 0 ) {
+                    $self->config_( 'force_fork', 0 );
+                    $status .= $$language{Configuration_NNTPForkDisabled};
+                }
             }
         }
         
@@ -485,11 +499,15 @@ sub validate_item
     
     if ( $name eq 'nntp_local' ) {
         if ( $form->{serveropt_nntp} ) {
-            $self->config_( 'local', 0 );
-            $status = $$language{Security_ServerModeUpdateNNTP};
+            if ( $self->config_( 'local' ) ne 0 ) {
+                $self->config_( 'local', 0 );
+                $status = $$language{Security_ServerModeUpdateNNTP};
+            }
         } else {
-            $self->config_( 'local', 1 );
-            $status = $$language{Security_StealthModeUpdateNNTP};
+            if ( $self->config_( 'local' ) ne 1 ) {
+                $self->config_( 'local', 1 );
+                $status = $$language{Security_StealthModeUpdateNNTP};
+            }
         }
         return( $status, $error );
     }    

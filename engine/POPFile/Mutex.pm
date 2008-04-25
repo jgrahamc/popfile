@@ -52,11 +52,13 @@ sub new
 #   Returns 1 if it manages to grab the mutex (and will block if necessary)
 #   and 0 if it fails.
 #
+#   $self                     Reference to this object
+#   $timeout                  Timeout in seconds to wait (undef = infinite)
+#
 #----------------------------------------------------------------------------
 sub acquire
 {
-    my ( $self,             # Reference to this object
-         $timeout ) = @_;   # Timeout in seconds to wait (undef = infinite)
+    my ( $self, $timeout ) = @_;
 
     # If acquire() has been called without a matching release() then
     # fail at once

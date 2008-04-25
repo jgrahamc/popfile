@@ -43,9 +43,9 @@ my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])"; #extended ksc
 
 # These are used for Japanese support
 
-my %encoding_candidates = (
+my %encoding_candidates = (                       # PROFILE BLOCK START
     'Nihongo' => [ 'cp932', 'euc-jp', '7bit-jis' ]
-);
+);                                                # PROFILE BLOCK STOP
 
 my $ascii = '[\x00-\x7F]'; # ASCII chars
 my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; # 2bytes EUC-JP chars
@@ -78,7 +78,7 @@ my $euc_jp_katakana = '(?:(?:\xA5[\xA1-\xF6])+(?:\xA1[\xA6\xBC\xB3\xB4])*)+'; # 
 my $euc_jp_hkatakana = '(?:\x8E[\xA6-\xDF])+'; # One or more Half-width Katakana characters
 my $euc_jp_kanji = '[\xB0-\xF4][\xA1-\xFE](?:[\xB0-\xF4][\xA1-\xFE]|\xA1\xB9)?'; # One or two Kanji characters
 
-my $euc_jp_word = '(' . 
+my $euc_jp_word = '(' .        # PROFILE BLOCK START
     $euc_jp_alphanum . '|' . 
     $euc_jp_hiragana . '|' . 
     $euc_jp_katakana . '|' . 
@@ -86,7 +86,7 @@ my $euc_jp_word = '(' .
     $euc_jp_kanji . '|' . 
     $euc_jp_symbol . '|' . 
     $ascii . '+|' .
-    $three_bytes_euc_jp . ')';
+    $three_bytes_euc_jp . ')'; # PROFILE BLOCK STOP
 
 # HTML entity mapping to character codes, this maps things like &amp;
 # to their corresponding character code
@@ -283,12 +283,12 @@ sub get_color__
         if ( defined( $id ) ) {
             my @buckets = $self->{bayes__}->get_buckets( $self->{color__} );
 
-            return $self->{bayes__}->get_bucket_color( $self->{color__},
+            return $self->{bayes__}->get_bucket_color( $self->{color__}, # PROFILE BLOCK START
                 $self->{bayes__}->get_top_bucket__(
                     $self->{color_userid__},
                     $id,
                     $self->{color_matrix__},
-                    \@buckets ) );
+                    \@buckets ) );                                       # PROFILE BLOCK STOP
         } else {
             return 'black';
         }
@@ -350,8 +350,8 @@ sub compute_html_color_distance
     # from hh hh hh format
 
     if ( $self->{htmlfontcolor__} ne '' && $self->{htmlbackcolor__} ne '' ) {
-        $self->{htmlcolordistance__} = $self->compute_rgb_distance(
-            $self->{htmlfontcolor__}, $self->{htmlbackcolor__} );
+        $self->{htmlcolordistance__} = $self->compute_rgb_distance( # PROFILE BLOCK START
+            $self->{htmlfontcolor__}, $self->{htmlbackcolor__} );   # PROFILE BLOCK STOP
     }
 }
 
@@ -612,7 +612,7 @@ sub add_line
                     # chars. Replace entities with blanks.
 
                     if ( $self->{lang__} eq 'Korean' || $self->{lang__} eq 'Nihongo' ) {
-                            $to = ' ';
+                        $to = ' ';
                     } else {
                         $to = chr($to);
                     }
@@ -626,9 +626,9 @@ sub add_line
 
                 # Don't decode odd (nonprintable) characters or < >'s.
 
-                if ( ( ( $2 < 255 ) && ( $2 > 63 ) ) ||
+                if ( ( ( $2 < 255 ) && ( $2 > 63 ) ) || # PROFILE BLOCK START
                      ( $2 == 61 ) ||
-                     ( ( $2 < 60 ) && ( $2 > 31 ) ) ) {
+                     ( ( $2 < 60 ) && ( $2 > 31 ) ) ) { # PROFILE BLOCK STOP
                     my $from = $1;
                     my $to   = chr($2);
 
@@ -636,8 +636,8 @@ sub add_line
                         $line       =~ s/$from/$to/g;
                         $self->{ut__} =~ s/$from/$to/g;
                         print "$from -> $to\n" if $self->{debug__};
-                        $self->update_pseudoword( 'html',
-                                   'numericentity', $encoded, $from );
+                        $self->update_pseudoword( 'html',              # PROFILE BLOCK START
+                                   'numericentity', $encoded, $from ); # PROFILE BLOCK STOP
                     }
                 }
             }
@@ -907,8 +907,8 @@ sub update_tag
 
             if ($value =~ /^mailto:/i) {
                 if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/\" \t]|$)/i )  {
-                   update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
-                   add_url( $self, $2, $encoded, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
+                    update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
+                    add_url( $self, $2, $encoded, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
                 }
             } else {
 
@@ -925,7 +925,7 @@ sub update_tag
         if ( $attribute =~ /^alt$/i && $tag =~ /^img$/i )  {
             add_line($self, $value, $encoded, '');
             next;
-         }
+        }
 
         # Tags with working background attributes
 
@@ -1500,8 +1500,8 @@ sub parse_file
     while (<MSG>) {
         $size_read += length($_);
         $self->parse_line( $_ );
-        if ( ( $max_size > 0 ) &&
-             ( $size_read > $max_size ) ) {
+        if ( ( $max_size > 0 ) &&           # PROFILE BLOCK START
+             ( $size_read > $max_size ) ) { # PROFILE BLOCK STOP
             last;
         }
     }
@@ -1782,8 +1782,8 @@ sub parse_line
 
             # If we are in a mime document then spot the boundaries
 
-            if ( ( $self->{mime__} ne '' ) && ( $line =~
-            /^\-\-($self->{mime__})(\-\-)?/ ) ) {
+            if ( ( $self->{mime__} ne '' ) &&                     # PROFILE BLOCK START
+                 ( $line =~ /^\-\-($self->{mime__})(\-\-)?/ ) ) { # PROFILE BLOCK STOP
 
                 # approach each mime part with fresh eyes
 
@@ -1947,8 +1947,8 @@ sub decode_string
         my ($pre, $atom, $encoding, $value);
         ($pre, $atom, $charset, $encoding, $value) = ($1, $2, $3, $4, $5);
 
-        $output .= $pre unless ($last_is_encoded && defined($atom) # Per RFC 2047 section 6.2
-                                    && $pre =~ /^[\t ]+$/);
+        $output .= $pre unless ($last_is_encoded && defined($atom) # PROFILE BLOCK START
+                                    && $pre =~ /^[\t ]+$/);        # PROFILE BLOCK STOP( Per RFC 2047 section 6.2 )
 
         if (defined($atom)) {
             if ($encoding eq "B" || $encoding eq "b") {
@@ -2043,7 +2043,7 @@ sub parse_header
     # Check the encoding type in all RFC 2047 encoded headers
 
     if ( $argument =~ /=\?([^\r\n\t ]{1,40})\?(Q|B)/i ) {
-            update_word( $self, $1, 0, '', '', 'charset' );
+        update_word( $self, $1, 0, '', '', 'charset' );
     }
 
     # Handle the From, To and Cc headers and extract email addresses
@@ -2719,8 +2719,8 @@ sub init_mecab
     # Initialize MeCab (-F %M\s -U %M\s -E \n is passed to MeCab as argument).
     # Insert white spaces after words.
 
-    $self->{nihongo_parser__}{obj_mecab} 
-        = MeCab::Tagger->new('-F %M\s -U %M\s -E \n');
+    $self->{nihongo_parser__}{obj_mecab}               # PROFILE BLOCK START
+        = MeCab::Tagger->new('-F %M\s -U %M\s -E \n'); # PROFILE BLOCK STOP
 }
 
 # ----------------------------------------------------------------------------

@@ -122,13 +122,26 @@ sub start
 
     # Open the socket used to receive request for proxy service
 
-    $self->{server__} = IO::Socket::INET->new( Proto     => 'tcp', # PROFILE BLOCK START
+    my $name = $self->name();
+
+    if ( $name eq 'pop3s' ) {
+        require IO::Socket::SSL;
+#        $IO::Socket::SSL::DEBUG = 4;
+        $self->{server__} = IO::Socket::SSL->new( Proto     => 'tcp', # PROFILE BLOCK START
+                                    ($self->config_( 'local' ) || 0) == 1 ? (LocalAddr => 'localhost') : (),
+                                    LocalPort => $self->config_( 'port' ),
+                                    Listen    => SOMAXCONN,
+                                    SSL_cert_file => $self->get_user_path_( $self->global_config_( 'cert_file' ) ),
+                                    SSL_key_file => $self->get_user_path_( $self->global_config_( 'key_file' ) ),
+                                    SSL_ca_file => $self->get_user_path_( $self->global_config_( 'ca_file' ) ),
+                                    Reuse     => 1 ); # PROFILE BLOCK STOP
+    } else {
+        $self->{server__} = IO::Socket::INET->new( Proto     => 'tcp', # PROFILE BLOCK START
                                     ($self->config_( 'local' ) || 0) == 1 ? (LocalAddr => 'localhost') : (),
                                     LocalPort => $self->config_( 'port' ),
                                     Listen    => SOMAXCONN,
                                     Reuse     => 1 ); # PROFILE BLOCK STOP
-
-    my $name = $self->name();
+    }
 
     if ( !defined( $self->{server__} ) ) {
         my $port = $self->config_( 'port' );
@@ -250,7 +263,7 @@ sub service
                             &{$self->{childexit_}}(0)
                         }
                     }
-            } else {
+                } else {
                     pipe my $reader, my $writer;
 
                     $self->{child_}( $self, $client, $self->{api_session__} );
@@ -282,7 +295,7 @@ sub forked
 
     $self->SUPER::forked( $writer );
 
-    close $self->{server__};
+    close $self->{server__} if ( $self->name() ne 'pop3s' );
 }
 
 # ----------------------------------------------------------------------------
@@ -452,7 +465,7 @@ sub echo_response_
     if ( $ok == 1 ) {
         if ( $response =~ /$self->{good_response_}/ ) {
             return 0;
-    } else {
+        } else {
             return 1;
         }
     } else {
@@ -476,10 +489,10 @@ sub get_session_key_
 {
     my ( $self, $token ) = @_;
 
-    return $self->classifier_()->get_session_key_from_token(
+    return $self->classifier_()->get_session_key_from_token( # PROFILE BLOCK START
                                      $self->{api_session__},
                                      $self->name(),
-                                     $token );
+                                     $token );               # PROFILE BLOCK STOP
 }
 
 # ----------------------------------------------------------------------------
@@ -532,9 +545,9 @@ sub verify_connected_
                     ProxyPort => $self->config_( 'socks_port' ),
                     ConnectAddr  => $hostname,
                     ConnectPort  => $port ); # PROFILE BLOCK STOP
-        $self->log_( 0, "Attempting to connect to socks server at " 
+        $self->log_( 0, "Attempting to connect to socks server at " # PROFILE BLOCK START
                     . $self->config_( 'socks_server' ) . ":" 
-                    . ProxyPort => $self->config_( 'socks_port' ) );
+                    . ProxyPort => $self->config_( 'socks_port' ) ); # PROFILE BLOCK STOP
     } else {
         if ( $ssl ) {
             require IO::Socket::SSL;
@@ -542,16 +555,16 @@ sub verify_connected_
                         Proto    => "tcp",
                         PeerAddr => $hostname,
                         PeerPort => $port ); # PROFILE BLOCK STOP
-            $self->log_( 0, "Attempting to connect to SSL server at " 
-                        . "$hostname:$port" );
-        
+            $self->log_( 0, "Attempting to connect to SSL server at " # PROFILE BLOCK START
+                        . "$hostname:$port" ); # PROFILE BLOCK STOP
+
         } else {
             $mail = IO::Socket::INET->new( # PROFILE BLOCK START
                         Proto    => "tcp",
                         PeerAddr => $hostname,
                         PeerPort => $port ); # PROFILE BLOCK STOP
-            $self->log_( 0, "Attempting to connect to POP server at " 
-                        . "$hostname:$port" );
+            $self->log_( 0, "Attempting to connect to POP server at " # PROFILE BLOCK START
+                        . "$hostname:$port" ); # PROFILE BLOCK STOP
         }
     }
 
@@ -662,18 +675,28 @@ sub validate_item
 
     if ( $name eq $me . "_socks_configuration" ) {
         if ( defined($$form{"$me" . "_socks_port"}) ) {
-            if ( ( $$form{"$me" . "_socks_port"} >= 1 ) && ( $$form{"$me" . "_socks_port"} < 65536 ) ) {
-                $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
-                $status = sprintf( $$language{Configuration_SOCKSPortUpdate}, $self->config_( 'socks_port' ) );
+            if ( ( $$form{"$me" . "_socks_port"} =~ /^\d+$/ ) && # PROFILE BLOCK START
+                 ( $$form{"$me" . "_socks_port"} >= 1 ) &&
+                 ( $$form{"$me" . "_socks_port"} < 65536 ) ) {   # PROFILE BLOCK STOP
+                if ( $self->config_( 'socks_port' ) ne $$form{"$me" . "_socks_port"} ) {
+                    $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
+                    $status = sprintf(                        # PROFILE BLOCK START
+                            $$language{Configuration_SOCKSPortUpdate},
+                            $self->config_( 'socks_port' ) ); # PROFILE BLOCK STOP
+                }
             } else {
                 $error = $$language{Configuration_Error8};
             }
         }
 
         if ( defined($$form{"$me" . "_socks_server"}) ) {
-            $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} );
-            $status .= "\n" if (defined $status);
-            $status .= sprintf( $$language{Configuration_SOCKSServerUpdate}, $self->config_( 'socks_server' ) );
+            if ( $self->config_( 'socks_server' ) ne $$form{"$me" . "_socks_server"} ) {
+                $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} );
+                $status .= "\n" if (defined $status);
+                $status .= sprintf(                         # PROFILE BLOCK START
+                        $$language{Configuration_SOCKSServerUpdate},
+                        $self->config_( 'socks_server' ) ); # PROFILE BLOCK STOP
+            }
         }
     }
 

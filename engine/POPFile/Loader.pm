@@ -171,9 +171,9 @@ sub CORE_loader_init
 
     # Parse just the --verbose command-line option
 
-    GetOptions( "verbose!" => \$self->{debug__},
+    GetOptions( "verbose!" => \$self->{debug__},          # PROFILE BLOCK START
                 "shutdown" => \$self->{shutdown__},
-                "quiet" => sub{ $self->{debug__} = 0 } );
+                "quiet" => sub{ $self->{debug__} = 0 } ); # PROFILE BLOCK STOP
 }
 
 #----------------------------------------------------------------------------

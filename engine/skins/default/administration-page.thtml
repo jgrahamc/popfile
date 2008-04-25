@@ -3,12 +3,14 @@
 
 <script type="text/javascript">
 function serverMode(state) {
+<TMPL_IF NAME="If_Javascript_OK">
     var d = document.forms;
     for (var i=0; i < d.length; i++) {
          for (var j=0; j < d[i].elements.length; j++)
               if (d[i].elements[j].name.substr(0,10) == "serveropt_")
                     d[i].elements[j].disabled = !state;
     }
+</TMPL_IF>
     return 0;
 }
 </script>
@@ -36,7 +38,7 @@ function serverMode(state) {
                             </label>
                             <br />
                             <div style="margin-left:1em;" class="adminAcceptRemote">
-                                <input type="checkbox" name="serveropt_html" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF> <TMPL_IF NAME="Security_If_Local_html"><TMPL_ELSE>checked="checked"</TMPL_IF>/>
+                                <input type="checkbox" name="serveropt_html" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="If_Javascript_OK"><TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF></TMPL_IF> <TMPL_IF NAME="Security_If_Local_html"><TMPL_ELSE>checked="checked"</TMPL_IF>/>
                                 <label class="administrationLabel" for="securityAcceptHTTP">
                                     <TMPL_VAR NAME="Localize_Security_UI">
                                 </label>
@@ -168,6 +170,20 @@ function serverMode(state) {
                 <input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port">" />
                 <br />
 
+                <br />
+                <input type="checkbox" id="configUIHTTPS" name="ui_https" value="1" <TMPL_IF NAME="Configuration_UI_HTTPS">checked</TMPL_IF>>
+                <label class="configurationLabel" for="configUIHTTPS">
+                    <TMPL_VAR NAME="Localize_Configuration_UIHTTPS">
+                </label>
+                <br />
+                <label class="configurationLabel" for="configUIHTTPSPort">
+                    <TMPL_VAR NAME="Localize_Configuration_UIHTTPSPort">:
+                </label>
+                <br />
+                <input name="ui_https_port" id="configUIHTTPSPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_HTTPS_Port">" />
+                <br />
+
+                <br />
                 <label class="configurationLabel" for="configTCPTimeout">
                     <TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:
                 </label>

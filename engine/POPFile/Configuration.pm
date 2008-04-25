@@ -157,6 +157,12 @@ sub initialize
 
     $self->global_config_( 'session_timeout', 1800 );
 
+    # Files used for the incoming SSL connections
+
+    $self->global_config_( 'cert_file', './certs/server-cert.pem' );
+    $self->global_config_( 'key_file',  './certs/server-key.pem'  );
+    $self->global_config_( 'ca_file',   './certs/ca.pem'          );
+
     # Register for the TICKD message which is sent hourly by the
     # Logger module.   We use this to hourly save the configuration file
     # so that POPFile's configuration is saved in case of a hard crash.
@@ -199,9 +205,9 @@ sub start
         $self->log_( 0, "Failed to create directory " . $self->global_config_( 'piddir' ) );
     }
 
-    $self->{pid_file__} = $self->get_user_path( $self->path_join(
+    $self->{pid_file__} = $self->get_user_path( $self->path_join(          # PROFILE BLOCK START
                                                     $self->config_( 'piddir' ),
-                                                    'popfile.pid' ), 0 ) ;
+                                                    'popfile.pid' ), 0 ) ; # PROFILE BLOCK STOP
 
     if (defined($self->live_check_())) {
         return 0;
@@ -593,8 +599,8 @@ sub load_configuration
                 $parameter = $self->upgrade_parameter__($parameter);
 
                 if (defined($self->{configuration_parameters__}{$parameter})) {
-                    $self->{configuration_parameters__}{$parameter}{value} =
-                        $value;
+                    $self->{configuration_parameters__}{$parameter}{value} = # PROFILE BLOCK START
+                        $value;                                              # PROFILE BLOCK STOP
                 } else {
                     $self->{deprecated_parameters__}{$parameter} = $value;
                 }
@@ -677,9 +683,9 @@ sub path_join
 
     $sandbox = 1 if ( !defined( $sandbox ) );
 
-    if ( ( $right =~ /^\// ) ||
+    if ( ( $right =~ /^\// ) ||               # PROFILE BLOCK START
          ( $right =~ /^[A-Za-z]:[\/\\]/ ) ||
-         ( $right =~ /\\\\/ ) ) {
+         ( $right =~ /\\\\/ ) ) {             # PROFILE BLOCK STOP
         if ( $sandbox ) {
             $self->log_( 0, "Attempt to access path $right outside sandbox" );
             return undef;

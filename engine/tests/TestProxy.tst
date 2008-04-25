@@ -658,5 +658,6 @@ $sp->stop();
 $sp2->stop();
 
 #$b->stop();
+$POPFile->CORE_stop();
 
 1;

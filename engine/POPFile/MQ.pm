@@ -70,14 +70,14 @@ use POSIX ":sys_wait_h";
 
 # Messages are handled in this order.
 
-my %message_type_list = (
+my %message_type_list = ( # PROFILE BLOCK START
     'CREAT'     => 1,
     'LOGIN'     => 2,
     'UIREG'     => 3,
     'COMIT'     => 4,
     'TICKD'     => 5,
     'RELSE'     => 6,
-);
+);                        # PROFILE BLOCK STOP
 
 #----------------------------------------------------------------------------
 # new
@@ -135,8 +135,8 @@ sub service
 
     # Iterate through all the messages in all the queues
 
-    for my $type ( sort sort_message__
-                   keys %{$self->{queue__}} ) {
+    for my $type ( sort sort_message__          # PROFILE BLOCK START
+                   keys %{$self->{queue__}} ) { # PROFILE BLOCK STOP
 
         while ( my $ref = shift @{$self->{queue__}{$type}} ) {
             my @message = @$ref;
@@ -145,8 +145,8 @@ sub service
             $self->log_( 2, "Message $type ($flat) ready for delivery" );
 
             for my $waiter (@{$self->{waiters__}{$type}}) {
-                $self->log_( 2, "Delivering message $type ($flat) to " .
-                    $waiter->name() );
+                $self->log_( 2, "Delivering message $type ($flat) to " . # PROFILE BLOCK START
+                    $waiter->name() );                                   # PROFILE BLOCK STOP
 
                 $waiter->deliver( $type, @message );
             }

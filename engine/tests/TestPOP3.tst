@@ -181,8 +181,8 @@ $p->configure_item( 'pop3_configuration', $templ );
 $params = $templ->{params__};
 test_assert_equal( scalar( keys( %{$params} ) ), 3 );
 test_assert_equal( $templ->param( 'POP3_Configuration_If_Force_Fork' ), ( $p->config_( 'force_fork' ) == 1 ) );
-test_assert_equal( $templ->param( 'POP3_Configuration_Port'          ),   $p->config_( 'port'       ) );
-test_assert_equal( $templ->param( 'POP3_Configuration_Separator'     ),   $p->config_( 'separator'  ) );
+test_assert_equal( $templ->param( 'POP3_Configuration_Port'          ),  $p->config_( 'port'       ) );
+test_assert_equal( $templ->param( 'POP3_Configuration_Separator'     ),  $p->config_( 'separator'  ) );
 
 delete $templ->{params__};
 
@@ -262,7 +262,7 @@ $form->{pop3_port} = $port + 1;
 
 ($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
 
-test_assert_equal( $status, "pop3 port update " . ( $port + 1 ) );
+test_assert_equal( $status, "pop3 port update " . ( $port + 1 ) . "\n" );
 test_assert( !defined( $error ) );
 test_assert_equal( $p->config_('port'), $port + 1 );
 
@@ -273,7 +273,7 @@ $language->{Configuration_Error3} = "configuration error 3";
 
 ($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
 
-test_assert_equal( $error, "configuration error 3" );
+test_assert_equal( $error, "configuration error 3\n" );
 test_assert( !defined( $status ) );
 test_assert_equal( $p->config_( 'port' ), $port );
 
@@ -285,7 +285,7 @@ $language->{'Configuration_POP3SepUpdate'} = "pop3 separator update %s";
 $form->{pop3_separator} = "'";
 
 ($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
-test_assert_equal( $status, "pop3 separator update '" );
+test_assert_equal( $status, "pop3 separator update '\n" );
 test_assert( !defined( $error ) );
 test_assert_equal( $p->config_( 'separator' ), "'" );
 
@@ -296,18 +296,20 @@ $language->{'Configuration_Error1'} = "configuration error 1";
 
 ($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
 
-test_assert_equal( $error, "configuration error 1" );
+test_assert_equal( $error, "configuration error 1\n" );
 test_assert( !defined( $status ) );
 test_assert_equal( $p->config_( 'separator' ), ':' );
 
 delete $form->{pop3_separator};
 
-test_assert_equal( $p->config_( 'force_fork' ), 0 );
+test_assert_equal( $p->config_( 'force_fork' ), 0);
 $form->{update_pop3_configuration} = 1;
 $form->{pop3_force_fork} = 1;
+$language->{'Configuration_POPForkEnabled'} = "use pop3 forking";
+$language->{'Configuration_POPForkDisabled'} = "don't use pop3 forking";
 
 ($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
-test_assert( !defined( $status ) );
+test_assert_equal( $status, "use pop3 forking" );
 test_assert( !defined( $error ) );
 test_assert_equal( $p->config_( 'force_fork' ), 1 );
 
@@ -317,6 +319,13 @@ $form->{pop3_force_fork} = 'aaaaa';
 test_assert( !defined( $status ) );
 test_assert( !defined( $error ) );
 test_assert_equal( $p->config_( 'force_fork' ), 1 );
+
+$form->{pop3_force_fork} = '';
+
+($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
+test_assert_equal( $status, "don't use pop3 forking" );
+test_assert( !defined($error) );
+test_assert_equal( $p->config_( 'force_fork' ), 0 );
 
 delete $form->{pop3_force_fork};
 delete $form->{update_pop3_configuration};
@@ -344,7 +353,7 @@ $form->{server} = "www.example.com";
 $language->{Security_SecureServerUpdate} = "secure server update %s";
 
 ($status, $error) = $p->validate_item( 'pop3_chain', $templ, $language, $form );
-test_assert_equal( $status, "secure server update www.example.com" );
+test_assert_equal( $status, "secure server update www.example.com\n" );
 test_assert_equal( defined( $error ), defined( undef ) );
 test_assert_equal( $p->config_( 'secure_server' ), 'www.example.com' );
 
@@ -357,7 +366,7 @@ $form->{sport} = "10110";
 $language->{Security_SecurePortUpdate} = "secure port update %s";
 
 ($status, $error) = $p->validate_item( 'pop3_chain', $templ, $language, $form );
-test_assert_equal( $status, "secure port update 10110" );
+test_assert_equal( $status, "secure port update 10110\n" );
 test_assert_equal( defined( $error ), defined( undef ) );
 test_assert_equal( $p->config_( 'secure_port' ), 10110 );
 
@@ -374,24 +383,25 @@ $p->config_('secure_port', $old_config_value );
 
 $old_config_value = $p->config_( 'secure_ssl' );
 
-$form->{update_server} = 1;
 $form->{sssl} = "1";
+$form->{update_server} = 1;
+
 $language->{Security_SecureServerUseSSLOn} = "use SSL connections";
 $language->{Security_SecureServerUseSSLOff} = "not use SSL connections";
 
 ($status, $error) = $p->validate_item( 'pop3_chain', $templ, $language, $form );
-test_assert_equal( $status, "use SSL connections" );
+test_assert_equal( $status, "use SSL connections\n" );
 test_assert( !defined( $error ) );
 test_assert_equal( $p->config_( 'secure_ssl' ), 1 );
 
 $form->{sssl} = '';
 
 ($status, $error) = $p->validate_item( 'pop3_chain', $templ, $language, $form );
-test_assert_equal( $status, "not use SSL connections" );
+test_assert_equal( $status, "not use SSL connections\n" );
 test_assert( !defined( $error ) );
 test_assert_equal( $p->config_( 'secure_ssl' ), 0 );
 
-delete $form->{server};
+delete $form->{sssl};
 delete $form->{update_server};
 $p->config_('secure_ssl', $old_config_value );
 

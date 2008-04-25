@@ -118,11 +118,17 @@ $c->stop();
 
 open FILE, "<popfile.cfg";
 my $line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_ca_file ./certs/ca.pem' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_cert_file ./certs/server-cert.pem' );
+$line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_crypt_device ' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_crypt_strength 0' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_debug 0' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_key_file ./certs/server-key.pem' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_language English' );
 $line = <FILE>;

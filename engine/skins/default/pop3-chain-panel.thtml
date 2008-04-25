@@ -21,3 +21,4 @@
     <br /><br />
     <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
+<br />

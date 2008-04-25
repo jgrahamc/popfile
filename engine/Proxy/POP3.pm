@@ -3,6 +3,7 @@ package Proxy::POP3;
 
 use Proxy::Proxy;
 use Digest::MD5;
+use MIME::Base64 qw(decode_base64);
 @ISA = ("Proxy::Proxy");
 
 # ----------------------------------------------------------------------------
@@ -82,7 +83,7 @@ sub initialize
     my ( $self ) = @_;
 
     # Enabled by default
-    $self->config_( 'enabled', 1);
+    $self->config_( 'enabled', 1 );
 
     # By default we don't fork on Windows
     $self->config_( 'force_fork', ($^O eq 'MSWin32')?0:1 );
@@ -105,8 +106,8 @@ sub initialize
     $self->config_( 'separator', ':' );
 
     # The welcome string from the proxy is configurable
-    $self->config_( 'welcome_string',
-        "POP3 POPFile ($self->{version_}) server ready" );
+    $self->config_( 'welcome_string',                      # PROFILE BLOCK START
+        "POP3 POPFile ($self->{version_}) server ready" ); # PROFILE BLOCK STOP
 
     return $self->SUPER::initialize();
 }
@@ -188,12 +189,12 @@ sub child__
     # Tell the client that we are ready for commands and identify our
     # version number
 
-    $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) .
-               "$eol" );
+    $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) . # PROFILE BLOCK START
+               "$eol" );                                                # PROFILE BLOCK STOP
 
     # Compile some configurable regexp's once
 
-    my $s = $self->config_( 'separator' );
+    my $s = $self->module_config_( 'pop3', 'separator' );
     $s =~ s/(\$|\@|\[|\]|\(|\)|\||\?|\*|\.|\^|\+)/\\$1/;
 
     my $transparent  = "^USER ([^$s]+)\$";
@@ -237,14 +238,14 @@ sub child__
         # needed
 
         if ( $command =~ /$transparent/ ) {
-            if ( $self->config_( 'secure_server' ) ne '' )  {
-                $token = $self->config_( 'secure_server' ). ":$1";
+            if ( $self->module_config_( 'pop3', 'secure_server' ) ne '' )  {
+                $token = $self->module_config_( 'pop3', 'secure_server' ). ":$1";
                 $self->log_( 2, "Set transparent proxy token : '$token'" );
 
-                if ( $mail = $self->verify_connected_( $mail, $client, 
-                        $self->config_( 'secure_server' ),
-                        $self->config_( 'secure_port' ),
-                        $self->config_( 'secure_ssl' ) ) ) {
+                if ( $mail = $self->verify_connected_( $mail, $client,      # PROFILE BLOCK START
+                        $self->module_config_( 'pop3', 'secure_server' ),
+                        $self->module_config_( 'pop3', 'secure_port' ),
+                        $self->module_config_( 'pop3', 'secure_ssl' ) ) ) {  # PROFILE BLOCK STOP
                     last if ($self->echo_response_($mail, $client, $command) == 2 );
                 } else {
                     next;
@@ -266,8 +267,8 @@ sub child__
                 my $ssl = defined( $options ) && ( $options =~ /ssl/i );
                 $port = $ssl?995:110 if ( !defined( $port ) );
 
-                if ( $mail = $self->verify_connected_( $mail, $client,
-                                 $host, $port, $ssl ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client, # PROFILE BLOCK START
+                                 $host, $port, $ssl ) )  {             # PROFILE BLOCK STOP
 
                     if ( defined( $options ) && ( $options =~ /apop/i ) ) {
 
@@ -340,11 +341,11 @@ sub child__
                 my $md5hex = $md5->hexdigest;
                 $self->log_( 2, "digest='$md5hex'" );
 
-                my ($response, $ok) =
+                my ($response, $ok) =                                # PROFILE BLOCK START
                     $self->get_response_( $mail, $client,
-                        "APOP $self->{apop_user__} $md5hex", 0, 1 );
-                if ( ( $ok == 1 ) &&
-                     ( $response =~ /$self->{good_response_}/ ) ) {
+                        "APOP $self->{apop_user__} $md5hex", 0, 1 ); # PROFILE BLOCK STOP
+                if ( ( $ok == 1 ) &&                                # PROFILE BLOCK START
+                     ( $response =~ /$self->{good_response_}/ ) ) { # PROFILE BLOCK STOP
 
                     # authentication OK, toss the hello response and
                     # return password ok
@@ -359,12 +360,14 @@ sub child__
                     $self->tee_( $client, $response );
                 }
             } else {
-                last if ($self->echo_response_($mail, $client,
-                             $command) == 2 );
-                $session = $self->get_session_key_( $token );
-                if ( !defined( $session ) ) {
-                    $self->tee_( $client, "-ERR Unknown account $token$eol" );
-                    last;
+                my $ok = $self->echo_response_( $mail, $client, $command );
+                last if ( $ok == 2 );
+                if ( $ok == 0 ) {
+                    $session = $self->get_session_key_( $token );
+                    if ( !defined( $session ) ) {
+                        $self->tee_( $client, "-ERR Unknown account $token$eol" );
+                        last;
+                    }
                 }
             }
             next;
@@ -375,8 +378,8 @@ sub child__
         # support this.
 
         if ( $command =~ /$apop_command/io ) {
-            $self->tee_( $client,
-              "-ERR APOP not supported between mail client and POPFile.$eol" );
+            $self->tee_( $client,                                               # PROFILE BLOCK START
+              "-ERR APOP not supported between mail client and POPFile.$eol" ); # PROFILE BLOCK STOP
 
             # TODO: Consider implementing a host:port:username:secret
             # hash syntax for proxying the APOP command
@@ -387,11 +390,25 @@ sub child__
         # Secure authentication
 
         if ( $command =~ /AUTH ([^ ]+)/ ) {
-            if ( $self->config_( 'secure_server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client,
-                     $self->config_( 'secure_server' ), 
-                     $self->config_( 'secure_port' ),
-                     $self->config_( 'secure_ssl' ) ) )  {
+            if ( $self->module_config_( 'pop3', 'secure_server' ) ne '' )  {
+                my $mechanism = $1;
+
+                $token = $self->module_config_( 'pop3', 'secure_server' );
+                if ( $self->global_config_( 'single_user' ) != 1 ) {
+                    if ( $mechanism !~ /^PLAIN$/i ) {
+                        # TODO : support other mechanisms
+
+                        # When AUTH command is used, we have to find out who is
+                        # accessing to POPFile.
+
+                        $self->tee_( $client, "-ERR AUTH $mechanism is not supported in the multi user mode$eol" );
+                    }
+                }
+
+                if ( $mail = $self->verify_connected_( $mail, $client,    # PROFILE BLOCK START
+                     $self->module_config_( 'pop3', 'secure_server' ), 
+                     $self->module_config_( 'pop3', 'secure_port' ),
+                     $self->module_config_( 'pop3', 'secure_ssl' ) ) )  { # PROFILE BLOCK STOP
 
                     # Loop until we get -ERR or +OK
 
@@ -401,7 +418,22 @@ sub child__
                         my $auth;
                         $auth = <$client>;
                         $auth =~ s/(\015|\012)$//g;
+
+                        if ( $mechanism =~ /^PLAIN$/i ) {
+                            my ( $authid, $userid, $password ) = 
+                                    split( "\00", decode_base64( $auth ) );
+                            $token .= ':' . $userid if ( defined($userid) );
+                        }
+
                         ( $response, $ok ) = $self->get_response_( $mail, $client, $auth );
+                    }
+
+                    if ( $response =~ /\+OK/ ) {
+                        $session = $self->get_session_key_( $token );
+                        if ( !defined( $session ) ) {
+                            $self->tee_( $client, "-ERR Unknown account $token$eol" );
+                            last;
+                        }
                     }
                 } else {
                     next;
@@ -414,11 +446,11 @@ sub child__
         }
 
         if ( $command =~ /AUTH/ ) {
-            if ( $self->config_( 'secure_server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client, 
-                     $self->config_( 'secure_server' ),
-                     $self->config_( 'secure_port' ),
-                     $self->config_( 'secure_ssl' ) ) )  {
+            if ( $self->module_config_( 'pop3', 'secure_server' ) ne '' )  {
+                if ( $mail = $self->verify_connected_( $mail, $client,    # PROFILE BLOCK START
+                     $self->module_config_( 'pop3', 'secure_server' ),
+                     $self->module_config_( 'pop3', 'secure_port' ),
+                     $self->module_config_( 'pop3', 'secure_ssl' ) ) )  { # PROFILE BLOCK STOP
                     my $response = $self->echo_response_($mail, $client, "AUTH" );
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
@@ -497,18 +529,18 @@ sub child__
             my $count = $1;
 
             if ( $2 ne '99999999' )  {
-                if ( $self->config_( 'toptoo' ) == 1 ) {
-                    my $response =
-                        $self->echo_response_( $mail, $client, "RETR $count" );
+                if ( $self->module_config_( 'pop3', 'toptoo' ) == 1 ) {
+                    my $response =                                              # PROFILE BLOCK START
+                        $self->echo_response_( $mail, $client, "RETR $count" ); # PROFILE BLOCK STOP
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
 
                         # Classify without echoing to client, saving
                         # file for later RETR's
 
-                        my ( $class, $slot ) =
+                        my ( $class, $slot ) =                            # PROFILE BLOCK START
                              $self->classifier_()->classify_and_modify(
-                                 $session, $mail, $client, 0, '', 0, 0 );
+                                 $session, $mail, $client, 0, '', 0, 0 ); # PROFILE BLOCK STOP
 
                         $downloaded{$count} = $slot;
 
@@ -517,22 +549,22 @@ sub child__
                         # the client.  The +OK has already been sent
                         # by the RETR
 
-                        $response =
+                        $response =                                # PROFILE BLOCK START
                             $self->echo_response_( $mail, $client,
-                                $command, 1 );
+                                $command, 1 );                     # PROFILE BLOCK STOP
                         last if ( $response == 2 );
                         if ( $response == 0 ) {
 
                             # Classify with pre-defined class, without
                             # saving, echoing to client
 
-                            $self->classifier_()->classify_and_modify(
-                               $session, $mail, $client, 1, $class, $slot, 1 );
+                            $self->classifier_()->classify_and_modify(          # PROFILE BLOCK START
+                               $session, $mail, $client, 1, $class, $slot, 1 ); # PROFILE BLOCK STOP
                         }
                     }
                 } else {
-                    my $response =
-                        $self->echo_response_( $mail, $client, $command );
+                    my $response =                                         # PROFILE BLOCK START
+                        $self->echo_response_( $mail, $client, $command ); # PROFILE BLOCK STOP
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
                         $self->echo_to_dot_( $mail, $client );
@@ -549,11 +581,11 @@ sub child__
         # The CAPA command
 
         if ( $command =~ /CAPA/i ) {
-            if ( $mail || $self->config_( 'secure_server' ) ne '' )  {
-                if ( $mail || ( $mail = $self->verify_connected_( $mail, $client,
-                     $self->config_( 'secure_server' ),
-                     $self->config_( 'secure_port' ),
-                     $self->config_( 'secure_ssl' ) ) ) )  {
+            if ( $mail || $self->module_config_( 'pop3', 'secure_server' ) ne '' )  {
+                if ( $mail || ( $mail = $self->verify_connected_( $mail, $client, # PROFILE BLOCK START
+                     $self->module_config_( 'pop3', 'secure_server' ),
+                     $self->module_config_( 'pop3', 'secure_port' ),
+                     $self->module_config_( 'pop3', 'secure_ssl' ) ) ) )  {       # PROFILE BLOCK STOP
                     my $response = $self->echo_response_($mail, $client, "CAPA" );
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
@@ -600,9 +632,9 @@ sub child__
             my $class;
             my $file;
 
-            if ( defined($downloaded{$count}) &&
+            if ( defined($downloaded{$count}) &&            # PROFILE BLOCK START
                  ( $file = $self->history_()->get_slot_file( $downloaded{$count} ) ) &&
-                 (open RETRFILE, "<$file") ) {
+                 (open RETRFILE, "<$file") ) {              # PROFILE BLOCK STOP
 
                 # act like a network stream
 
@@ -618,9 +650,9 @@ sub child__
 
                 # Load the last classification
 
-                my ( $id, $from, $to, $cc, $subject,
+                my ( $id, $from, $to, $cc, $subject,                                     # PROFILE BLOCK START
                     $date, $hash, $inserted, $bucket, $reclassified ) =
-                    $self->history_()->get_slot_fields( $downloaded{$count}, $session );
+                    $self->history_()->get_slot_fields( $downloaded{$count}, $session ); # PROFILE BLOCK STOP
 
                 if ( $bucket ne 'unknown class' ) {
 
@@ -765,9 +797,15 @@ sub validate_item
 
     if ( $name eq 'pop3_configuration' ) {
         if ( defined($$form{pop3_port}) ) {
-            if ( ( $$form{pop3_port} =~ /^\d+$/ ) && ( $$form{pop3_port} >= 1 ) && ( $$form{pop3_port} < 65536 ) ) {
-                $self->config_( 'port', $$form{pop3_port} );
-                $status_message .= sprintf( $$language{Configuration_POP3Update}, $self->config_( 'port' ) ) . "\n";
+            if ( ( $$form{pop3_port} =~ /^\d+$/ ) &&       # PROFILE BLOCK START
+                 ( $$form{pop3_port} >= 1 ) &&
+                 ( $$form{pop3_port} < 65536 ) ) {         # PROFILE BLOCK STOP
+                if ( $self->config_( 'port' ) ne $$form{pop3_port} ) {
+                    $self->config_( 'port', $$form{pop3_port} );
+                    $status_message .= sprintf(                # PROFILE BLOCK START
+                            $$language{Configuration_POP3Update},
+                            $self->config_( 'port' ) ) . "\n"; # PROFILE BLOCK STOP
+                }
             } else {
                 $error_message .= $$language{Configuration_Error3} . "\n";
             }
@@ -775,8 +813,12 @@ sub validate_item
 
         if ( defined($$form{pop3_separator}) ) {
             if ( length($$form{pop3_separator}) == 1 ) {
-                $self->config_( 'separator', $$form{pop3_separator} );
-                $status_message .= sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) ) . "\n";
+                if ( $self->config_( 'separator' ) ne $$form{pop3_separator} ) {
+                    $self->config_( 'separator', $$form{pop3_separator} );
+                    $status_message .= sprintf(                     # PROFILE BLOCK START
+                            $$language{Configuration_POP3SepUpdate},
+                            $self->config_( 'separator' ) ) . "\n"; # PROFILE BLOCK STOP
+                }
             } else {
                 $error_message .= $$language{Configuration_Error1} . "\n";
             }
@@ -784,26 +826,33 @@ sub validate_item
 
         if ( defined($$form{update_pop3_configuration}) ) {
             if ( $$form{pop3_force_fork} ) {
-                $self->config_( 'force_fork', 1 );
+                if ( $self->config_( 'force_fork' ) ne 1 ) {
+                    $self->config_( 'force_fork', 1 );
+                    $status_message .= $$language{Configuration_POPForkEnabled};
+                }
             } else {
-                $self->config_( 'force_fork', 0 );
+                if ( $self->config_( 'force_fork' ) ne 0 ) {
+                    $self->config_( 'force_fork', 0 );
+                    $status_message .= $$language{Configuration_POPForkDisabled};
+                }
             }
         }
-
-        $status_message =~ s/\n$// if ( defined( $status_message ) );
-        $error_message =~ s/\n$// if ( defined( $error_message) );
 
         return( $status_message, $error_message );
     }
 
     if ( $name eq 'pop3_security' ) {
         if ( $$form{serveropt_pop3} ) {
-            $self->config_( 'local', 0 );
-            $status_message = $$language{Security_ServerModeUpdatePOP3};
+            if ( $self->config_( 'local' ) ne 0 ) {
+                $self->config_( 'local', 0 );
+                $status_message = $$language{Security_ServerModeUpdatePOP3};
+            }
         }
         else {
-            $self->config_( 'local', 1 );
-            $status_message = $$language{Security_StealthModeUpdatePOP3};
+            if ( $self->config_( 'local' ) ne 1 ) {
+                $self->config_( 'local', 1 );
+                $status_message = $$language{Security_StealthModeUpdatePOP3};
+            }
         }
 
         return( $status_message, $error_message );
@@ -811,14 +860,24 @@ sub validate_item
 
     if ( $name eq 'pop3_chain' ) {
         if ( defined( $$form{server} ) ) {
-            $self->config_( 'secure_server', $$form{server} );
-            $status_message .= sprintf( $$language{Security_SecureServerUpdate}, $self->config_( 'secure_server' ) ) . "\n";
+            if ( $self->config_( 'secure_server' ) ne $$form{server} ) {
+                $self->config_( 'secure_server', $$form{server} );
+                $status_message .= sprintf(                         # PROFILE BLOCK START
+                        $$language{Security_SecureServerUpdate},
+                        $self->config_( 'secure_server' ) ) . "\n"; # PROFILE BLOCK STOP
+            }
        }
 
         if ( defined($$form{sport}) ) {
-            if ( ( $$form{sport} =~ /^\d+$/ ) && ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
-                $self->config_( 'secure_port', $$form{sport} );
-                $status_message .= sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) ) . "\n";
+            if ( ( $$form{sport} =~ /^\d+$/ ) &&           # PROFILE BLOCK START
+                 ( $$form{sport} >= 1 ) &&
+                 ( $$form{sport} < 65536 ) ) {             # PROFILE BLOCK STOP
+                if ( $self->config_( 'secure_port' ) ne $$form{sport} ) {
+                    $self->config_( 'secure_port', $$form{sport} );
+                    $status_message .= sprintf(                       # PROFILE BLOCK START
+                            $$language{Security_SecurePortUpdate},
+                            $self->config_( 'secure_port' ) ) . "\n"; # PROFILE BLOCK STOP
+                }
             } else {
                 $error_message .= $$language{Security_Error1};
             }
@@ -826,16 +885,17 @@ sub validate_item
 
         if ( defined($$form{update_server}) ) {
             if ( $$form{sssl} ) {
-                $self->config_( 'secure_ssl', 1 );
-                $status_message .= $$language{Security_SecureServerUseSSLOn} . "\n";
+                if ( $self->config_( 'secure_ssl' ) ne 1 ) {
+                    $self->config_( 'secure_ssl', 1 );
+                    $status_message .= $$language{Security_SecureServerUseSSLOn} . "\n";
+                }
             } else {
-                $self->config_( 'secure_ssl', 0 );
-                $status_message .= $$language{Security_SecureServerUseSSLOff} . "\n";
+                if ( $self->config_( 'secure_ssl' ) ne 0 ) {
+                    $self->config_( 'secure_ssl', 0 );
+                    $status_message .= $$language{Security_SecureServerUseSSLOff} . "\n";
+                }
             }
         }
-
-        $status_message =~ s/\n$// if ( defined( $status_message ) );
-        $error_message =~ s/\n$// if ( defined( $error_message) );
 
         return( $status_message, $error_message );
     }
@@ -843,3 +903,4 @@ sub validate_item
     return $self->SUPER::validate_item( $name, $templ, $language, $form );
 }
 
+1;

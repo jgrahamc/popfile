@@ -72,19 +72,42 @@ sub start
 {
     my ( $self ) = @_;
 
-    $self->{server_} = IO::Socket::INET->new( Proto     => 'tcp',             # PROFILE BLOCK START
+    if ( $self->config_( 'https_enabled' ) ) {
+        require IO::Socket::SSL;
+
+        $self->{server_}{https} = IO::Socket::SSL->new( Proto     => 'tcp',   # PROFILE BLOCK START
+                                    $self->config_( 'local' )  == 1 ? (LocalAddr => 'localhost') : (),
+                                     LocalPort => $self->config_( 'https_port' ),
+                                     Listen    => SOMAXCONN,
+                                     SSL_cert_file => $self->get_user_path_( $self->global_config_( 'cert_file' ) ),
+                                     SSL_key_file => $self->get_user_path_( $self->global_config_( 'key_file' ) ),
+                                     SSL_ca_file => $self->get_user_path_( $self->global_config_( 'ca_file' ) ),
+                                     Reuse     => 1 );                        # PROFILE BLOCK STOP
+    }
+
+    $self->{server_}{http} = IO::Socket::INET->new( Proto     => 'tcp',       # PROFILE BLOCK START
                                     $self->config_( 'local' )  == 1 ? (LocalAddr => 'localhost') : (),
                                      LocalPort => $self->config_( 'port' ),
                                      Listen    => SOMAXCONN,
                                      Reuse     => 1 );                        # PROFILE BLOCK STOP
 
-    if ( !defined( $self->{server_} ) ) {
-        my $port = $self->config_( 'port' );
+    if ( !defined( $self->{server_}{http} ) ||       # PROFILE BLOCK START
+         ( $self->config_( 'https_enabled' ) &&
+           !defined( $self->{server_}{https} ) ) ) { # PROFILE BLOCK STOP
+        my ( $port, $protocol );
+
+        if ( !defined( $self->{server_}{http} ) ) {
+            $port = $self->config_( 'port' );
+            $protocol = 'HTTP';
+        } else {
+            $port = $self->config_( 'https_port' );
+            $protocol = 'HTTPS';
+        }
         my $name = $self->name();
         print STDERR <<EOM;                                                   # PROFILE BLOCK START
 
-\nCouldn't start the $name HTTP interface because POPFile could not bind to the
-HTTP port $port. This could be because there is another service
+\nCouldn't start the $name $protocol interface because POPFile could not bind to the
+$protocol port $port. This could be because there is another service
 using that port or because you do not have the right privileges on
 your system (On Unix systems this can happen if you are not root
 and the port you specified is less than 1024).
@@ -95,26 +118,28 @@ EOM
         return 0;
     }
 
-    $self->{selector_} = new IO::Select( $self->{server_} );
+    foreach my $protocol ( keys %{$self->{server_}} ) {
+        $self->{selector_}{$protocol} = new IO::Select( $self->{server_}{$protocol} );
+    }
 
     # Think of an encryption key for encrypting cookies using Blowfish
 
     my $module = $self->global_config_( 'random_module' );
     $self->log_( 1, "Generating random octet using $module" );
 
-    my $key = $self->random_()->generate_random_string(
+    my $key = $self->random_()->generate_random_string( # PROFILE BLOCK START
                 $module,
                 56,
                 $self->global_config_( 'crypt_strength' ),
                 $self->global_config_( 'crypt_devide' )
-              );
-    $self->{crypto__} = new Crypt::CBC( { 'key'            => $key,
+              );                                         # PROFILE BLOCK STOP
+    $self->{crypto__} = new Crypt::CBC( { 'key'            => $key, # PROFILE BLOCK START
                                           'cipher'         => 'Blowfish',
                                           'padding'        => 'standard',
                                           'prepend_iv'     => 0,
                                           'regenerate_key' => 0,
                                           'salt'           => 1,
-                                          'header'         => 'salt', } );
+                                          'header'         => 'salt', } ); # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -130,7 +155,11 @@ sub stop
 {
     my ( $self ) = @_;
 
-    close $self->{server_} if ( defined( $self->{server_} ) );
+    if ( defined( $self->{server__} ) ) {
+        foreach my $protocol ( keys %{$self->{server_}} ) {
+            close $self->{server_}{$protocol};
+        }
+    }
 
     $self->SUPER::stop();
 }
@@ -151,81 +180,85 @@ sub service
     # See if there's a connection waiting for us, if there is we
     # accept it handle a single request and then exit
 
-    my ( $ready ) = $self->{selector_}->can_read(0);
+    foreach my $protocol ( keys %{$self->{server_}} ) {
 
-    # Handle HTTP requests for the UI
+        my ( $ready ) = $self->{selector_}{$protocol}->can_read(0);
 
-    if ( ( defined( $ready ) ) && ( $ready == $self->{server_} ) ) {
+        # Handle HTTP requests for the UI
 
-        if ( my $client = $self->{server_}->accept() ) {
+        if ( ( defined( $ready ) ) && ( $ready == $self->{server_}{$protocol} ) ) {
 
-            # Check that this is a connection from the local machine,
-            # if it's not then we drop it immediately without any
-            # further processing.  We don't want to allow remote users
-            # to admin POPFile
+            if ( my $client = $self->{server_}{$protocol}->accept() ) {
 
-            my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
+                # Check that this is a connection from the local machine,
+                # if it's not then we drop it immediately without any
+                # further processing.  We don't want to allow remote users
+                # to admin POPFile
 
-            if ( ( $self->config_( 'local' ) == 0 ) ||                # PROFILE BLOCK START
-                 ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {     # PROFILE BLOCK STOP
+                my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
-                # Read the request line (GET or POST) from the client
-                # and if we manage to do that then read the rest of
-                # the HTTP headers grabbing the Content-Length and
-                # using it to read any form POST content into $content
+                if ( ( $self->config_( 'local' ) == 0 ) ||                # PROFILE BLOCK START
+                     ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {     # PROFILE BLOCK STOP
 
-                $client->autoflush(1);
+                    # Read the request line (GET or POST) from the client
+                    # and if we manage to do that then read the rest of
+                    # the HTTP headers grabbing the Content-Length and
+                    # using it to read any form POST content into $content
 
-                if ( ( defined( $client ) ) &&
-                     ( my $request = $self->slurp_( $client ) ) ) {
-                    my $content_length = 0;
-                    my $content;
-                    my $cookie = '';
+                    $client->autoflush(1);
 
-                    $self->log_( 2, $request );
+                    if ( ( defined( $client ) ) &&                      # PROFILE BLOCK START
+                         ( my $request = $self->slurp_( $client ) ) ) { # PROFILE BLOCK STOP
+                        my $content_length = 0;
+                        my $content;
+                        my $cookie = '';
 
-                    while ( my $line = $self->slurp_( $client ) )  {
-                        $cookie = $1 if ( $line =~ /Cookie: (.+)/ );
-                        $content_length = $1 if ( $line =~ /Content-Length: (\d+)/i );
-                        # Discovered that Norton Internet Security was
-                        # adding HTTP headers of the form
-                        #
-                        # ~~~~~~~~~~~~~~: ~~~~~~~~~~~~~
-                        #
-                        # which we were not recognizing as valid
-                        # (surprise, surprise) and this was messing
-                        # about our handling of POST data.  Changed
-                        # the end of header identification to any line
-                        # that does not contain a :
+                        $self->log_( 2, $request );
 
-                        last                 if ( $line !~ /:/ );
-                    }
+                        while ( my $line = $self->slurp_( $client ) )  {
+                            $cookie = $1 if ( $line =~ /Cookie: (.+)/ );
+                            $content_length = $1 if ( $line =~ /Content-Length: (\d+)/i );
+                            # Discovered that Norton Internet Security was
+                            # adding HTTP headers of the form
+                            #
+                            # ~~~~~~~~~~~~~~: ~~~~~~~~~~~~~
+                            #
+                            # which we were not recognizing as valid
+                            # (surprise, surprise) and this was messing
+                            # about our handling of POST data.  Changed
+                            # the end of header identification to any line
+                            # that does not contain a :
 
-                    if ( $content_length > 0 ) {
-                        $content = $self->slurp_buffer_( $client,
-                            $content_length );
-                        $self->log_( 2, $content );
-                    }
+                            last                 if ( $line !~ /:/ );
+                        }
 
-                    # Handle decryption of a cookie header
+                        if ( $content_length > 0 ) {
+                            $content = $self->slurp_buffer_( $client, # PROFILE BLOCK START
+                                $content_length );                    # PROFILE BLOCK STOP
+                            $self->log_( 2, $content );
+                        }
 
-                    $cookie = $self->decrypt_cookie__( $cookie );
+                        # Handle decryption of a cookie header
 
-                    if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
-                        $code = $self->handle_url( $client, $2, $1,
-                                    $content, $cookie );
-                        $self->log_( 2,
-                            "HTTP handle_url returned code $code\n" );
-                    } else {
-                        $self->http_error_( $client, 500 );
+                        $cookie = $self->decrypt_cookie__( $cookie );
+
+                        if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
+                            $code = $self->handle_url( $client, $2, $1, # PROFILE BLOCK START
+                                        $content, $cookie );            # PROFILE BLOCK STOP
+                            $self->log_( 2,                                # PROFILE BLOCK START
+                                "HTTP handle_url returned code $code\n" ); # PROFILE BLOCK STOP
+                        } else {
+                            $self->http_error_( $client, 500 );
+                        }
                     }
                 }
-            }
 
-            $self->log_( 2, "Close HTTP connection on $client\n" );
-            $self->done_slurp_( $client );
-            close $client;
+                $self->log_( 2, "Close HTTP connection on $client\n" );
+                $self->done_slurp_( $client );
+                close $client;
+            }
         }
+
     }
 
     return $code;
@@ -244,7 +277,9 @@ sub forked
 
     $self->SUPER::forked( $writer );
 
-    close $self->{server_};
+    foreach my $protocol ( keys %{$self->{server_}} ) {
+        close $self->{server_}{$protocol};
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -262,8 +297,8 @@ sub handle_url
 {
     my ( $self, $client, $url, $command, $content, $cookie ) = @_;
 
-    return $self->{url_handler_}( $self, $client, $url, $command,
-                                  $content, $cookie );
+    return $self->{url_handler_}( $self, $client, $url, $command, # PROFILE BLOCK START
+                                  $content, $cookie ); # PROFILE BLOCK STOP
 }
 
 # ----------------------------------------------------------------------------
@@ -426,14 +461,15 @@ sub http_error_
 
     $self->log_( 0, "HTTP error $error returned" );
 
-    my $text="<html><head><title>POPFile Web Server Error $error</title></head>
+    my $text =      # PROFILE BLOCK START
+            "<html><head><title>POPFile Web Server Error $error</title></head>
 <body>
 <h1>POPFile Web Server Error $error</h1>
 An error has occurred which has caused POPFile to return the error $error.
 <p>
 Click <a href=\"/\">here</a> to continue.
 </body>
-</html>$eol";
+</html>$eol";       # PROFILE BLOCK STOP
 
     $self->log_( 1, $text );
 
@@ -481,8 +517,8 @@ sub http_file_
         my $expires = $self->zulu_offset_( 0, 1 );
         my $header = "HTTP/1.0 200 OK$eol";
         $header .= "Content-Type: $type$eol";
-        if ( $file =~ /\.log$/ ) {
-            # The log files should not been cached
+        if ( $file =~ /\.log$/ || $file =~ /\.msg$/ ) {
+            # The log/message files should not been cached
 
             $header .= "Pragma: no-cache$eol";
             $header .= "Cache-Control: no-cache$eol";
@@ -515,8 +551,8 @@ sub zulu_offset_
     my ( $self, $days, $hours ) = @_;
 
     my @day   = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
-    my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
-                  'Sep', 'Oct', 'Nov', 'Dec' );
+    my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', # PROFILE BLOCK START
+                  'Sep', 'Oct', 'Nov', 'Dec' );                           # PROFILE BLOCK STOP
     my $zulu = time;
     $zulu += 60 * 60 * $hours;
     $zulu += 24 * 60 * 60 * $days;

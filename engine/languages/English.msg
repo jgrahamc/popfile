@@ -121,7 +121,7 @@ Footer_Wiki                             Documentation
 
 Configuration_Error1                    The separator character must be a single character
 Configuration_Error2                    The user interface port must be a number between 1 and 65535
-Configuration_Error3                    The POP3 listen port must be a number between 1 and 65535
+Configuration_Error3                    The POP3/POP3S listen port must be a number between 1 and 65535
 Configuration_Error4                    The page size must be a number between 1 and 1000
 Configuration_Error5                    The number of days in the history must be a number between 1 and 366
 Configuration_Error6                    The TCP timeout must be a number between 10 and 300
@@ -129,6 +129,8 @@ Configuration_Error7                    The XML RPC listen port must be a number
 Configuration_Error8                    The SOCKS V proxy port must be a number between 1 and 65535
 Configuration_POP3Port                  POP3 listen port
 Configuration_POP3Update                Updated POP3 port to %s; this change will not take affect until you restart POPFile
+Configuration_POP3SPort                 POP3S listen port
+Configuration_POP3SUpdate               Updated POP3S (POP3 over SSL) port to %s; this change will not take affect until you restart POPFile
 Configuration_XMLRPCUpdate              Updated XML-RPC port to %s; this change will not take affect until you restart POPFile
 Configuration_XMLRPCPort                XML-RPC listen port
 Configuration_SMTPPort                  SMTP listen port
@@ -136,14 +138,28 @@ Configuration_SMTPUpdate                Updated SMTP port to %s; this change wil
 Configuration_NNTPPort                  NNTP listen port
 Configuration_NNTPUpdate                Updated NNTP port to %s; this change will not take affect until you restart POPFile
 Configuration_POPFork                   Allow concurrent POP3 connections
+Configuration_POP3SFork                 Allow concurrent POP3S connections
 Configuration_SMTPFork                  Allow concurrent SMTP connections
 Configuration_NNTPFork                  Allow concurrent NNTP connections
+Configuration_POPForkEnabled            Enabled concurrent POP3 connections
+Configuration_POP3SForkEnabled          Enabled concurrent POP3S (POP3 over SSL) connections
+Configuration_SMTPForkEnabled           Enabled concurrent SMTP connections
+Configuration_NNTPForkEnabled           Enabled concurrent NNTP connections
+Configuration_POPForkDisabled           Disabled concurrent POP3 connections
+Configuration_POP3SForkDisabled         Disabled concurrent POP3S (POP3 over SSL) connections
+Configuration_SMTPForkDisabled          Disabled concurrent SMTP connections
+Configuration_NNTPForkDisabled          Disabled concurrent NNTP connections
 Configuration_POP3Separator             POP3 host:port:user separator character
 Configuration_NNTPSeparator             NNTP host:port:user separator character
 Configuration_POP3SepUpdate             Updated POP3 separator to %s
 Configuration_NNTPSepUpdate             Updated NNTP separator to %s
 Configuration_UI                        User interface web port
 Configuration_UIUpdate                  Updated user interface web port to %s; this change will not take affect until you restart POPFile
+Configuration_UIHTTPS                   Accept incoming SSL connections to the UI
+Configuration_UIHTTPSEnabled            Enabled incoming SSL connections to the UI; this change will not take affect until you restart POPFile
+Configuration_UIHTTPSDisabled           Disabled incoming SSL connections to the UI; this change will not take affect until you restart POPFile
+Configuration_UIHTTPSPort               User interface web (SSL) port
+Configuration_UIHTTPSPortUpdate         Updated user interface web port (SSL) to %s; this change will not take affect until you restart POPFile
 Configuration_History                   Messages per page
 Configuration_HistoryUpdate             Updated number of messages per page to %s
 Configuration_Days                      Days of history to keep
@@ -320,12 +336,15 @@ Security_SMTPServerUpdate               Updated SMTP chain server to %s; this ch
 Security_SMTPPort                       SMTP chain port
 Security_SMTPPortUpdate                 Updated SMTP chain port to %s; this change will not take affect until you restart POPFile
 Security_POP3                           Accept POP3 connections from remote machines (requires POPFile restart)
+Security_POP3S                          Accept POP3S connections from remote machines (requires POPFile restart)
 Security_SMTP                           Accept SMTP connections from remote machines (requires POPFile restart)
 Security_NNTP                           Accept NNTP connections from remote machines (requires POPFile restart)
 Security_UI                             Accept HTTP (User Interface) connections from remote machines  (requires POPFile restart)
 Security_XMLRPC                         Accept XML-RPC connections from remote machines (requires POPFile restart)
 Security_StealthModeUpdatePOP3          POPFile POP3 proxy WON'T be accessed from another machine; this change will not take affect until you restart POPFile
 Security_ServerModeUpdatePOP3           POPFile POP3 proxy ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
+Security_StealthModeUpdatePOP3S         POPFile POP3S proxy WON'T be accessed from another machine; this change will not take affect until you restart POPFile
+Security_ServerModeUpdatePOP3S          POPFile POP3S proxy ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
 Security_StealthModeUpdateSMTP          POPFile SMTP proxy WON'T be accessed from another machine; this change will not take affect until you restart POPFile
 Security_ServerModeUpdateSMTP           POPFile SMTP proxy ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
 Security_StealthModeUpdateNNTP          POPFile NNTP proxy WON'T be accessed from another machine; this change will not take affect until you restart POPFile

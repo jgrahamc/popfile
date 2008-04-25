@@ -56,6 +56,7 @@ my $b = $POPFile->get_module( 'Classifier/Bayes' );
 my $h = $POPFile->get_module( 'POPFile/History'  );
 my $l = $POPFile->get_module( 'POPFile/Logger'   );
 
+$l->config_( 'level', 1 );
 $b->module_config_( 'pop3', 'port', 9110 );
 
 $POPFile->CORE_start();
@@ -142,21 +143,30 @@ $b->global_config_( 'single_user', 1 );
 
 my $session2 = $b->get_session_key_from_token( $session, 'smtp', 'token' );
 test_assert( $b->is_admin_session( $session2 ) );
+$b->release_session_key( $session2 );
 $session2    = $b->get_session_key_from_token( $session, 'nntp', 'token' );
 test_assert( $b->is_admin_session( $session2 ) );
+$b->release_session_key( $session2 );
 $session2    = $b->get_session_key_from_token( $session, 'pop',  'token' );
 test_assert( $b->is_admin_session( $session2 ) );
+$b->release_session_key( $session2 );
 $session2    = $b->get_session_key_from_token( $session, 'pop3', 'token' );
 test_assert( $b->is_admin_session( $session2 ) );
+$b->release_session_key( $session2 );
+
+# Multi user mode
 
 $b->global_config_( 'single_user', 0 );
 
 $session2 = $b->get_session_key_from_token( $session, 'smtp', 'token' );
 test_assert( $b->is_admin_session( $session2 ) );
+$b->release_session_key( $session2 );
 $session2 = $b->get_session_key_from_token( $session, 'nntp', 'token' );
 test_assert( $b->is_admin_session( $session2 ) );
+$b->release_session_key( $session2 );
 $session2 = $b->get_session_key_from_token( $session, 'pop',  'token' );
 test_assert( $b->is_admin_session( $session2 ) );
+$b->release_session_key( $session2 );
 $session2 = $b->get_session_key_from_token( $session, 'pop3', 'token' );
 test_assert( !defined( $session2 ) );
 
@@ -184,12 +194,14 @@ $b->module_config_( 'pop3', 'secure_port', '110' );
 
 $session1 = $b->get_session_key_from_token( $session, 'pop3', 'example.com:testuser' );
 test_assert(  defined( $session1 ) );
+$b->release_session_key( $session1 );
 
 $session1 = $b->get_session_key_from_token( $session, 'pop3', 'fooz:bar' );
 test_assert( !defined( $session1 ) );
 
 $session1 = $b->get_session_key_from_token( $session, 'pop3', 'foo:bar'  );
 test_assert(  defined( $session1 ) );
+$b->release_session_key( $session1 );
 
 $b->module_config_( 'pop3', 'secure_server', '' );
 
@@ -277,6 +289,39 @@ test_assert( !defined($b->get_user_id_from_session( -1 )) );
 test_assert_equal( $b->get_user_name_from_session( $session  ), 'admin'    );
 test_assert_equal( $b->get_user_name_from_session( $session1 ), 'testuser' );
 test_assert( !defined($b->get_user_name_from_session( -1 )) );
+
+# get_current_sessions
+
+$POPFile->CORE_service(1);
+
+my $active_sessions = $b->get_current_sessions( $session );
+test_assert( defined($active_sessions) );
+test_assert_equal( $#{$active_sessions}, 1 );
+
+foreach my $active_session ( @{$active_sessions} ) {
+    if ( $active_session->{userid} eq 1 ) {
+        test_assert_equal( $active_session->{session}, $session  );
+    } elsif ( $active_session->{userid} eq $id1 ) {
+        test_assert_equal( $active_session->{session}, $session1 );
+    } else {
+        test_assert( 0 );
+    }
+    test_assert( defined($active_session->{lastused}) );
+}
+
+# timeout test
+
+$session2 = $b->get_session_key_from_token( $session, 'smtp', 'token' );
+
+$active_sessions = $b->get_current_sessions( $session );
+test_assert_equal( $#{$active_sessions}, 2 );
+
+$b->{api_sessions__}{$session2}{lastused} = 0; # expired
+$POPFile->CORE_service(1);
+$POPFile->CORE_service(1);
+
+$active_sessions = $b->get_current_sessions( $session );
+test_assert_equal( $#{$active_sessions}, 1 );
 
 # create_user with cloning admin
 
@@ -901,6 +946,7 @@ for my $modify_file (@modify_tests) {
         open OUTPUT, "<temp.out";
         while ( <OUTPUT> ) {
             my $output_line = $_;
+            next if ( $output_line =~ /^X-POPFile-TimeoutPrevension:/ );
             my $cam_line    = <CAM> || '';
             $output_line =~ s/[\r\n]//g;
             $cam_line =~ s/[\r\n]//g;

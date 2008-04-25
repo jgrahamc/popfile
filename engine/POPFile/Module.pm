@@ -375,8 +375,8 @@ sub log_
     my ( $self, $level, $message ) = @_;
 
     my ( $package, $file, $line ) = caller;
-    $self->logger_()->debug( $level, $self->{name__} . ": $line: " .
-        $message );
+    $self->logger_()->debug( $level, $self->{name__} . ": $line: " . # PROFILE BLOCK START
+        $message );                                                  # PROFILE BLOCK STOP
 }
 
 # ----------------------------------------------------------------------------
@@ -540,11 +540,11 @@ sub user_module_config_
     my ( $self, $user, $module, $name, $value ) = @_;
 
     if ( defined( $value ) ) {
-        return $self->classifier_()->set_user_parameter_from_id( $user,
-                                        $module . "_" . $name, $value );
+        return $self->classifier_()->set_user_parameter_from_id( $user,  # PROFILE BLOCK START
+                                        $module . "_" . $name, $value ); # PROFILE BLOCK STOP
     } else {
-        my ( $val, $def ) = $self->classifier_()->get_user_parameter_from_id(
-                                $user, $module . "_" . $name );
+        my ( $val, $def ) = $self->classifier_()->get_user_parameter_from_id( # PROFILE BLOCK START
+                                $user, $module . "_" . $name );               # PROFILE BLOCK STOP
         return $val;
     }
 }

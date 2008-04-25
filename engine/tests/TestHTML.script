@@ -802,7 +802,7 @@ INPUTIS   pop3_port 111
 CONFIGIS  pop3_port 111
 MATCH Updated POP3 port to 111; this change will not take affect until you restart POPFile
 SETSUBMIT pop3_port 0
-MATCH The POP3 listen port must be a number between 1 and 65535
+MATCH The POP3/POP3S listen port must be a number between 1 and 65535
 INPUTIS   pop3_port 111
 
 # Check fork for POP3

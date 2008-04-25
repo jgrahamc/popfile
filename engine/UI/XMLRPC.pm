@@ -109,15 +109,15 @@ sub start
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->register_configuration_item_( 'configuration',
+    $self->register_configuration_item_( 'configuration', # PROFILE BLOCK START
                                          'xmlrpc_port',
                                          'xmlrpc-port.thtml',
-                                         $self );
+                                         $self );         # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'security',
+    $self->register_configuration_item_( 'security',      # PROFILE BLOCK START
                                          'xmlrpc_local',
                                          'xmlrpc-local.thtml',
-                                         $self );
+                                         $self );         # PROFILE BLOCK STOP
 
     # We use a single XMLRPC::Lite object to handle requests for access to the
     # Classifier::Bayes object
@@ -284,9 +284,15 @@ sub validate_item
 
     if ( $name eq 'xmlrpc_port' ) {
         if ( defined($$form{xmlrpc_port}) ) {
-            if ( ( $$form{xmlrpc_port} =~ /^\d+$/ ) && ( $$form{xmlrpc_port} >= 1 ) && ( $$form{xmlrpc_port} < 65536 ) ) {
-                $self->config_( 'port', $$form{xmlrpc_port} );
-                $status = sprintf( $$language{Configuration_XMLRPCUpdate}, $self->config_( 'port' ) );
+            if ( ( $$form{xmlrpc_port} =~ /^\d+$/ ) &&     # PROFILE BLOCK START
+                 ( $$form{xmlrpc_port} >= 1 ) &&
+                 ( $$form{xmlrpc_port} < 65536 ) ) {       # PROFILE BLOCK STOP
+                if ( $self->config_( 'port' ) ne $$form{xmlrpc_port} ) {
+                    $self->config_( 'port', $$form{xmlrpc_port} );
+                    $status = sprintf(                     # PROFILE BLOCK START
+                            $$language{Configuration_XMLRPCUpdate},
+                            $self->config_( 'port' ) );    # PROFILE BLOCK STOP
+                }
             } else {
                 $error = $$language{Configuration_Error7};
             }
@@ -295,12 +301,16 @@ sub validate_item
 
     if ( $name eq 'xmlrpc_local' ) {
         if ( $$form{serveropt_xmlrpc} ) {
-            $self->config_( 'local', 0 );
-            $status = $$language{Security_ServerModeUpdateXMLRPC};
+            if ( $self->config_( 'local' ) ne 0 ) {
+                $self->config_( 'local', 0 );
+                $status = $$language{Security_ServerModeUpdateXMLRPC};
+            }
         }
         else {
-            $self->config_( 'local', 1 );
-            $status = $$language{Security_StealthModeUpdateXMLRPC};
+            if ( $self->config_( 'local' ) ne 1 ) {
+                $self->config_( 'local', 1 );
+                $status = $$language{Security_StealthModeUpdateXMLRPC};
+            }
         }
 
         return( $status, $error );

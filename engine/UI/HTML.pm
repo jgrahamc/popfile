@@ -70,7 +70,7 @@ my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])';
 # EUC-JP characters
 my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)";
 
-my %headers_table = ( 'from',       'From',            # PROFILE BLOCK START
+my %headers_table = ( 'from',       'From',         # PROFILE BLOCK START
                       'to',         'To',
                       'cc',         'Cc',
                       'subject',    'Subject',
@@ -167,6 +167,14 @@ sub initialize
 
     $self->config_( 'allow_javascript', 1 );
 
+    # Use incoming SSL connections
+
+    $self->config_( 'https_enabled', 0 );
+
+    # SSL port
+
+    $self->config_( 'https_port', 8443 );
+
     # Load skins
 
     $self->load_skins__();
@@ -203,8 +211,8 @@ sub start
 
     # Ensure that the messages subdirectory exists
 
-    if ( !$self->history_()->make_directory__(
-        $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
+    if ( !$self->history_()->make_directory__(                               # PROFILE BLOCK START
+            $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) { # PROFILE BLOCK STOP
         print STDERR "Failed to create the messages subdirectory\n";
         return 0;
     }
@@ -377,8 +385,8 @@ sub handle_cookie__
         # that any extensions to the user interface that have not yet been
         # translated will still appear
 
-        $self->cache_language_for_user( $self->user_config_( $user, 'language' ),
-                                        $session );
+        $self->cache_language_for_user( $self->user_config_( $user, 'language' ), # PROFILE BLOCK START
+                                        $session );                               # PROFILE BLOCK STOP
 
         return $session;
 
@@ -417,14 +425,14 @@ sub set_cookie__
         my $module = $self->global_config_( 'random_module' );
         $self->log_( 1, "Generating random octet using $module" );
 
-        $cookie_string = encode_base64(
+        $cookie_string = encode_base64(                 # PROFILE BLOCK START
                             $self->random_()->generate_random_string(
                                 $module,
                                 16,
                                 $self->global_config_( 'crypt_strength' ),
                                 $self->global_config_( 'crypt_device' )
                             ),
-                         '' );
+                         '' );                          # PROFILE BLOCK STOP
         $cookie_string .= ' ';
         $cookie_string .= time;
         $cookie_string .= ' ';
@@ -443,6 +451,7 @@ sub set_cookie__
         my $http_header = "Set-Cookie: popfile=$cookie_string; ";
         $http_header   .= 'path=/; ';
 #        $http_header   .= 'expires=' . $self->zulu_offset_( 14, 0 );
+        $http_header   .= 'secure' if ( $client =~ /ssl/i );
         $http_header   .= "\r\n";
 
         $self->log_( 2, "Sending cookie header: $http_header" );
@@ -484,8 +493,8 @@ sub url_handler__
 
     # In single user mode get the single user mode key
 
-    if ( !defined( $session ) &&
-        $self->global_config_( 'single_user' ) ) {
+    if ( !defined( $session ) &&                   # PROFILE BLOCK START
+        $self->global_config_( 'single_user' ) ) { # PROFILE BLOCK STOP
 
         # If admin has a password, then redirect to the password page
 
@@ -553,13 +562,14 @@ sub url_handler__
 
         my $config_skin = $self->user_config_( $user, 'skin' );
 
-        my %mime_extensions = qw( gif image/gif
+        my %mime_extensions =                       # PROFILE BLOCK START
+                              qw( gif image/gif
                                   png image/png
                                   ico image/x-icon
                                   jpg image/jpeg
                                   jpeg image/jpeg
                                   css text/css
-                                  html text/html );
+                                  html text/html ); # PROFILE BLOCK STOP
         my $path_is_skin = 0;
 
         if ( $path_skin eq $config_skin ) {
@@ -576,15 +586,15 @@ sub url_handler__
 
         my $file = $self->get_root_path_( "$template_root$filename" );
         if ( !( -e $file ) ) {
-                $template_root = 'skins/default/';
+            $template_root = 'skins/default/';
 
-                if ( $path_is_skin ) {
-                    $template_root .= $path_not_skin;
-                } else {
-                    $template_root .= $path;
-                }
+            if ( $path_is_skin ) {
+                $template_root .= $path_not_skin;
+            } else {
+                $template_root .= $path;
+            }
 
-                $file = $self->get_root_path_( "$template_root$filename" );
+            $file = $self->get_root_path_( "$template_root$filename" );
         }
 
         $self->log_(2, "Skin file $url mapped to $file");
@@ -604,8 +614,8 @@ sub url_handler__
         if ( defined($mime) ) {
             $self->http_file_( $client, $file, $mime );
         } else {
-            $self->log_( 0,
-                "Unknown mime type loaded from skins folder. $filename" );
+            $self->log_( 0,                                                # PROFILE BLOCK START
+                "Unknown mime type loaded from skins folder. $filename" ); # PROFILE BLOCK STOP
             $self->http_error_( $client, 404 );
         }
         return 1;
@@ -646,8 +656,8 @@ sub url_handler__
         my $continue;
 
         ( $session, $continue ) = $self->password_page( $client, $original_url );
-        if ( !defined( $continue ) ||
-             $continue eq '/password' ) {
+        if ( !defined( $continue ) ||     # PROFILE BLOCK START
+             $continue eq '/password' ) { # PROFILE BLOCK STOP
             $continue = '/';
         }
         if ( defined( $session ) ) {
@@ -665,10 +675,10 @@ sub url_handler__
 
         my $slot = $self->{form_}{view};
 
-        if ( ( $slot =~ /^\d+$/ ) &&
-             ( $self->history_()->is_valid_slot( $slot, $session ) ) ) {
-            $self->http_redirect_( $client,
-                 "/view?view=$slot", $session );
+        if ( ( $slot =~ /^\d+$/ ) &&                                     # PROFILE BLOCK START
+             ( $self->history_()->is_valid_slot( $slot, $session ) ) ) { # PROFILE BLOCK STOP
+            $self->http_redirect_( $client,      # PROFILE BLOCK START
+                 "/view?view=$slot", $session ); # PROFILE BLOCK STOP
         } else {
             $self->http_redirect_( $client, "/history", $session );
         }
@@ -676,10 +686,10 @@ sub url_handler__
         return 1;
     }
 
-    if ( ( $url =~ /^\/popfile.*\.log$/ ) &&
-         ( $self->classifier_()->is_admin_session( $session ) ) )  {
-        $self->http_file_( $client, $self->logger_()->debug_filename(),
-            'text/plain' );
+    if ( ( $url =~ /^\/popfile.*\.log$/ ) &&                         # PROFILE BLOCK START
+         ( $self->classifier_()->is_admin_session( $session ) ) )  { # PROFILE BLOCK STOP
+        $self->http_file_( $client, $self->logger_()->debug_filename(), # PROFILE BLOCK START
+            'text/plain' );                                             # PROFILE BLOCK STOP
         return 1;
     }
 
@@ -688,8 +698,8 @@ sub url_handler__
         return 1;
     }
 
-    if ( ( $url eq '/shutdown' ) &&
-         ( $self->classifier_()->is_admin_session( $session ) ) )  {
+    if ( ( $url eq '/shutdown' ) &&                                  # PROFILE BLOCK START
+         ( $self->classifier_()->is_admin_session( $session ) ) )  { # PROFILE BLOCK STOP
         my $http_header = "HTTP/1.1 200 OK\r\n";
         $http_header .= "Connection: close\r\n";
         $http_header .= "Pragma: no-cache\r\n";
@@ -717,14 +727,14 @@ sub url_handler__
     # the training help item. And if this one is clicked away, both
     # will no longer be shown.
 
-    if ( exists $self->{form_}{nomore_bucket_help} &&
-         $self->{form_}{nomore_bucket_help} ) {
+    if ( exists $self->{form_}{nomore_bucket_help} && # PROFILE BLOCK START
+         $self->{form_}{nomore_bucket_help} ) {       # PROFILE BLOCK STOP
         $self->user_config_( $self->{sessions__}{$session}{user}, 'show_bucket_help', 0 );
         $self->user_config_( $self->{sessions__}{$session}{user}, 'show_training_help', 1 );
     }
 
-    if ( exists $self->{form_}{nomore_training_help} &&
-         $self->{form_}{nomore_training_help} ) {
+    if ( exists $self->{form_}{nomore_training_help} && # PROFILE BLOCK START
+         $self->{form_}{nomore_training_help} ) {       # PROFILE BLOCK STOP
         $self->user_config_( $self->{sessions__}{$session}{user}, 'show_training_help', 0 );
     }
 
@@ -732,7 +742,7 @@ sub url_handler__
     # display, the page table maps the pages to the functions that
     # handle them and the related template
 
-    my %page_table = (
+    my %page_table = (                      # PROFILE BLOCK START
         'administration' => [ \&administration_page,
             'administration-page.thtml' ],
         'buckets'        => [ \&corpus_page,
@@ -746,16 +756,16 @@ sub url_handler__
         'history'        => [ \&history_page,
             'history-page.thtml'       ],
         'view'           => [ \&view_page,
-            'view-page.thtml'          ] );
+            'view-page.thtml'          ] ); # PROFILE BLOCK STOP
 
-    my %url_table = ( '/administration' => 'administration',
+    my %url_table = ( '/administration' => 'administration', # PROFILE BLOCK START
                       '/buckets'        => 'buckets',
                       '/magnets'        => 'magnets',
                       '/advanced'       => 'advanced',
                       '/users'          => 'users',
                       '/view'           => 'view',
                       '/history'        => 'history',
-                      '/'               => 'history' );
+                      '/'               => 'history' );      # PROFILE BLOCK STOP
 
     # Check to see if this user has administration rights, if they do
     # not then remove the administration and advanced URLs
@@ -781,8 +791,8 @@ sub url_handler__
 
         my $templ = $self->load_template__( $template, $url, $session );
 
-        &{$method}( $self, $client, $templ,
-                    $template, $url, $session );
+        &{$method}( $self, $client, $templ,      # PROFILE BLOCK START
+                    $template, $url, $session ); # PROFILE BLOCK STOP
         return 1;
     }
 
@@ -864,8 +874,8 @@ sub http_ok
     $selected = -1 if ( !defined( $selected ) );
 
     my @tab = ( 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard' );
-    $tab[$selected] = 'menuSelected' if ( ( $selected <= $#tab ) &&
-                                          ( $selected >= 0 ) );
+    $tab[$selected] = 'menuSelected' if ( ( $selected <= $#tab ) && # PROFILE BLOCK START
+                                          ( $selected >= 0 ) );     # PROFILE BLOCK STOP
 
     for my $i (0..$#tab) {
         $templ->param( "Common_Middle_Tab$i" => $tab[$i] );
@@ -877,38 +887,38 @@ sub http_ok
     # then insert a reference to an image that is generated through a
     # CGI.  Also send stats to the same site if that is allowed.
 
-    if ( defined( $session ) &&
+    if ( defined( $session ) &&                             # PROFILE BLOCK START
          ( $self->{today__} ne
            $self->user_config_( $self->{sessions__}{$session}{user},
-                                'last_update_check' ) ) ) {
+                                'last_update_check' ) ) ) { # PROFILE BLOCK STOP
         $self->calculate_today();
 
-        if ( $self->user_config_( $self->{sessions__}{$session}{user},
-                                  'update_check' ) ) {
-            my ( $major_version, $minor_version, $build_version ) =
-                $self->version() =~ /^v([^.]*)\.([^.]*)\.(.*)$/;
+        if ( $self->user_config_( $self->{sessions__}{$session}{user}, # PROFILE BLOCK START
+                                  'update_check' ) ) {                 # PROFILE BLOCK STOP
+            my ( $major_version, $minor_version, $build_version ) = # PROFILE BLOCK START
+                $self->version() =~ /^v([^.]*)\.([^.]*)\.(.*)$/;    # PROFILE BLOCK STOP
             $templ->param( 'Common_Middle_If_UpdateCheck' => 1 );
             $templ->param( 'Common_Middle_Major_Version' => $major_version );
             $templ->param( 'Common_Middle_Minor_Version' => $minor_version );
             $templ->param( 'Common_Middle_Build_Version' => $build_version );
         }
 
-        if ( defined( $session ) &&
+        if ( defined( $session ) &&                      # PROFILE BLOCK START
              ( $self->user_config_( $self->{sessions__}{$session}{user},
-                                    'send_stats' ) ) ) {
+                                    'send_stats' ) ) ) { # PROFILE BLOCK STOP
             $templ->param( 'Common_Middle_If_SendStats' => 1 );
-            my @buckets = $self->classifier_()->get_buckets(
-                $session );
+            my @buckets = $self->classifier_()->get_buckets( # PROFILE BLOCK START
+                $session );                                  # PROFILE BLOCK STOP
             my $bc      = $#buckets + 1;
             $templ->param( 'Common_Middle_Buckets'  => $bc );
-            $templ->param( 'Common_Middle_Messages' =>
-                           $self->mcount__( $session ) );
-            $templ->param( 'Common_Middle_Errors'   =>
-                           $self->ecount__( $session ) );
+            $templ->param( 'Common_Middle_Messages' =>    # PROFILE BLOCK START
+                           $self->mcount__( $session ) ); # PROFILE BLOCK STOP
+            $templ->param( 'Common_Middle_Errors'   =>    # PROFILE BLOCK START
+                           $self->ecount__( $session ) ); # PROFILE BLOCK STOP
         }
 
-        $self->user_config_( $self->{sessions__}{$session}{user},
-                             'last_update_check', $self->{today__}, 1 );
+        $self->user_config_( $self->{sessions__}{$session}{user},        # PROFILE BLOCK START
+                             'last_update_check', $self->{today__}, 1 ); # PROFILE BLOCK STOP
     }
 
     # Show login user name on header in the multi-user mode
@@ -940,7 +950,16 @@ sub http_ok
     $http_header .= "$eol$eol";
 
     if ( $client->connected ) {
-        $client->print( $http_header . $text );
+        my $data = $http_header . $text;
+
+        # Workaround for Win32 compatibility
+
+        while ( length( $data ) > 16383 ) {
+            my $subdata = substr( $data, 0, 16383 );
+            $client->print( $subdata );
+            $data = substr( $data, 16383 );
+        }
+        $client->print( $data );
     }
 }
 
@@ -961,30 +980,30 @@ sub handle_history_bar__
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
     if ( defined($self->{form_}{page_size}) ) {
-        if ( ( $self->{form_}{page_size} >= 1 ) &&
-             ( $self->{form_}{page_size} <= 1000 ) ) {
-            $self->user_config_( $self->{sessions__}{$session}{user},
-                                 'page_size', $self->{form_}{page_size} );
+        if ( ( $self->{form_}{page_size} >= 1 ) &&     # PROFILE BLOCK START
+             ( $self->{form_}{page_size} <= 1000 ) ) { # PROFILE BLOCK STOP
+            $self->user_config_( $self->{sessions__}{$session}{user},      # PROFILE BLOCK START
+                                 'page_size', $self->{form_}{page_size} ); # PROFILE BLOCK STOP
         } else {
-            $self->error_message__( $templ,
-                $self->language($session)->{Configuration_Error4} );
+            $self->error_message__( $templ,                          # PROFILE BLOCK START
+                $self->language($session)->{Configuration_Error4} ); # PROFILE BLOCK STOP
             delete $self->{form_}{page_size};
         }
     }
 
-    $templ->param( 'Configuration_Page_Size' =>
+    $templ->param( 'Configuration_Page_Size' =>          # PROFILE BLOCK START
                    $self->user_config_( $self->{sessions__}{$session}{user},
-                                        'page_size' ) );
+                                        'page_size' ) ); # PROFILE BLOCK STOP
 
     if ( defined($self->{form_}{history_days}) ) {
-        if ( ( $self->{form_}{history_days} >= 1 ) &&
-             ( $self->{form_}{history_days} <= 366 ) ) {
-            $self->user_module_config_( $self->{sessions__}{$session}{user},
+        if ( ( $self->{form_}{history_days} >= 1 ) &&    # PROFILE BLOCK START
+             ( $self->{form_}{history_days} <= 366 ) ) { # PROFILE BLOCK STOP
+            $self->user_module_config_( $self->{sessions__}{$session}{user}, # PROFILE BLOCK START
                                         'history', 'history_days',
-                                        $self->{form_}{history_days} );
+                                        $self->{form_}{history_days} );       # PROFILE BLOCK STOP
         } else {
-            $self->error_message__( $templ,
-                $self->language($session)->{Configuration_Error5} );
+            $self->error_message__( $templ,                          # PROFILE BLOCK START
+                $self->language($session)->{Configuration_Error5} ); # PROFILE BLOCK STOP
             $templ->param( 'Configuration_If_History_Days_Error' => 1 );
             delete $self->{form_}{history_days};
         }
@@ -1026,8 +1045,8 @@ sub handle_history_bar__
         my $selected = ($1 eq '+')?'checked':'';
         $column =~ s/^.//;
         $row{Configuration_Field_Name} = $column;
-        $row{Configuration_Localized_Field_Name} =
-           $self->language($session)->{$headers_table{$column}};
+        $row{Configuration_Localized_Field_Name} =                    # PROFILE BLOCK START
+                $self->language($session)->{$headers_table{$column}}; # PROFILE BLOCK STOP
         push ( @column_data, \%row );
     }
     $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
@@ -1090,8 +1109,8 @@ sub handle_configuration_bar__
     }
 
     if ( defined($self->{form_}{language}) ) {
-        if ( $self->user_config_( $userid, 'language' ) ne
-                 $self->{form_}{language} ) {
+        if ( $self->user_config_( $userid, 'language' ) ne # PROFILE BLOCK START
+                 $self->{form_}{language} ) {              # PROFILE BLOCK STOP
             my $language = $self->{form_}{language};
 
             $self->user_config_( $userid, 'language', $language );
@@ -1099,8 +1118,8 @@ sub handle_configuration_bar__
             # If the language setting of the administrator is changed in the
             # multiuser mode, update the global language setting
 
-            if ( $self->global_config_( 'single_user' ) &&
-                 ( $userid eq 1 ) ) {
+            if ( $self->global_config_( 'single_user' ) && # PROFILE BLOCK START
+                 ( $userid eq 1 ) ) {                      # PROFILE BLOCK STOP
                 $self->global_config_( 'language', $language );
 
                 $self->cache_language_for_user( $language, 'global' );
@@ -1176,28 +1195,28 @@ sub handle_configuration_bar__
 
         # Check that the two new passwords match
 
-        if ( $self->{form_}{new_password} ne
-             $self->{form_}{confirm_password} ) {
+        if ( $self->{form_}{new_password} ne      # PROFILE BLOCK START
+             $self->{form_}{confirm_password} ) { # PROFILE BLOCK STOP
 
-            $self->error_message__( $templ,
-                       $self->language($session)->{Configuration_Password_Mismatch} );
+            $self->error_message__( $templ,                                            # PROFILE BLOCK START
+                       $self->language($session)->{Configuration_Password_Mismatch} ); # PROFILE BLOCK STOP
         } else {
 
             # Check that the old password is correct
 
-            if ( !$self->classifier_()->validate_password( $session,
-                                        $self->{form_}{old_password} ) ) {
+            if ( !$self->classifier_()->validate_password( $session,       # PROFILE BLOCK START
+                                        $self->{form_}{old_password} ) ) { # PROFILE BLOCK STOP
 
-                $self->error_message__( $templ,
-                           $self->language($session)->{Configuration_Password_Bad} );
+                $self->error_message__( $templ,                                       # PROFILE BLOCK START
+                           $self->language($session)->{Configuration_Password_Bad} ); # PROFILE BLOCK STOP
             } else {
-                if ( !$self->classifier_()->set_password( $session,
-                                             $self->{form_}{new_password} ) ) {
-                    $self->error_message__( $templ,
-                             $self->language($session)->{Configuration_Password_Fail});
+                if ( !$self->classifier_()->set_password( $session,             # PROFILE BLOCK START
+                                             $self->{form_}{new_password} ) ) { # PROFILE BLOCK STOP
+                    $self->error_message__( $templ,                                     # PROFILE BLOCK START
+                             $self->language($session)->{Configuration_Password_Fail}); # PROFILE BLOCK STOP
                 } else {
-                    $self->status_message__( $templ,
-                             $self->language($session)->{Configuration_Set_Password} );
+                    $self->status_message__( $templ,                                    # PROFILE BLOCK START
+                             $self->language($session)->{Configuration_Set_Password} ); # PROFILE BLOCK STOP
                 }
             }
         }
@@ -1221,11 +1240,9 @@ sub administration_page
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
-    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
-                                                    $page, $session );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template, # PROFILE BLOCK START
+                                                    $page, $session );      # PROFILE BLOCK STOP
 
-    my $server_error = '';
-    my $port_error   = '';
     my $user = $self->{sessions__}{$session}{user};
 
     my $single_user_mode_changed = 0;
@@ -1240,12 +1257,15 @@ sub administration_page
         $self->global_config_( 'single_user', $self->{form_}->{usermode} ? 1 : 0 );
 
         if ( $self->{form_}->{ serveropt_html } ) {
-            $self->config_( 'local',  0 );
-            $self->status_message__( $templ, $self->language($session)->{Security_ServerModeUpdateUI} );
-        }
-        else {
-            $self->config_( 'local',  1 );
-            $self->status_message__( $templ, $self->language($session)->{Security_StealthModeUpdateUI} );
+            if ( $self->config_( 'local' ) ne 0 ) {
+                $self->config_( 'local',  0 );
+                $self->status_message__( $templ, $self->language($session)->{Security_ServerModeUpdateUI} );
+            }
+        } else {
+            if ( $self->config_( 'local' ) ne 1 ) {
+                $self->config_( 'local',  1 );
+                $self->status_message__( $templ, $self->language($session)->{Security_StealthModeUpdateUI} );
+            }
         }
 
         # If the single user mode (POPFile classic) is enabled or disabled
@@ -1260,20 +1280,32 @@ sub administration_page
 
     elsif ( $self->{form_}->{privacy} ) {
         if ( $self->{form_}->{send_stats} ) {
-            $self->user_config_( $user, 'send_stats', 1 );
-            $self->status_message__( $templ, $self->language($session)->{Security_StatsOn} . "\n" .
-                                             $self->language($session)->{Security_ExplainStats} );
+            if ( $self->user_config_( $user, 'send_stats' ) ne 1 ) {
+                $self->user_config_( $user, 'send_stats', 1 );
+                $self->status_message__(                                              # PROFILE BLOCK START
+                        $templ,
+                        $self->language($session)->{Security_StatsOn} . "\n" .
+                                $self->language($session)->{Security_ExplainStats} ); # PROFILE BLOCK STOP
+            }
         } else {
-            $self->user_config_( $user, 'send_stats', 0 );
-            $self->status_message__( $templ, $self->language($session)->{Security_StatsOff} );
+            if ( $self->user_config_( $user, 'send_stats' ) ne 0 ) {
+                $self->user_config_( $user, 'send_stats', 0 );
+                $self->status_message__( $templ, $self->language($session)->{Security_StatsOff} );
+            }
         }
         if ( $self->{form_}->{update_check} ) {
-            $self->user_config_( $user, 'update_check', 1 );
-            $self->status_message__( $templ, $self->language($session)->{Security_UpdateOn} . "\n" .
-                                             $self->language($session)->{Security_ExplainUpdate} );
+            if ( $self->user_config_( $user, 'update_check' ) ne 1 ) {
+                $self->user_config_( $user, 'update_check', 1 );
+                $self->status_message__(                                               # PROFILE BLOCK START
+                        $templ,
+                        $self->language($session)->{Security_UpdateOn} . "\n" .
+                                $self->language($session)->{Security_ExplainUpdate} ); # PROFILE BLOCK STOP
+            }
         } else {
-            $self->user_config_( $user, 'update_check', 0 );
-            $self->status_message__( $templ, $self->language($session)->{Security_UpdateOff} );
+            if ( $self->user_config_( $user, 'update_check' ) ne 0 ) {
+                $self->user_config_( $user, 'update_check', 0 );
+                $self->status_message__( $templ, $self->language($session)->{Security_UpdateOff} );
+            }
         }
     }
 
@@ -1282,48 +1314,97 @@ sub administration_page
     elsif ( $self->{form_}->{submit_debug} ) {
         my $logger_level = $self->{form_}->{level};
 
-        $self->module_config_( 'logger', 'level', $logger_level );
-        $self->status_message__(
-                $templ,
-                sprintf( $self->language($session)->{Configuration_Logger_LevelUpdate},
-                         $self->language($session)->{"Configuration_Logger_Level$logger_level"} ) );
-
-        if ( ( defined($self->{form_}->{debug}) ) &&
-           ( ( $self->{form_}{debug} >= 1 ) &&
-             ( $self->{form_}{debug} <= 4 ) ) ) {
-            my $debug = $self->{form_}{debug} - 1;
-            my %debug_options = (
-                    0 => 'Configuration_None',
-                    1 => 'Configuration_ToFile',
-                    2 => 'Configuration_ToScreen',
-                    3 => 'Configuration_ToScreenFile' );
-
-            $self->global_config_( 'debug', $debug );
-            $self->status_message__(
+        if ( $self->module_config_( 'logger', 'level' ) ne $logger_level ) {
+            $self->module_config_( 'logger', 'level', $logger_level );
+            $self->status_message__(  # PROFILE BLOCK START
                     $templ,
-                    sprintf( $self->language($session)->{Configuration_LoggerOutputUpdate},
-                             $self->language($session)->{$debug_options{$debug}} ) );
+                    sprintf( $self->language($session)->{Configuration_Logger_LevelUpdate},
+                             $self->language($session)->{"Configuration_Logger_Level$logger_level"} )
+                                   ); # PROFILE BLOCK STOP
+        }
+
+        if ( ( defined($self->{form_}->{debug}) ) && # PROFILE BLOCK START
+           ( ( $self->{form_}{debug} >= 1 ) &&
+             ( $self->{form_}{debug} <= 4 ) ) ) {    # PROFILE BLOCK STOP
+            my $debug = $self->{form_}{debug} - 1;
+            if ( $self->global_config_( 'debug' ) ne $debug ) {
+                my %debug_options = (                        # PROFILE BLOCK START
+                        0 => 'Configuration_None',
+                        1 => 'Configuration_ToFile',
+                        2 => 'Configuration_ToScreen',
+                        3 => 'Configuration_ToScreenFile' ); # PROFILE BLOCK STOP
+
+                $self->global_config_( 'debug', $debug );
+                $self->status_message__(                   # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Configuration_LoggerOutputUpdate},
+                                 $self->language($session)->{$debug_options{$debug}} )
+                                       );                  # PROFILE BLOCK STOP
+            }
         }
     }
 
-    # HTML module options
+    # Module options
 
     elsif ( $self->{form_}->{update_modules} ) {
         if ( defined($self->{form_}{ui_port}) ) {
-            if ( ( $self->{form_}{ui_port} >= 1 ) &&
-                 ( $self->{form_}{ui_port} < 65536 ) ) {
-                $self->config_( 'port', $self->{form_}{ui_port} );
-                $self->status_message__( $templ, sprintf( $self->language($session)->{Configuration_UIUpdate},
-                    $self->config_( 'port' ) ) );
+            if ( ( $self->{form_}{ui_port} =~ /^\d+$/ ) &&  # PROFILE BLOCK START
+                 ( $self->{form_}{ui_port} >= 1 ) &&
+                 ( $self->{form_}{ui_port} < 65536 ) ) {    # PROFILE BLOCK STOP
+                if ( $self->config_( 'port' ) ne $self->{form_}{ui_port} ) {
+                    $self->config_( 'port', $self->{form_}{ui_port} );
+                    $self->status_message__(                       # PROFILE BLOCK START
+                            $templ,
+                            sprintf( $self->language($session)->{Configuration_UIUpdate},
+                                     $self->config_( 'port' ) ) ); # PROFILE BLOCK STOP
+                }
             } else {
                 $self->error_message__( $templ, $self->language($session)->{Configuration_Error2} );
                 delete $self->{form_}{ui_port};
             }
         }
 
+        if ( defined($self->{form_}{ui_https_port}) ) {
+            if ( ( $self->{form_}{ui_https_port} =~ /^\d+$/ ) && # PROFILE BLOCK START
+                 ( $self->{form_}{ui_https_port} >= 1 ) &&
+                 ( $self->{form_}{ui_https_port} < 65536 ) ) {   # PROFILE BLOCK STOP
+                if ( $self->config_( 'https_port' ) ne $self->{form_}{ui_https_port} ) {
+                    $self->config_( 'https_port', $self->{form_}{ui_https_port} );
+                    $self->status_message__(                             # PROFILE BLOCK START
+                            $templ,
+                            sprintf( $self->language($session)->{Configuration_UIHTTPSPortUpdate},
+                                     $self->config_( 'https_port' ) ) ); # PROFILE BLOCK STOP
+                }
+            } else {
+                $self->error_message__( $templ, $self->language($session)->{Configuration_Error2} );
+                delete $self->{form_}{ui_https_port};
+            }
+        }
+
+        if ( $self->{form_}{ui_https} ) {
+            if ( $self->config_( 'https_enabled' ) ne 1 ) {
+                $self->config_( 'https_enabled', 1 );
+                $self->status_message__( $templ, $self->language($session)->{Configuration_UIHTTPSEnabled} );
+            }
+        } else {
+            if ( $self->config_( 'https_enabled' ) ne 0 ) {
+                $self->config_( 'https_enabled', 0 );
+                $self->status_message__( $templ, $self->language($session)->{Configuration_UIHTTPSDisabled} );
+            }
+        }
+
         if ( defined($self->{form_}{timeout}) ) {
-            if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
-                $self->global_config_( 'timeout', $self->{form_}{timeout} );
+            if ( ( $self->{form_}{timeout} =~ /^\d+$/ ) &&  # PROFILE BLOCK START
+                 ( $self->{form_}{timeout} >= 10 ) &&
+                 ( $self->{form_}{timeout} <= 300 ) ) {     # PROFILE BLOCK STOP
+                if ( $self->global_config_( 'timeout' ) ne $self->{form_}{timeout} ) {
+                    $self->global_config_( 'timeout', $self->{form_}{timeout} );
+                    $self->status_message__(                                 # PROFILE BLOCK START
+                            $templ,
+                            sprintf( $self->language($session)->{Configuration_TCPTimeoutUpdate},
+                                     $self->global_config_( 'timeout' ) ) ); # PROFILE BLOCK STOP
+
+                }
             }
             else {
                 $self->error_message__( $templ, $self->language($session)->{Configuration_Error6} );
@@ -1336,13 +1417,20 @@ sub administration_page
 
     #$templ->param( 'Security_If_Password_Updated' => ( defined($self->{form_}{password} ) ) );
     $templ->param( 'Configuration_UI_Port'    => $self->config_( 'port' ) );
+    $templ->param( 'Configuration_UI_HTTPS'   => $self->config_( 'https_enabled' ) );
+    $templ->param( 'Configuration_UI_HTTPS_Port' => $self->config_( 'https_port' ) );
+    $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
+
     $templ->param( 'If_Single_User'           => $self->global_config_( 'single_user' ) );
+
     $templ->param( 'Security_If_Send_Stats'   => $self->user_config_( $user, 'send_stats' ) );
     $templ->param( 'Security_If_Update_Check' => $self->user_config_( $user, 'update_check' ) );
-    $templ->param( 'logger_level_selected_' . $self->module_config_( 'logger', 'level' )
-                        => 'selected="selected"');
-    $templ->param( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected'
-                        => 'selected="selected"' );
+
+    $templ->param( 'logger_level_selected_' . $self->module_config_( 'logger', 'level' ) # PROFILE BLOCK START
+                        => 'selected="selected"');                                       # PROFILE BLOCK STOP
+    $templ->param( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected' # PROFILE BLOCK START
+                        => 'selected="selected"' );                                                # PROFILE BLOCK STOP
+
     $templ->param( "Security_If_Local_html" => $self->config_( 'local' ) );
     my $all_local = $self->config_( 'local' );
 
@@ -1350,12 +1438,17 @@ sub administration_page
     my %security_templates;
 
     for my $name (keys %{$self->{dynamic_ui__}{security}}) {
-        $security_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{security}{$name}{template}, $page, $session );
+        $security_templates{$name} = $self->load_template__( # PROFILE BLOCK START
+                $self->{dynamic_ui__}{security}{$name}{template},
+                $page,
+                $session );                                  # PROFILE BLOCK STOP
         if ( $self->{form_}->{apply_stealth} ) {
-            ($status_message, $error_message) = $self->{dynamic_ui__}{security}{$name}{object}->validate_item( $name,
-                                                                       $security_templates{$name},
-                                                                       \%{$self->language($session)},
-                                                                       \%{$self->{form_}} );
+            ($status_message, $error_message) =            # PROFILE BLOCK START
+                    $self->{dynamic_ui__}{security}{$name}{object}->validate_item(
+                            $name,
+                            $security_templates{$name},
+                            \%{$self->language($session)},
+                            \%{$self->{form_}} );          # PROFILE BLOCK STOP
 
             # Tell the user anything the dynamic UI was interested in sharing
 
@@ -1373,11 +1466,16 @@ sub administration_page
     my %chain_templates;
 
     for my $name (keys %{$self->{dynamic_ui__}{chain}}) {
-        $chain_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{chain}{$name}{template}, $page, $session );
-        ($status_message, $error_message) = $self->{dynamic_ui__}{chain}{$name}{object}->validate_item( $name,
-                                                                    $chain_templates{$name},
-                                                                    \%{$self->language($session)},
-                                                                    \%{$self->{form_}} );
+        $chain_templates{$name} = $self->load_template__(  # PROFILE BLOCK START
+                $self->{dynamic_ui__}{chain}{$name}{template},
+                $page,
+                $session );                                # PROFILE BLOCK STOP
+        ($status_message, $error_message) =                # PROFILE BLOCK START
+                $self->{dynamic_ui__}{chain}{$name}{object}->validate_item(
+                        $name,
+                        $chain_templates{$name},
+                        \%{$self->language($session)},
+                        \%{$self->{form_}} );              # PROFILE BLOCK STOP
 
         # Tell the user anything the dynamic UI was interested in sharing
 
@@ -1396,8 +1494,10 @@ sub administration_page
     my $security_html = '';
 
     for my $name (sort keys %{$self->{dynamic_ui__}{security}}) {
-        my $local = $self->{dynamic_ui__}{security}{$name}{object}->configure_item(
-            $name, $security_templates{$name}, \%{$self->language($session)} );
+        my $local = $self->{dynamic_ui__}{security}{$name}{object}->configure_item( # PROFILE BLOCK START
+                $name,
+                $security_templates{$name},
+                \%{$self->language($session)} );                                    # PROFILE BLOCK STOP
         $all_local &&= $local;
     }
 
@@ -1413,15 +1513,15 @@ sub administration_page
     my $chain_html = '';
 
     for my $name (sort keys %{$self->{dynamic_ui__}{chain}}) {
-        $self->{dynamic_ui__}{chain}{$name}{object}->configure_item(
-            $name, $chain_templates{$name}, \%{$self->language($session)} );
+        $self->{dynamic_ui__}{chain}{$name}{object}->configure_item( # PROFILE BLOCK START
+                $name,
+                $chain_templates{$name},
+                \%{$self->language($session)} );                     # PROFILE BLOCK STOP
         $chain_html .= $chain_templates{$name}->output;
     }
 
     $templ->param( 'Security_Dynamic_Security' => $security_html );
     $templ->param( 'Security_Dynamic_Chain'    => $chain_html    );
-
-
 
     # Load all of the templates that are needed for the dynamic parts of
     # the configuration page, and for each one call its validation interface
@@ -1430,14 +1530,15 @@ sub administration_page
 
     my %dynamic_templates;
     for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
-        $dynamic_templates{$name} = $self->load_template__(
-            $self->{dynamic_ui__}{configuration}{$name}{template}, $page,
-            $session );
-        ($status_message, $error_message) = $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
-            $name,
-            $dynamic_templates{$name},
-            \%{$self->language($session)},
-            \%{$self->{form_}} );
+        $dynamic_templates{$name} = $self->load_template__( # PROFILE BLOCK START
+                $self->{dynamic_ui__}{configuration}{$name}{template}, $page,
+                $session );                                 # PROFILE BLOCK STOP
+        ($status_message, $error_message) =   # PROFILE BLOCK START
+                $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
+                        $name,
+                        $dynamic_templates{$name},
+                        \%{$self->language($session)},
+                        \%{$self->{form_}} ); # PROFILE BLOCK STOP
 
         # Tell the user anything the dynamic UI was interested in sharing
 
@@ -1451,9 +1552,6 @@ sub administration_page
         }
     }
 
-
-    $self->status_message__( $templ, sprintf( $self->language($session)->{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
-    $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
 
     # Insert all the items that are dynamically created from the
     # modules that are loaded
@@ -1469,8 +1567,8 @@ sub administration_page
             $configuration_html .= uc($module);
             $configuration_html .= "</h2>\n";
         }
-        $self->{dynamic_ui__}{configuration}{$name}{object}->configure_item(
-            $name, $dynamic_templates{$name}, \%{$self->language($session)} );
+        $self->{dynamic_ui__}{configuration}{$name}{object}->configure_item(   # PROFILE BLOCK START
+            $name, $dynamic_templates{$name}, \%{$self->language($session)} ); # PROFILE BLOCK STOP
         $configuration_html .= $dynamic_templates{$name}->output;
     }
 
@@ -1490,23 +1588,23 @@ sub administration_page
     my $odd = 1;
     foreach my $active_session (@{$active_sessions}) {
         my %row;
-        $row{CurrentSessions_UserName} =
-            $self->classifier_()->get_user_name_from_id( $session, $active_session->{userid} );
-        $row{CurrentSessions_LastUsed} =
-            $self->pretty_date__( $active_session->{lastused}, 0, $session );
+        $row{CurrentSessions_UserName} = # PROFILE BLOCK START
+            $self->classifier_()->get_user_name_from_id( $session, $active_session->{userid} ); # PROFILE BLOCK STOP
+        $row{CurrentSessions_LastUsed} = # PROFILE BLOCK START
+            $self->pretty_date__( $active_session->{lastused}, 0, $session ); # PROFILE BLOCK STOP
         my $idletime = $current_time - $active_session->{lastused};
         my $h = int( $idletime / 3600 );
         my $m = int( ( $idletime % 3600 ) / 60 );
         my $s = $idletime % 60;
         if ( $h > 0 ) {
-            $row{CurrentSessions_IdleTime} =
-                sprintf( "%d:%02d:%02d", $h, $m, $s );
+            $row{CurrentSessions_IdleTime} =           # PROFILE BLOCK START
+                sprintf( "%d:%02d:%02d", $h, $m, $s ); # PROFILE BLOCK STOP
         } elsif ( $m > 0 ) {
-            $row{CurrentSessions_IdleTime} =
-                sprintf( "%02d:%02d", $m, $s );
+            $row{CurrentSessions_IdleTime} =           # PROFILE BLOCK START
+                sprintf( "%02d:%02d", $m, $s );        # PROFILE BLOCK STOP
         } else {
-            $row{CurrentSessions_IdleTime} =
-                sprintf( ":%02d", $s );
+            $row{CurrentSessions_IdleTime} =           # PROFILE BLOCK START
+                sprintf( ":%02d", $s );                # PROFILE BLOCK STOP
         }
         push( @active_sessions_data, \%row );
     }
@@ -1571,8 +1669,8 @@ sub pretty_date__
     }
 
     if ( $format =~ /[\t ]*(.+)[\t ]*\|[\t ]*(.+)/ ) {
-        if ( ( $date < time ) &&
-             ( $date > ( time - ( 7 * 24 * 60 * 60 ) ) ) ) {
+        if ( ( $date < time ) &&                             # PROFILE BLOCK START
+             ( $date > ( time - ( 7 * 24 * 60 * 60 ) ) ) ) { # PROFILE BLOCK STOP
             if ( $long ) {
                 return time2str( $2, $date );
             } else {
@@ -1601,87 +1699,140 @@ sub users_page
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
-    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
-                                                    $page, $session );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template, # PROFILE BLOCK START
+                                                    $page, $session );      # PROFILE BLOCK STOP
 
     # Handle user creation
 
     if ( exists( $self->{form_}{create} ) &&
          ( $self->{form_}{newuser} ne '' ) ) {
-        my ( $result, $password ) = $self->classifier_()->create_user(
+        my ( $result, $password ) = $self->classifier_()->create_user( # PROFILE BLOCK START
                 $session,
                 $self->{form_}{newuser},
                 $self->{form_}{clone},
                 $self->{form_}{users_copy_magnets},
-                $self->{form_}{users_copy_corpus} );
+                $self->{form_}{users_copy_corpus} );                   # PROFILE BLOCK STOP
         if ( $result == 0 ) {
             if ( $self->{form_}{clone} ne '' ) {
-                 $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Created_And_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
+                 $self->status_message__(                  # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Users_Created_And_Cloned},
+                                 $self->{form_}{newuser},
+                                 $self->{form_}{clone},
+                                 $password ) );            # PROFILE BLOCK STOP
             } else {
-                $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Created}, $self->{form_}{newuser}, $password ) );
+                $self->status_message__(                   # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Users_Created},
+                                 $self->{form_}{newuser},
+                                 $password ) );            # PROFILE BLOCK STOP
             }
         }
         if ( $result == 1 ) {
-            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Not_Created_Exists}, $self->{form_}{newuser} ) );
+            $self->error_message__(                        # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Not_Created_Exists},
+                             $self->{form_}{newuser} ) );  # PROFILE BLOCK STOP
         }
         if ( $result == 2 ) {
-            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Not_Created}, $self->{form_}{newuser} ) );
+            $self->error_message__(                        # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Not_Created},
+                             $self->{form_}{newuser} ) );  # PROFILE BLOCK STOP
         }
         if ( $result == 3 ) {
-            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Created_Not_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone}, $password ) );
+            $self->error_message__(                        # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Created_Not_Cloned},
+                             $self->{form_}{newuser},
+                             $self->{form_}{clone},
+                             $password ) );                # PROFILE BLOCK STOP
         }
     }
 
     # Handle user rename
 
-    if ( exists( $self->{form_}{rename} ) &&
-         ( $self->{form_}{torename} ne '' ) && ( $self->{form_}{newname} ne '' ) ) {
-        my ( $result, $password ) = $self->classifier_()->rename_user(
-                $session,
-                $self->{form_}{torename},
-                $self->{form_}{newname} );
+    if ( exists( $self->{form_}{rename} ) &&               # PROFILE BLOCK START
+         ( $self->{form_}{torename} ne '' ) &&
+         ( $self->{form_}{newname} ne '' ) ) {             # PROFILE BLOCK STOP
+        my ( $result, $password ) =                        # PROFILE BLOCK START
+                $self->classifier_()->rename_user(
+                        $session,
+                        $self->{form_}{torename},
+                        $self->{form_}{newname} );         # PROFILE BLOCK STOP
         if ( $result == 0 ) {
-            $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Renamed}, $self->{form_}{torename}, $self->{form_}{newname}, $password ) );
+            $self->status_message__(                       # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Renamed},
+                             $self->{form_}{torename},
+                             $self->{form_}{newname},
+                             $password ) );                # PROFILE BLOCK STOP
         }
         if ( $result == 1 ) {
-            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Rename_Failed_Exists}, $self->{form_}{torename}, $self->{form_}{newname} ) );
+            $self->error_message__(                        # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Rename_Failed_Exists},
+                             $self->{form_}{torename},
+                             $self->{form_}{newname} ) );  # PROFILE BLOCK STOP
         }
         if ( $result == 2 ) {
-            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Rename_Failed}, $self->{form_}{torename} ) );
+            $self->error_message__(                        # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Rename_Failed},
+                             $self->{form_}{torename} ) ); # PROFILE BLOCK STOP
         }
     }
 
     # Handle user removal
 
-    if ( exists( $self->{form_}{remove} ) &&
-         ( $self->{form_}{toremove} ne '' ) ) {
+    if ( exists( $self->{form_}{remove} ) &&               # PROFILE BLOCK START
+         ( $self->{form_}{toremove} ne '' ) ) {            # PROFILE BLOCK STOP
         my $result = $self->classifier_()->remove_user( $session, $self->{form_}{toremove} );
         if ( $result == 0 ) {
-            $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Removed}, $self->{form_}{toremove} ) );
+            $self->status_message__(                       # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Removed},
+                             $self->{form_}{toremove} ) ); # PROFILE BLOCK STOP
         }
         if ( $result == 1 ) {
-            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Removed_Failed}, $self->{form_}{toremove} ) );
+            $self->error_message__(                        # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Removed_Failed},
+                             $self->{form_}{toremove} ) ); # PROFILE BLOCK STOP
         }
         if ( $result == 2 ) {
-            $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Removed_Failed_Admin}, $self->{form_}{toremove} ) );
+            $self->error_message__(                        # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Users_Removed_Failed_Admin},
+                             $self->{form_}{toremove} ) ); # PROFILE BLOCK STOP
         }
     }
 
     # Handle changing/initializing user's password
 
-    if ( exists( $self->{form_}{users_change_password} ) &&
-         ( $self->{form_}{tochangepassword} ne '' ) ) {
+    if ( exists( $self->{form_}{users_change_password} ) && # PROFILE BLOCK START
+         ( $self->{form_}{tochangepassword} ne '' ) ) {     # PROFILE BLOCK STOP
 
         my $initialize_password = $self->{form_}{users_reset_password};
 
         if ( $initialize_password ) {
             # Initialize user's password
-            my ($result, $new_password) = $self->classifier_()->initialize_users_password( $session, $self->{form_}{tochangepassword} );
+            my ($result, $new_password) =                       # PROFILE BLOCK START
+                    $self->classifier_()->initialize_users_password(
+                            $session,
+                            $self->{form_}{tochangepassword} ); # PROFILE BLOCK STOP
             if ( $result == 0 ) {
-                $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Reset_Password}, $self->{form_}{tochangepassword}, $new_password ) );
+                $self->status_message__(                   # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Users_Reset_Password},
+                                 $self->{form_}{tochangepassword},
+                                 $new_password ) );        # PROFILE BLOCK STOP
             }
             if ( $result == 1 ) {
-                $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Reset_Password_Failed}, $self->{form_}{tochangepassword} ) );
+                $self->error_message__(                                # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Users_Reset_Password_Failed},
+                                 $self->{form_}{tochangepassword} ) ); # PROFILE BLOCK STOP
             }
 
         } else {
@@ -1691,15 +1842,27 @@ sub users_page
             my $confirm_password = $self->{form_}{users_confirm_password};
 
             if ( $new_password eq $confirm_password ) {
-                my $result = $self->classifier_()->change_users_password( $session, $self->{form_}{tochangepassword}, $new_password );
+                my $result = $self->classifier_()->change_users_password( # PROFILE BLOCK START
+                        $session,
+                        $self->{form_}{tochangepassword},
+                        $new_password );                                  # PROFILE BLOCK STOP
                 if ( $result == 0 ) {
-                    $self->status_message__( $templ, sprintf( $self->language($session)->{Users_Changed_Password}, $self->{form_}{tochangepassword} ) );
+                    $self->status_message__(                               # PROFILE BLOCK START
+                            $templ,
+                            sprintf( $self->language($session)->{Users_Changed_Password},
+                                     $self->{form_}{tochangepassword} ) ); # PROFILE BLOCK STOP
                 }
                 if ( $result == 1 ) {
-                    $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Change_Password_Failed}, $self->{form_}{tochangepassword} ) );
+                    $self->error_message__(                                # PROFILE BLOCK START
+                            $templ,
+                            sprintf( $self->language($session)->{Users_Change_Password_Failed},
+                                     $self->{form_}{tochangepassword} ) ); # PROFILE BLOCK STOP
                 }
             } else {
-                $self->error_message__( $templ, sprintf( $self->language($session)->{Users_Change_Password_Failed_Mismatch}, $self->{form_}{tochangepassword} ) );
+                $self->error_message__(                                # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Users_Change_Password_Failed_Mismatch},
+                                 $self->{form_}{tochangepassword} ) ); # PROFILE BLOCK STOP
             }
         }
     }
@@ -1710,8 +1873,8 @@ sub users_page
         my $id = $self->classifier_()->get_user_id( $session, $self->{form_}{editname} );
         foreach my $param (sort keys %{$self->{form_}}) {
             if ( $param =~ /parameter_(.*)/ ) {
-                $self->classifier_()->set_user_parameter_from_id( $id,
-                    $1, $self->{form_}{$param} );
+                $self->classifier_()->set_user_parameter_from_id( $id, # PROFILE BLOCK START
+                    $1, $self->{form_}{$param} );                      # PROFILE BLOCK STOP
             }
         }
     }
@@ -1719,8 +1882,8 @@ sub users_page
     # Handle adding an account to a user
 
     if ( defined( $self->{form_}{addaccount} ) ) {
-        if ( ( $self->{form_}{newaccount} ne '' ) &&
-             ( $self->{form_}{newaccount} =~ /^.+:.+$/ ) )  {
+        if ( ( $self->{form_}{newaccount} ne '' ) &&          # PROFILE BLOCK START
+             ( $self->{form_}{newaccount} =~ /^.+:.+$/ ) ) {  # PROFILE BLOCK STOP
             my $id = $self->classifier_()->get_user_id( $session, $self->{form_}{editname} );
             my $result = $self->classifier_()->add_account( $session, $id, 'pop3', $self->{form_}{newaccount} );
             if ( $result == -1 ) {
@@ -1828,8 +1991,8 @@ sub advanced_page
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
-    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
-                                                    $page, $session );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template, # PROFILE BLOCK START
+                                                    $page, $session );      # PROFILE BLOCK STOP
 
     my $single_mode = $self->global_config_( 'single_user' );
 
@@ -1838,8 +2001,8 @@ sub advanced_page
     if ( defined( $self->{form_}{update_params} ) ) {
         foreach my $param (sort keys %{$self->{form_}}) {
             if ( $param =~ /parameter_(.*)/ ) {
-                $self->configuration_()->parameter( $1,
-                    $self->{form_}{$param} );
+                $self->configuration_()->parameter( $1, # PROFILE BLOCK START
+                    $self->{form_}{$param} );           # PROFILE BLOCK STOP
             }
         }
 
@@ -1851,8 +2014,8 @@ sub advanced_page
     if ( $single_mode && defined( $self->{form_}{update_single_user_params} ) ) {
         foreach my $param (sort keys %{$self->{form_}}) {
             if ( $param =~ /parameter_(.*)/ ) {
-                $self->classifier_()->set_user_parameter_from_id( 1,
-                    $1, $self->{form_}{$param} );
+                $self->classifier_()->set_user_parameter_from_id( 1, # PROFILE BLOCK START
+                    $1, $self->{form_}{$param} );                    # PROFILE BLOCK STOP
             }
         }
     }
@@ -1860,12 +2023,15 @@ sub advanced_page
     # Handle adding/removing words to/from stopwords
 
     if ( defined($self->{form_}{newword}) ) {
-        my $result = $self->classifier_()->add_stopword( $session,
-                         $self->{form_}{newword} );
+        my $result = $self->classifier_()->add_stopword( $session, # PROFILE BLOCK START
+                         $self->{form_}{newword} );                # PROFILE BLOCK STOP
         if ( $result == 0 ) {
             $self->error_message__( $templ, $self->language($session)->{Advanced_Error2} );
         } else {
-            $self->status_message__( $templ, sprintf $self->language($session)->{Advanced_Error3}, $self->{form_}{newword} );
+            $self->status_message__(                       # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Advanced_Error3},
+                             $self->{form_}{newword} ) );  # PROFILE BLOCK STOP
         }
     }
 
@@ -1875,11 +2041,14 @@ sub advanced_page
         if ( $result == 0 ) {
             $self->error_message__( $templ, $self->language($session)->{Advanced_Error2} );
         } else {
-            $self->status_message__( $templ, sprintf $self->language($session)->{Advanced_Error5}, $self->{form_}{word} );
+            $self->status_message__(                       # PROFILE BLOCK START
+                    $templ,
+                    sprintf( $self->language($session)->{Advanced_Error5},
+                             $self->{form_}{word} ) );     # PROFILE BLOCK STOP
         }
     }
 
-    # the word census ( stopword )
+    # the word census ( stopwords )
 
     my $last = '';
     my $need_comma = 0;
@@ -1898,7 +2067,7 @@ sub advanced_page
             $word =~ /^(.)/;
             $c = $1;
         } else {
-                if ( $self->global_config_( 'language' ) =~ /^Nihongo$/ ) {
+            if ( $self->global_config_( 'language' ) =~ /^Nihongo$/ ) {
                no locale;
                $word =~ /^($euc_jp)/o;
                $c = $1;
@@ -1968,10 +2137,10 @@ sub advanced_page
 
         $row_data{Advanced_Parameter}   = $param;
         $row_data{Advanced_Value}       = $value;
-        $row_data{Advanced_If_Changed}  =
-            !$self->configuration_()->is_default( $param );
-        $row_data{Advanced_If_Password} =
-            ( $param =~ /_password/ ) ? 1 : 0;
+        $row_data{Advanced_If_Changed}  =                   # PROFILE BLOCK START
+            !$self->configuration_()->is_default( $param ); # PROFILE BLOCK STOP
+        $row_data{Advanced_If_Password} =                   # PROFILE BLOCK START
+            ( $param =~ /_password/ ) ? 1 : 0;              # PROFILE BLOCK STOP
 
 
         push ( @param_loop, \%row_data);
@@ -2031,8 +2200,8 @@ sub magnet_page
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
-    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
-                                                    $page, $session );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,  # PROFILE BLOCK START
+                                                    $page, $session );       # PROFILE BLOCK STOP
 
     if ( defined( $self->{form_}{delete} ) ) {
         for my $i ( 1 .. $self->{form_}{count} ) {
@@ -2043,17 +2212,17 @@ sub magnet_page
                 my $mbucket = $self->{form_}{"bucket$i"};
 
                 $self->classifier_()->delete_magnet( $session, $mbucket, $mtype, $mtext );
-                $self->status_message__(
+                $self->status_message__(                         # PROFILE BLOCK START
                         $templ,
                         sprintf( $self->language($session)->{Magnet_RemovedMagnets},
-                                 "$mtype: $mtext", $mbucket ) );
+                                 "$mtype: $mtext", $mbucket ) ); # PROFILE BLOCK STOP
             }
         }
     }
 
-    if ( defined( $self->{form_}{count} ) &&
+    if ( defined( $self->{form_}{count} ) &&               # PROFILE BLOCK START
        ( defined( $self->{form_}{update} ) ||
-         defined( $self->{form_}{create} ) ) ) {
+         defined( $self->{form_}{create} ) ) ) {           # PROFILE BLOCK STOP
         for my $i ( 0 .. $self->{form_}{count} ) {
             my $mtype   = $self->{form_}{"type$i"};
             my $mtext   = $self->{form_}{"text$i"};
@@ -2065,8 +2234,8 @@ sub magnet_page
                 my $obucket = $self->{form_}{"obucket$i"};
 
                 if ( defined( $otype ) ) {
-                    $self->classifier_()->delete_magnet( $session,
-                        $obucket, $otype, $otext );
+                    $self->classifier_()->delete_magnet( $session, # PROFILE BLOCK START
+                        $obucket, $otype, $otext );                # PROFILE BLOCK STOP
                 }
             }
 
@@ -2100,19 +2269,21 @@ sub magnet_page
                 my $found = 0;
 
                 foreach my $current_mtext (@mtexts) {
-                    for my $bucket ($self->classifier_()->get_buckets_with_magnets(
-                                        $session )) {
+                    for my $bucket ($self->classifier_()->get_buckets_with_magnets( # PROFILE BLOCK START
+                                        $session )) {                               # PROFILE BLOCK STOP
                         my %magnets;
-                        @magnets{ $self->classifier_()->get_magnets(
+                        @magnets{ $self->classifier_()->get_magnets( # PROFILE BLOCK START
                                       $session,
-                                          $bucket, $mtype )} = ();
+                                      $bucket,
+                                      $mtype ) } = ();               # PROFILE BLOCK STOP
 
                         if ( exists( $magnets{$current_mtext} ) ) {
                             $found  = 1;
-                            $self->error_message__(
+                            $self->error_message__(        # PROFILE BLOCK START
                                     $templ,
                                     sprintf( $self->language($session)->{Magnet_Error1},
-                                             "$mtype: $current_mtext", $bucket ) );
+                                             "$mtype: $current_mtext",
+                                             $bucket ) );  # PROFILE BLOCK STOP
                             last;
                         }
                     }
@@ -2125,10 +2296,12 @@ sub magnet_page
                             for my $from (keys %magnets)  {
                                 if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
                                     $found = 1;
-                                    $self->error_message__(
+                                    $self->error_message__(       # PROFILE BLOCK START
                                             $templ,
                                             sprintf( $self->language($session)->{Magnet_Error2},
-                                                     "$mtype: $current_mtext", "$mtype: $from", $bucket ) );
+                                                     "$mtype: $current_mtext",
+                                                     "$mtype: $from",
+                                                     $bucket ) ); # PROFILE BLOCK START
                                     last;
                                 }
                             }
@@ -2160,10 +2333,11 @@ sub magnet_page
 
                     $self->classifier_()->create_magnet( $session, $mbucket, $mtype, $current_mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
-                        $self->status_message__(
+                        $self->status_message__(           # PROFILE BLOCK START
                                 $templ,
                                 sprintf( $self->language($session)->{Magnet_Error3},
-                                         "$mtype: $current_mtext", $mbucket ) );
+                                         "$mtype: $current_mtext",
+                                         $mbucket ) );     # PROFILE BLOCK STOP
                     }
                 }
             }
@@ -2187,8 +2361,8 @@ sub magnet_page
     }
 
     if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) < $magnet_count ) {
-        $self->set_magnet_navigator__( $templ, $start_magnet,
-            $stop_magnet, $magnet_count, $session );
+        $self->set_magnet_navigator__( $templ, $start_magnet, # PROFILE BLOCK START
+            $stop_magnet, $magnet_count, $session );          # PROFILE BLOCK STOP
     }
 
     $templ->param( 'Magnet_Start_Magnet' => $start_magnet );
@@ -2303,16 +2477,22 @@ sub bucket_page
 
     $templ = $self->load_template__( 'bucket-page.thtml', $page, $session );
 
-    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
-                                                    $page, $session );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template, # PROFILE BLOCK START
+                                                    $page, $session );      # PROFILE BLOCK STOP
 
     my $color = $self->classifier_()->get_bucket_color( $session, $bucket );
-    $templ->param( 'Bucket_Main_Title' => sprintf( $self->language($session)->{SingleBucket_Title}, "<span style=\"color:$color\">$bucket</span>" ) );
+    $templ->param( 'Bucket_Main_Title' =>                               # PROFILE BLOCK START
+            sprintf( $self->language($session)->{SingleBucket_Title},
+                     "<span style=\"color:$color\">$bucket</span>" ) ); # PROFILE BLOCK STOP
 
     my $bucket_count = $self->classifier_()->get_bucket_word_count( $session, $bucket );
-    $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count, $session ) );
-    $templ->param( 'Bucket_Unique_Count' => sprintf( $self->language($session)->{SingleBucket_Unique}, $self->pretty_number( $self->classifier_()->get_bucket_unique_count( $session, $bucket ), $session ) ) );
-    $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->classifier_()->get_word_count( $session ), $session ) );
+    $templ->param( 'Bucket_Word_Count'   =>                    # PROFILE BLOCK START
+            $self->pretty_number( $bucket_count, $session ) ); # PROFILE BLOCK STOP
+    $templ->param( 'Bucket_Unique_Count' =>                    # PROFILE BLOCK START
+            sprintf( $self->language($session)->{SingleBucket_Unique},
+                     $self->pretty_number( $self->classifier_()->get_bucket_unique_count( $session, $bucket ), $session ) ) ); # PROFILE BLOCK STOP
+    $templ->param( 'Bucket_Total_Word_Count' =>                # PROFILE BLOCK START
+            $self->pretty_number( $self->classifier_()->get_word_count( $session ), $session ) ); # PROFILE BLOCK STOP
     $templ->param( 'Bucket_Bucket' => $bucket );
 
     my $percent = '0%';
@@ -2330,23 +2510,25 @@ sub bucket_page
             $row_data{Bucket_Bucket} = $bucket;
             if ( defined( $self->{form_}{showletter} ) && ( $i eq $self->{form_}{showletter} ) ) {
                 $row_data{Bucket_If_Show_Letter} = 1;
-                }
+            }
             push ( @letter_data, \%row_data );
-                    }
+        }
         $templ->param( 'Bucket_Loop_Letters' => \@letter_data );
 
         if ( defined( $self->{form_}{showletter} ) ) {
             my $letter = $self->{form_}{showletter};
 
             $templ->param( 'Bucket_If_Show_Letter'   => 1 );
-            $templ->param( 'Bucket_Word_Table_Title' => sprintf( $self->language($session)->{SingleBucket_WordTable}, $bucket ) );
+            $templ->param( 'Bucket_Word_Table_Title' =>    # PROFILE BLOCK START
+                    sprintf( $self->language($session)->{SingleBucket_WordTable},
+                             $bucket ) );                  # PROFILE BLOCK STOP
             $templ->param( 'Bucket_Letter'           => $letter );
 
             my %word_count;
 
             for my $j ( $self->classifier_()->get_bucket_word_list( $session, $bucket, $letter ) ) {
                 $word_count{$j} = $self->classifier_()->get_count_for_word( $session, $bucket, $j );
-                }
+            }
 
             my @words = sort { $word_count{$b} <=> $word_count{$a} || $a cmp $b } keys %word_count;
 
@@ -2422,8 +2604,8 @@ sub bar_chart_100
                 if ( $total_count == 0 ) {
                     $percent = " (  0$d" . "00%)";
                 } else {
-                   $percent = sprintf( " (%.2f%%)", int( $value * 10000 / $total_count ) / 100 );
-                   $percent =~ s/\./$d/;
+                    $percent = sprintf( " (%.2f%%)", int( $value * 10000 / $total_count ) / 100 );
+                    $percent =~ s/\./$d/;
                 }
             }
 
@@ -2489,12 +2671,12 @@ sub corpus_page
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
-    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
-                                                    $page, $session );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template, # PROFILE BLOCK START
+                                                    $page, $session );      # PROFILE BLOCK STOP
 
     if ( defined( $self->{form_}{clearbucket} ) ) {
-        $self->classifier_()->clear_bucket( $session,
-                                  $self->{form_}{showbucket} );
+        $self->classifier_()->clear_bucket( $session,           # PROFILE BLOCK START
+                                  $self->{form_}{showbucket} ); # PROFILE BLOCK STOP
     }
 
     if ( defined($self->{form_}{reset_stats}) ) {
@@ -2524,10 +2706,16 @@ sub corpus_page
         } else {
             if ( $self->classifier_()->is_bucket( $session, $self->{form_}{cname} ) ||
                 $self->classifier_()->is_pseudo_bucket( $session, $self->{form_}{cname} ) ) {
-                $self->error_message__( $templ, sprintf( $self->language($session)->{Bucket_Error2}, $self->{form_}{cname} ) );
+                $self->error_message__(                     # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Bucket_Error2},
+                                 $self->{form_}{cname} ) ); # PROFILE BLOCK STOP
             } else {
                 $self->classifier_()->create_bucket( $session, $self->{form_}{cname} );
-                $self->status_message__( $templ, sprintf( $self->language($session)->{Bucket_Error3}, $self->{form_}{cname} ) );
+                $self->status_message__(                    # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Bucket_Error3},
+                                 $self->{form_}{cname} ) ); # PROFILE BLOCK STOP
             }
        }
     }
@@ -2535,19 +2723,26 @@ sub corpus_page
     if ( ( defined($self->{form_}{delete}) ) && ( $self->{form_}{name} ne '' ) ) {
         $self->{form_}{name} = lc($self->{form_}{name});
         $self->classifier_()->delete_bucket( $session, $self->{form_}{name} );
-        $self->status_message__( $templ, sprintf( $self->language($session)->{Bucket_Error6}, $self->{form_}{name} ) );
+        $self->status_message__(                           # PROFILE BLOCK START
+                $templ,
+                sprintf( $self->language($session)->{Bucket_Error6},
+                         $self->{form_}{name} ) );         # PROFILE BLOCK STOP
     }
 
-    if ( ( defined($self->{form_}{newname}) ) &&
-         ( $self->{form_}{oname} ne '' ) ) {
-        if ( ( $self->{form_}{newname} eq '' ) ||
-             ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) )  {
+    if ( ( defined($self->{form_}{newname}) ) &&           # PROFILE BLOCK START
+         ( $self->{form_}{oname} ne '' ) ) {               # PROFILE BLOCK STOP
+        if ( ( $self->{form_}{newname} eq '' ) ||                        # PROFILE BLOCK START
+             ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) )  { # PROFILE BLOCK STOP
             $self->error_message__( $templ, $self->language($session)->{Bucket_Error1} );
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
             $self->{form_}{newname} = lc($self->{form_}{newname});
             if ( $self->classifier_()->rename_bucket( $session, $self->{form_}{oname}, $self->{form_}{newname} ) == 1 ) {
-                $self->status_message__( $templ, sprintf( $self->language($session)->{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) );
+                $self->status_message__(                      # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Bucket_Error5},
+                                 $self->{form_}{oname},
+                                 $self->{form_}{newname} ) ); # PROFILE BLOCK STOP
             } else {
                 $self->error_message__( $templ, 'Internal error: rename failed' );
             }
@@ -2715,7 +2910,7 @@ sub corpus_page
                 if ( $val != 0 ) {
                     my %row_data;
                     my $prob    = exp( $val );
-                      my $n       = ($total > 0)?$prob / $total:0;
+                    my $n       = ($total > 0)?$prob / $total:0;
                     my $score   = ($#buckets >= 0)?($val - $self->classifier_()->get_not_likely_( $session ) )/log(10.0):0;
                     my $d = $self->language($session)->{Locale_Decimal};
                     my $normal  = sprintf("%.10f", $n);
@@ -2741,15 +2936,15 @@ sub corpus_page
             $templ->param( 'Corpus_Loop_Lookup' => \@lookup_data );
 
             if ( $max_bucket ne '' ) {
-                $templ->param( 'Corpus_Lookup_Message' => 
+                $templ->param( 'Corpus_Lookup_Message' => # PROFILE BLOCK START
                                sprintf( $self->language($session)->{Bucket_LookupMostLikely},
                                         $self->escape_html_( $word ),
                                         $self->classifier_()->get_bucket_color( $session, $max_bucket ),
-                                        $max_bucket ) );
+                                        $max_bucket ) );  # PROFILE BLOCK STOP
             } else {
-                $templ->param( 'Corpus_Lookup_Message' => 
+                $templ->param( 'Corpus_Lookup_Message' =>                 # PROFILE BLOCK START
                                sprintf( $self->language($session)->{Bucket_DoesNotAppear},
-                                        $self->escape_html_( $word ) ) );
+                                        $self->escape_html_( $word ) ) ); # PROFILE BLOCK STOP
             }
         }
     }
@@ -2916,8 +3111,8 @@ sub history_reclassify
 
         foreach my $key (keys %{$self->{form_}}) {
             if ( $key =~ /^reclassify_([0-9]+)$/ ) {
-                if ( defined( $self->{form_}{$key} ) &&
-                     ( $self->{form_}{$key} ne '' ) ) {
+                if ( defined( $self->{form_}{$key} ) && # PROFILE BLOCK START
+                     ( $self->{form_}{$key} ne '' ) ) { # PROFILE BLOCK STOP
                     $messages{$1} = $self->{form_}{$key};
                 }
             }
@@ -2926,10 +3121,10 @@ sub history_reclassify
         $self->classifier_()->reclassify( $session, %messages );
 
         while ( my ( $slot, $newbucket ) = each %messages ) {
-            $self->{feedback}{$slot} = sprintf(
+            $self->{feedback}{$slot} = sprintf(            # PROFILE BLOCK START
                  $self->language($session)->{History_ChangedTo},
                  $self->classifier_()->get_bucket_color(
-                     $session, $newbucket ), $newbucket );
+                     $session, $newbucket ), $newbucket ); # PROFILE BLOCK STOP
         }
     }
 }
@@ -2953,16 +3148,16 @@ sub history_undo
             my $slot = $1;
             my @fields = $self->history_()->get_slot_fields( $slot, $session );
             my $bucket = $fields[8];
-            my $newbucket = $self->classifier_()->get_bucket_name(
+            my $newbucket = $self->classifier_()->get_bucket_name( # PROFILE BLOCK START
                                 $session,
-                                $fields[9] );
-            $self->classifier_()->reclassified(
-                $session, $newbucket, $bucket, 1 );
-            $self->history_()->change_slot_classification(
-                 $slot, $newbucket, $session, 1 );
-            $self->classifier_()->remove_message_from_bucket(
+                                $fields[9] );                      # PROFILE BLOCK STOP
+            $self->classifier_()->reclassified(               # PROFILE BLOCK START
+                $session, $newbucket, $bucket, 1 );           # PROFILE BLOCK STOP
+            $self->history_()->change_slot_classification(    # PROFILE BLOCK START
+                 $slot, $newbucket, $session, 1 );            # PROFILE BLOCK STOP
+            $self->classifier_()->remove_message_from_bucket( # PROFILE BLOCK START
                 $session, $bucket,
-                $self->history_()->get_slot_file( $slot ) );
+                $self->history_()->get_slot_file( $slot ) );  # PROFILE BLOCK STOP
         }
     }
 }
@@ -2985,14 +3180,14 @@ sub history_page
     # Handle the jump to page functionality
 
     if ( defined( $self->{form_}{gopage} ) ) {
-        my $destination = ( $self->{form_}{jumptopage} - 1 ) *
-                     $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+        my $destination = ( $self->{form_}{jumptopage} - 1 ) *                                # PROFILE BLOCK START
+                     $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ); # PROFILE BLOCK STOP
         my $q = $self->{sessions__}{$session}{q};
         my $maximum = $self->history_()->get_query_size( $q );
 
         if ( $destination <= $maximum && $destination > 0 ) {
-            return $self->http_redirect_( $client, "/history?start_message=$destination&"
-                 . $self->print_form_fields_(1,0,('filter','search','sort','negate') ), $session );
+            return $self->http_redirect_( $client, "/history?start_message=$destination&"           # PROFILE BLOCK START
+                 . $self->print_form_fields_(1,0,('filter','search','sort','negate') ), $session ); # PROFILE BLOCK STOP
         }
     }
 
@@ -3140,11 +3335,11 @@ sub history_page
         $self->history_()->delete_query( $q, $session );
     }
 
-    $self->history_()->set_query( $q,
+    $self->history_()->set_query( $q,                                  # PROFILE BLOCK START
                                    $self->{form_}{filter},
                                    $self->{form_}{search},
                                    $self->{form_}{sort},
-                                   ( $self->{form_}{negate} ne '' ) );
+                                   ( $self->{form_}{negate} ne '' ) ); # PROFILE BLOCK STOP
 
     # Redirect somewhere safe if non-idempotent action has been taken
 
@@ -3168,9 +3363,9 @@ sub history_page
     foreach my $bucket (@buckets) {
         my %row_data;
         $row_data{History_Bucket} = $bucket;
-        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $session,
+        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $session, # PROFILE BLOCK START
                                                                       $bucket,
-                                                                      'color' );
+                                                                      'color' );                 # PROFILE BLOCK STOP
         push ( @bucket_data, \%row_data );
     }
 
@@ -3179,9 +3374,9 @@ sub history_page
         my %row_data;
         $row_data{History_Bucket} = $bucket;
         $row_data{History_Selected} = ( defined( $self->{form_}{filter} ) && ( $self->{form_}{filter} eq $bucket ) )?'selected':'';
-        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $session,
+        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $session, # PROFILE BLOCK START
                                                                       $bucket,
-                                                                      'color' );
+                                                                      'color' );                 # PROFILE BLOCK STOP
         push ( @sf_bucket_data, \%row_data );
     }
     $templ->param( 'History_Loop_SF_Buckets' => \@sf_bucket_data );
@@ -3226,11 +3421,11 @@ sub history_page
             next if ( $1 eq '-' );
             $colspan++;
             $header =~ s/^.//;
-            $row_data{History_Fields} =
+            $row_data{History_Fields} =            # PROFILE BLOCK START
                 $self->print_form_fields_(1,1,
-                    ('filter','search','negate'));
-            $row_data{History_Sort}   =
-                ( $self->{form_}{sort} eq $header )?'-':'';
+                    ('filter','search','negate')); # PROFILE BLOCK STOP
+            $row_data{History_Sort}   =                     # PROFILE BLOCK START
+                ( $self->{form_}{sort} eq $header )?'-':''; # PROFILE BLOCK STOP
             $row_data{History_Header} = $header;
 
             my $label = '';
@@ -3240,10 +3435,10 @@ sub history_page
                 $label = $headers_table{$header};
             }
             $row_data{History_Label} = $label;
-            $row_data{History_If_Sorted} =
-                ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ );
-            $row_data{History_If_Sorted_Ascending} =
-                ( $self->{form_}{sort} !~ /^-/ );
+            $row_data{History_If_Sorted} =                      # PROFILE BLOCK START
+                ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ ); # PROFILE BLOCK STOP
+            $row_data{History_If_Sorted_Ascending} =            # PROFILE BLOCK START
+                ( $self->{form_}{sort} !~ /^-/ );               # PROFILE BLOCK STOP
             $row_data{History_If_MoveLeft} = ( $header ne $columns[0] );
             $row_data{History_If_MoveRight} = ( $header ne $columns[$#columns] );
             $row_data{Localize_tip_History_RemoveColumn} = $self->language($session)->{tip_History_RemoveColumn};
@@ -3256,9 +3451,9 @@ sub history_page
         $templ->param( 'History_Loop_Headers' => \@header_data );
         $templ->param( 'History_Colspan' => $colspan );
 
-        my @rows = $self->history_()->get_query_rows(
+        my @rows = $self->history_()->get_query_rows( # PROFILE BLOCK START
             $q, $start_message+1,
-            $stop_message - $start_message + 1 );
+            $stop_message - $start_message + 1 );     # PROFILE BLOCK STOP
 
         my @history_data;
         my $i = $start_message;
@@ -3302,10 +3497,10 @@ sub history_page
                 my %dates = ( 'inserted' => 7, 'date' => 5 );
 
                 if ( defined( $dates{$header} ) ) {
-                    $col_data{History_Cell_Title} =
-                        $self->pretty_date__( $$row[$dates{$header}], 1, $session );
-                    $col_data{History_Cell_Value} =
-                        $self->pretty_date__( $$row[$dates{$header}], undef, $session );
+                    $col_data{History_Cell_Title} =                                  # PROFILE BLOCK START
+                        $self->pretty_date__( $$row[$dates{$header}], 1, $session ); # PROFILE BLOCK STOP
+                    $col_data{History_Cell_Value} =                                      # PROFILE BLOCK START
+                        $self->pretty_date__( $$row[$dates{$header}], undef, $session ); # PROFILE BLOCK STOP
                     push ( @column_data, \%col_data );
                     next;
                 }
@@ -3314,11 +3509,11 @@ sub history_page
 
                  if ( defined( $addresses{$header} ) ) {
                      $col_data{History_Cell_Title} =$$row[$addresses{$header}];
-                     $col_data{History_Cell_Value} =
+                     $col_data{History_Cell_Value} = # PROFILE BLOCK START
                          $self->shorten__( $col_data{History_Cell_Title},
                                            $length,
                                            $language_for_user
-                                           );
+                                           );        # PROFILE BLOCK STOP
                      push ( @column_data, \%col_data );
                      next;
                  }
@@ -3338,13 +3533,13 @@ sub history_page
                      }
 
                      $col_data{History_Cell_Title}    = $$row[4];
-                     $col_data{History_Cell_Value} =
-                         $self->shorten__( $$row[4], $length, $language_for_user );
+                     $col_data{History_Cell_Value} =                                # PROFILE BLOCK START
+                         $self->shorten__( $$row[4], $length, $language_for_user ); # PROFILE BLOCK STOP
                      $col_data{History_Mail_File}     = $$row[0];
                      $col_data{History_Fields}        =
-                         $self->print_form_fields_(0,1,
+                         $self->print_form_fields_(0,1, # PROFILE BLOCK START
                            ('start_message','filter','search',
-                            'sort','negate' ) );
+                            'sort','negate' ) );        # PROFILE BLOCK STOP
                      push ( @column_data, \%col_data );
                      next;
                  }
@@ -3370,8 +3565,8 @@ sub history_page
                      $v =~ s/&nbsp;/\xA0/g;
 
                      $col_data{History_Cell_Value} = $v;
-                     $col_data{History_Cell_Title} =
-                         $col_data{History_Cell_Value};
+                     $col_data{History_Cell_Title} =    # PROFILE BLOCK START
+                         $col_data{History_Cell_Value}; # PROFILE BLOCK STOP
                      push ( @column_data, \%col_data );
                      next;
                  }
@@ -3381,17 +3576,17 @@ sub history_page
                      my $bucket = $col_data{History_Bucket} = $$row[8];
                      if ( $$row[11] ne '' ) {
                         $col_data{History_If_Magnetized} = 1;
-                        my ( $header, $value ) =
-                            $self->classifier_()->get_magnet_header_and_value( $session, $$row[13] );
-                        $col_data{History_Magnet}        =
-                            $self->language($session)->{$header} . ':' . $value;
+                        my ( $header, $value ) =                                                      # PROFILE BLOCK START
+                            $self->classifier_()->get_magnet_header_and_value( $session, $$row[13] ); # PROFILE BLOCK STOP
+                        $col_data{History_Magnet}        =                       # PROFILE BLOCK START
+                            $self->language($session)->{$header} . ':' . $value; # PROFILE BLOCK STOP
                      }
-                     $col_data{History_If_Not_Pseudo} =
+                     $col_data{History_If_Not_Pseudo} =        # PROFILE BLOCK START
                          !$self->classifier_()->is_pseudo_bucket(
-                                          $session, $bucket );
-                     $col_data{History_Bucket_Color}  =
+                                          $session, $bucket ); # PROFILE BLOCK STOP
+                     $col_data{History_Bucket_Color}  =    # PROFILE BLOCK START
                          $self->classifier_()->get_bucket_parameter(
-                             $session, $bucket, 'color' );
+                             $session, $bucket, 'color' ); # PROFILE BLOCK STOP
                      push ( @column_data, \%col_data );
                      next;
                  }
@@ -3409,11 +3604,11 @@ sub history_page
                 delete $self->{feedback}{$mail_file};
             }
 
-            if ( ( $last != -1 ) &&
+            if ( ( $last != -1 ) &&                                                                     # PROFILE BLOCK START
                  ( $self->{form_}{sort} =~ /inserted/ ) &&
-                 ( $self->user_config_( $self->{sessions__}{$session}{user}, 'session_dividers' ) ) ) {
-                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) >
-                                                  300 );
+                 ( $self->user_config_( $self->{sessions__}{$session}{user}, 'session_dividers' ) ) ) { # PROFILE BLOCK STOP
+                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > # PROFILE BLOCK START
+                                                  300 );                    # PROFILE BLOCK STOP
             }
             # we set this here so feedback lines will also
             # get the correct colspan:
@@ -3421,8 +3616,8 @@ sub history_page
 
             $last = $$row[7];
 
-            $row_data{Localize_History_Reclassified} =
-                $self->language($session)->{History_Reclassified};
+            $row_data{Localize_History_Reclassified} =             # PROFILE BLOCK START
+                $self->language($session)->{History_Reclassified}; # PROFILE BLOCK STOP
             $row_data{Localize_Undo} = $self->language($session)->{Undo};
             push ( @history_data, \%row_data );
         }
@@ -3484,9 +3679,9 @@ sub view_page
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
-    my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted,
+    my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted,             # PROFILE BLOCK START
         $bucket, $reclassified, $bucketid, $magnet, $size, $magnetid ) =
-        $self->history_()->get_slot_fields( $self->{form_}{view}, $session );
+        $self->history_()->get_slot_fields( $self->{form_}{view}, $session ); # PROFILE BLOCK STOP
 
     if ( !defined($id) ) {
         $self->http_redirect_( $client, "/history", $session );
@@ -3495,15 +3690,15 @@ sub view_page
 
     my ( $header, $value );
     if ( $magnet ne '' ) {
-        ( $header, $value ) =
-            $self->classifier_()->get_magnet_header_and_value( $session, $magnetid );
+        ( $header, $value ) =                                                         # PROFILE BLOCK START
+            $self->classifier_()->get_magnet_header_and_value( $session, $magnetid ); # PROFILE BLOCK STOP
     }
 
     my $mail_file = $self->history_()->get_slot_file( $self->{form_}{view} );
     my $start_message = $self->{form_}{start_message} || 0;
 
-    my $color = $self->classifier_()->get_bucket_color(
-                    $session, $bucket );
+    my $color = $self->classifier_()->get_bucket_color( # PROFILE BLOCK START
+                    $session, $bucket );                # PROFILE BLOCK STOP
     my $page_size = $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
 
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
@@ -3577,15 +3772,15 @@ sub view_page
         # not need to parse it again and hence we pass in undef for
         # the filename
 
-        my $current_class = $self->classifier_()->classify(
-            $session, $mail_file, $templ, \%matrix, \%idmap );
+        my $current_class = $self->classifier_()->classify(    # PROFILE BLOCK START
+            $session, $mail_file, $templ, \%matrix, \%idmap ); # PROFILE BLOCK STOP
 
         # Check whether the original classfication is still valid.  If
         # not, add a note at the top of the page:
 
         if ( $current_class ne $bucket ) {
-            my $new_color = $self->classifier_()->get_bucket_color(
-                $session, $current_class );
+            my $new_color = $self->classifier_()->get_bucket_color( # PROFILE BLOCK START
+                $session, $current_class );                         # PROFILE BLOCK STOP
             $templ->param( 'View_If_Class_Changed' => 1 );
             $templ->param( 'View_Class_Changed' => $current_class );
             $templ->param( 'View_Class_Changed_Color' => $new_color );
@@ -3595,9 +3790,9 @@ sub view_page
 
         $self->classifier_()->wordscores( 0 );
 
-        $templ->param( 'View_Message' =>
+        $templ->param( 'View_Message' =>                     # PROFILE BLOCK START
             $self->classifier_()->fast_get_html_colored_message(
-                $session, $mail_file, \%matrix, \%idmap ) );
+                $session, $mail_file, \%matrix, \%idmap ) ); # PROFILE BLOCK STOP
 
         # We want to insert a link to change the output format at the
         # start of the word matrix.  The classifier puts a comment in
@@ -3706,17 +3901,17 @@ sub password_page
 
     if ( exists( $self->{form_}{username} ) &&
          exists( $self->{form_}{password} ) ) {
-        $session = $self->classifier_()->get_session_key(
+        $session = $self->classifier_()->get_session_key(                 # PROFILE BLOCK START
                                               $self->{form_}{username},
-                                              $self->{form_}{password} );
+                                              $self->{form_}{password} ); # PROFILE BLOCK STOP
 
         if ( defined( $session ) ) {
             return ($session, $self->url_decode_($self->{form_}{next}));
         } else {
-            $self->error_message__( $templ,
+            $self->error_message__( $templ,                                # PROFILE BLOCK START
                        ( $single_user ? 
                          $self->language($session)->{Password_Error1} :
-                         $self->language($session)->{Password_Error2} ) );
+                         $self->language($session)->{Password_Error2} ) ); # PROFILE BLOCK STOP
         }
     }
 
@@ -3740,6 +3935,7 @@ sub status_message__
 {
     my ( $self, $templ, $message ) = @_;
 
+    $message =~ s/\n$//;
     $message = $self->escape_html_( $message );
     $message =~ s/\n/<br \/>/g;
 
@@ -3763,6 +3959,7 @@ sub error_message__
 {
     my ( $self, $templ, $message ) = @_;
 
+    $message =~ s/\n$//;
     $message = $self->escape_html_( $message );
     $message =~ s/\n/<br \/>/g;
 
@@ -3814,7 +4011,7 @@ sub load_template__
         $root = 'skins/default/';
     }
 
-    my $templ = HTML::Template->new(
+    my $templ = HTML::Template->new(                        # PROFILE BLOCK START
         filename          => $file,
         case_sensitive    => 1,
         loop_context_vars => 1,
@@ -3823,12 +4020,12 @@ sub load_template__
         search_path_on_include => 1,
         path => [$self->get_root_path_( "$root" ),
                  $self->get_root_path_( 'skins/default' ) ]
-                                   );
+                                   );                       # PROFILE BLOCK STOP
 
     # Set a variety of common elements that are used repeatedly
     # throughout POPFile's pages
 
-    my %fixups = ( 'Skin_Root'               => $root,
+    my %fixups = ( 'Skin_Root'               => $root,      # PROFILE BLOCK START
                    'Common_Bottom_LastLogin' =>
                        ( $self->global_config_( 'single_user' ) ?
                          $self->{last_login__} :
@@ -3847,7 +4044,7 @@ sub load_template__
                    'Configuration_Action'    => $page,
                    'Header_If_SingleUser'    =>
                        $self->global_config_( 'single_user' ),
-                   );
+                   );                                       # PROFILE BLOCK STOP
 
     $self->{skin_root} = $root;
 
@@ -4086,7 +4283,7 @@ sub print_form_fields_
             $formstring .= "$amp" if ($count > 0);
             $count++;
             next;
-            }
+        }
         unless ( !defined($self->{form_}{$field}) || ( $self->{form_}{$field} eq '' ) ) {
             $formstring .= "$amp" if ($count > 0);
             $formstring .= "$field=". $self->url_encode_($self->{form_}{$field});
