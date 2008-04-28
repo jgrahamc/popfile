@@ -1390,7 +1390,7 @@ if ( $have_text_kakasi ) {
 
     $b->clear_magnets( $session );
     $b->create_magnet( $session, 'gomi', 'subject', chr(0xbe) . chr(0xb5) . chr(0xc2) . chr(0xfa) );
-    test_assert_equal( $b->classify( $session, 'TestNihongo021.msg' ), 'gomi' );
+    test_assert_equal( $b->classify( $session, 'TestMails/TestNihongo021.msg' ), 'gomi' );
 
     test_assert_equal( $b->magnet_count( $session ), 1 );
     $b->create_magnet( $session, 'gomi', 'subject', chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8));
@@ -1411,7 +1411,7 @@ if ( $have_text_kakasi ) {
 
     my %words;
 
-    open WORDS, "<TestNihongo021.wrd";
+    open WORDS, "<TestMails/TestNihongo021.wrd";
     while ( <WORDS> ) {
         if ( /(.+) (\d+)/ ) {
             $words{$1} = $2;
@@ -1419,7 +1419,7 @@ if ( $have_text_kakasi ) {
     }
     close WORDS;
 
-    test_assert( $b->add_message_to_bucket( $session, 'gomi', 'TestNihongo021.msg' ) );
+    test_assert( $b->add_message_to_bucket( $session, 'gomi', 'TestMails/TestNihongo021.msg' ) );
 
     foreach my $word (keys %words) {
         test_assert_equal( $b->get_base_value_( $session, 'gomi', $word ), $words{$word}, "gomi: $word $words{$word}" );
@@ -1438,7 +1438,7 @@ if ( $have_text_kakasi ) {
     $b->set_bucket_parameter( $session, 'gomi', 'quarantine', 1 );
 
     open CLIENT, ">temp.tmp";
-    open MAIL, "<TestNihongo021.msg";
+    open MAIL, "<TestMails/TestNihongo021.msg";
     my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0, 1 );
     close CLIENT;
     close MAIL;
@@ -1447,7 +1447,7 @@ if ( $have_text_kakasi ) {
     test_assert( -e $h->get_slot_file( $slot ) );
 
     open TEMP, "<temp.tmp";
-    open MAIL, "<TestNihongo021.qrn";
+    open MAIL, "<TestMails/TestNihongo021.qrn";
     while ( !eof( MAIL ) && !eof( TEMP ) ) {
         my $temp = <TEMP>;
         $temp =~ s/[\r\n]//g;
@@ -1460,7 +1460,7 @@ if ( $have_text_kakasi ) {
 
     # remove_message_from_bucket
 
-    test_assert( $b->remove_message_from_bucket( $session, 'gomi', 'TestNihongo021.msg' ) );
+    test_assert( $b->remove_message_from_bucket( $session, 'gomi', 'TestMails/TestNihongo021.msg' ) );
     test_assert_equal( $b->get_bucket_word_count( $session, 'gomi' ), 0 );
 
 } else {

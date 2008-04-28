@@ -462,8 +462,8 @@ sub file_message {
     uid_next( $folder );
     my $new_uid = $uidnext{ $folder };
     uid_next( $folder, $uidnext{ $folder }+1 );
-    debug( "Trying to copy TestMailParse$msg.msg to $spool/$folder/$new_uid" );
-    copy "TestMailParse$msg.msg", "$spool/$folder/$new_uid";
+    debug( "Trying to copy TestMails/TestMailParse$msg.msg to $spool/$folder/$new_uid" );
+    copy "TestMails/TestMailParse$msg.msg", "$spool/$folder/$new_uid";
 }
 
 
