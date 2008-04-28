@@ -21,6 +21,11 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+use POSIX qw(locale_h);
+
+if ( $^O eq 'MSWin32' && setlocale(LC_COLLATE) eq 'Japanese_Japan.932' ) {
+    setlocale(LC_COLLATE,'C');
+}
 # Set up the test corpus and use the Test msg and cls files
 # to create a current history set
 
@@ -491,7 +496,9 @@ EOM
         }
 
         if ( $line =~ /^MATCH +(.+)$/ ) {
-            my $result = test_assert_regexp( $content, "\Q$1\E", "From script line $line_number" );
+            my $string = $1;
+            $content =~ s/([0-9]\.[0-9]+e[-\+])0([0-9]{2})/$1$2/ if ( $^O eq 'MSWin32' );
+            my $result = test_assert_regexp( $content, "\Q$string\E", "From script line $line_number" );
             if ( !$result ) {
                 open HTML, ">testhtml_match$line_number.html";
                 print HTML $content;

@@ -324,6 +324,7 @@ $active_sessions = $b->get_current_sessions( $session );
 test_assert_equal( $#{$active_sessions}, 1 );
 
 # create_user with cloning admin
+# the magnets and corpus are not copied
 
 my ( $success4, $password4 ) = $b->create_user( $session, 'testuser4', 'admin' );
 test_assert_equal( $success4, 0 );
@@ -352,7 +353,7 @@ foreach my $parameter (@parameters) {
 
 my @buckets1 = sort $b->get_all_buckets( $session  );
 my @buckets4 = sort $b->get_all_buckets( $session4 );
-for my $i (0..3) {
+for my $i (0..$#buckets1) {
     test_assert_equal( $buckets1[$i], $buckets4[$i] );
 
     my $bucket = $buckets1[$i];
@@ -373,7 +374,7 @@ for my $i (0..3) {
     }
 }
 
-# word count (corpus does not be copied)
+# word count (corpus is not copied)
 
 test_assert_equal( $b->get_word_count( $session4 ), 0 );
 
@@ -384,7 +385,48 @@ foreach my $bucket (@buckets4) {
 
 $b->release_session_key( $session4 );
 
-# TODO : cloning with magnets and corpus option
+# create_user with cloning admin
+# the magnets and corpus are copied
+
+my ( $success5, $password5 ) = $b->create_user( $session, 'testuser5', 'admin', 1, 1 );
+test_assert_equal( $success5, 0 );
+test_assert( defined( $password5 ) );
+test_assert( $password5 ne '' );
+
+my $id5 = $b->get_user_id( $session, 'testuser5' );
+test_assert( defined( $id5 ) );
+
+my $session5 = $b->get_session_key( 'testuser5', $password5 );
+
+# magnets (magnets are copied)
+
+my @mags1 = $b->get_buckets_with_magnets( $session  );
+my @mags5 = $b->get_buckets_with_magnets( $session5 );
+test_assert_equal( $#mags1, $#mags5 );
+for (0..$#mags1) {
+    test_assert_equal( $mags1[$_], $mags5[$_] );
+}
+
+my @types1 = $b->get_magnet_types_in_bucket( $session,  'personal' );
+my @types5 = $b->get_magnet_types_in_bucket( $session5, 'personal' );
+test_assert_equal( $#types1, $#types5 );
+for (0..$#types1) {
+    test_assert_equal( $types1[$_], $types5[$_] );
+}
+
+# word count (corpus is copied)
+
+test_assert_equal( $b->get_word_count( $session5 ),
+                   $b->get_word_count( $session  ) );
+
+foreach my $bucket (@buckets4) {
+    test_assert_equal( $b->get_bucket_word_count(   $session5, $bucket ),
+                       $b->get_bucket_word_count(   $session,  $bucket ) );
+    test_assert_equal( $b->get_bucket_unique_count( $session5, $bucket ),
+                       $b->get_bucket_unique_count( $session,  $bucket ) );
+}
+
+$b->release_session_key( $session5 );
 
 # initialize_users_password
 
@@ -702,6 +744,21 @@ foreach my $word (keys %words) {
 #test_assert( !defined( $line ) );
 #close FILE;
 
+# get_magnet_header_and_value
+
+my ( $header, $value ) = $b->get_magnet_header_and_value( $session, 1 );
+test_assert( defined( $header ) );
+test_assert_equal( $header, 'Subject' );
+test_assert_equal( $value, 'bar' );
+( $header, $value ) = $b->get_magnet_header_and_value( $session, 2 );
+test_assert( defined( $header ) );
+test_assert_equal( $header, 'To' );
+test_assert_equal( $value, 'baz@baz.com' );
+( $header, $value ) = $b->get_magnet_header_and_value( $session, 3 );
+test_assert( defined( $header ) );
+test_assert_equal( $header, 'From' );
+test_assert_equal( $value, 'foo' );
+
 # create_magnet
 
 test_assert_equal( $b->magnet_count( $session ), 4 );
@@ -861,7 +918,7 @@ $single_orphan_query->finish;
 
 $b->create_magnet( $session, 'zeotrope', 'from', 'cxcse231@yahoo.com' );
 test_assert_equal( $b->classify( $session, 'TestMailParse021.msg' ), 'zeotrope' );
-test_assert_equal( $b->{magnet_detail__}, 5 );
+test_assert_equal( $b->{magnet_detail__}, 8 );
 test_assert( $b->{magnet_used__} );
 
 # clear_magnets

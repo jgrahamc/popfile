@@ -27,6 +27,7 @@
 use IO::Handle;
 use IO::Socket;
 use Digest::MD5;
+use strict;
 
 unlink 'popfile.db';
 unlink 'popfile.cfg';
@@ -405,6 +406,15 @@ delete $form->{sssl};
 delete $form->{update_server};
 $p->config_('secure_ssl', $old_config_value );
 
+# create user and account for the multiuser mode tests
+
+my $session = $b->get_administrator_session_key();
+test_assert( defined( $session ) );
+
+my ( $result, $password ) = $b->create_user( $session, 'transparent' );
+test_assert( $b->add_account( $session, 1, 'pop3', '127.0.0.1:gooduser' ) == 1 );
+
+$b->release_session_key( $session );
 
 # some tests require this directory to be present
 mkdir( 'messages' );
@@ -540,6 +550,19 @@ if ( $pid == 0 ) {
                     print $uwriter "OK\n";
                     next;
                 }
+
+                if ( $command =~ /__MULTIUSERMODE/ ) {
+                    $p->global_config_( 'single_user', 0 );
+                    print $uwriter "OK\n";
+                    next;
+                }
+
+                if ( $command =~ /__SINGLEUSERMODE/ ) {
+                    $p->global_config_( 'single_user', 1 );
+                    print $uwriter "OK\n";
+                    next;
+                }
+
             }
             select ( undef, undef, undef, 0.05 );
         }
@@ -1990,6 +2013,110 @@ if ( $pid == 0 ) {
 
         $b->release_session_key( $session );
 
+        # Multiuser mode tests
+
+        print $dwriter "__MULTIUSERMODE :\n";
+        $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
+        $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1:8110:gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome gooduser$eol" );
+
+        print $client "PASS secret$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Now logged in$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        close $client;
+
+        # transparent proxy
+
+        $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1:8110:transparent$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome transparent$eol" );
+
+        print $client "PASS secret$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Now logged in$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        close $client;
+
+        # bad account
+
+        $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1:8110:noaccount$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome noaccount$eol" );
+
+        print $client "PASS secret$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR Unknown account 127.0.0.1:noaccount$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        close $client;
+
+        print $dwriter "__SINGLEUSERMODE :\n";
+        $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
         # Send the remote server a special message that makes it die
 
         $client = IO::Socket::INET->new(
@@ -2067,7 +2194,7 @@ sub server
         $command =~ s/(\015|\012)//g;
 
         if ( $command =~ /^USER (.*)/i ) {
-            if ( $1 =~ /(gooduser|goslow|hang|slowlf)/ ) {
+            if ( $1 =~ /(gooduser|goslow|hang|slowlf|transparent|noaccount)/ ) {
                  print $client "+OK Welcome $1$eol";
                  $goslow = ( $1 =~ /goslow/ );
                  $hang   = ( $1 =~ /hang/   );

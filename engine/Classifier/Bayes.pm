@@ -1870,17 +1870,21 @@ sub get_session_key_from_token
         return undef;
     }
 
+    # If the module is pop3s (POP3 over SSL), treat as pop3
+
+    $module = 'pop3' if ( $module eq 'pop3s' );
+
     # If the this is not the pop3 module then return the administrator
     # session since there is currently no token matching for non-POP3
     # accounts.
 
-    if ( ( $module !~ /^pop3s?|insert$/ ) ) {
+    if ( ( $module !~ /^pop3|insert$/ ) ) {
         return $self->get_single_user_session_key();
     }
 
     my $user;
 
-    if ( $module =~ /^pop3s?$/ ) {
+    if ( $module eq 'pop3' ) {
         my ( $server, $username ) = split( /:/, $token );
 
         my $secure_server = $self->module_config_( 'pop3', 'secure_server' );
@@ -1897,8 +1901,9 @@ sub get_session_key_from_token
             }
 
             $user = $self->get_user_id( $session, $username );
+        }
 
-        } else {
+        if ( !defined( $user ) ) {
 
             # Check the token against the associations in the database and
             # figure out which user is being talked about

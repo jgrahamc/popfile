@@ -558,6 +558,7 @@ NOTMATCH spamaddy
 
 GET /history
 CLICK clearpage
+GET /history
 NOTMATCH Jump to message
 MATCH Recent Messages (9)
 MATCH ADV: Turn Back the Hands of Time

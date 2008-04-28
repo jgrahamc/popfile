@@ -350,25 +350,29 @@ sub child__
                     # authentication OK, toss the hello response and
                     # return password ok
 
-                    $self->tee_( $client, "+OK password ok$eol" );
                     $session = $self->get_session_key_( $token );
                     if ( !defined( $session ) ) {
                         $self->tee_( $client, "-ERR Unknown account $token$eol" );
                         last;
                     }
+                    $self->tee_( $client, "+OK password ok$eol" );
                 } else {
                     $self->tee_( $client, $response );
                 }
             } else {
-                my $ok = $self->echo_response_( $mail, $client, $command );
-                last if ( $ok == 2 );
-                if ( $ok == 0 ) {
+                my ( $response, $ok ) =                       # PROFILE BLOCK START
+                    $self->get_response_($mail, $client,
+                             $command, 0, 1);                 # PROFILE BLOCK STOP
+                if ( ( $ok == 1 ) &&
+                     ( $response =~ /$self->{good_response_}/ ) ) {
+
                     $session = $self->get_session_key_( $token );
                     if ( !defined( $session ) ) {
                         $self->tee_( $client, "-ERR Unknown account $token$eol" );
                         last;
                     }
                 }
+                $self->tee_( $client, $response );
             }
             next;
         }

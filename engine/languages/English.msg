@@ -270,6 +270,8 @@ Users_AddAccount                        Add POP3 account (host:user)
 Users_Bad_Account                       The new account name must be in the form host:user
 Users_Duplicate_Account                 Failed to add the account because it is assigned to another user
 Users_Failed_Account                    Failed to add the account
+Users_SingleUserModeOn                  POPFile is now in the Single User Mode (POPFile classic). You are recommended to restart POPFile.
+Users_MultiUserModeOn                   POPFile is now in the Multiuser Mode. You are recommended to restart POPFile.
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
 History_FilterBy                        Filter&nbsp;By
@@ -312,6 +314,7 @@ Password_Username                       User name
 Password_Go                             Login
 Password_Error1                         Incorrect password
 Password_Error2                         Incorrect user name or password
+Password_SessionTimeout                 POPFile session has been expired because a timeout period passed
 
 Security_Error1                         The port must be a number between 1 and 65535
 Security_Stealth                        Stealth Mode/Server Operation

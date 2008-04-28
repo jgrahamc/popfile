@@ -272,6 +272,8 @@ Users_AddAccount                        POP3 アカウントの追加（ホスト名:ユーザー
 Users_Bad_Account                       新しいアカウント名は「ホスト名:ユーザー名」の形式でなければなりません
 Users_Duplicate_Account                 アカウントを追加できませんでした。別のユーザーに関連づけられています
 Users_Failed_Account                    アカウントを追加できませんでした。
+Users_SingleUserModeOn                  POPFile は「シングルユーザーモード（POPFile クラシック）」に変更されました。POPFile を再起動することをお勧めします。
+Users_MultiUserModeOn                   POPFile は「マルチユーザーモード」に変更されました。POPFile を再起動することをお勧めします。
 
 History_Filter                          &nbsp;(<font color="%s">%s </font>バケツのみを表示)
 History_FilterBy                        フィルタリング
@@ -314,6 +316,7 @@ Password_Username                       ユーザー名
 Password_Go                             ログイン
 Password_Error1                         パスワードが間違っています
 Password_Error2                         ユーザー名またはパスワードが間違っています
+Password_SessionTimeout                 POPFile のセッションは時間切れになりました
 
 Security_Error1                         認証ポート番号は 1 から 65535 までにしてください。
 Security_Stealth                        ステルスモード/サーバーオペレーション

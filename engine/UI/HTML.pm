@@ -363,13 +363,13 @@ sub handle_cookie__
 #            $self->{sessions__}{$session}{lastused} = time;
             return $session;
         } else {
+            # time out
+
             $self->history_()->stop_query( $self->{sessions__}{$session}{q} );
             delete $self->{sessions__}{$session};
-            return undef;
+            return 'TIMEOUT';
         }
     }
-
-    # Check that the session ID is still valid in the API.
 
     if ( defined( $user ) ) {
 #        $self->{sessions__}{$session}{lastused} = time;
@@ -391,7 +391,7 @@ sub handle_cookie__
         return $session;
 
     } else {
-        return undef;
+        return 'TIMEOUT';
     }
 }
 
@@ -486,9 +486,14 @@ sub url_handler__
     # for the user, if the user is authenticated.
 
     my $session;
+    my $timeout = 0;
 
     if ( $cookie ne '' ) {
         $session = $self->handle_cookie__( $cookie, $client );
+        if ( defined($session) && ( $session eq 'TIMEOUT' ) ) {
+            $timeout = 1;
+            $session = undef;
+        }
     }
 
     # In single user mode get the single user mode key
@@ -655,7 +660,7 @@ sub url_handler__
     if ( !defined( $session ) ) {
         my $continue;
 
-        ( $session, $continue ) = $self->password_page( $client, $original_url );
+        ( $session, $continue ) = $self->password_page( $client, $original_url, $timeout );
         if ( !defined( $continue ) ||     # PROFILE BLOCK START
              $continue eq '/password' ) { # PROFILE BLOCK STOP
             $continue = '/';
@@ -1247,7 +1252,15 @@ sub administration_page
 
     my $single_user_mode_changed = 0;
 
-    # TODO: add status messages
+    # Changed between the Single user mode and Multiuser mode
+
+    if ( defined $self->{form_}->{single_user} ) {
+        if ( $self->global_config_( 'single_user' ) ) {
+            $self->status_message__( $templ, $self->language($session)->{Users_SingleUserModeOn} );
+        } else {
+            $self->status_message__( $templ, $self->language($session)->{Users_MultiUserModeOn} );
+        }
+    }
 
     # Read the CGI parameters and set the configuration vars accordingly
     # Server / Stealth mode
@@ -1614,7 +1627,7 @@ sub administration_page
     # we should reflesh the UI
 
     if ( $single_user_mode_changed ) {
-        $self->http_redirect_( $client, "/administration", $session );
+        $self->http_redirect_( $client, "/administration?single_user=" . $self->global_config_( 'single_user' ), $session );
         return;
     }
 
@@ -3873,13 +3886,14 @@ sub view_page
 #
 # $client     The web browser to send the results to
 # $url        The higher level page the password prompt is to be embedded in
+# $timeout    1 if session timeout
 #
 # Returns undef if login failed, or a session key value if it succeeded
 #
 #----------------------------------------------------------------------------
 sub password_page
 {
-    my ( $self, $client, $url ) = @_;
+    my ( $self, $client, $url, $timeout ) = @_;
 
     my $session;
     my $templ = $self->load_template__( 'password-page.thtml' );
@@ -3896,6 +3910,10 @@ sub password_page
     $templ->param( 'Header_If_Password' => 1 );
     $templ->param( 'Next_Url' => $url );
     $templ->param( 'Password_If_SingleUser' => $single_user );
+
+    if ( $timeout ) {
+        $self->error_message__( $templ, $self->language('GLOBAL')->{Password_SessionTimeout} );
+    }
 
     $self->{form_}{username} = 'admin' if ( $single_user );
 
