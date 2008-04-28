@@ -619,8 +619,8 @@ test_assert( !$b->set_bucket_parameter( $session, 'badbucket', 'quarantine', 0 )
 
 # get_html_colored_message
 
-my $html = $b->get_html_colored_message(  $session, 'TestMailParse019.msg' );
-open FILE, "<TestMailParse019.clr";
+my $html = $b->get_html_colored_message(  $session, 'TestMails/TestMailParse019.msg' );
+open FILE, "<TestMails/TestMailParse019.clr";
 my $check = <FILE>;
 close FILE;
 test_assert_equal( $html, $check );
@@ -683,7 +683,7 @@ test_assert( !$b->rename_bucket( $session, 'spam',      'zeotrope'   ) );
 
 my %words;
 
-open WORDS, "<TestMailParse021.wrd";
+open WORDS, "<TestMails/TestMailParse021.wrd";
 while ( <WORDS> ) {
     if ( /(.+) (\d+)/ ) {
         $words{$1} = $2;
@@ -691,13 +691,13 @@ while ( <WORDS> ) {
 }
 close WORDS;
 
-test_assert( $b->add_message_to_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->add_message_to_bucket( $session, 'zeotrope', 'TestMails/TestMailParse021.msg' ) );
 
 foreach my $word (keys %words) {
     test_assert_equal( $b->get_base_value_( $session, 'zeotrope', $word ), $words{$word}, "zeotrope: $word $words{$word}" );
 }
 
-test_assert( $b->add_message_to_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->add_message_to_bucket( $session, 'zeotrope', 'TestMails/TestMailParse021.msg' ) );
 
 foreach my $word (keys %words) {
     test_assert_equal( $b->get_base_value_( $session, 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
@@ -705,15 +705,15 @@ foreach my $word (keys %words) {
 
 # remove_message_from_bucket
 
-test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
-test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMails/TestMailParse021.msg' ) );
+test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMails/TestMailParse021.msg' ) );
 
 test_assert_equal( $b->get_bucket_word_count(   $session, 'zeotrope' ), 0 );
 test_assert_equal( $b->get_bucket_unique_count( $session, 'zeotrope' ), 0 );
 
 # add_messages_to_bucket
 
-test_assert( $b->add_messages_to_bucket( $session, 'zeotrope', ( 'TestMailParse021.msg', 'TestMailParse021.msg' ) ) );
+test_assert( $b->add_messages_to_bucket( $session, 'zeotrope', ( 'TestMails/TestMailParse021.msg', 'TestMails/TestMailParse021.msg' ) ) );
 
 foreach my $word (keys %words) {
     test_assert_equal( $b->get_base_value_( $session, 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
@@ -917,7 +917,7 @@ $single_orphan_query->finish;
 # classify a message using a magnet
 
 $b->create_magnet( $session, 'zeotrope', 'from', 'cxcse231@yahoo.com' );
-test_assert_equal( $b->classify( $session, 'TestMailParse021.msg' ), 'zeotrope' );
+test_assert_equal( $b->classify( $session, 'TestMails/TestMailParse021.msg' ), 'zeotrope' );
 test_assert_equal( $b->{magnet_detail__}, 8 );
 test_assert( $b->{magnet_used__} );
 
@@ -959,10 +959,10 @@ test_assert_equal( $b->get_base_value_( $session, 'personal', 'foo' ), 100 );
 test_assert_equal( $b->get_value_( $session, 'personal', 'foo' ),      log(100/202) );
 test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), log(100/202) );
 
-# glob the tests directory for files called TestMailParse\d+.msg which consist of messages
-# to be parsed with the resulting classification in TestMailParse.cls
+# glob the tests directory for files called TestMails/TestMailParse\d+.msg which consist of messages
+# to be parsed with the resulting classification in TestMails/TestMailParse.cls
 
-my @class_tests = sort glob 'TestMailParse*.msg';
+my @class_tests = sort glob 'TestMails/TestMailParse*.msg';
 
 for my $class_test (@class_tests) {
     my $class_file = $class_test;
@@ -978,7 +978,7 @@ for my $class_test (@class_tests) {
     test_assert_equal( $b->classify( $session, $class_test ), $class, $class_test );
 }
 
-# glob the tests directory for files called TestMailParse\d+.msg which consist of messages
+# glob the tests directory for files called TestMails/TestMailParse\d+.msg which consist of messages
 # to be sent through classify_and_modify
 
 $b->config_( 'msgdir', '../tests/' );
@@ -989,7 +989,7 @@ $b->set_bucket_parameter( $session, 'spam', 'subject', 1 );
 $b->set_bucket_parameter( $session, 'spam', 'xtc',     1 );
 $b->set_bucket_parameter( $session, 'spam', 'xpl',     1 );
 
-my @modify_tests = sort glob 'TestMailParse*.msg';
+my @modify_tests = sort glob 'TestMails/TestMailParse*.msg';
 
 for my $modify_file (@modify_tests) {
     if ( ( open MSG, "<$modify_file" ) && ( open OUTPUT, ">temp.out" ) ) {

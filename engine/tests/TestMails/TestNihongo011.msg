@@ -1,0 +1,51 @@
+Date: Thu, 23 Sep 2004 22:30:00 +0900 (JST)
+To: =?ISO-2022-JP?B??=<test@example.com>
+From: =?ISO-2022-JP?B?GyRCJF4kZiRfGyhC?=<mayumi_k0707@yahoo.co.jp>
+Subject: =?ISO-2022-JP?B?GyRCJCo1VyQ3JFYkaiRHJDkkTRsoQg==?=
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="cf49d7a3-0d53-4c67-83a7-c85ea0e5cfe1"
+X-MIME-Autoconverted: from 8bit to base64 by mail.isp.ne.jp id WAA14640
+Status: RO
+
+こんなメールはどうでしょう。
+
+--cf49d7a3-0d53-4c67-83a7-c85ea0e5cfe1
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+    filename="=?iso-2022-jp?B?XxskQjYoTk8ycTxSTVcwdzhEP00lOSUtJWs+
+cEpzGyhCXzM5MDcueGxz?="
+
+PCFET0NUWVBFIEhUTUwgUFVCTElDICItLy9XM0MvL0RURCBIVE1MIDQuMCBUcmFuc2l0aW9u
+YWwvL0VOIj4NCjxIVE1MPjxIRUFEPg0KPE1FVEEgaHR0cC1lcXVpdj1Db250ZW50LVR5cGUg
+Y29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PXVuaWNvZGUiPg0KPE1FVEEgY29udGVudD0i
+TVNIVE1MIDYuMDAuMjkwMC4yMTgwIiBuYW1lPUdFTkVSQVRPUj48L0hFQUQ+DQo8Qk9EWT4N
+CjxQPoLcguSC3YLFgreBQjwvUD4NCjxQPiZuYnNwO4Koi3aCtYLUguiCxYK3gsuBQjwvUD4N
+CjxQPoLggqSWWYLqgsSCtYLcgsGCvYKpgrWC54FIgWmCuILBgsaYQZeNgrWCyIKtgsSCsoLf
+gvGCyIKzgqKBaiA8L1A+DQo8UD6NxYvfgs2PrYK1jp6K1ILgjuaC6oLpguaCpILJgsiCwYK9
+gqmC54FBguaCqYLBgr2C54nvgsGCxILdgtyCuYLxgqmBSCA8L1A+DQo8UD6OhILMmEGXjZDm
+gs2CsYLMg1SDQ4NngsmN2oLBgsSC6YKpgueKbZRGgrWCxIKtguqC6YFIIDwvUD4NCjxQPoK7
+guqCtoLhkdKCwYLEgumCy4FCIDwvUD4NCjxQPjxBIA0KaHJlZj0iaHR0cDovL3d3dy5jeWJl
+ci1hZDAxLmNvbS9sb3ZlMXBlYWNlMi8/aXA9MDAwMSZhbXA7aWQ9QjkzMCI+aHR0cDovL3d3
+dy5jeWJlci1hZDAxLmNvbS9sb3ZlMXBlYWNlMi8/aXA9MDAwMSZhbXA7aWQ9QjkzMDwvQT4g
+DQo8L1A+DQo8UD4mbmJzcDs8L1A+DQo8UD4mbmJzcDs8L1A+PC9CT0RZPjwvSFRNTD4NCg0K
+DQo=
+
+--cf49d7a3-0d53-4c67-83a7-c85ea0e5cfe1
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+    filename="=?iso-2022-jp?B?XyAgICAgICAkQjZOTzJxUk1XMHc4RE0
+lOSUtJWtwSnNCXzM5MDcueGxz?="
+
+DQqCzYK2gt+C3IK1gsSBYCCT3oFYgsWCt4FCDQoNCg0KjGaOppTCk8eC8YLFg4GBW4OLgrWC
+3IK1gr2BQg0KgWmCv4LlgsGCxotDgsmCyILBgr2CqYLngWOBag0KDQqC4IK1guaCqYLBgr2C
+54Kokm2C6I2HgqKCqYLngsWC4IKigqKCzILFg4GBW4OLgsyC4oLojuaC6IK1gtyCuYLxgqmB
+SA0KDQqOhILMgrGCzINBg2iDjINYgs2K7pZ7k0mCyY5kjpaCyY5ngsGCxILpgsyCxYKggtyC
+6IKxgrGCyZGXgueCyIKigsWC2YK1gqKCzIFCDQookEWP6oLMitaMV4LFg4GBW4OLgqqUYIKp
+guqC6YKpguCCtYLqgsiCooLMgWMpDQqCxYKrguqCzom6gsyDVINDg2eCqYLngXWT3oFYgXaC
+xZJUgrmC6YLGjnaCpILMgsWBQYK7grGCxYLiguiO5oLogrWCvYKigsiBQg0KDQqCsYKxgr6C
+5oH0DQpodHRwOi8veTcubmV0L2dhcmRlbl9jYWZlL3NreS8NCg0KDQqRU5WUlrOXv4K+gsGC
+xI+RgqKCxIKggsGCvYKpgueSaoLMkGyCzJWJklOC4ILIgqKCxo52gqSCtYFCgUKBQg0KkoeX
+x4KtgsiC6oK9gueBQYxnkdGCxYOBgVuDi4K1gsSC4IKigqKCtYFjgfQNCg0KguaC64K1gq2C
+y4FJgUCCu4LqgraC4YFAgtyCvYLLgWCB9A0KDQo=
+
+--cf49d7a3-0d53-4c67-83a7-c85ea0e5cfe1--

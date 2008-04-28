@@ -50,9 +50,9 @@ test_assert_regexp( $line, 'reads a message on STDIN, classifies it, outputs the
 
 # Try classifying a message
 
-my $modify_file = 'TestMailParse021.msg';
-$code = system( "cat TestMailParse021.msg | $pipe > temp.tmp" ); # Done once to force the bucket upgrade
-$code = system( "cat TestMailParse021.msg | $pipe > temp.tmp" );
+my $modify_file = 'TestMails/TestMailParse021.msg';
+$code = system( "cat TestMails/TestMailParse021.msg | $pipe > temp.tmp" ); # Done once to force the bucket upgrade
+$code = system( "cat TestMails/TestMailParse021.msg | $pipe > temp.tmp" );
 test_assert( $code == 0 );
 my $output_file = $modify_file;
 $output_file    =~ s/msg/cam/;

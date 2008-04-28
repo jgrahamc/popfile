@@ -674,7 +674,7 @@ if ( $pid == 0 ) {
 
         my $count = 0;
         my $size  = 0;
-        my @messages = sort glob 'TestMailParse*.msg';
+        my @messages = sort glob 'TestMails/TestMailParse*.msg';
         for my $i (0..$#messages) {
             if ( $messages[$i] ne '' ) {
                 $count += 1;
@@ -789,7 +789,7 @@ if ( $pid == 0 ) {
         $cam = $messages[27];
         $cam =~ s/msg$/cam/;
 
-        test_assert( open RESULT, ">testpop3_$messages[27]-got.cam" );
+        test_assert( open RESULT, ">$messages[27]_testpop3_-got.cam" );
         test_assert( open FILE, "<$cam" );
         binmode FILE;
         while ( <FILE> ) {
@@ -2175,7 +2175,7 @@ if ( $pid == 0 ) {
 sub server
 {
     my ( $client, $apop ) = @_;
-    my @messages = sort glob 'TestMailParse*.msg';
+    my @messages = sort glob 'TestMails/TestMailParse*.msg';
     my $goslow = 0;
     my $hang   = 0;
     my $slowlf = 0;
@@ -2293,7 +2293,7 @@ sub server
         }
 
         if ( $command =~ /RSET/i ) {
-            @messages = sort glob 'TestMailParse*.msg';
+            @messages = sort glob 'TestMails/TestMailParse*.msg';
             print $client "+OK Reset$eol";
             next;
         }

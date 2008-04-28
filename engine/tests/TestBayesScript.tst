@@ -67,7 +67,7 @@ open STDERR, ">&", $old_stderr;
 
 my %words;
 
-open WORDS, "<TestMailParse021.wrd";
+open WORDS, "<TestMails/TestMailParse021.wrd";
 while ( <WORDS> ) {
     if ( /(.+) (\d+)/ ) {
         $words{$1} = $2;
@@ -75,12 +75,12 @@ while ( <WORDS> ) {
 }
 close WORDS;
 
-@stdout = `$bayes TestMailParse021.msg`;# 2> temp.tmp 1> temp2.tmp" );
+@stdout = `$bayes TestMails/TestMailParse021.msg`;# 2> temp.tmp 1> temp2.tmp" );
 
 $code = ($? >> 8);
 test_assert( $code == 0 );
 $line = shift @stdout;
-test_assert_regexp( $line, '`TestMailParse021.msg\' is `spam\'' );
+test_assert_regexp( $line, '`TestMails/TestMailParse021.msg\' is `spam\'' );
 
 my %output;
 

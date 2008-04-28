@@ -55,7 +55,7 @@ unlink( 'stopwords' );
 test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 mkdir 'messages';
-my @messages = glob 'TestMailParse*.msg';
+my @messages = glob 'TestMails/TestMailParse*.msg';
 
 my $count = 0;
 my $dl    = 0;

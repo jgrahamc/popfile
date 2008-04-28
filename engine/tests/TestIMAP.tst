@@ -194,14 +194,14 @@ sub test_imap_module {
     }
 
     # check that a fresh classification confirms the reclassification
-    test_assert_equal( $b->classify( $session, 'TestMailParse007.msg' ), 'personal' );
+    test_assert_equal( $b->classify( $session, 'TestMails/TestMailParse007.msg' ), 'personal' );
 
     # Now let's see whether the words in one of the reclassified messages
     # actually ended up in the corpus
 
     my %words;
 
-    open WORDS, "<TestMailParse013.wrd";
+    open WORDS, "<TestMails/TestMailParse013.wrd";
     while ( <WORDS> ) {
         if ( /(.+) (\d+)/ ) {
             $words{$1} = $2;
@@ -344,7 +344,7 @@ sub test_imap_client {
         my $uid = shift @msgs;
         my ( $ok, @msg_lines ) = $client->fetch_message_part( $uid, '' );
         test_assert_equal( $ok, 1 );
-        my $filename = "TestMailParse$msg_number.msg";
+        my $filename = "TestMails/TestMailParse$msg_number.msg";
         if ( open my $ORG, '<', $filename ) {
             my @org_lines = ();
             while ( <$ORG> ) {
