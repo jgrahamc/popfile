@@ -309,6 +309,7 @@ sub handle_cookie__
     my ( $garbage, $timeset, $session, $client_name, $checksum ) = ( $1, $2, $3, $4, $5 );
 
     if ( !defined( $checksum ) ) {
+        $self->log_( 0, "Invalid cookie received, had no checksum" );
         return undef;
     }
 
@@ -781,6 +782,12 @@ sub url_handler__
         delete $url_table{'/users'};
     }
 
+    # In the single user mode, remove the users URLs
+
+    if ( $self->global_config_( 'single_user' ) ) {
+        delete $url_table{'/users'};
+    }
+
     # Any of the standard pages can be found in the url_table, the
     # other pages are probably files on disk
 
@@ -1127,7 +1134,7 @@ sub handle_configuration_bar__
                  ( $userid eq 1 ) ) {                      # PROFILE BLOCK STOP
                 $self->global_config_( 'language', $language );
 
-                $self->cache_language_for_user( $language, 'global' );
+                $self->cache_global_language( $language );
             }
 
             # Reload language cache

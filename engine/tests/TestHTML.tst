@@ -295,14 +295,20 @@ EOM
     close $uwriter;
     $dwriter->autoflush(1);
 
-    use LWP::Simple;
     use LWP::UserAgent;
+    use HTTP::Cookies;
     use URI::URL;
     use String::Interpolate;
 
     my $ua = new LWP::UserAgent;
     my $line_number = 0;
     my %h = ( port => \$port );
+
+    # Cookies
+
+    my $cookie_jar = HTTP::Cookies->new(file => 'TestHTML_cookie', autosave => 1);
+    $cookie_jar->clear;
+    $ua->cookie_jar($cookie_jar);
 
     my $in = new String::Interpolate %h;
 
@@ -356,13 +362,17 @@ EOM
             $request = $form->click( $name ) if ( defined( $form ) );
             if ( defined( $request ) ) {
                 my $response = $ua->request( $request );
-                @forms = HTML::Form->parse( $response );
                 if ( $response->code == 302 ) {
-                    $content = get(url("http://127.0.0.1:$port" . $response->headers->header('Location')));
-                    @forms = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
+#                    print "  REDIRECTED to ", $response->headers->header('Location'), " at line $line_number\n";
+                    $request = HTTP::Request->new( 'GET', "http://127.0.0.1:$port" . $response->headers->header('Location') );
+                    $response = $ua->request( $request );
+                    $content = $response->content;
+                    @forms = HTML::Form->parse( $response );
+#                    print $content;
                 } else {
                     test_assert_equal( $response->code, 200, "From script line $line_number" );
                     $content = $response->content;
+                    @forms = HTML::Form->parse( $response );
                 }
                 $content =~ s/^[\t ]+//gm;
                 $content =~ s/[\t ]+$//gm;
@@ -485,12 +495,22 @@ EOM
             my $request = form_submit( $2 );
             if ( defined( $request ) ) {
                 my $response = $ua->request( $request );
-                $content = $response->content;
+                if ( $response->code == 302 ) {
+#                    print "  REDIRECTED to ", $response->headers->header('Location'), " at line $line_number\n";
+                    $request = HTTP::Request->new( 'GET', "http://127.0.0.1:$port" . $response->headers->header('Location') );
+                    $response = $ua->request( $request );
+                    $content = $response->content;
+                    @forms = HTML::Form->parse( $response );
+#                    print $content;
+                } else {
+                    test_assert_equal( $response->code, 200, "From script line $line_number" );
+                    $content = $response->content;
+                    @forms = HTML::Form->parse( $response );
+                }
                 $content =~ s/^[\t ]+//gm;
                 $content =~ s/[\t ]+$//gm;
                 while ( ( $content =~ s/\n\n/\n/gs ) > 0 ) {
                 }
-                @forms   = HTML::Form->parse( $response );
             }
             next;
         }
@@ -596,6 +616,14 @@ EOM
                 select( undef, undef, undef, 0.1 );
             }
 
+            next;
+        }
+
+        if ( $line =~ /^SETCOOKIE +(.*)$/ ) {
+#            print "    Current cookie : ", $ua->cookie_jar->as_string, "\n";
+            $cookie_jar->set_cookie( 0, 'popfile', $1, '/', '127.0.0.1', undef, undef, undef, undef, 1 );
+#            $ua->cookie_jar->set_cookie( 1, 'popfile', $1, '/', 'http://127.0.0.1' );
+#            print "    Changed cookie : ", $ua->cookie_jar->as_string, "\n";
             next;
         }
 

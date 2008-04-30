@@ -3633,7 +3633,7 @@ sub create_user
         }
         $h->finish;
 
-        # Clone buckets (optional)
+        # Clone buckets
 
         $h = $self->db_()->prepare(                                  # PROFILE BLOCK START
              "select name, pseudo from buckets where userid = ?;" ); # PROFILE BLOCK STOP
@@ -3670,9 +3670,10 @@ sub create_user
         # Clone bucket parameters
 
         $h = $self->db_()->prepare(                             # PROFILE BLOCK START
-            "select bucketid, btid, val from buckets, bucket_params
+            "select bucketid, btid, val from buckets, bucket_params, bucket_template
                  where userid = ? and
-                       buckets.id = bucket_params.bucketid;" ); # PROFILE BLOCK STOP
+                       buckets.id = bucket_params.bucketid and
+                       bucket_template.name not in ( 'fncount', 'fpcount','count' );" ); # PROFILE BLOCK STOP
         $h->execute( $clid );
 
         my %bucket_params;

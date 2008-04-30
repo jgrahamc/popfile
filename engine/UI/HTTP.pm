@@ -315,11 +315,15 @@ sub decrypt_cookie__
     $self->log_( 2, "Decrypt cookie: $cookie" );
 
     $cookie =~ /popfile=([^\r\n]+)/;
-    if ( defined( $1 ) ) {
-        return $self->{crypto__}->decrypt( decode_base64( $1 ) );
-    } else {
-        return '';
+    if ( defined( $1 ) && ( length( $1 ) eq 216 ) ) {
+        my $decoded_cookie = decode_base64( $1 );
+        if ( $decoded_cookie =~ /^Salted__(.{8})/ ) {
+#            print "Decrypted : ", $self->{crypto__}->decrypt( $decoded_cookie ), "\n";
+            return $self->{crypto__}->decrypt( $decoded_cookie );
+        }
     }
+
+    return '';
 }
 
 # ----------------------------------------------------------------------------

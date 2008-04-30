@@ -71,6 +71,8 @@ MATCH <html lang="en">
 MATCH <link rel="stylesheet" type="text/css" href="skins/default/style.css" media="all" title="POPFile">
 MATCH <link rel="icon" href="favicon.ico">
 
+MATCH <a class="shutdownLink" href="/shutdown">Shutdown POPFile</a>
+
 # Common MIDDLE parts (i.e. the tabs)
 
 MATCH <a class="menuLink" href="/history"
@@ -83,6 +85,9 @@ MATCH <a class="menuLink" href="/administration"
 MATCH Administration</a>
 MATCH <a class="menuLink" href="/advanced"
 MATCH Advanced</a>
+
+NOTMATCH <a class="menuLink" href="/users"
+NOTMATCH Users</a>
 
 # Common BOTTOM parts
 
@@ -121,6 +126,511 @@ MATCH
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/advanced"
 ENDMATCH
+
+GET /users
+MATCH POPFile Web Server Error 404
+
+# Enter the Multi user mode
+
+GET /administration
+INPUTIS   usermode on
+CONFIGIS  GLOBAL_single_user 1
+SETINPUT  usermode off
+CLICK     apply_stealth
+INPUTIS   usermode 
+CONFIGIS  GLOBAL_single_user 0
+MATCH     POPFile is now in the Multiuser Mode. You are recommended to restart POPFile.
+MATCH     <a class="logoutLink" href="/logout">Logout (admin)</a>
+
+# Login page
+
+GET       /logout
+MATCH     <h2 class="password">Login</h2>
+MATCH     User name
+MATCH     Password
+SETINPUT  username admin
+SETSUBMIT password wrongpassword
+MATCH     Incorrect user name or password
+SETINPUT  username wronguser
+SETSUBMIT password 
+MATCH     Incorrect user name or password
+
+SETINPUT  username admin
+SETSUBMIT password 
+MATCH     Recent Messages
+
+# Administration page (Current Active User sessions)
+
+GET       /administration
+MATCH     Current Active User Sessions
+MATCH     <td aligh="left" >admin</td>
+
+# Advanced page (No single user mode options)
+
+GET       /advanced
+NOTMATCH  Single User Mode Parameters
+
+# Users page
+
+# Create user
+
+GET       /users
+MATCH     Create New User
+SETSUBMIT newuser testuser
+MATCH     Created user &#39;testuser&#39; (initial password &#39;
+SETSUBMIT newuser testuser
+MATCH     User &#39;testuser&#39; not created: already exists
+SETSUBMIT newuser testuser2
+MATCH     Created user &#39;testuser2&#39; (initial password &#39;
+
+SETINPUT  newuser admin_clone
+SETSUBMIT clone admin
+MATCH     Created user &#39;admin_clone&#39; as clone of &#39;admin&#39; (initial password &#39;
+
+SETINPUT  newuser admin_clone_with_data
+SETINPUT  clone admin
+SETINPUT  users_copy_magnets on
+SETSUBMIT users_copy_corpus on
+MATCH     Created user &#39;admin_clone_with_data&#39; as clone of &#39;admin&#39; (initial password &#39;
+
+# Remove User
+
+GET       /users
+MATCH     Remove Existing User
+MATCH
+<select name="toremove">
+<option value="">&nbsp;</option>
+<option>admin_clone</option>
+<option>testuser2</option>
+<option>testuser</option>
+<option>admin_clone_with_data</option>
+</select>
+ENDMATCH
+SETSUBMIT toremove testuser
+MATCH     Removed user &#39;testuser&#39;
+MATCH
+<select name="toremove">
+<option value="">&nbsp;</option>
+<option>admin_clone</option>
+<option>testuser2</option>
+<option>admin_clone_with_data</option>
+</select>
+ENDMATCH
+SETSUBMIT toremove admin_clone
+MATCH     Failed to remove user &#39;admin_clone&#39;: disable admin rights first
+MATCH
+<select name="toremove">
+<option value="">&nbsp;</option>
+<option>admin_clone</option>
+<option>testuser2</option>
+<option>admin_clone_with_data</option>
+</select>
+ENDMATCH
+
+# Rename user
+
+GET       /users
+MATCH     Rename Existing User
+MATCH
+<select name="torename">
+<option value="">&nbsp;</option>
+<option>admin_clone</option>
+<option>testuser2</option>
+<option>admin_clone_with_data</option>
+</select>
+ENDMATCH
+SETINPUT  torename testuser2
+SETSUBMIT newname renameduser
+MATCH     Renamed user &#39;testuser2&#39; to &#39;renameduser&#39; (initial password &#39;
+MATCH
+<select name="torename">
+<option value="">&nbsp;</option>
+<option>admin_clone</option>
+<option>renameduser</option>
+<option>admin_clone_with_data</option>
+</select>
+ENDMATCH
+SETINPUT  torename renameduser
+SETSUBMIT newname admin
+MATCH     Failed to rename user &#39;renameduser&#39; to &#39;admin&#39;: already exists
+
+# Initialize user's password
+
+GET       /users
+MATCH     Change/Initialize User's Password
+MATCH
+<select name="tochangepassword">
+<option value="">&nbsp;</option>
+<option>admin_clone</option>
+<option>admin</option>
+<option>renameduser</option>
+<option>admin_clone_with_data</option>
+</select>
+ENDMATCH
+SETINPUT  tochangepassword renameduser
+SETSUBMIT users_reset_password on
+MATCH     Initialized password for user &#39;renameduser&#39; (new initial password &#39;
+
+# Set user's password
+
+GET       /users
+SETINPUT  tochangepassword renameduser
+SETINPUT  users_new_password newpassword
+SETSUBMIT users_confirm_password newpassword
+MATCH     Changed password for user &#39;renameduser&#39;
+SETINPUT  tochangepassword renameduser
+SETINPUT  users_new_password newpassword2
+SETSUBMIT users_confirm_password wrongconfirmpassword
+MATCH     Failed to change password for user &#39;renameduser&#39;: The new password must by identical in the New and Confirm New boxes
+
+SETINPUT  tochangepassword admin_clone
+SETINPUT  users_new_password newpassword
+SETSUBMIT users_confirm_password newpassword
+MATCH     Changed password for user &#39;admin_clone&#39;
+
+SETINPUT  tochangepassword admin_clone_with_data
+SETINPUT  users_new_password newpassword
+SETSUBMIT users_confirm_password newpassword
+MATCH     Changed password for user &#39;admin_clone_with_data&#39;
+
+# Edit user's settings
+
+GET       /users
+MATCH     Edit User Settings
+MATCH
+<select name="editname">
+<option value="">&nbsp;</option>
+<option>admin_clone</option>
+<option>admin</option>
+<option>renameduser</option>
+<option>admin_clone_with_data</option>
+</select>
+ENDMATCH
+SETSUBMIT editname admin
+MATCH     Associated POP3 Accounts (admin)
+MATCH     Parameters (admin)
+
+# Add account
+
+SETSUBMIT newaccount foo:bar
+MATCH
+<tr>
+<th class="usersLabel" scope="col" align="left">
+POP3 Account
+</th>
+<th class="usersLabel" scope="col">
+Remove
+</th>
+</tr>
+ENDMATCH
+MATCH
+<td>
+foo:bar
+</td>
+ENDMATCH
+SETINPUT  newaccount fooz:bar
+CLICK     addaccount
+MATCH
+<td>
+fooz:bar
+</td>
+ENDMATCH
+SETINPUT  newaccount foo:bar
+CLICK     addaccount
+MATCH     Failed to add the account because it is assigned to another user
+
+# Remove account
+
+SETINPUT  remove_fooz:bar on
+CLICK     delete
+NOTMATCH  fooz:bar
+
+# Edit parameters
+
+INPUTIS   parameter_history_history_days 2
+USERCONFIGIS history_history_days 2
+SETSUBMIT parameter_history_history_days 10
+INPUTIS   parameter_history_history_days 10
+USERCONFIGIS history_history_days 10
+SETSUBMIT parameter_history_history_days 2
+
+INPUTIS   parameter_GLOBAL_can_admin 1
+USERCONFIGIS GLOBAL_can_admin 1
+SETSUBMIT parameter_GLOBAL_can_admin 0
+INPUTIS   parameter_GLOBAL_can_admin 1
+USERCONFIGIS GLOBAL_can_admin 1
+
+GET       /logout
+
+# Login as standard (non-admin) user
+
+GET       /
+SETINPUT  username renameduser
+SETSUBMIT password wrongpassword
+MATCH     Incorrect user name or password
+SETINPUT  username renameduser
+SETSUBMIT password newpassword
+
+MATCH <a class="menuLink" href="/history"
+MATCH History</a>
+MATCH <a class="menuLink" href="/buckets"
+MATCH Buckets</a>
+MATCH <a class="menuLink" href="/magnets"
+MATCH Magnets</a>
+
+NOTMATCH <a class="menuLink" href="/administration"
+NOTMATCH Administration</a>
+NOTMATCH <a class="menuLink" href="/users"
+NOTMATCH Users</a>
+NOTMATCH <a class="menuLink" href="/advanced"
+NOTMATCH Advanced</a>
+
+MATCH     <a class="logoutLink" href="/logout">Logout (renameduser)</a>
+NOTMATCH  <a class="shutdownLink" href="/shutdown">Shutdown POPFile</a>
+
+# No History
+
+GET /history
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/history"
+ENDMATCH
+MATCH     No messages.
+
+# No Buckets
+
+GET /buckets
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/buckets"
+ENDMATCH
+MATCH
+<span style="color:black">
+unclassified
+</span>
+ENDMATCH
+MATCH
+<td align="right">
+0 (  0.00%)
+</td>
+<td align="right">
+0
+</td>
+<td align="right">
+</td>
+ENDMATCH
+
+# No Magnets
+
+GET /magnets
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/magnets"
+ENDMATCH
+NOTMATCH  text1
+
+# Non admin users can't access these pages
+
+GET /administration
+MATCH POPFile Web Server Error 404
+GET /users
+MATCH POPFile Web Server Error 404
+GET /advanced
+MATCH POPFile Web Server Error 404
+
+GET /shutdown
+MATCH POPFile Web Server Error 404
+
+GET /logout
+
+# Login as cloned admin without data
+
+GET /
+SETINPUT  username admin_clone
+SETSUBMIT password newpassword
+
+MATCH <a class="menuLink" href="/history"
+MATCH History</a>
+MATCH <a class="menuLink" href="/buckets"
+MATCH Buckets</a>
+MATCH <a class="menuLink" href="/magnets"
+MATCH Magnets</a>
+MATCH <a class="menuLink" href="/administration"
+MATCH Administration</a>
+MATCH <a class="menuLink" href="/users"
+MATCH Users</a>
+MATCH <a class="menuLink" href="/advanced"
+MATCH Advanced</a>
+
+MATCH <a class="logoutLink" href="/logout">Logout (admin_clone)</a>
+MATCH <a class="shutdownLink" href="/shutdown">Shutdown POPFile</a>
+
+# No history
+
+GET       /history
+MATCH     No messages.
+
+# Buckets
+
+GET /buckets
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/buckets"
+ENDMATCH
+MATCH
+<span style="color:red">
+other
+</span>
+ENDMATCH
+MATCH
+<span style="color:green">
+personal
+</span>
+ENDMATCH
+MATCH
+<span style="color:blue">
+spam
+</span>
+ENDMATCH
+MATCH
+<span style="color:black">
+unclassified
+</span>
+ENDMATCH
+MATCH
+<td align="right">
+0
+</td>
+ENDMATCH
+MATCH
+<td align="right">
+0 (0.00%)
+</td>
+<td align="right">
+0
+</td>
+<td align="right">
+0
+</td>
+ENDMATCH
+MATCH
+<td align="right">
+0 (0.00%)
+</td>
+<td align="right">
+0
+</td>
+<td align="right">
+</td>
+ENDMATCH
+
+# No magnets
+
+GET /magnets
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/magnets"
+ENDMATCH
+NOTMATCH  text1
+
+GET /logout
+
+# Login as cloned admin with data
+
+GET /
+SETINPUT  username admin_clone_with_data
+SETSUBMIT password newpassword
+
+MATCH <a class="menuLink" href="/history"
+MATCH History</a>
+MATCH <a class="menuLink" href="/buckets"
+MATCH Buckets</a>
+MATCH <a class="menuLink" href="/magnets"
+MATCH Magnets</a>
+MATCH <a class="menuLink" href="/administration"
+MATCH Administration</a>
+MATCH <a class="menuLink" href="/users"
+MATCH Users</a>
+MATCH <a class="menuLink" href="/advanced"
+MATCH Advanced</a>
+
+MATCH     <a class="logoutLink" href="/logout">Logout (admin_clone_with_data)</a>
+MATCH <a class="shutdownLink" href="/shutdown">Shutdown POPFile</a>
+
+# History is not copied
+
+GET       /history
+MATCH     No messages.
+
+# Buckets
+
+GET       /buckets
+MATCH
+<span style="color:red">
+other
+</span>
+ENDMATCH
+MATCH
+<span style="color:green">
+personal
+</span>
+ENDMATCH
+MATCH
+<span style="color:blue">
+spam
+</span>
+ENDMATCH
+MATCH
+<span style="color:black">
+unclassified
+</span>
+ENDMATCH
+
+MATCH
+<td align="right">
+656
+</td>
+ENDMATCH
+MATCH
+<td align="right">
+3
+</td>
+ENDMATCH
+MATCH
+<td align="right">
+3,353
+</td>
+ENDMATCH
+
+# Magnets
+
+GET       /magnets
+INPUTIS text1 oldstyle
+INPUTIS bucket1 personal
+INPUTIS type1 from
+INPUTIS text2 bar
+INPUTIS bucket2 personal
+INPUTIS type2 subject
+INPUTIS text3 baz\@baz.com
+INPUTIS bucket3 personal
+INPUTIS type3 to
+
+GET /logout
+
+# Return to the single user mode
+
+GET       /administration
+SETINPUT  username admin
+SETSUBMIT password 
+
+#INPUTIS   usermode 
+CONFIGIS  GLOBAL_single_user 0
+SETINPUT  usermode on
+CLICK     apply_stealth
+#INPUTIS   usermode on
+CONFIGIS  GLOBAL_single_user 1
+NOTMATCH  <a class="logoutLink" href="/logout">Logout (admin)</a>
+MATCH     POPFile is now in the Single User Mode (POPFile classic). You are recommended to restart POPFile.
 
 # History Page
 
@@ -287,7 +797,7 @@ CLICK setfilter
 NOTMATCH Magnetic Attraction for Ferrous Females
 MATCH Testing Refresh
 CLICK change
-MATCH Magnetic Attraction for Ferrous Females
+NOTMATCH Magnetic Attraction for Ferrous Females
 MATCH Testing Refresh
 CLICK reset_filter_search
 
@@ -371,7 +881,6 @@ spam
 ENDMATCH
 
 # bucket page
-# this test does not work on Japanese version of Windows
 
 GET /buckets?showbucket=spam
 MATCH Detail for <span style="color:blue">spam</span>
@@ -415,7 +924,6 @@ MATCH <b style="color:red">here</b>
 NOTMATCH 0.3289
 NOTMATCH 0.6697
 MATCH <b style="color:black">John</b>
-#MATCH <font color="red">here</font>
 MATCH Body would
 
 GET /view?view=31&amp;start_message=0&amp;format=prob
@@ -456,29 +964,32 @@ MATCH <b style="color:red">here</b>
 NOTMATCH 0.3289
 NOTMATCH 0.6697
 MATCH <b style="color:black">John</b>
-#MATCH <font color="red">here</font>
-# MATCH Body would
+MATCH Body would
 
 GET /jump_to_message?view=40
 NOTMATCH Single Message View
 MATCH Recent Messages
 
 # jump_to_message and a password
-# TODO : password interface test needs to change for multiuser mode
 
-#GET /security
-#INPUTIS password
-#CONFIGIS html_password
-#SETSUBMIT password secret
-#GET /jump_to_message?view=popfile10000=1.msg
-#MATCH Enter password:
-#SETSUBMIT password secret
-#MATCH Single Message View
-#MATCH Testing Refresh
-#SETCONFIG html_password
-#GET /security
-#SETSUBMIT password
-#MATCH Updated password to
+GET /history
+SETINPUT new_password secret
+SETINPUT confirm_password secret
+CLICK    change_password
+MATCH    New password has been set
+GET /logout
+
+GET /jump_to_message?view=31
+SETSUBMIT password secret
+MATCH Single Message View
+MATCH Testing Refresh
+GET /history
+
+SETINPUT old_password secret
+SETINPUT new_password 
+SETINPUT confirm_password 
+CLICK    change_password
+MATCH    New password has been set
 
 # Quick Magnets
 
@@ -538,19 +1049,19 @@ ENDMATCH
 # Check delete one message
 
 GET /history
-MATCH Testing Refresh
+MATCH    Testing Refresh
 SETINPUT remove_31 on
-CLICK clearchecked
-MATCH Recent Messages
+CLICK    clearchecked
+MATCH    Recent Messages
 NOTMATCH Testing Refresh
 
 # Check delete some messages
 
-MATCH from: Leandro
-MATCH spamaddy
+MATCH    from: Leandro
+MATCH    spamaddy
 SETINPUT remove_20 on
 SETINPUT remove_28 on
-CLICK clearchecked
+CLICK    clearchecked
 NOTMATCH from: Leandro
 NOTMATCH spamaddy
 
@@ -558,7 +1069,6 @@ NOTMATCH spamaddy
 
 GET /history
 CLICK clearpage
-GET /history
 NOTMATCH Jump to message
 MATCH Recent Messages (9)
 MATCH ADV: Turn Back the Hands of Time
@@ -566,9 +1076,10 @@ MATCH ADV: Turn Back the Hands of Time
 # Check delete all messages
 # TODO : need to fix
 
+GET /history
+CLICK clearall
 #GET /history
-#CLICK clearall
-#MATCH No messages.
+MATCH No messages.
 
 # Magnets Page
 
@@ -599,15 +1110,15 @@ INPUTIS   type5 subject
 INPUTIS   bucket5 spam
 MAGNETIS  spam subject newmagnet
 
-SETINPUT text0 foo
-SETINPUT type0 from
+SETINPUT  text0 foo
+SETINPUT  type0 from
 SETSUBMIT bucket0 personal
-MATCH Magnet &#39;from: foo&#39; already exists in bucket &#39;personal&#39;
+MATCH     Magnet &#39;from: foo&#39; already exists in bucket &#39;personal&#39;
 
-SETINPUT text0 fo
-SETINPUT type0 from
+SETINPUT  text0 fo
+SETINPUT  type0 from
 SETSUBMIT bucket0 personal
-MATCH New magnet &#39;from: fo&#39; clashes with magnet &#39;from: foo&#39; in bucket &#39;personal&#39; and could cause ambiguous results.  New magnet was not added.
+MATCH     New magnet &#39;from: fo&#39; clashes with magnet &#39;from: foo&#39; in bucket &#39;personal&#39; and could cause ambiguous results.  New magnet was not added.
 
 # Check magnet change value
 
@@ -616,18 +1127,18 @@ INPUTIS   text5 newmagnetvalue
 INPUTIS   type5 subject
 INPUTIS   bucket5 spam
 MAGNETIS  spam subject newmagnetvalue
-INPUTIS text1 foo
-INPUTIS bucket1 personal
-INPUTIS type1 from
-INPUTIS text2 oldstyle
-INPUTIS bucket2 personal
-INPUTIS type2 from
-INPUTIS text3 bar
-INPUTIS bucket3 personal
-INPUTIS type3 subject
-INPUTIS text4 baz\@baz.com
-INPUTIS bucket4 personal
-INPUTIS type4 to
+INPUTIS   text1 foo
+INPUTIS   bucket1 personal
+INPUTIS   type1 from
+INPUTIS   text2 oldstyle
+INPUTIS   bucket2 personal
+INPUTIS   type2 from
+INPUTIS   text3 bar
+INPUTIS   bucket3 personal
+INPUTIS   type3 subject
+INPUTIS   text4 baz\@baz.com
+INPUTIS   bucket4 personal
+INPUTIS   type4 to
 
 # Check magnet change type
 
@@ -636,18 +1147,18 @@ INPUTIS   type5 to
 INPUTIS   text5 newmagnetvalue
 INPUTIS   bucket5 spam
 MAGNETIS  spam to newmagnetvalue
-INPUTIS text1 foo
-INPUTIS bucket1 personal
-INPUTIS type1 from
-INPUTIS text2 oldstyle
-INPUTIS bucket2 personal
-INPUTIS type2 from
-INPUTIS text3 bar
-INPUTIS bucket3 personal
-INPUTIS type3 subject
-INPUTIS text4 baz\@baz.com
-INPUTIS bucket4 personal
-INPUTIS type4 to
+INPUTIS   text1 foo
+INPUTIS   bucket1 personal
+INPUTIS   type1 from
+INPUTIS   text2 oldstyle
+INPUTIS   bucket2 personal
+INPUTIS   type2 from
+INPUTIS   text3 bar
+INPUTIS   bucket3 personal
+INPUTIS   type3 subject
+INPUTIS   text4 baz\@baz.com
+INPUTIS   bucket4 personal
+INPUTIS   type4 to
 
 # Check magnet change bucket
 
@@ -775,12 +1286,32 @@ CONFIGIS  GLOBAL_debug 1
 SETSUBMIT debug 3
 INPUTIS   debug 3
 CONFIGIS  GLOBAL_debug 2
+MATCH     The current logger output : &#39;To Screen (console)&#39;
 SETSUBMIT debug 4
 INPUTIS   debug 4
 CONFIGIS  GLOBAL_debug 3
+MATCH     The current logger output : &#39;To Screen and File&#39;
 SETSUBMIT debug 1
 INPUTIS   debug 1
 CONFIGIS  GLOBAL_debug 0
+MATCH     The current logger output : &#39;None&#39;
+
+# Check logger level change
+
+INPUTIS   level 0
+CONFIGIS  logger_level 0
+SETSUBMIT level 1
+INPUTIS   level 1
+CONFIGIS  logger_level 1
+MATCH     The current logger level : &#39;Medium&#39;
+SETSUBMIT level 2
+INPUTIS   level 2
+CONFIGIS  logger_level 2
+MATCH     The current logger level : &#39;High&#39;
+SETSUBMIT level 0
+INPUTIS   level 0
+CONFIGIS  logger_level 0
+MATCH     The current logger level : &#39;Low&#39;
 
 # Check change timeout
 
@@ -808,15 +1339,16 @@ INPUTIS   pop3_port 111
 
 # Check fork for POP3
 
-#HIDDEN 1
 INPUTIS   pop3_force_fork 
 CONFIGIS  pop3_force_fork 0
 SETSUBMIT pop3_force_fork 1
 INPUTIS   pop3_force_fork 1
 CONFIGIS  pop3_force_fork 1
+MATCH     Enabled concurrent POP3 connections
 SETSUBMIT pop3_force_fork off
 INPUTIS   pop3_force_fork 
-#HIDDEN 0
+CONFIGIS  pop3_force_fork 0
+MATCH     Disabled concurrent POP3 connections
 
 # Check UI port
 
@@ -832,28 +1364,28 @@ INPUTIS   ui_port 8082
 
 # Check POP3 stealth
 
-#HIDDEN 1
 INPUTIS   serveropt_pop3 
 CONFIGIS  pop3_local 1
 SETSUBMIT serveropt_pop3 on
 INPUTIS   serveropt_pop3 on
 CONFIGIS  pop3_local 0
+MATCH     POPFile POP3 proxy ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
 SETSUBMIT serveropt_pop3 off
 INPUTIS   serveropt_pop3 
 CONFIGIS  pop3_local 1
-#HIDDEN 0
+MATCH     POPFile POP3 proxy WON&#39;T be accessed from another machine; this change will not take affect until you restart POPFile
 
 # Check UI stealth
-#HIDDEN 1
 INPUTIS   serveropt_html 
 CONFIGIS  html_local 1
 SETSUBMIT serveropt_html on
 INPUTIS   serveropt_html on
 CONFIGIS  html_local 0
+MATCH     POPFile UI (Control center) ALLOWS to be accessed from another machine; this change will not take affect until you restart POPFile
 SETSUBMIT serveropt_html off
 INPUTIS   serveropt_html 
 CONFIGIS  html_local 1
-#HIDDEN 0
+MATCH     POPFile UI (Control center) WON&#39;T be accessed from another machine; this change will not take affect until you restart POPFile
 
 # Check POP3 AUTH options
 
@@ -877,32 +1409,31 @@ MATCH The port must be a number between 1 and 65535
 
 # Check autoupdate
 
-#HIDDEN 1
 INPUTIS      update_check 
 USERCONFIGIS html_update_check 0
 SETSUBMIT    update_check on
 INPUTIS      update_check on
 USERCONFIGIS html_update_check 1
+MATCH        POPFile checks for updates daily
 SETSUBMIT    update_check off
 INPUTIS      update_check 
 USERCONFIGIS html_update_check 0
-#HIDDEN 0
+MATCH        POPFile does not check for updates automatically
 
 # Check statistics sending
 
-#HIDDEN 1
 INPUTIS      send_stats 
 USERCONFIGIS html_send_stats 0
 SETSUBMIT    send_stats on
 INPUTIS      send_stats on
+MATCH        POPFile sends classification statistics daily
 USERCONFIGIS html_send_stats 1
 SETSUBMIT    send_stats off
 INPUTIS      send_stats 
 USERCONFIGIS html_send_stats 0
-#HIDDEN 0
+MATCH        POPFile does not send classification statistics
 
 # Check password
-# TODO : multiuser support
 
 GET /history
 ISVALIDPASSWORD 
@@ -970,6 +1501,11 @@ GET /advanced
 SETSUBMIT parameter_bayes_hostname testhostname
 CONFIGIS  bayes_hostname testhostname
 INPUTIS   parameter_bayes_hostname testhostname
+
+# Single user mode parameters
+
+GET /advanced
+MATCH Single User Mode Parameters
 
 # Buckets Page
 
@@ -1131,7 +1667,7 @@ MATCH spam
 MATCH personal
 MATCH other
 
-# TODO Check bucket delete
+# Check bucket delete
 
 SETSUBMIT name sensible
 MATCH Deleted bucket sensible
@@ -1191,7 +1727,6 @@ GET /buckets?spam_color=feldspar&amp;bucket_settings=Apply%20Changes
 MATCH <option value="feldspar"  selected style="color: feldspar">
 
 # Check individual bucket page for accuracy
-# TODO : these tests do not work on Japanese version of Windows
 
 MATCH /buckets?showbucket=spam
 GET /buckets?showbucket=spam
@@ -1223,8 +1758,69 @@ Total word count
 </td>
 ENDMATCH
 
-# Check bad session key
-# TODO : cookie support
+# Cookie test
+
+# Single user mode
+
+SETCOOKIE 123456
+GET       /
+MATCH     Recent Messages
+
+SETINPUT  old_password 
+SETINPUT  new_password secret
+SETINPUT  confirm_password secret
+CLICK     change_password
+MATCH     New password has been set
+
+SETCOOKIE 123456
+GET       /
+MATCH     Login
+
+SETSUBMIT password secret
+MATCH     Recent Messages
+
+# invalid cookie1
+
+SETCOOKIE U2FsdGVkX183ySXJbS5ODY1xWaXjA6JXEJyng/Gcxw7xcX/XEqChvbddodaI7xIff47V5z+lW9LYf9+YcnifYchpGxYAQtJOM2mA0lU4eyiUbgdx0tpjmzjdHxzCyO06BGxfqibNotcmhDqxiMzCjYa9J6jVClSXW2PKjrpEvYDNuF435TnO87ucLSDKq3NChNpbyJ448OPco9WYBFx5+g==
+GET       /
+MATCH     Login
+
+SETSUBMIT password secret
+MATCH     Recent Messages
+
+# invalid cookie2
+
+SETCOOKIE U2FsdGVkX183ySXJbS5ODY1xWaXjA6JXEJyng/G;xw7xcX/XEqChvbddodaI7xIff47V5z+lW9LYf9+YcnifYchpGxYAQtJOM2mA0lU4eyiUbgdx0tpjmzjdHxzCyO06BGxfqibNotcmhDqxiMzCjYa9J6jVClSXW2PKjrpEvYDNuF435TnO87ucLSDKq3NChNpbyJ448OPco9WYBFx5+ga=
+GET       /
+MATCH     Login
+
+SETSUBMIT password secret
+SETSUBMIT password secret
+MATCH     Recent Messages
+
+SETINPUT  old_password secret
+SETINPUT  new_password 
+SETINPUT  confirm_password 
+CLICK     change_password
+MATCH     New password has been set
+
+# Multiuser mode
+
+GET       /administration
+SETINPUT  usermode off
+CLICK     apply_stealth
+
+SETCOOKIE 123456
+GET       /
+MATCH     Login
+
+SETINPUT  username admin
+SETSUBMIT password 
+MATCH     Recent Messages
+
+GET       /administration
+SETINPUT  usermode on
+CLICK     apply_stealth
 
 #GET /history?session=123456
 #MATCH POPFile Session Expired
@@ -1270,6 +1866,7 @@ MATCH .menuSelected
 # Get a page that does not exist
 
 GET /foo
+MATCH POPFile Web Server Error 404
 
 # Check update checking
 
@@ -1282,27 +1879,39 @@ MATCH popfile_update.pl
 MATCH popfile_stats.pl
 
 # Check the operation of passwords
-# TODO : multi user support
 
-#GET /administration
-#INPUTIS old_password 
-#USERCONFIGIS html_password b61124a488acc5f4406e74272629ee86
-#SETSUBMIT password secret
-#GET /advanced?session=123456
-#MATCH Enter password:
-#SETSUBMIT password wrong
-#MATCH Enter password:
-#MATCH Incorrect password
-#GET /?session=123456
-#MATCH Enter password:
-#SETSUBMIT password secret
-#MATCH Recent Messages
-#GET /advanced?session=123456&dummy=foo&dummy=bar
-#MATCH Enter password:
-#SETSUBMIT password secret
-#MATCH All POPFile Parameters
+GET /history
+SETINPUT new_password secret
+SETINPUT confirm_password secret
+CLICK    change_password
+MATCH    New password has been set
+GET /logout
 
-# TODO multi user mode
+GET /history
+MATCH     <h2 class="password">Login</h2>
+SETSUBMIT password wrongpassword
+MATCH Incorrect password
+GET /history
+MATCH     <h2 class="password">Login</h2>
+SETSUBMIT password secret
+MATCH     Recent Messages
+
+SETINPUT  old_password secret
+SETINPUT  new_password 
+SETINPUT  confirm_password 
+CLICK     change_password
+MATCH     New password has been set
+
+SETINPUT old_password wrongpassword
+CLICK    change_password
+MATCH    The old password entered is incorrect
+SETINPUT old_password 
+SETINPUT new_password secret
+SETINPUT confirm_password wrongconfirmpassword
+CLICK    change_password
+MATCH    The new password must by identical in the New and Confirm New boxes
+
+
 
 # Check shutdown operation
 
