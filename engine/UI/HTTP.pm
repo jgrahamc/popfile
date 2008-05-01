@@ -124,17 +124,23 @@ EOM
 
     # Think of an encryption key for encrypting cookies using Blowfish
 
-    my $module = $self->global_config_( 'random_module' );
-    $self->log_( 1, "Generating random octet using $module" );
+    my $cipher = $self->config_( 'cookie_cipher' );
+    my $key_length = 8;
+
+    if ( $cipher =~ /(Crypt::)?Blowfish/i ) {
+        $key_length = 56;
+    }
+    if ( $cipher =~ /(Crypt::)?DES/i ) {
+        $key_length = 8;
+    }
 
     my $key = $self->random_()->generate_random_string( # PROFILE BLOCK START
-                $module,
-                56,
+                $key_length,
                 $self->global_config_( 'crypt_strength' ),
                 $self->global_config_( 'crypt_devide' )
               );                                         # PROFILE BLOCK STOP
     $self->{crypto__} = new Crypt::CBC( { 'key'            => $key, # PROFILE BLOCK START
-                                          'cipher'         => 'Blowfish',
+                                          'cipher'         => $cipher,
                                           'padding'        => 'standard',
                                           'prepend_iv'     => 0,
                                           'regenerate_key' => 0,
@@ -155,9 +161,9 @@ sub stop
 {
     my ( $self ) = @_;
 
-    if ( defined( $self->{server__} ) ) {
+    if ( defined( $self->{server_} ) ) {
         foreach my $protocol ( keys %{$self->{server_}} ) {
-            close $self->{server_}{$protocol};
+            close $self->{server_}{$protocol} if ( defined( $self->{server_}{$protocol} ) );
         }
     }
 
@@ -315,12 +321,17 @@ sub decrypt_cookie__
     $self->log_( 2, "Decrypt cookie: $cookie" );
 
     $cookie =~ /popfile=([^\r\n]+)/;
-    if ( defined( $1 ) && ( length( $1 ) eq 216 ) ) {
+    if ( defined( $1 ) ) {
         my $decoded_cookie = decode_base64( $1 );
-        if ( $decoded_cookie =~ /^Salted__(.{8})/ ) {
-#            print "Decrypted : ", $self->{crypto__}->decrypt( $decoded_cookie ), "\n";
-            return $self->{crypto__}->decrypt( $decoded_cookie );
-        }
+        my $result = '';
+
+        # Workaround to avoid crash when a wrong cookie is sent
+
+        eval {
+            $result = $self->{crypto__}->decrypt( $decoded_cookie );
+        };
+
+        return $result;
     }
 
     return '';

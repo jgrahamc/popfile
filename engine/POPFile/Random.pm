@@ -31,15 +31,34 @@ use strict;
 #
 #   Returns the module itself
 #
+# $module       The module to use to generate the random string
+#
 #----------------------------------------------------------------------------
 sub new
 {
-    my $type = shift;
+    my ( $type, $module ) = @_;
     my $self;
 
     $self->{name__} = "random";
+    $self->{module__} = 'Crypt::Random';
 
-    return bless $self, $type;
+    if ( defined( $module ) ) {
+        $module = 'Crypt::' . $module if ( $module !~ /^Crypt::/ );
+
+        if ( ( $module eq 'Crypt::Random' ) ||          # PROFILE BLOCK START
+             ( $module eq 'Crypt::OpenSSL::Random' ) ||
+             ( $module eq 'Crypt::CBC' ) ) {            # PROFILE BLOCK STOP
+            $self->{module__} = $module;
+        }
+    }
+
+    my $has_module = eval "require $module; 1;";
+
+    if ( $has_module ) {
+        return bless $self, $type;
+    } else {
+        return undef;
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -49,39 +68,39 @@ sub new
 #   Returns length $length of random string.
 #
 # $length       Length of the string
-# $module       The module to use to generate the random string
-# $strength     The Strength value ( used only if using Crypt::Random )
-# $device       The Device value ( used only if using Crypt::Random )
+# $strength     The Strength value ( valid only if using Crypt::Random )
+# $device       The Device value ( valid only if using Crypt::Random )
 #
 #----------------------------------------------------------------------------
 sub generate_random_string
 {
-    my ( $self, $module, $length, $strength, $device    ) = @_;
+    my ( $self, $length, $strength, $device ) = @_;
 
-    if ( defined($module) && ( $module eq 'Crypt::Random' ) ) {
+    return undef if ( !defined( $self->{module__} ) );
+    return undef if ( !defined( $length ) );
+
+    $strength = 0 if ( !defined( $strength ) );
+    $device = '' if ( !defined( $device ) );
+
+    if ( $self->{module__} eq 'Crypt::Random' ) {
         require Crypt::Random;
 
-        return Crypt::Random::makerandom_octet(
+        return Crypt::Random::makerandom_octet(   # PROFILE BLOCK START
                     Length   => $length,
                     Strength => $strength,
                     Device   => $device,
-               );
+               );                                 # PROFILE BLOCK STOP
     }
 
-    if ( defined($module) && ( $module eq 'Crypt::OpenSSL::Random' ) ) {
+    if ( $self->{module__} eq 'Crypt::OpenSSL::Random' ) {
         require Crypt::OpenSSL::Random;
 
         return Crypt::OpenSSL::Random::random_bytes( $length );
     }
 
-    my $result = '';
+    require Crypt::CBC;
 
-    for (1 .. $length) {
-        my $random = chr( int( rand(255) ) + 1 );
-
-        $result .= $random;
-    }
-    return $result;
+    return Crypt::CBC->random_bytes( $length );
 }
 
 #----------------------------------------------------------------------------
@@ -90,15 +109,16 @@ sub generate_random_string
 #
 #   Give a random seed to the module
 #
+#   $seed       A seed
+#
 #----------------------------------------------------------------------------
 sub rand_seed
 {
-    my ( $self,
-         $seed ) = @_;
+    my ( $self, $seed ) = @_;
 
-    my $module = $self->global_config_( 'random_module' );
+    return undef if ( !defined( $self->{module__} ) );
 
-    if ( defined($module) && $module eq 'Crypt::OpenSSL::Random' ) {
+    if ( $self->{module__} eq 'Crypt::OpenSSL::Random' ) {
         require Crypt::OpenSSL::Random;
 
         Crypt::OpenSSL::Random::random_seed( $seed );

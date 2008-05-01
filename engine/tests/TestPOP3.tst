@@ -45,6 +45,8 @@ test_assert( rec_cp( 'corpus.base', 'corpus' ) );
 rmtree( 'corpus/CVS' );
 rmtree( 'messages' );
 
+use POSIX ":sys_wait_h";
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 # $POPFile->{debug__} = 1;
@@ -477,8 +479,8 @@ if ( $pid == 0 ) {
     }
 
     close $server;
-    exit(0) if ( $^O ne 'MSWin32' );
-    select ( undef, undef, undef, 3 );
+    sleep(1);
+    exit(0);
 } else {
 
     # This pipe is used to send signals to the child running
@@ -575,8 +577,8 @@ if ( $pid == 0 ) {
 
         $POPFile->CORE_stop();
 
-        exit(0) if ( $^O ne 'MSWin32' );
-        select ( undef, undef, undef, 3 );
+        sleep(1);
+        exit(0);
     } else {
 
         # PARENT THAT WILL SEND COMMAND TO THE PROXY
@@ -789,7 +791,7 @@ if ( $pid == 0 ) {
         $cam = $messages[27];
         $cam =~ s/msg$/cam/;
 
-        test_assert( open RESULT, ">$messages[27]_testpop3_-got.cam" );
+        test_assert( open RESULT, ">$messages[27]_testpop3-got.cam" );
         test_assert( open FILE, "<$cam" );
         binmode FILE;
         while ( <FILE> ) {
@@ -2161,10 +2163,9 @@ if ( $pid == 0 ) {
         close $dwriter;
         close $ureader;
 
-#        while ( waitpid( $pid, &WNOHANG ) != $pid ) {
-#        }
-#        while ( waitpid( $pid2, &WNOHANG ) != $pid2 ) {
-#        }
+        while ( waitpid( -1, WNOHANG ) > 0 ) {
+            select( undef, undef, undef, 0.1 );
+        }
 
     }
 }

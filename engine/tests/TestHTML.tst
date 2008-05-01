@@ -143,7 +143,7 @@ if ( $pid == 0 ) {
 
     $hi->service();
 
-    my $session = $b->get_session_key( 'admin', '' );
+    my $session = $b->get_administrator_session_key();
 
     # CHILD THAT WILL RUN THE HTML INTERFACE
 
@@ -169,6 +169,8 @@ if ( $pid == 0 ) {
 
     while ( 1 ) {
         $h->service();
+        $b->service();
+        $mq->service();
 
         if ( pipeready( $dreader ) ) {
             my $command = <$dreader>;
@@ -191,14 +193,16 @@ if ( $pid == 0 ) {
                 next;
             }
 
-            if ( $command =~ /^__GETUSERCONFIG ([^_]+)_(.+)/ ) {
-                my $value = $h->user_module_config_( 1, $1, $2 );
+            if ( $command =~ /^__GETUSERCONFIG ([^ ]+) ([^_]+)_(.+)/ ) {
+                my $userid = $b->get_user_id( $session, $1 );
+                my $value = $h->user_module_config_( $userid, $2, $3 );
                 print $uwriter "OK $value\n";
                 next;
             }
 
-            if ( $command =~ /^__SETUSERCONFIG ([^_]+)_(.+) (.+)?/ ) {
-                my $value = $h->user_module_config_( 1, $1, $2, $3 );
+            if ( $command =~ /^__SETUSERCONFIG ([^ ]+) ([^_]+)_(.+) (.+)?/ ) {
+                my $userid = $b->get_user_id( $session, $1 );
+                my $value = $h->user_module_config_( $userid, $2, $3, $4 );
                 print $uwriter "OK\n";
                 next;
             }
@@ -279,6 +283,7 @@ EOM
                 next;
             }
         }
+        select( undef, undef, undef, 0.05 );
     }
 
     close $dreader;
@@ -408,10 +413,10 @@ EOM
             next;
         }
 
-        if ( $line =~ /^USERCONFIGIS +([^ ]+) ?(.+)?$/ ) {
-            my ( $option, $expected ) = ( $1, $2 );
+        if ( $line =~ /^USERCONFIGIS +([^ ]+) +([^ ]+) ?(.+)?$/ ) {
+            my ( $user, $option, $expected ) = ( $1, $2, $3 );
             $expected = '' if ( !defined( $expected ) );
-            print $dwriter "__GETUSERCONFIG $option\n";
+            print $dwriter "__GETUSERCONFIG $user $option\n";
             my $reply = <$ureader>;
             if ( $reply =~ /^OK ([^\r\n]+)/ ) {
                 $reply = $1;
@@ -434,10 +439,10 @@ EOM
             next;
         }
 
-        if ( $line =~ /^SETUSERCONFIG +([^ ]+) ?(.+)?$/ ) {
-            my ( $option, $value ) = ( $1, $2 );
+        if ( $line =~ /^SETUSERCONFIG +([^ ]+) ([^ ]+) ?(.+)?$/ ) {
+            my ( $user, $option, $value ) = ( $1, $2, $3 );
             $value = '' if ( !defined( $value ) );
-            print $dwriter "__SETUSERCONFIG $option $value\n";
+            print $dwriter "__SETUSERCONFIG $user $option $value\n";
             my $reply = <$ureader>;
 
             if ( !( $reply =~ /^OK/ ) ) {

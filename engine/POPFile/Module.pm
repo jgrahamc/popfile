@@ -954,7 +954,7 @@ sub random_
     my ( $self ) = @_;
 
     if ( !defined( $self->{random__} ) ) {
-        $self->{random__} = new POPFile::Random();
+        $self->{random__} = new POPFile::Random( $self->global_config_( 'random_module' ) );
     }
 
     return $self->{random__};

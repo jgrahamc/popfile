@@ -39,9 +39,9 @@
 # SUBMIT a          Finds the form with input a and submits it
 # SETSUBMIT a b     Just like doing SETINPUT a b followed by SUBMIT a
 # CONFIGIS a b      Verify that config item a has value b
-# SETCONFIG a b     Set config item a to b
-# USERCONFIGIS a b  Verify that current user's config item a has value b
-# SETUSERCONFIG a b Set current user's config item a to b
+# SETCONFIG u a b     Set config item a for user u to b
+# USERCONFIGIS u a b  Verify that config item a for user u has value b
+# SETUSERCONFIG u a b Set config item a for user u to b
 # MAGNETIS a b c    Checks that magnet c exists in bucket a with type b
 # PARAMETERIS a b c Check that parameter b in bucket a has value c
 # CLICK a           Click the button called a
@@ -158,6 +158,16 @@ MATCH     Incorrect user name or password
 SETINPUT  username admin
 SETSUBMIT password 
 MATCH     Recent Messages
+
+# Does not redirect to login page
+
+GET       /logout
+GET       /administration
+MATCH     <input type="hidden" id="next" name="next" value="%2Fadministration" />
+GET       /logout
+MATCH     <input type="hidden" id="next" name="next" value="%2F" />
+SETINPUT  username admin
+SETSUBMIT password 
 
 # Administration page (Current Active User sessions)
 
@@ -328,6 +338,7 @@ MATCH
 foo:bar
 </td>
 ENDMATCH
+
 SETINPUT  newaccount fooz:bar
 CLICK     addaccount
 MATCH
@@ -335,9 +346,14 @@ MATCH
 fooz:bar
 </td>
 ENDMATCH
+
 SETINPUT  newaccount foo:bar
 CLICK     addaccount
 MATCH     Failed to add the account because it is assigned to another user
+
+SETINPUT  newaccount badaccount
+CLICK     addaccount
+MATCH     The new account name must be in the form host:user
 
 # Remove account
 
@@ -348,17 +364,41 @@ NOTMATCH  fooz:bar
 # Edit parameters
 
 INPUTIS   parameter_history_history_days 2
-USERCONFIGIS history_history_days 2
+USERCONFIGIS admin history_history_days 2
 SETSUBMIT parameter_history_history_days 10
 INPUTIS   parameter_history_history_days 10
-USERCONFIGIS history_history_days 10
+USERCONFIGIS admin history_history_days 10
 SETSUBMIT parameter_history_history_days 2
 
 INPUTIS   parameter_GLOBAL_can_admin 1
-USERCONFIGIS GLOBAL_can_admin 1
+USERCONFIGIS admin GLOBAL_can_admin 1
 SETSUBMIT parameter_GLOBAL_can_admin 0
 INPUTIS   parameter_GLOBAL_can_admin 1
-USERCONFIGIS GLOBAL_can_admin 1
+USERCONFIGIS admin GLOBAL_can_admin 1
+
+# Timeout test
+
+GET       /advanced
+CONFIGIS  GLOBAL_session_timeout 1800
+INPUTIS   parameter_GLOBAL_session_timeout 1800
+SETSUBMIT parameter_GLOBAL_session_timeout 1
+CONFIGIS  GLOBAL_session_timeout 1
+INPUTIS   parameter_GLOBAL_session_timeout 1
+
+CODE
+select( undef, undef, undef, 5 ); # wait for timeout
+ENDCODE
+
+GET       /advanced
+MATCH     Login
+MATCH     POPFile session has been expired because a timeout period passed
+SETINPUT  username admin
+SETSUBMIT password 
+
+GET       /advanced
+SETSUBMIT parameter_GLOBAL_session_timeout 1800
+CONFIGIS  GLOBAL_session_timeout 1800
+INPUTIS   parameter_GLOBAL_session_timeout 1800
 
 GET       /logout
 
@@ -387,6 +427,11 @@ NOTMATCH Advanced</a>
 
 MATCH     <a class="logoutLink" href="/logout">Logout (renameduser)</a>
 NOTMATCH  <a class="shutdownLink" href="/shutdown">Shutdown POPFile</a>
+
+# Standard user can't access the log file
+
+GET /popfile_current_log.log
+MATCH POPFile Web Server Error 404
 
 # No History
 
@@ -431,15 +476,28 @@ NOTMATCH  text1
 
 # Non admin users can't access these pages
 
-GET /administration
+GET   /administration
 MATCH POPFile Web Server Error 404
-GET /users
+GET   /users
 MATCH POPFile Web Server Error 404
-GET /advanced
+GET   /advanced
 MATCH POPFile Web Server Error 404
 
-GET /shutdown
+GET   /shutdown
 MATCH POPFile Web Server Error 404
+
+# Language test
+
+GET          /
+MATCH        <html lang="en">
+USERCONFIGIS renameduser html_language English
+SETSUBMIT    language Francais
+MATCH        <html lang="fr">
+USERCONFIGIS renameduser html_language Francais
+USERCONFIGIS admin html_language English
+SETSUBMIT    language English
+MATCH        <html lang="en">
+USERCONFIGIS renameduser html_language English
 
 GET /logout
 
@@ -623,14 +681,224 @@ GET       /administration
 SETINPUT  username admin
 SETSUBMIT password 
 
-#INPUTIS   usermode 
+INPUTIS   usermode 
 CONFIGIS  GLOBAL_single_user 0
 SETINPUT  usermode on
 CLICK     apply_stealth
-#INPUTIS   usermode on
+INPUTIS   usermode on
 CONFIGIS  GLOBAL_single_user 1
 NOTMATCH  <a class="logoutLink" href="/logout">Logout (admin)</a>
 MATCH     POPFile is now in the Single User Mode (POPFile classic). You are recommended to restart POPFile.
+
+# Config Bar
+
+GET /history
+
+# Show/Hide Config Bar
+
+MATCH    <a name="configBar" title="Hide configuration bar" href="/history?hide_configbar=1">Config Bar</a>
+MATCH    <table class="configBarBody" cellspacing="0" width="100%" summary="">
+GET      /history?hide_configbar=1
+MATCH    <a title="Show configuration bar" href="/history?show_configbar=1#configBar">Config Bar</a>
+NOTMATCH <table class="configBarBody" cellspacing="0" width="100%" summary="">
+GET      /history?show_configbar=1
+MATCH    <a name="configBar" title="Hide configuration bar" href="/history?hide_configbar=1">Config Bar</a>
+
+# Check skin change
+
+MATCH        <link rel="stylesheet" type="text/css" href="skins/default/style.css" media="all" title="POPFile">
+USERCONFIGIS admin html_skin default
+SETSUBMIT    skin oceanblue
+MATCH        <link rel="stylesheet" type="text/css" href="skins/oceanblue/style.css" title="POPFile-Style">
+USERCONFIGIS admin html_skin oceanblue
+SETSUBMIT    skin default
+USERCONFIGIS admin html_skin default
+
+# Check language change
+
+MATCH        <html lang="en">
+USERCONFIGIS admin html_language English
+SETSUBMIT    language Francais
+MATCH        <html lang="fr">
+USERCONFIGIS admin html_language Francais
+SETSUBMIT    language English
+MATCH        <html lang="en">
+USERCONFIGIS admin html_language English
+
+# Check history lines change
+
+INPUTIS      page_size 20
+USERCONFIGIS admin html_page_size 20
+SETSUBMIT    page_size 30
+INPUTIS      page_size 30
+USERCONFIGIS admin html_page_size 30
+#MATCH        Updated number of messages per page to 30
+SETSUBMIT    page_size 0
+MATCH        The page size must be a number between 1 and 1000
+INPUTIS      page_size 30
+SETSUBMIT    page_size 20
+USERCONFIGIS admin html_page_size 20
+
+# Check history days change
+
+INPUTIS      history_days 2
+USERCONFIGIS admin history_history_days 2
+SETSUBMIT    history_days 3
+INPUTIS      history_days 3
+USERCONFIGIS admin history_history_days 3
+#MATCH        Updated number of days of history to 3
+SETSUBMIT    history_days 0
+#MATCH        The number of days in the history must be a number between 1 and 366
+INPUTIS      history_days 3
+
+# Add/Remove columns
+
+MATCH
+<a href="/history?setsort=inserted" title="Sort by this column">
+<em class="historyLabelSort">
+&lt;&nbsp;Arrived
+</em>
+</a>
+ENDMATCH
+MATCH
+<a href="/history?setsort=from" title="Sort by this column">
+From
+</a>
+ENDMATCH
+MATCH
+<a href="/history?setsort=to" title="Sort by this column">
+To
+</a>
+ENDMATCH
+MATCH
+<a href="/history?setsort=subject" title="Sort by this column">
+Subject
+</a>
+ENDMATCH
+MATCH
+<a href="/history?setsort=bucket" title="Sort by this column">
+Bucket
+</a>
+ENDMATCH
+MATCH
+<input type="hidden" id="inserted" name="inserted">
+<input type="hidden" id="from" name="from">
+<input type="hidden" id="to" name="to">
+<span class="checkLabel"><input type="checkbox" id="cc" class="checkbox" name="cc">&nbsp;<label for="cc">Cc</label>&nbsp;</span>
+<input type="hidden" id="subject" name="subject">
+<span class="checkLabel"><input type="checkbox" id="date" class="checkbox" name="date">&nbsp;<label for="date">Date</label>&nbsp;</span>
+<span class="checkLabel"><input type="checkbox" id="size" class="checkbox" name="size">&nbsp;<label for="size">Size</label>&nbsp;</span>
+<input type="hidden" id="bucket" name="bucket">
+ENDMATCH
+USERCONFIGIS admin html_columns +inserted,+from,+to,-cc,+subject,-date,-size,+bucket,
+
+SETINPUT date on
+CLICK    update_fields
+MATCH
+<a href="/history?setsort=date" title="Sort by this column">
+Date
+</a>
+ENDMATCH
+MATCH
+<input type="hidden" id="inserted" name="inserted">
+<input type="hidden" id="from" name="from">
+<input type="hidden" id="to" name="to">
+<span class="checkLabel"><input type="checkbox" id="cc" class="checkbox" name="cc">&nbsp;<label for="cc">Cc</label>&nbsp;</span>
+<input type="hidden" id="subject" name="subject">
+<input type="hidden" id="date" name="date">
+<span class="checkLabel"><input type="checkbox" id="size" class="checkbox" name="size">&nbsp;<label for="size">Size</label>&nbsp;</span>
+<input type="hidden" id="bucket" name="bucket">
+ENDMATCH
+USERCONFIGIS admin html_columns +inserted,+from,+to,-cc,+subject,+date,-size,+bucket,
+
+SETINPUT size on
+CLICK    update_fields
+MATCH
+<a href="/history?setsort=size" title="Sort by this column">
+Size
+</a>
+ENDMATCH
+MATCH
+<input type="hidden" id="inserted" name="inserted">
+<input type="hidden" id="from" name="from">
+<input type="hidden" id="to" name="to">
+<span class="checkLabel"><input type="checkbox" id="cc" class="checkbox" name="cc">&nbsp;<label for="cc">Cc</label>&nbsp;</span>
+<input type="hidden" id="subject" name="subject">
+<input type="hidden" id="date" name="date">
+<input type="hidden" id="size" name="size">
+<input type="hidden" id="bucket" name="bucket">
+ENDMATCH
+USERCONFIGIS admin html_columns +inserted,+from,+to,-cc,+subject,+date,+size,+bucket,
+
+MATCH    <a class="columnRemove" href="/history?removecolumn=date"><img title="Remove column" src="skins/x.gif" border="0" alt="x"></a>
+MATCH    <a class="columnRemove" href="/history?removecolumn=size"><img title="Remove column" src="skins/x.gif" border="0" alt="x"></a>
+
+GET      /history?removecolumn=date
+NOTMATCH <a class="columnRemove" href="/history?removecolumn=date"><img title="Remove column" src="skins/x.gif" border="0" alt="x"></a>
+MATCH    <a class="columnRemove" href="/history?removecolumn=size"><img title="Remove column" src="skins/x.gif" border="0" alt="x"></a>
+MATCH
+<input type="hidden" id="inserted" name="inserted">
+<input type="hidden" id="from" name="from">
+<input type="hidden" id="to" name="to">
+<span class="checkLabel"><input type="checkbox" id="cc" class="checkbox" name="cc">&nbsp;<label for="cc">Cc</label>&nbsp;</span>
+<input type="hidden" id="subject" name="subject">
+<span class="checkLabel"><input type="checkbox" id="date" class="checkbox" name="date">&nbsp;<label for="date">Date</label>&nbsp;</span>
+<input type="hidden" id="size" name="size">
+<input type="hidden" id="bucket" name="bucket">
+ENDMATCH
+USERCONFIGIS admin html_columns +inserted,+from,+to,-cc,+subject,-date,+size,+bucket,
+
+GET      /history?removecolumn=size
+NOTMATCH <a class="columnRemove" href="/history?removecolumn=size"><img title="Remove column" src="skins/x.gif" border="0" alt="x"></a>
+MATCH
+<input type="hidden" id="inserted" name="inserted">
+<input type="hidden" id="from" name="from">
+<input type="hidden" id="to" name="to">
+<span class="checkLabel"><input type="checkbox" id="cc" class="checkbox" name="cc">&nbsp;<label for="cc">Cc</label>&nbsp;</span>
+<input type="hidden" id="subject" name="subject">
+<span class="checkLabel"><input type="checkbox" id="date" class="checkbox" name="date">&nbsp;<label for="date">Date</label>&nbsp;</span>
+<span class="checkLabel"><input type="checkbox" id="size" class="checkbox" name="size">&nbsp;<label for="size">Size</label>&nbsp;</span>
+<input type="hidden" id="bucket" name="bucket">
+ENDMATCH
+USERCONFIGIS admin html_columns +inserted,+from,+to,-cc,+subject,-date,-size,+bucket,
+
+# Move column left/right
+
+MATCH    <a class="columnMove" href="/history?moveright=inserted"><img title="Move right" src="skins/rightarrow.gif" border="0" alt="&gt;"></a>
+MATCH    <a class="columnMove" href="/history?moveleft=from"><img title="Move left" src="skins/leftarrow.gif" border="0" alt="&lt;"></a>
+GET      /history?moveright=inserted
+MATCH    <a class="columnMove" href="/history?moveleft=inserted"><img title="Move left" src="skins/leftarrow.gif" border="0" alt="&lt;"></a>
+MATCH    <a class="columnMove" href="/history?moveright=inserted"><img title="Move right" src="skins/rightarrow.gif" border="0" alt="&gt;"></a>
+NOTMATCH <a class="columnMove" href="/history?moveleft=from"><img title="Move left" src="skins/leftarrow.gif" border="0" alt="&lt;"></a>
+USERCONFIGIS admin html_columns +from,+inserted,+to,-cc,+subject,-date,-size,+bucket
+
+GET      /history?moveleft=inserted
+MATCH    <a class="columnMove" href="/history?moveright=inserted"><img title="Move right" src="skins/rightarrow.gif" border="0" alt="&gt;"></a>
+MATCH    <a class="columnMove" href="/history?moveleft=from"><img title="Move left" src="skins/leftarrow.gif" border="0" alt="&lt;"></a>
+NOTMATCH <a class="columnMove" href="/history?moveleft=inserted"><img title="Move left" src="skins/leftarrow.gif" border="0" alt="&lt;"></a>
+USERCONFIGIS admin html_columns +inserted,+from,+to,-cc,+subject,-date,-size,+bucket
+
+# Column size
+
+MATCH         Think you&#39;ve seen porn? How about a dog...
+USERCONFIGIS  admin html_column_characters 39
+CLICK         increase
+MATCH         Think you&#39;ve seen porn? How about a dog ...
+USERCONFIGIS  admin html_column_characters 40
+
+CLICK         decrease
+MATCH         Think you&#39;ve seen porn? How about a dog...
+USERCONFIGIS  admin html_column_characters 39
+SETUSERCONFIG admin html_column_characters 6
+USERCONFIGIS  admin html_column_characters 6
+CLICK         decrease
+CLICK         decrease
+MATCH         Think...
+USERCONFIGIS  admin html_column_characters 5
+
+CLICK         automatic
+MATCH         Think you&#39;ve seen porn? How about a dog ...
+USERCONFIGIS  admin html_column_characters 0
 
 # History Page
 
@@ -677,6 +945,39 @@ ENDMATCH
 NOTMATCH XoSeXyGoDdEsSm\@hotmail.com
 NOTMATCH from: Leandro
 NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
+
+SETSUBMIT jumptopage 1
+MATCH
+Jump to page:
+<b>1</b>
+[<a href="/history?start_message=20&amp;sort=-inserted">2</a>]
+[<a href="/history?start_message=20&amp;sort=-inserted">Next &gt;</a>]
+ENDMATCH
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
+MATCH XoSeXyGoDdEsSm\@hotmail.com
+MATCH from: Leandro
+
+SETSUBMIT jumptopage 3
+MATCH
+Jump to page:
+<b>1</b>
+[<a href="/history?start_message=20&amp;sort=-inserted">2</a>]
+[<a href="/history?start_message=20&amp;sort=-inserted">Next &gt;</a>]
+ENDMATCH
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
+MATCH XoSeXyGoDdEsSm\@hotmail.com
+MATCH from: Leandro
+
+SETSUBMIT jumptopage 0
+MATCH
+Jump to page:
+<b>1</b>
+[<a href="/history?start_message=20&amp;sort=-inserted">2</a>]
+[<a href="/history?start_message=20&amp;sort=-inserted">Next &gt;</a>]
+ENDMATCH
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
+MATCH XoSeXyGoDdEsSm\@hotmail.com
+MATCH from: Leandro
 
 GET /history
 
@@ -739,7 +1040,7 @@ MATCH Jump to page
 
 SETSUBMIT search Doctor
 NOTMATCH test\@test.com
-MATCH Enlarge your package Doctor Approv...
+MATCH Enlarge your package Doctor ApprovedNHOB...
 NOTMATCH Jump to page
 CLICK reset_filter_search
 NOTMATCH No messages.
@@ -940,6 +1241,11 @@ GET /view?view=31&amp;start_message=0&amp;format=score
 MATCH showing word scores
 MATCH 2.3639
 MATCH 2.6727
+
+GET   /view?view=31&amp;text=1
+MATCH From: John
+MATCH Subject: Testing Refresh
+MATCH Body would go here
 
 # Jump to message
 
@@ -1215,65 +1521,16 @@ NOTMATCH type5
 
 SETINPUT remove1 on
 SETINPUT remove3 on
-CLICK delete
+CLICK    delete
 NOTMATCH "foo"
 NOTMATCH "bar"
-INPUTIS text1 oldstyle
-INPUTIS bucket1 personal
-INPUTIS type1 from
-INPUTIS text2 baz\@baz.com
-INPUTIS bucket2 personal
-INPUTIS type2 to
+INPUTIS  text1 oldstyle
+INPUTIS  bucket1 personal
+INPUTIS  type1 from
+INPUTIS  text2 baz\@baz.com
+INPUTIS  bucket2 personal
+INPUTIS  type2 to
 NOTMATCH type3
-
-# Config Bar
-
-GET /history
-
-# Check skin change
-
-MATCH <link rel="stylesheet" type="text/css" href="skins/default/style.css" media="all" title="POPFile">
-USERCONFIGIS html_skin default
-SETSUBMIT skin oceanblue
-MATCH <link rel="stylesheet" type="text/css" href="skins/oceanblue/style.css" title="POPFile-Style">
-USERCONFIGIS html_skin oceanblue
-SETSUBMIT skin default
-USERCONFIGIS html_skin default
-
-# Check language change
-
-MATCH <html lang="en">
-USERCONFIGIS html_language English
-SETSUBMIT language Francais
-MATCH <html lang="fr">
-USERCONFIGIS html_language Francais
-SETSUBMIT language English
-MATCH <html lang="en">
-USERCONFIGIS html_language English
-
-# Check history lines change
-
-INPUTIS   page_size 20
-USERCONFIGIS  html_page_size 20
-SETSUBMIT page_size 30
-INPUTIS   page_size 30
-USERCONFIGIS  html_page_size 30
-#MATCH Updated number of messages per page to 30
-SETSUBMIT page_size 0
-MATCH The page size must be a number between 1 and 1000
-INPUTIS   page_size 30
-
-# Check history days change
-
-INPUTIS   history_days 2
-USERCONFIGIS  history_history_days 2
-SETSUBMIT history_days 3
-INPUTIS   history_days 3
-USERCONFIGIS  history_history_days 3
-#MATCH Updated number of days of history to 3
-SETSUBMIT history_days 0
-#MATCH The number of days in the history must be a number between 1 and 366
-INPUTIS   history_days 3
 
 # Administration Page
 
@@ -1410,27 +1667,27 @@ MATCH The port must be a number between 1 and 65535
 # Check autoupdate
 
 INPUTIS      update_check 
-USERCONFIGIS html_update_check 0
+USERCONFIGIS admin html_update_check 0
 SETSUBMIT    update_check on
 INPUTIS      update_check on
-USERCONFIGIS html_update_check 1
+USERCONFIGIS admin html_update_check 1
 MATCH        POPFile checks for updates daily
 SETSUBMIT    update_check off
 INPUTIS      update_check 
-USERCONFIGIS html_update_check 0
+USERCONFIGIS admin html_update_check 0
 MATCH        POPFile does not check for updates automatically
 
 # Check statistics sending
 
 INPUTIS      send_stats 
-USERCONFIGIS html_send_stats 0
+USERCONFIGIS admin html_send_stats 0
 SETSUBMIT    send_stats on
 INPUTIS      send_stats on
 MATCH        POPFile sends classification statistics daily
-USERCONFIGIS html_send_stats 1
+USERCONFIGIS admin html_send_stats 1
 SETSUBMIT    send_stats off
 INPUTIS      send_stats 
-USERCONFIGIS html_send_stats 0
+USERCONFIGIS admin html_send_stats 0
 MATCH        POPFile does not send classification statistics
 
 # Check password
@@ -1506,6 +1763,10 @@ INPUTIS   parameter_bayes_hostname testhostname
 
 GET /advanced
 MATCH Single User Mode Parameters
+
+SETSUBMIT parameter_bayes_unclassified_weight 1000
+USERCONFIGIS admin bayes_unclassified_weight 1000
+INPUTIS   parameter_bayes_unclassified_weight 1000
 
 # Buckets Page
 
@@ -1795,7 +2056,6 @@ GET       /
 MATCH     Login
 
 SETSUBMIT password secret
-SETSUBMIT password secret
 MATCH     Recent Messages
 
 SETINPUT  old_password secret
@@ -1850,6 +2110,9 @@ ENDCODE
 GET /temp.png
 MATCH 10 GOTO 10
 
+GET /popfile_current_log.log
+MATCH Attempting to connect to dbi:SQLite2:dbname=../tests/popfile.db
+
 CODE
 mkdir '../manual';
 open TEMP, ">../manual/temp.html";
@@ -1870,10 +2133,9 @@ MATCH POPFile Web Server Error 404
 
 # Check update checking
 
-SETUSERCONFIG html_update_check 1
-SETUSERCONFIG html_send_stats 1
-SETUSERCONFIG html_last_update_check 0
-SETCONFIG GLOBAL_ecount 1
+SETUSERCONFIG admin html_update_check 1
+SETUSERCONFIG admin html_send_stats 1
+SETUSERCONFIG admin html_last_update_check 0
 GET /
 MATCH popfile_update.pl
 MATCH popfile_stats.pl

@@ -1566,11 +1566,7 @@ sub generate_unique_session_key__
     # Generate a long random number, hash it and the time together to
     # get a random session key in hex
 
-    my $module = $self->global_config_( 'random_module' );
-    $self->log_( 1, "Generating random octet using $module" );
-
     my $random = $self->random_()->generate_random_string( # PROFILE BLOCK START
-                        $module,
                         128,
                         $self->global_config_( 'crypt_strength' ),
                         $self->global_config_( 'crypt_device' )

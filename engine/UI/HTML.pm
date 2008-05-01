@@ -175,6 +175,10 @@ sub initialize
 
     $self->config_( 'https_port', 8443 );
 
+    # Encryption module for cookies
+
+    $self->config_( 'cookie_cipher', 'Blowfish' );
+
     # Load skins
 
     $self->load_skins__();
@@ -423,12 +427,8 @@ sub set_cookie__
         # The IP address of the client that set the cookie
         # MD5 checksum of the data (hex encoded)
 
-        my $module = $self->global_config_( 'random_module' );
-        $self->log_( 1, "Generating random octet using $module" );
-
         $cookie_string = encode_base64(                 # PROFILE BLOCK START
                             $self->random_()->generate_random_string(
-                                $module,
                                 16,
                                 $self->global_config_( 'crypt_strength' ),
                                 $self->global_config_( 'crypt_device' )
@@ -489,7 +489,7 @@ sub url_handler__
     my $session;
     my $timeout = 0;
 
-    if ( $cookie ne '' ) {
+    if ( defined($cookie) && ( $cookie ne '' ) ) {
         $session = $self->handle_cookie__( $cookie, $client );
         if ( defined($session) && ( $session eq 'TIMEOUT' ) ) {
             $timeout = 1;
@@ -643,8 +643,8 @@ sub url_handler__
     }
 
     if ( $url =~ /^\/(.+\.ico)/ ) {
-        $self->http_file_( $client, $self->get_root_path_( $1 ),
-             'image/x-icon' );
+        $self->http_file_( $client, $self->get_root_path_( $1 ),  # PROFILE BLOCK START
+             'image/x-icon' );                                    # PROFILE BLOCK STOP
         return 1;
     }
 
@@ -1724,8 +1724,8 @@ sub users_page
 
     # Handle user creation
 
-    if ( exists( $self->{form_}{create} ) &&
-         ( $self->{form_}{newuser} ne '' ) ) {
+    if ( exists( $self->{form_}{create} ) &&     # PROFILE BLOCK START
+         ( $self->{form_}{newuser} ne '' ) ) {   # PROFILE BLOCK STOP
         my ( $result, $password ) = $self->classifier_()->create_user( # PROFILE BLOCK START
                 $session,
                 $self->{form_}{newuser},
@@ -1950,8 +1950,8 @@ sub users_page
     $templ->param( 'Users_Loop_Copy' => \@user_loop );
     $templ->param( 'Users_Loop_ChangePassword' => \@user_loop );
 
-    if ( exists( $self->{form_}{edituser} ) &&
-         ( $self->{form_}{editname} ne '' ) ) {
+    if ( exists( $self->{form_}{edituser} ) &&   # PROFILE BLOCK START
+         ( $self->{form_}{editname} ne '' ) ) {  # PROFILE BLOCK STOP
         my $id = $self->classifier_()->get_user_id( $session, $self->{form_}{editname} );
         my @parameters = $self->classifier_()->get_user_parameter_list( $session );
 
@@ -2056,8 +2056,8 @@ sub advanced_page
     }
 
     if ( defined($self->{form_}{word}) ) {
-        my $result = $self->classifier_()->remove_stopword( $session,
-                         $self->{form_}{word} );
+        my $result = $self->classifier_()->remove_stopword( $session,   # PROFILE BLOCK START
+                         $self->{form_}{word} );                        # PROFILE BLOCK STOP
         if ( $result == 0 ) {
             $self->error_message__( $templ, $self->language($session)->{Advanced_Error2} );
         } else {
@@ -2135,8 +2135,8 @@ sub advanced_page
 
     $templ->param( 'Advanced_Loop_Word' => \@word_loop );
 
-    $templ->param( 'Advanced_POPFILE_CFG' =>
-        $self->get_user_path_( 'popfile.cfg' ) );
+    $templ->param( 'Advanced_POPFILE_CFG' =>      # PROFILE BLOCK START
+        $self->get_user_path_( 'popfile.cfg' ) ); # PROFILE BLOCK STOP
 
     my $last_module = '';
 
@@ -2225,8 +2225,8 @@ sub magnet_page
 
     if ( defined( $self->{form_}{delete} ) ) {
         for my $i ( 1 .. $self->{form_}{count} ) {
-            if ( defined( $self->{form_}{"remove$i"} ) &&
-               ( $self->{form_}{"remove$i"} ) ) {
+            if ( defined( $self->{form_}{"remove$i"} ) &&   # PROFILE BLOCK START
+                 ( $self->{form_}{"remove$i"} ) ) {         # PROFILE BLOCK STOP
                 my $mtype   = $self->{form_}{"type$i"};
                 my $mtext   = $self->{form_}{"text$i"};
                 my $mbucket = $self->{form_}{"bucket$i"};
@@ -2259,9 +2259,9 @@ sub magnet_page
                 }
             }
 
-            if ( ( defined($mbucket) ) &&
+            if ( ( defined($mbucket) ) &&   # PROFILE BLOCK START
                  ( $mbucket ne '' ) &&
-                 ( $mtext ne '' ) ) {
+                 ( $mtext ne '' ) ) {       # PROFILE BLOCK STOP
 
                 # Support for feature request 77646 - import function.
                 # goal is a method of creating multiple magnets all
@@ -2629,8 +2629,8 @@ sub bar_chart_100
                 }
             }
 
-            if ( ( $s == 2 ) &&
-                 ( $self->classifier_()->is_pseudo_bucket( $session, $bucket ) ) ) {
+            if ( ( $s == 2 ) &&                                                      # PROFILE BLOCK START
+                 ( $self->classifier_()->is_pseudo_bucket( $session, $bucket ) ) ) { # PROFILE BLOCK STOP
                 $count = '';
                 $percent = '';
             }
@@ -2724,8 +2724,8 @@ sub corpus_page
         if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
             $self->error_message__( $templ, $self->language($session)->{Bucket_Error1} );
         } else {
-            if ( $self->classifier_()->is_bucket( $session, $self->{form_}{cname} ) ||
-                $self->classifier_()->is_pseudo_bucket( $session, $self->{form_}{cname} ) ) {
+            if ( $self->classifier_()->is_bucket( $session, $self->{form_}{cname} ) ||        # PROFILE BLOCK START
+                $self->classifier_()->is_pseudo_bucket( $session, $self->{form_}{cname} ) ) { # PROFILE BLOCK STOP
                 $self->error_message__(                     # PROFILE BLOCK START
                         $templ,
                         sprintf( $self->language($session)->{Bucket_Error2},
@@ -3027,10 +3027,10 @@ sub set_history_navigator__
     my $q = $self->{sessions__}{$session}{q};
     while ( $i < $self->history_()->get_query_size( $q ) ) {
         my %row_data;
-        if ( ( $i == 0 ) ||
+        if ( ( $i == 0 ) ||                                                                                                                       # PROFILE BLOCK START
              ( ( $i + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $self->history_()->get_query_size( $q ) ) ||
              ( ( ( $i - 2 * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) <= $start_message ) &&
-               ( ( $i + 2 * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $start_message ) ) ) {
+               ( ( $i + 2 * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $start_message ) ) ) {                   # PROFILE BLOCK STOP
             $row_data{History_Navigator_Page} = $p;
             $row_data{History_Navigator_I} = $i;
             if ( $i == $start_message ) {
@@ -3200,7 +3200,9 @@ sub history_page
     # Handle the jump to page functionality
 
     if ( defined( $self->{form_}{gopage} ) ) {
-        my $destination = ( $self->{form_}{jumptopage} - 1 ) *                                # PROFILE BLOCK START
+        my $jumptopage = $self->{form_}{jumptopage};
+        $jumptopage = 1 if ( ( $jumptopage eq '' ) || ( $jumptopage =~ /[^\d]/ ) );
+        my $destination = ( $jumptopage - 1 ) *                                # PROFILE BLOCK START
                      $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ); # PROFILE BLOCK STOP
         my $q = $self->{sessions__}{$session}{q};
         my $maximum = $self->history_()->get_query_size( $q );
@@ -3211,8 +3213,8 @@ sub history_page
         }
     }
 
-    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
-                                                    $page, $session );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,   # PROFILE BLOCK START
+                                                    $page, $session );        # PROFILE BLOCK STOP
     $self->handle_history_bar__( $client, $templ, $template, $page, $session );
 
     # Set up default values for various form elements that have been
@@ -3438,7 +3440,7 @@ sub history_page
         foreach my $header (@columns) {
             my %row_data;
             $header =~ /^(.)/;
-            next if ( $1 eq '-' );
+            next if ( ( $1 eq '-' ) || ( $1 eq '' ) );
             $colspan++;
             $header =~ s/^.//;
             $row_data{History_Fields} =            # PROFILE BLOCK START
@@ -3556,10 +3558,10 @@ sub history_page
                      $col_data{History_Cell_Value} =                                # PROFILE BLOCK START
                          $self->shorten__( $$row[4], $length, $language_for_user ); # PROFILE BLOCK STOP
                      $col_data{History_Mail_File}     = $$row[0];
-                     $col_data{History_Fields}        =
-                         $self->print_form_fields_(0,1, # PROFILE BLOCK START
+                     $col_data{History_Fields}        =   # PROFILE BLOCK START
+                         $self->print_form_fields_(0,1,
                            ('start_message','filter','search',
-                            'sort','negate' ) );        # PROFILE BLOCK STOP
+                            'sort','negate' ) );          # PROFILE BLOCK STOP
                      push ( @column_data, \%col_data );
                      next;
                  }
@@ -3924,8 +3926,8 @@ sub password_page
 
     $self->{form_}{username} = 'admin' if ( $single_user );
 
-    if ( exists( $self->{form_}{username} ) &&
-         exists( $self->{form_}{password} ) ) {
+    if ( exists( $self->{form_}{username} ) &&   # PROFILE BLOCK START
+         exists( $self->{form_}{password} ) ) {  # PROFILE BLOCK STOP
         $session = $self->classifier_()->get_session_key(                 # PROFILE BLOCK START
                                               $self->{form_}{username},
                                               $self->{form_}{password} ); # PROFILE BLOCK STOP

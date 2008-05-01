@@ -33,6 +33,8 @@ unlink 'popfile.pid';
 unlink 'stopwords';
 test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
+use POSIX ":sys_wait_h";
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->{debug__} = 1;
@@ -66,7 +68,7 @@ if ( $pid == 0 ) {
     # CHILD THAT WILL RUN THE XMLRPC SERVER
 
     if ( $x->start() == 1 ) {
-        my $count = 100;
+        my $count = 50;
         while ( $x->service() && $POPFile->CORE_service( 1 ) ) {
             select( undef, undef, undef, 0.1 );
             last if ( $count-- <= 0 );
@@ -128,9 +130,11 @@ if ( $pid == 0 ) {
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
     -> call('POPFile/API.release_session_key', $session );
 
-    wait();
-}
+    sleep(3);
 
-# TODO : terminate child process
+    while ( waitpid( $pid, WNOHANG ) > 0 ) {
+        select( undef, undef, undef, 0.1 );
+    }
+}
 
 1;

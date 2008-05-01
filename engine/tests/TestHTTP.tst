@@ -64,6 +64,7 @@ $POPFile->CORE_start();
 my $port = 9000 + int(rand(1000));
 $h->config_( 'port', $port );
 $h->config_( 'local', 1 );
+$h->config_( 'cookie_cipher', 'Blowfish' );
 test_assert_equal( $h->config_( 'port' ),  $port );
 test_assert_equal( $h->config_( 'local' ), 1 );
 test_assert_equal( $h->start(), 1 );
