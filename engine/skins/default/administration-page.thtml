@@ -190,6 +190,13 @@ function serverMode(state) {
                 <br />
                 <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
 
+                <br />
+                <label class="configurationLabel" for="configSessionTimeout">
+                    <TMPL_VAR NAME="Localize_Configuration_SessionTimeoutSecs">:
+                </label>
+                <br />
+                <input name="session_timeout" type="text" id="configSessionTimeout" value="<TMPL_VAR NAME="Configuration_Session_Timeout">" />
+
                 <br /><br />
                 <input type="submit" class="submit" name="update_modules" value="<TMPL_VAR NAME="Localize_Apply">" />
 

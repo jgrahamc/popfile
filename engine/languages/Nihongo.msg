@@ -128,6 +128,7 @@ Configuration_Error5                    履歴を残す日数は 1 から 366 までにしてく
 Configuration_Error6                    TCP コネクションタイムアウトの秒数は 10 から 300 にしてください。
 Configuration_Error7                    XML RPC ポート番号は 1 から 65535 までにしてください。
 Configuration_Error8                    SOCKS V プロキシのポート番号は 1 から 65535 までにしてください。
+Configuration_Error9                    セッションコネクションタイムアウトの秒数は 300 から 86400 にしてください。
 Configuration_POP3Port                  POP3 ポート番号
 Configuration_POP3Update                POP3 ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
 Configuration_POP3SPort                 POP3S ポート番号
@@ -176,6 +177,9 @@ Configuration_HistoryView               履歴
 Configuration_TCPTimeout                TCP コネクションタイムアウト
 Configuration_TCPTimeoutSecs            TCP コネクションタイムアウトの秒数
 Configuration_TCPTimeoutUpdate          TCP コネクションタイムアウトの秒数を 「%s」に変更しました。
+Configuration_SessionTimeout            セッションタイムアウト
+Configuration_SessionTimeoutSecs        セッションタイムアウトの秒数
+Configuration_SessionTimeoutUpdate      セッションタイムアウトの秒数を 「%s」に変更しました。
 Configuration_ClassificationInsertion   電子メールへのテキスト挿入機能
 Configuration_SubjectLine               件名の変更
 Configuration_XTCInsertion              X-Text-Classification<br>ヘッダー

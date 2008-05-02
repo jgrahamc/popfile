@@ -1431,6 +1431,25 @@ sub administration_page
                 delete $self->{form_}{timeout};
             }
         }
+
+        if ( defined($self->{form_}{session_timeout}) ) {
+            if ( ( $self->{form_}{session_timeout} =~ /^\d+$/ ) &&  # PROFILE BLOCK START
+                 ( $self->{form_}{session_timeout} >= 300 ) &&
+                 ( $self->{form_}{session_timeout} <= 86400 ) ) {   # PROFILE BLOCK STOP
+                if ( $self->global_config_( 'session_timeout' ) ne $self->{form_}{session_timeout} ) {
+                    $self->global_config_( 'session_timeout', $self->{form_}{session_timeout} );
+                    $self->status_message__(                                 # PROFILE BLOCK START
+                            $templ,
+                            sprintf( $self->language($session)->{Configuration_SessionTimeoutUpdate},
+                                     $self->global_config_( 'session_timeout' ) ) ); # PROFILE BLOCK STOP
+
+                }
+            }
+            else {
+                $self->error_message__( $templ, $self->language($session)->{Configuration_Error9} );
+                delete $self->{form_}{session_timeout};
+            }
+        }
     }
 
     # Set the template parameters
@@ -1440,6 +1459,7 @@ sub administration_page
     $templ->param( 'Configuration_UI_HTTPS'   => $self->config_( 'https_enabled' ) );
     $templ->param( 'Configuration_UI_HTTPS_Port' => $self->config_( 'https_port' ) );
     $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
+    $templ->param( 'Configuration_Session_Timeout' => $self->global_config_( 'session_timeout' ) );
 
     $templ->param( 'If_Single_User'           => $self->global_config_( 'single_user' ) );
 

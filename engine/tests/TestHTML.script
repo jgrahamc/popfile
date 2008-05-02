@@ -1582,6 +1582,18 @@ SETSUBMIT timeout 0
 MATCH The TCP timeout must be a number between 10 and 300
 INPUTIS   timeout 61
 
+# Check change session timeout
+
+INPUTIS   session_timeout 1800
+CONFIGIS  GLOBAL_session_timeout 1800
+SETSUBMIT session_timeout 1801
+INPUTIS   session_timeout 1801
+CONFIGIS  GLOBAL_session_timeout 1801
+MATCH Updated session timeout to 1801
+SETSUBMIT session_timeout 0
+MATCH The session timeout must be a number between 300 and 86400
+INPUTIS   session_timeout 1801
+
 # Check change POP3 port
 
 INPUTIS   pop3_port 9110

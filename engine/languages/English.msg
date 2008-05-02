@@ -127,6 +127,7 @@ Configuration_Error5                    The number of days in the history must b
 Configuration_Error6                    The TCP timeout must be a number between 10 and 300
 Configuration_Error7                    The XML RPC listen port must be a number between 1 and 65535
 Configuration_Error8                    The SOCKS V proxy port must be a number between 1 and 65535
+Configuration_Error9                    The session timeout must be a number between 300 and 86400
 Configuration_POP3Port                  POP3 listen port
 Configuration_POP3Update                Updated POP3 port to %s; this change will not take affect until you restart POPFile
 Configuration_POP3SPort                 POP3S listen port
@@ -174,6 +175,9 @@ Configuration_HistoryView               History View
 Configuration_TCPTimeout                Connection Timeout
 Configuration_TCPTimeoutSecs            Connection timeout in seconds
 Configuration_TCPTimeoutUpdate          Updated connection timeout to %s
+Configuration_SessionTimeout            Session Timeout
+Configuration_SessionTimeoutSecs        Session timeout in seconds
+Configuration_SessionTimeoutUpdate      Updated session timeout to %s
 Configuration_ClassificationInsertion   Message Text Insertion
 Configuration_SubjectLine               Subject line<br>modification
 Configuration_XTCInsertion              X-Text-Classification<br>Header
