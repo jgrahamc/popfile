@@ -102,7 +102,18 @@ installer: $(engine)
 
 	@echo "Building installer packages ..."
 
-	$(PACKAGE_MAKER) --root $(PACKAGE_ROOT) --id $(PACKAGE_ID) --out $(PACKAGE) --root-volume-only --discard-forks --target 10.3 --resources $(RESOURCES) --scripts $(RESOURCES) --title $(PACKAGE_TITLE) --version $(PACKAGE_VERSION)
+	$(PACKAGE_MAKER) \
+		--root $(PACKAGE_ROOT) \
+		--id $(PACKAGE_ID) \
+		--out $(PACKAGE) \
+		--root-volume-only \
+		--discard-forks \
+		--target 10.3 \
+		--resources $(RESOURCES) \
+		--scripts $(RESOURCES) \
+		--title $(PACKAGE_TITLE) \
+		--version $(PACKAGE_VERSION) \
+		--filter CVS
 
 	@echo "...done"
 
@@ -125,8 +136,8 @@ build_modules:
 documents: $(ENGINE)/license $(ENGINE)/v$(POPFILE_VERSION).change $(ENGINE)/v$(POPFILE_VERSION).change.nihongo
 	cp $(ENGINE)/license $(RESOURCES)/License.txt
 	if test ! -d $(RESOURCES)/English.lproj; then mkdir $(RESOURCES)/English.lproj ; fi
-	cp $(ENGINE)/v$(POPFILE_VERSION).change $(RESOURCES)/English.lproj/ReadMe.txt
 	if test ! -d $(RESOURCES)/Japanese.lproj; then mkdir $(RESOURCES)/Japanese.lproj ; fi
+	cp $(ENGINE)/v$(POPFILE_VERSION).change $(RESOURCES)/English.lproj/ReadMe.txt
 	cp $(ENGINE)/v$(POPFILE_VERSION).change.nihongo $(RESOURCES)/Japanese.lproj/ReadMe.txt
 
 engine: $(engine)

@@ -312,6 +312,7 @@ kakasi_dictionary: $(KAKASI)/kanwadict $(KAKASI)/itaijidict
 	  ;; \
 	esac
 
+	if test ! -d $(KAKASI_DIC_ROOT); then mkdir $(KAKASI_DIC_ROOT); fi
 	cp -f $(KAKASI)/kanwadict-body $(KAKASI_DIC_ROOT)
 	cp -f $(KAKASI)/kanwadict-head_i386 $(KAKASI_DIC_ROOT)
 	cp -f $(KAKASI)/kanwadict-head_ppc $(KAKASI_DIC_ROOT)
