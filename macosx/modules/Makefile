@@ -22,8 +22,13 @@
 PACKAGE_ROOT=../Package_Root
 POPFILE_ROOT=$(PACKAGE_ROOT)/Library/POPFile
 LIB_ROOT = $(POPFILE_ROOT)/lib
-SSLLIB_ROOT = ../addssl/Package_Root/Library/POPFile/lib
+
 KAKASI_DIC_ROOT = $(POPFILE_ROOT)/kakasi
+
+SSLPACKAGE_ROOT = ../addssl/Package_Root
+SSLPACKAGE_LIBRARY_ROOT = $(SSLPACKAGE_ROOT)/Library
+SSLPOPFILE_ROOT = $(SSLPACKAGE_LIBRARY_ROOT)/POPFile
+SSLLIB_ROOT = $(SSLPOPFILE_ROOT)/lib
 
 FAKECONFIG = ExtUtils-FakeConfig-0.11
 FAKECONFIG_ARCHIVE = $(FAKECONFIG).zip
@@ -107,6 +112,8 @@ clean:
 	rm -rf $(KAKASI_DIC_ROOT)/*
 
 core_modules:core_modules_build $(CORE_MODULES)
+	if test ! -d $(LIB_ROOT); then mkdir $(LIB_ROOT) ; fi
+
 	cp -rf $(DBI)/blib/arch/auto $(LIB_ROOT)
 	cp -rf $(DBI)/blib/lib/* $(LIB_ROOT)
 
@@ -126,16 +133,25 @@ core_modules:core_modules_build $(CORE_MODULES)
 	cp -rf $(TIMEDATE)/blib/lib/* $(LIB_ROOT)
 
 xmlrpc_modules: xmlrpc_modules_build
+	if test ! -d $(LIB_ROOT); then mkdir $(LIB_ROOT) ; fi
+
 	cp -rf $(SOAPLITE)/lib/* $(LIB_ROOT)
 
 	cp -rf $(VERSION_MODULE)/blib/arch/auto $(LIB_ROOT)
 	cp -rf $(VERSION_MODULE)/blib/lib/* $(LIB_ROOT)
 
 japanese_modules: japanese_modules_build
+	if test ! -d $(LIB_ROOT); then mkdir $(LIB_ROOT) ; fi
+
 	cp -rf $(TEXTKAKASI)/blib/arch/auto $(LIB_ROOT)
 	cp -rf $(TEXTKAKASI)/blib/lib/* $(LIB_ROOT)
 
 ssl_modules: ssl_modules_build
+	if test ! -d $(SSLPACKAGE_ROOT); then mkdir $(SSLPACKAGE_ROOT) ; fi
+	if test ! -d $(SSLPACKAGE_LIBRARY_ROOT); then mkdir $(SSLPACKAGE_LIBRARY_ROOT) ; fi
+	if test ! -d $(SSLPOPFILE_ROOT); then mkdir $(SSLPOPFILE_ROOT) ; fi
+	if test ! -d $(SSLLIB_ROOT); then mkdir $(SSLLIB_ROOT) ; fi
+
 	cp -rf $(NETSSLEAY)/blib/arch/auto $(SSLLIB_ROOT)
 	cp -rf $(NETSSLEAY)/blib/lib/* $(SSLLIB_ROOT)
 

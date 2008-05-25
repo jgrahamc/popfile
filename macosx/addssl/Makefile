@@ -81,6 +81,8 @@ ssl_installer: $(LIB_ROOT)/auto/Net/SSLeay/*.* $(LIB_ROOT)/IO/Socket/SSL.pm $(LI
 
 documents: $(ENGINE)/license $(ENGINE)/v$(POPFILE_VERSION).change $(ENGINE)/v$(POPFILE_VERSION).change.nihongo
 	cp $(ENGINE)/license $(RESOURCES)/License.txt
+	if test ! -d $(RESOURCES)/English.lproj; then mkdir $(RESOURCES)/English.lproj ; fi
+	if test ! -d $(RESOURCES)/Japanese.lproj; then mkdir $(RESOURCES)/Japanese.lproj ; fi
 	cp $(ENGINE)/v$(POPFILE_VERSION).change $(RESOURCES)/English.lproj/ReadMe.txt
 	cp $(ENGINE)/v$(POPFILE_VERSION).change.nihongo $(RESOURCES)/Japanese.lproj/ReadMe.txt
 
