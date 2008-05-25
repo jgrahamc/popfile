@@ -1,0 +1,7 @@
+#!/bin/sh
+
+POPFILE_STARTUP=/Library/StartupItems/POPFile/POPFile
+
+"$POPFILE_STARTUP" start
+
+exit 0

@@ -1,0 +1,32 @@
+#!/bin/sh
+
+POPFILE_STARTUP=/Library/StartupItems/POPFile/POPFile
+POPFILE_DIR=/Library/POPFile
+STOPWORDS_PATH="$POPFILE_DIR"/stopwords
+POPFILE_DB_PATH="$POPFILE_DIR"/popfile.db
+POPFILE_CFG_PATH="$POPFILE_DIR"/popfile.cfg
+
+# stop POPFile
+if [ -e "$POPFILE_STARTUP" ]; then
+	"$POPFILE_STARTUP" stop
+fi
+
+# back up stopwords
+if [ -e "$STOPWORDS_PATH" ]; then
+	rm "$STOPWORDS_PATH".old
+	cp "$STOPWORDS_PATH" "$STOPWORDS_PATH".old
+fi
+
+# back up database
+if [ -e "$POPFILE_DB_PATH" ]; then
+	rm "$POPFILE_DB_PATH".old
+	cp "$POPFILE_DB_PATH" "$POPFILE_DB_PATH".old
+fi
+
+# back up configuration
+if [ -e "$POPFILE_CFG_PATH" ]; then
+	rm "$POPFILE_CFG_PATH".old
+	cp "$POPFILE_CFG_PATH" "$POPFILE_CFG_PATH".old
+fi
+
+exit 0

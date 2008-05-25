@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Patch kanwadict on Intel CPU
+CPU_TYPE=`/usr/bin/uname -p`
+# CPU_TYPE="i386"
+KANWADICT_PATH=/Library/POPFile/kakasi
+
+case $CPU_TYPE in
+	powerpc )
+		echo "PowerPC";
+		cat $KANWADICT_PATH/kanwadict-head_ppc $KANWADICT_PATH/kanwadict-body > $KANWADICT_PATH/kanwadict
+		;;
+	i386 )
+		echo "Intel";
+		cat $KANWADICT_PATH/kanwadict-head_i386 $KANWADICT_PATH/kanwadict-body > $KANWADICT_PATH/kanwadict
+		;;
+esac
+
+rm $KANWADICT_PATH/kanwadict-head_ppc
+rm $KANWADICT_PATH/kanwadict-head_i386
+rm $KANWADICT_PATH/kanwadict-body
+
+POPFILE_STARTUP=/Library/StartupItems/POPFile/POPFile
+
+"$POPFILE_STARTUP" start
+
+exit 0

@@ -1,0 +1,49 @@
+#!/bin/sh
+
+##
+# POPfile
+##
+
+. /etc/rc.common
+
+POPFILEDIR="/Library/POPFile"
+KANWADICTPATH="$POPFILEDIR/kakasi/kanwadict"; export KANWADICTPATH
+ITAIJIDICTPATH="$POPFILEDIR/kakasi/itaijidict"; export ITAIJIDICTPATH
+MECABRC="$POPFILEDIR/mecab/etc/mecabrc"; export MECABRC
+
+StartService ()
+{
+    pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
+    if ! [ $pid ]; then
+      ConsoleMessage "Starting POPFile POP mail proxy"
+      rm -f "$POPFILEDIR"/popfile.pid
+      cd "$POPFILEDIR"
+      perl -Ilib ./popfile.pl > /dev/null 2>&1 &
+    else
+      ConsoleMessage "POPFile is already running"
+    fi
+}
+
+StopService ()
+{
+    pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
+    if [ $pid ]; then
+      ConsoleMessage "Stopping POPFile POP mail proxy"
+      kill -6 $pid
+      rm -f "$POPFILEDIR"/popfile.pid
+    else
+      ConsoleMessage "POPFile is not running."
+    fi
+}
+
+RestartService ()
+{
+    pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
+      ConsoleMessage "Restarting POPFile POP mail proxy"
+      kill -HUP $pid
+      rm -f "$POPFILEDIR"/popfile.pid
+      cd "$POPFILEDIR"
+      perl -Ilib ./popfile.pl > /dev/null 2>&1 &
+}
+
+RunService "$1"
