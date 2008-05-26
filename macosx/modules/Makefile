@@ -194,7 +194,7 @@ core_modules_build: fakeconfig
 xmlrpc_modules_build: $(XMLRPC_ARCHIVES)
 	if test ! -d $(VERSION_MODULE); then tar xzf $(VERSION_ARCHIVE); fi
 	cd $(VERSION_MODULE) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL --perl_only ; fi ;\
 	make
 
 	if test ! -d $(SOAPLITE); then tar xzf $(SOAPLITE_ARCHIVE); fi
