@@ -237,7 +237,7 @@ sub child__
         # that the user can say host:username:ssl,apop if both are
         # needed
 
-        if ( $command =~ /$transparent/ ) {
+        if ( $command =~ /$transparent/i ) {
             if ( $self->module_config_( 'pop3', 'secure_server' ) ne '' )  {
                 $token = $self->module_config_( 'pop3', 'secure_server' ). ":$1";
                 $self->log_( 2, "Set transparent proxy token : '$token'" );
@@ -251,7 +251,7 @@ sub child__
                     next;
                 }
             } else {
-                $self->tee_(  $client, "-ERR Transparent proxying not configured: set secure server/port$eol" );
+                $self->tee_(  $client, "-ERR Transparent proxying not configured: set secure server/port ( command you sent: '$command' )$eol" );
             }
 
             next;
@@ -393,7 +393,7 @@ sub child__
 
         # Secure authentication
 
-        if ( $command =~ /AUTH ([^ ]+)/ ) {
+        if ( $command =~ /AUTH ([^ ]+)/i ) {
             if ( $self->module_config_( 'pop3', 'secure_server' ) ne '' )  {
                 my $mechanism = $1;
 
@@ -449,7 +449,7 @@ sub child__
             next;
         }
 
-        if ( $command =~ /AUTH/ ) {
+        if ( $command =~ /AUTH/i ) {
             if ( $self->module_config_( 'pop3', 'secure_server' ) ne '' )  {
                 if ( $mail = $self->verify_connected_( $mail, $client,    # PROFILE BLOCK START
                      $self->module_config_( 'pop3', 'secure_server' ),
