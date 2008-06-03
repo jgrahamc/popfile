@@ -2,7 +2,7 @@
 #
 # Tests for insert.pl
 #
-# Copyright (c) 2003-2006 John Graham-Cumming
+# Copyright (c) 2003-2008 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
