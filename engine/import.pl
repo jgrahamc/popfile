@@ -33,6 +33,11 @@ if ( $#ARGV > 0 ) {
 
     $newusername = $username if ( !defined($newusername) );
 
+    if ( $newusername eq 'admin' ) {
+        print STDERR "Error : Bad new user name '$newusername', import aborted\n";
+        exit 1;
+    }
+
 #    $user_dir = "../corpus_import";
 #    $username = "admin";
 #    $newusername = "test_dummy3";
@@ -84,6 +89,11 @@ if ( $#ARGV > 0 ) {
     my $b2 = $POPFile2->get_module( 'Classifier/Bayes' );
     my $c2 = $POPFile2->get_module( 'POPFile/Configuration' );
 
+    use POSIX qw(locale_h);
+    if ( $^O eq 'MSWin32' && setlocale(LC_COLLATE) eq 'Japanese_Japan.932' ) {
+        setlocale(LC_COLLATE,'C');
+    }
+
     $POPFile2->CORE_start();
 
     # Fetch the database version
@@ -104,6 +114,13 @@ if ( $#ARGV > 0 ) {
     $row = $h->fetchrow_arrayref;
     my $userid = $row->[0];
     $h->finish;
+
+    if ( !defined( $userid) ) {
+        $POPFile2->CORE_stop();
+        $POPFile->CORE_stop();
+        print STDERR "Error : User '$username' does not exist, import aborted\n";
+        exit 1 ;
+    }
 
     # Create a new user
 
@@ -179,7 +196,7 @@ if ( $#ARGV > 0 ) {
         $h = $b->db_()->prepare( "select magnet_types.mtype, magnets.val
                                          from magnet_types, magnets
                                          where magnet_types.id = magnets.mtid and
-                                         magnets.bucketid = ?;" );
+                                               magnets.bucketid = ?;" );
         foreach my $bucket ( keys %buckets ) {
             $h->execute( $buckets{$bucket}{id} );
 
@@ -193,21 +210,19 @@ if ( $#ARGV > 0 ) {
 
         $h = $b->db_()->prepare( "select words.word, matrix.times from words, matrix
                                          where words.id = matrix.wordid and
-                                         matrix.bucketid = ?;" );
+                                               matrix.bucketid = ?;" );
         foreach my $bucket ( keys %buckets ) {
             next if ( $buckets{$bucket}{pseudo} );
 
             # Word list
 
-            $b2->{parser__}{words__} = ();
+            $b2->{parser__}->{words__} = {};
 
             $h->execute( $buckets{$bucket}{id} );
 
             while ( my $row = $h->fetchrow_arrayref ) {
-                $b2->{parser__}{words__}{$row->[0]} = $row->[1];
+                $b2->{parser__}->{words__}{$row->[0]} = $row->[1];
             }
-
-            # Add words to bucket
 
             print "  Importing words into the bucket '$bucket'...\n";
             $b2->add_words_to_bucket__( $user_session, $bucket, 1 );
@@ -217,7 +232,8 @@ if ( $#ARGV > 0 ) {
         print "Imported the database successfully\n";
 
     } else {
-        print "Failed to create a user '$newusername'\n";
+        print STDERR "Error : Failed to create a user '$newusername', import aborted\n";
+        $code = 1;
     }
 
     $POPFile2->CORE_stop();

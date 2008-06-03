@@ -50,11 +50,16 @@ if ( $#ARGV > 0 ) {
 
         # Prevent the tool from finding another copy of POPFile running
 
-        my $c = $POPFile->get_module('POPFile::Config');
+        my $c = $POPFile->get_module( 'POPFile::Config' );
         my $current_piddir = $c->config_( 'piddir' );
         $c->config_( 'piddir', $c->config_( 'piddir' ) . 'insert.pl.' );
 
         my $multiuser_mode = ( $c->global_config_( 'single_user' ) != 1 );
+
+        if ( $multiuser_mode && $#argv_backup < 2 ) {
+            &usage;
+            exit 1;
+        }
 
         my $user   = shift @argv_backup if ( $multiuser_mode );
         my $bucket = shift @argv_backup;
@@ -88,9 +93,11 @@ if ( $#ARGV > 0 ) {
 
         # Multiuser support
 
+        my $for_user;
         my $user_session;
 
         if ( $multiuser_mode ) {
+            $for_user = " for user `$user'";
 
             # Get user's session id
 
@@ -100,16 +107,17 @@ if ( $#ARGV > 0 ) {
                 $code = 1;
             }
         } else {
+            $for_user = '';
             $user_session = $session;
         }
 
         if ( $code == 0 ) {
             if ( !$b->is_bucket( $user_session, $bucket ) ) {
-                print STDERR "Error: Bucket `$bucket' does not exist, insert aborted.\n";
+                print STDERR "Error: Bucket `$bucket'$for_user does not exist, insert aborted.\n";
                 $code = 1;
             } else {
                 $b->add_messages_to_bucket( $user_session, $bucket, @files );
-                print "Added ", $#files+1, " files to `$bucket'\n";
+                print "Added ", $#files+1, " files to `$bucket'$for_user\n";
             }
         }
 
@@ -119,13 +127,18 @@ if ( $#ARGV > 0 ) {
         $POPFile->CORE_stop();
     }
 } else {
+    &usage;
+    exit 1;
+}
+
+exit $code;
+
+sub usage
+{
     print "insert.pl - insert mail messages into a specific bucket of the specific user\n\n";
     print "Usage: insert.pl [<user>] <bucket> <messages>\n";
     print "       <user>             The name of the user (multiuser mode only)\n";
     print "       <bucket>           The name of the bucket\n";
     print "       <messages>         Filename of message(s) to insert\n";
-    $code = 1;
 }
-
-exit $code;
 
