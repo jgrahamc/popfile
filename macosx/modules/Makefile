@@ -60,8 +60,8 @@ TIMEDATE_URL = http://search.cpan.org/CPAN/authors/id/G/GB/GBARR/$(TIMEDATE_ARCH
 
 # XMLRCP Support
 
-SOAPLITE = SOAP-Lite-0.710.05
-SOAPLITE_ARCHIVE = $(SOAPLITE).tar.gz
+SOAPLITE = SOAP-Lite-0.60
+SOAPLITE_ARCHIVE = $(SOAPLITE)a.tar.gz
 SOAPLITE_URL = http://search.cpan.org/CPAN/authors/id/M/MK/MKUTTER/$(SOAPLITE_ARCHIVE)
 
 VERSION_MODULE = version-0.74

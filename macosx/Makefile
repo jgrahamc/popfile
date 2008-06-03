@@ -116,7 +116,8 @@ installer: $(engine)
 		--scripts $(RESOURCES) \
 		--title $(PACKAGE_TITLE) \
 		--version $(PACKAGE_VERSION) \
-		--filter CVS
+		--filter CVS \
+		--filter .svn
 
 	@echo "...done"
 
