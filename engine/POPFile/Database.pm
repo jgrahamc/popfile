@@ -82,14 +82,14 @@ sub initialize
     # it resolves to the full path to the database named in the
     # database parameter above.
 
-    $self->config_( 'dbconnect', 'dbi:SQLite2:dbname=$dbname' );
+    $self->config_( 'dbconnect', 'dbi:SQLite:dbname=$dbname' );
     $self->config_( 'dbuser', '' );
     $self->config_( 'dbauth', '' );
 
     # SQLite 1.05+ have some problems we are resolving.  This lets us
     # give a nice message and then disable the version checking later
 
-    $self->config_( 'bad_sqlite_version', '3.0.0' );
+    $self->config_( 'bad_sqlite_version', '4.0.0' );
 
     # This is a bit mask used to control options when we are using the
     # default SQLite database.  By default all the options are on.
@@ -298,21 +298,27 @@ sub db_connect_helper__
                                   $self->config_( 'dbuser' ),
                                   $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
 
-    $self->log_( 0, "Using SQLite library version " . $db->{sqlite_version});
+    if ( $self->{db_is_sqlite__} ) {
+        $self->log_( 0, "Using SQLite library version " . $db->{sqlite_version});
 
-    # We check to make sure we're not using DBD::SQLite 1.05 or greater
-    # which uses SQLite V 3 If so, we'll use DBD::SQLite2 and SQLite 2.8,
-    # which is still compatible with old databases
+        # We check to make sure we're not using DBD::SQLite 1.05 or greater
+        # which uses SQLite V 3 If so, we'll use DBD::SQLite2 and SQLite 2.8,
+        # which is still compatible with old databases
 
-    if ( $db->{sqlite_version} gt $self->config_('bad_sqlite_version' ) )  {
-        $self->log_( 0, "Substituting DBD::SQLite2 for DBD::SQLite 1.05" );
-        $self->log_( 0, "Please install DBD::SQLite2 and set dbconnect to use DBD::SQLite2" );
+        if ( $db->{sqlite_version} gt $self->config_('bad_sqlite_version' ) )  {
+            $self->log_( 0, "Substituting DBD::SQLite2 for DBD::SQLite 1.05" );
+            $self->log_( 0, "Please install DBD::SQLite2 and set dbconnect to use DBD::SQLite2" );
 
-        $dbconnect =~ s/SQLite:/SQLite2:/;
+            $dbconnect =~ s/SQLite:/SQLite2:/;
 
-        $db = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
-                                      $self->config_( 'dbuser' ),
-                                      $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
+            $db = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
+                                          $self->config_( 'dbuser' ),
+                                          $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
+        }
+
+        # For Japanese compatibility
+
+        $db->do( 'pragma case_sensitive_like=1;' );
     }
 
     if ( !defined( $db ) ) {

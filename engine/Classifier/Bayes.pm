@@ -839,6 +839,28 @@ sub db_cleanup__
     $self->{db_delete_zero_words__}->finish;
     $self->{db_get_user_list__}->finish;
     $self->{db_get_user_from_account__}->finish;
+
+    # Avoid DBD::SQLite 'closing dbh with active statement handles' bug
+
+    undef $self->{db_get_buckets__};
+    undef $self->{db_get_wordid__};
+    undef $self->{db_get_userid__};
+    undef $self->{db_get_word_count__};
+    undef $self->{db_put_word_count__};
+    undef $self->{db_get_bucket_unique_counts__};
+    undef $self->{db_get_bucket_word_counts__};
+    undef $self->{db_get_unique_word_count__};
+    undef $self->{db_get_full_total__};
+    undef $self->{db_get_bucket_parameter__};
+    undef $self->{db_set_bucket_parameter__};
+    undef $self->{db_get_bucket_parameter_default__};
+    undef $self->{db_get_user_parameter__};
+    undef $self->{db_set_user_parameter__};
+    undef $self->{db_get_user_parameter_default__};
+    undef $self->{db_get_buckets_with_magnets__};
+    undef $self->{db_delete_zero_words__};
+    undef $self->{db_get_user_list__};
+    undef $self->{db_get_user_from_account__};
 }
 
 #----------------------------------------------------------------------------
@@ -1396,6 +1418,7 @@ sub add_words_to_bucket__
     }
 
     $self->{get_wordids__}->finish;
+    undef $self->{get_wordids__};
 
     my $ids = join( ',', @id_list );
 
@@ -1414,6 +1437,7 @@ sub add_words_to_bucket__
     }
 
     $self->{db_getwords__}->finish;
+    undef $self->{get_words__};
 
     $self->db_()->begin_work;
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
@@ -2153,6 +2177,7 @@ sub classify
     }
 
     $self->{get_wordids__}->finish;
+    undef $self->{get_wordids__};
 
     my $ids = join( ',', @id_list );
 
@@ -2179,6 +2204,7 @@ sub classify
     }
 
     $self->{db_classify__}->finish;
+    undef $self->{db_classify__};
 
     foreach my $id (@id_list) {
         $word_count += 2;
@@ -3518,6 +3544,12 @@ sub get_bucket_parameter
         return undef;
     }
 
+    # Make sure that the parameter is valid
+
+    if ( !defined( $self->{db_parameterid__}{$parameter} ) ) {
+        return undef;
+    }
+
     # If there is a non-default value for this parameter then return it.
 
     $self->{db_get_bucket_parameter__}->execute(        # PROFILE BLOCK START
@@ -4221,6 +4253,12 @@ sub get_user_parameter_from_id
         $self->{cache_user_parameters__}{$user}{$parameter}{lastused} = time;
         return ($self->{cached_user_parameters__}{$user}{$parameter}{value},    # PROFILE BLOCK START
                 $self->{cached_user_parameters__}{$user}{$parameter}{default}); # PROFILE BLOCK STOP
+    }
+
+    # Make sure that the parameter is valid
+
+    if ( !defined( $self->{db_user_parameterid__}{$parameter} ) ) {
+        return undef;
     }
 
     # If there is a non-default value for this parameter then return it.

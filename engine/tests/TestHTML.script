@@ -2123,7 +2123,7 @@ GET /temp.png
 MATCH 10 GOTO 10
 
 GET /popfile_current_log.log
-MATCH Attempting to connect to dbi:SQLite2:dbname=../tests/popfile.db
+MATCH Attempting to connect to dbi:SQLite:dbname=../tests/popfile.db
 
 CODE
 mkdir '../manual';

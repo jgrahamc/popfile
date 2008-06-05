@@ -462,6 +462,8 @@ EOF
     $h->set_query( $q, '', 't', '', 0 );
     test_assert_equal( $#{$h->{queries__}{$q}{cache}}, -1 );
 
+    $h->stop_query( $q );
+
     if ( $userid eq 1 ) {
         # Make sure that we can upgrade an existing file with a specific
         # classification
@@ -494,6 +496,8 @@ EOF
 
         $POPFile->CORE_service( 1 );
 
+        $q = $h->start_query( $session );
+
         $h->set_query( $q, '', '', '', 0 );
         test_assert_equal( $h->get_query_size( $q ), 4 );
 
@@ -507,12 +511,17 @@ EOF
         test_assert_equal( $rows[0][4], 'Something' );
         test_assert_equal( $rows[0][5], 964521991 );
         test_assert_equal( $rows[0][12], $size );
+
+        $h->stop_query( $q );
     }
+
+    $q = $h->start_query( $session );
 
     # Now check that deletion works
 
     $h->set_query( $q, '', '', '', 0 );
     test_assert_equal( $h->get_query_size( $q ), ($userid eq 1?4:3) );
+    $h->stop_query( $q );
 
     $file = $h->get_slot_file( $slot1 );
     test_assert( ( -e $file ) );
@@ -521,6 +530,7 @@ EOF
     $h->stop_deleting();
     test_assert( !( -e $file ) );
 
+    $q = $h->start_query( $session );
     $h->set_query( $q, '', '', '', 0 );
     test_assert_equal( $h->get_query_size( $q ), ($userid eq 1?3:2) );
 

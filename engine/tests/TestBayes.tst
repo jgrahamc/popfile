@@ -878,15 +878,11 @@ $orphan_query->execute();
 
 test_assert_equal( $orphan_query->fetchrow_arrayref->[0] , 160 );
 
-$orphan_query->finish;
-
 # Test a few specific orphaned words
 
 $single_orphan_query->execute();
 
 test_assert_equal( $single_orphan_query->fetchrow_arrayref->[0] , 1 );
-
-$single_orphan_query->finish;
 
 # Test clearing of orphans
 
@@ -907,6 +903,7 @@ $orphan_query->execute();
 test_assert_equal( $orphan_query->fetchrow_arrayref->[0] , 0 );
 
 $orphan_query->finish;
+undef $orphan_query;
 
 # Test a few specific orphaned words
 
@@ -915,6 +912,8 @@ $single_orphan_query->execute();
 test_assert_equal( $single_orphan_query->fetchrow_arrayref->[0] , 0 );
 
 $single_orphan_query->finish;
+undef $single_orphan_query;
+
 # classify a message using a magnet
 
 $b->create_magnet( $session, 'zeotrope', 'from', 'cxcse231@yahoo.com' );

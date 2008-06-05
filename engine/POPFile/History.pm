@@ -244,40 +244,28 @@ sub reserve_slot
     return undef if ( !defined( $userid ) );
 
     my $r;
-    my $in_transaction = ! ( $self->db_()->{AutoCommit} );
-    $self->log_( 2, "already in a transaction." ) if ($in_transaction);
+    my $insert_sth = $self->db_()->prepare(                            # PROFILE BLOCK START
+            "insert into history ( userid, committed, inserted )
+                         values  (      ?,         ?,        ? );" );  # PROFILE BLOCK STOP
 
-    while (1) {
+    my $slot;
+
+    while ( !defined($slot) || $slot == 0 ) {
         $r = int(rand( 1000000000 )+2);
 
         $self->log_( 2, "reserve_slot selected random number $r" );
-
-        # Avoid another POPFile process using the same committed id
-        $self->db_()->begin_work unless ($in_transaction);
-
-        my $test = $self->db_()->selectrow_arrayref(                       # PROFILE BLOCK START
-                 "select id from history where committed = $r limit 1;" ); # PROFILE BLOCK STOP
-
-        if ( defined( $test ) ) {
-            $self->db_()->commit unless ($in_transaction);
-            next;
-        }
 
         # Get the date/time now which will be stored in the database
         # so that we can sort on the Date: header in the message and
         # when we received it
 
-        my $now = time;
-        $self->db_()->do(                                                                          # PROFILE BLOCK START
-            "insert into history ( userid, committed, inserted ) values ( $userid, $r, $now );" ); # PROFILE BLOCK STOP
-        last;
+        my $result = $insert_sth->execute( $userid, $r, time );
+        next if ( !defined( $result ) );
+
+        $slot = $self->db_()->last_insert_id( undef, undef, 'history', 'id' );
     }
 
-    my $result = $self->db_()->selectrow_arrayref(                         # PROFILE BLOCK START
-                 "select id from history where committed = $r limit 1;" ); # PROFILE BLOCK STOP
-    $self->db_()->commit unless ($in_transaction);
-
-    my $slot = $result->[0];
+    $insert_sth->finish;
 
     $self->log_( 2, "reserve_slot returning slot id $slot" );
 
@@ -484,6 +472,24 @@ sub commit_history
         return;
     }
 
+    my $update_history = $self->db_()->prepare(          # PROFILE BLOCK START
+                "update history set hdr_from     = ?,
+                                    hdr_to       = ?,
+                                    hdr_date     = ?,
+                                    hdr_cc       = ?,
+                                    hdr_subject  = ?,
+                                    sort_from    = ?,
+                                    sort_to      = ?,
+                                    sort_cc      = ?,
+                                    sort_subject = ?,
+                                    committed    = ?,
+                                    bucketid     = ?,
+                                    usedtobe     = ?,
+                                    magnetid     = ?,
+                                    hash         = ?,
+                                    size         = ?
+                                    where id     = ?;" ); # PROFILE BLOCK STOP
+
     $self->db_()->begin_work;
     foreach my $entry (@{$self->{commit_list__}}) {
         my ( $session, $slot, $bucket, $magnet ) = @{$entry};
@@ -528,7 +534,6 @@ sub commit_history
                                             ${$header{'date'}}[0],
                                             ${$header{'subject'}}[0],
                                             ${$header{'received'}}[0] );
-        $hash = $self->db_()->quote( $hash );
 
         # For sorting purposes the From, To, CC, Subject headers have
         # special cleaned up versions of themselves in the database.
@@ -557,9 +562,6 @@ sub commit_history
 
                 $sort_headers{$h} =~ s/^re: *//;
             }
-
-            $sort_headers{$h} = $self->db_()->quote(  # PROFILE BLOCK START
-                $sort_headers{$h} );                  # PROFILE BLOCK STOP
         }
 
         # Make sure that the headers we are going to insert into
@@ -581,7 +583,6 @@ sub commit_history
             }
 
             ${$header{$h}}[0] =~ s/\0//g;
-            ${$header{$h}}[0] = $self->db_()->quote( ${$header{$h}}[0] );
         }
 
         # If we do not have a date header then set the date to
@@ -610,29 +611,31 @@ sub commit_history
         # history and log the failure
 
         if ( defined( $bucketid ) ) {
-            my $result = $self->db_()->do(                # PROFILE BLOCK START
-                "update history set hdr_from     = ${$header{from}}[0],
-                                    hdr_to       = ${$header{to}}[0],
-                                    hdr_date     = ${$header{date}}[0],
-                                    hdr_cc       = ${$header{cc}}[0],
-                                    hdr_subject  = ${$header{subject}}[0],
-                                    sort_from    = $sort_headers{from},
-                                    sort_to      = $sort_headers{to},
-                                    sort_cc      = $sort_headers{cc},
-                                    sort_subject = $sort_headers{subject},
-                                    committed    = 1,
-                                    bucketid     = $bucketid,
-                                    usedtobe     = 0,
-                                    magnetid     = $magnet,
-                                    hash         = $hash,
-                                    size         = $msg_size
-                                    where id = $slot;" ); # PROFILE BLOCK STOP
+            my $result = $update_history->execute(  # PROFILE BLOCK START
+                    ${$header{from}}[0],    # hdr_from
+                    ${$header{to}}[0],      # hdr_to
+                    ${$header{date}}[0],    # hdr_date
+                    ${$header{cc}}[0],      # hdr_cc
+                    ${$header{subject}}[0], # hdr_subject
+                    $sort_headers{from},    # sort_from
+                    $sort_headers{to},      # sort_to
+                    $sort_headers{cc},      # sort_cc
+                    $sort_headers{subject}, # sort_subject
+                    1,                      # committed
+                    $bucketid,              # bucketid
+                    0,                      # usedtobe
+                    $magnet,                # magnetid
+                    $hash,                  # hash
+                    $msg_size,              # size
+                    $slot                   # id
+                         );                         # PROFILE BLOCK STOP
         } else {
             $self->log_( 0, "Couldn't find bucket ID for bucket $bucket when committing $slot" );
             $self->release_slot( $slot );
         }
     }
     $self->db_()->commit;
+    $update_history->finish;
 
     $self->{commit_list__} = ();
     $self->force_requery__();
@@ -730,7 +733,7 @@ sub start_deleting
 {
     my ( $self ) = @_;
 
-    $self->database_()->tweak_sqlite( 1, 1, $self->db_() );
+#    $self->database_()->tweak_sqlite( 1, 1, $self->db_() );
     $self->db_()->begin_work;
 }
 
@@ -747,7 +750,7 @@ sub stop_deleting
     my ( $self ) = @_;
 
     $self->db_()->commit;
-    $self->database_()->tweak_sqlite( 1, 0, $self->db_() );
+#    $self->database_()->tweak_sqlite( 1, 0, $self->db_() );
 }
 
 #----------------------------------------------------------------------------
@@ -917,6 +920,7 @@ sub stop_query
 
         if ( ( defined $q ) && ( $q != 0 ) && ( $q->{Active} ) ) {
             $q->finish;
+            undef $self->{queries__}{$id}{query};
         }
     }
 

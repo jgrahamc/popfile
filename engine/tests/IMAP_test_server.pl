@@ -55,7 +55,7 @@ my $uid_file = 'imap.uids';
 
 # if nothing happens with in $idle_timeout seconds
 # we call exit.
-my $idle_timeout = 60;
+my $idle_timeout = 300;
 
 my @mailboxes = qw/INBOX spam personal other unclassified/;
 
