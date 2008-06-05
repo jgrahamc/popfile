@@ -1437,7 +1437,7 @@ sub add_words_to_bucket__
     }
 
     $self->{db_getwords__}->finish;
-    undef $self->{get_words__};
+    undef $self->{db_getwords__};
 
     $self->db_()->begin_work;
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
