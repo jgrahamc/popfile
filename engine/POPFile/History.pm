@@ -247,6 +247,7 @@ sub reserve_slot
     my $insert_sth = $self->db_()->prepare(                            # PROFILE BLOCK START
             "insert into history ( userid, committed, inserted )
                          values  (      ?,         ?,        ? );" );  # PROFILE BLOCK STOP
+    my $is_sqlite2 = ( $self->db_()->{Driver}->{Name} =~ /SQLite2/ );
 
     my $slot;
 
@@ -262,7 +263,11 @@ sub reserve_slot
         my $result = $insert_sth->execute( $userid, $r, time );
         next if ( !defined( $result ) );
 
-        $slot = $self->db_()->last_insert_id( undef, undef, 'history', 'id' );
+        if ( $is_sqlite2 ) {
+            $slot = $self->db_()->func( 'last_insert_rowid' );
+        } else {
+            $slot = $self->db_()->last_insert_id( undef, undef, 'history', 'id' );
+        }
     }
 
     $insert_sth->finish;
