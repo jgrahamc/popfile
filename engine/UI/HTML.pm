@@ -1056,6 +1056,7 @@ sub handle_history_bar__
         $row{Configuration_Field_Visible} = ( $1 eq '-' );
         my $selected = ($1 eq '+')?'checked':'';
         $column =~ s/^.//;
+        next if ( !defined( $headers_table{$column} ) );
         $row{Configuration_Field_Name} = $column;
         $row{Configuration_Localized_Field_Name} =                    # PROFILE BLOCK START
                 $self->language($session)->{$headers_table{$column}}; # PROFILE BLOCK STOP
@@ -3461,8 +3462,9 @@ sub history_page
             my %row_data;
             $header =~ /^(.)/;
             next if ( ( $1 eq '-' ) || ( $1 eq '' ) );
-            $colspan++;
             $header =~ s/^.//;
+            next if ( !defined( $headers_table{$header} ) );
+            $colspan++;
             $row_data{History_Fields} =            # PROFILE BLOCK START
                 $self->print_form_fields_(1,1,
                     ('filter','search','negate')); # PROFILE BLOCK STOP

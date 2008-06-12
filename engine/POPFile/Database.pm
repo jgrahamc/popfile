@@ -298,7 +298,7 @@ sub db_connect_helper__
                                   $self->config_( 'dbuser' ),
                                   $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
 
-    if ( $self->{db_is_sqlite__} ) {
+    if ( $sqlite ) {
         $self->log_( 0, "Using SQLite library version " . $db->{sqlite_version});
 
         # We check to make sure we're not using DBD::SQLite 1.05 or greater
@@ -354,12 +354,12 @@ sub db_connect_helper__
         my @tables = map { s/$sqlquotechar//g; $_ } ($db->tables());
 
         foreach my $table (@tables) {
-            if ( $table eq 'popfile' ) {
-                my @row = $db->selectrow_array(      # PROFILE BLOCK START
+            if ( $table =~ /\.?popfile$/ ) {
+                my $row = $db->selectrow_arrayref(   # PROFILE BLOCK START
                    'select version from popfile;' ); # PROFILE BLOCK STOP
 
-                if ( $#row == 0 ) {
-                    $need_upgrade = ( $row[0] != $version );
+                if ( defined( $row ) ) {
+                    $need_upgrade = ( $row->[0] != $version );
                 }
             }
         }
@@ -378,7 +378,7 @@ sub db_connect_helper__
             open INSERT, '>' . $ins_file;
 
             foreach my $table (@tables) {
-                next if ( $table eq 'popfile' );
+                next if ( $table =~ /\.?popfile$/ );
                 if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
                     next;
                 }
@@ -399,11 +399,15 @@ sub db_connect_helper__
                         print "\n";
                         flush STDOUT;
                     }
-                    my @rows = $t->fetchrow_array;
+                    my $rows = $t->fetchrow_arrayref;
 
-                    last if ( $#rows == -1 );
+                    last if ( !defined( $rows ) );
 
-                    print INSERT "INSERT OR IGNORE INTO $table (";
+                    if ( $sqlite ) {
+                        print INSERT "INSERT OR IGNORE INTO $table (";
+                    } else {
+                        print INSERT "INSERT INTO $table (";
+                    }
                     for my $i (0..$t->{NUM_OF_FIELDS}-1) {
                         if ( $i != 0 ) {
                             print INSERT ',';
@@ -415,7 +419,7 @@ sub db_connect_helper__
                         if ( $i != 0 ) {
                             print INSERT ',';
                         }
-                        my $val = $rows[$i];
+                        my $val = $rows->[$i];
                         if ( $t->{TYPE}->[$i] !~ /^int/i ) {
                             $val = '' if ( !defined( $val ) );
                             $val = $db->quote( $val );
@@ -426,6 +430,7 @@ sub db_connect_helper__
                     }
                     print INSERT ");\n";
                 }
+                $t->finish;
             }
 
             close INSERT;
@@ -524,6 +529,86 @@ sub insert_schema__
         $self->log_( 0, "Can't find the database schema" );
         return 0;
     }
+}
+
+#----------------------------------------------------------------------------
+#
+# validate_sql_prepare_and_execute
+#
+# This method will prepare sql statements and execute them.
+# The statement itself and any binding parameters are also
+# tested for possible null-characters (\x00).
+# If you pass in a handle to a prepared statement, the statement
+# will be executed and possible binding-parameters are checked.
+#
+# $statement  The sql statement to prepare or the prepared statement handle
+# @args       The (optional) list of binding parameters
+#
+# Returns the result of prepare()
+#----------------------------------------------------------------------------
+sub validate_sql_prepare_and_execute {
+    my $self = shift;
+    my $sql_or_sth  = shift;
+    my @args = @_;
+
+    my $dbh = $self->{db__};
+    my $sth = undef;
+
+    # Is this a statement-handle or a sql string?
+    if ( (ref $sql_or_sth) =~ m/^DBI::/ ) {
+        $sth = $sql_or_sth;
+    }
+    else {
+        my $sql = $sql_or_sth;
+        $sql = $self->check_for_nullbytes( $sql );
+        $sth = $dbh->prepare( $sql );
+    }
+
+    my $execute_result = undef;
+
+    # Any binding-params?
+    if ( @args ) {
+        foreach my $arg ( @args ) {
+            $arg = $self->check_for_nullbytes( $arg );
+        }
+        $execute_result = $sth->execute( @args );
+    }
+    else {
+        $execute_result = $sth->execute();
+    }
+
+    unless ( $execute_result ) {
+        my ( $package, $file, $line ) = caller;
+        $self->log_( 0, "DBI::execute failed.  Called from package '$package' ($file), line $line." );
+    }
+
+    return $sth;
+}
+
+
+#----------------------------------------------------------------------------
+#
+# check_for_nullbytes
+#
+# Will check a passed-in string for possible null-bytes and log and error
+# message in case a null-byte is found.
+#
+# Will return the string with any null-bytes removed.
+#----------------------------------------------------------------------------
+sub check_for_nullbytes {
+    my $self = shift;
+    my $string = shift;
+
+    if ( defined $string ) {
+        my $backup = $string;
+
+        if ( my $count = ( $string =~ s/\x00//g ) ) {
+            my ( $package, $file, $line ) = caller( 1 );
+            $self->log_( 0, "Found $count null-character(s) in string '$backup'. Called from package '$package' ($file), line $line." );
+        }
+    }
+
+    return $string;
 }
 
 #----------------------------------------------------------------------------

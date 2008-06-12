@@ -101,6 +101,7 @@ sub new
     $self->{db_delete_zero_words__} = 0;
     $self->{db_get_user_list__} = 0;
     $self->{db_get_user_from_account__} = 0;
+    $self->{db_insert_word__} = 0;
 
     # Caches the name of each bucket and relates it to both the bucket
     # ID in the database and whether it is pseudo or not
@@ -620,7 +621,8 @@ sub set_value_
 
         my $userid = $self->valid_session_key__( $session );
         my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-        $self->{db_delete_zero_words__}->execute( $bucketid );
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                $self->{db_delete_zero_words__}, $bucketid );  # PROFILE BLOCK STOP
 
         return 1;
     } else {
@@ -788,10 +790,14 @@ sub db_prepare__
     $self->{db_get_user_from_account__} = $self->db_()->prepare(                        # PROFILE BLOCK START
              'select userid from accounts where account = ?' );                          # PROFILE BLOCK STOP
 
+    $self->{db_insert_word__} = $self->db_()->prepare(                                 # PROFILE BLOCK START
+             'insert into words ( word )
+                          values ( ? );' );                                             # PROFILE BLOCK STOP
+
     # Get the mapping from parameter names to ids into a local hash
 
-    my $h = $self->db_()->prepare( "select name, id from bucket_template;" );
-    $h->execute();
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select name, id from bucket_template;' );             # PROFILE BLOCK STOP
     while ( my $row = $h->fetchrow_arrayref ) {
         $self->{db_parameterid__}{$row->[0]} = $row->[1];
     }
@@ -799,8 +805,8 @@ sub db_prepare__
 
     # Get the mapping from user parameter names to ids into a local hash
 
-    $h = $self->db_()->prepare( "select name, id from user_template;" );
-    $h->execute;
+    $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select name, id from user_template;' );            # PROFILE BLOCK STOP
     while ( my $row = $h->fetchrow_arrayref ) {
         $self->{db_user_parameterid__}{$row->[0]} = $row->[1];
     }
@@ -839,6 +845,7 @@ sub db_cleanup__
     $self->{db_delete_zero_words__}->finish;
     $self->{db_get_user_list__}->finish;
     $self->{db_get_user_from_account__}->finish;
+    $self->{db_insert_word__}->finish;
 
     # Avoid DBD::SQLite 'closing dbh with active statement handles' bug
 
@@ -861,6 +868,7 @@ sub db_cleanup__
     undef $self->{db_delete_zero_words__};
     undef $self->{db_get_user_list__};
     undef $self->{db_get_user_from_account__};
+    undef $self->{db_insert_word__};
 }
 
 #----------------------------------------------------------------------------
@@ -881,28 +889,36 @@ sub db_update_cache__
 
     delete $self->{db_bucketid__}{$userid};
 
-    $self->{db_get_buckets__}->execute( $userid );
-    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
-        $self->{db_bucketid__}{$userid}{$row->[0]}{id} = $row->[1];
-        $self->{db_bucketid__}{$userid}{$row->[0]}{pseudo} = $row->[2];
-        $self->{db_bucketcount__}{$userid}{$row->[0]} = 0;
+    my ( $bucketname, $bucketid, $pseudo );
+    $self->{db_get_buckets__}->bind_columns( \$bucketname, \$bucketid, \$pseudo );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_buckets__}, $userid );          # PROFILE BLOCK STOP
+    while ( $self->{db_get_buckets__}->fetchrow_arrayref ) {
+        $self->{db_bucketid__}{$userid}{$bucketname}{id} = $bucketid;
+        $self->{db_bucketid__}{$userid}{$bucketname}{pseudo} = $pseudo;
+        $self->{db_bucketcount__}{$userid}{$bucketname} = 0;
     }
 
-    $self->{db_get_bucket_word_counts__}->execute( $userid );
+    $self->database_()->validate_sql_prepare_and_execute(    # PROFILE BLOCK START
+            $self->{db_get_bucket_word_counts__}, $userid ); # PROFILE BLOCK STOP
 
     for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
         $self->{db_bucketcount__}{$userid}{$b} = 0;
         $self->{db_bucketunique__}{$userid}{$b} = 0;
     }
 
-    while ( my $row = $self->{db_get_bucket_word_counts__}->fetchrow_arrayref ) {
-        $self->{db_bucketcount__}{$userid}{$row->[1]} = $row->[0];
+    my $count;
+    $self->{db_get_bucket_word_counts__}->bind_columns( \$count, \$bucketname );
+    while ( $self->{db_get_bucket_word_counts__}->fetchrow_arrayref ) {
+        $self->{db_bucketcount__}{$userid}{$bucketname} = $count;
     }
 
-    $self->{db_get_bucket_unique_counts__}->execute( $userid );
+    $self->database_()->validate_sql_prepare_and_execute(      # PROFILE BLOCK START
+            $self->{db_get_bucket_unique_counts__}, $userid ); # PROFILE BLOCK STOP
 
-    while ( my $row = $self->{db_get_bucket_unique_counts__}->fetchrow_arrayref ) {
-        $self->{db_bucketunique__}{$userid}{$row->[1]} = $row->[0];
+    $self->{db_get_bucket_unique_counts__}->bind_columns( \$count, \$bucketname );
+    while ( $self->{db_get_bucket_unique_counts__}->fetchrow_arrayref ) {
+        $self->{db_bucketunique__}{$userid}{$bucketname} = $count;
     }
 
     $self->update_constants__( $session );
@@ -927,7 +943,8 @@ sub db_get_word_count__
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{db_get_wordid__}->execute( $word );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_wordid__}, $word );             # PROFILE BLOCK STOP
     my $result = $self->{db_get_wordid__}->fetchrow_arrayref;
     if ( !defined( $result ) ) {
         return undef;
@@ -935,7 +952,9 @@ sub db_get_word_count__
 
     my $wordid = $result->[0];
 
-    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id}, $wordid );
+    $self->database_()->validate_sql_prepare_and_execute(            # PROFILE BLOCK START
+            $self->{db_get_word_count__},
+            $self->{db_bucketid__}{$userid}{$bucket}{id}, $wordid ); # PROFILE BLOCK STOP
     $result = $self->{db_get_word_count__}->fetchrow_arrayref;
     if ( defined( $result ) ) {
          return $result->[0];
@@ -968,21 +987,23 @@ sub db_put_word_count__
     # word in the words table (if there's none then we need to add the
     # word), the bucket id in the buckets table (which must exist)
 
-    $word = $self->db_()->quote($word);
-
-    my $result = $self->db_()->selectrow_arrayref(                            # PROFILE BLOCK START
-            "select words.id from words where words.word = $word limit 1;" ); # PROFILE BLOCK STOP
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_wordid__}, $word );             # PROFILE BLOCK STOP
+    my $result = $self->{db_get_wordid__}->fetchrow_arrayref;
 
     if ( !defined( $result ) ) {
-        $self->db_()->do( "insert into words ( word ) values ( $word );" );
-        $result = $self->db_()->selectrow_arrayref(                               # PROFILE BLOCK START
-                "select words.id from words where words.word = $word limit 1;" ); # PROFILE BLOCK STOP
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                $self->{db_insert_word__}, $word );            # PROFILE BLOCK STOP
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                $self->{db_get_wordid__}, $word );             # PROFILE BLOCK STOP
+        $result = $self->{db_get_wordid__}->fetchrow_arrayref;
     }
 
     my $wordid = $result->[0];
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
-    $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
+    $self->database_()->validate_sql_prepare_and_execute(               # PROFILE BLOCK START
+            $self->{db_put_word_count__}, $bucketid, $wordid, $count ); # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -1303,18 +1324,20 @@ sub magnet_match_helper__
     my @magnets;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->db_()->prepare(                                           # PROFILE BLOCK START
-        "select magnets.val, magnets.id from magnets, users, buckets, magnet_types
-             where buckets.id = $bucketid and
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+        'select magnets.val, magnets.id from magnets, users, buckets, magnet_types
+             where buckets.id = ? and
                    magnets.id != 0 and
                    users.id = buckets.userid and
                    magnets.bucketid = buckets.id and
                    magnet_types.mtype = ? and
-                   magnets.mtid = magnet_types.id order by magnets.val;" );   # PROFILE BLOCK STOP
+                   magnets.mtid = magnet_types.id order by magnets.val;',
+        $bucketid, $type );                                        # PROFILE BLOCK STOP
 
-    $h->execute( $type );
+    my ( $val, $id );
+    $h->bind_columns( \$val, \$id );
     while ( my $row = $h->fetchrow_arrayref ) {
-        push @magnets, [$row->[0], $row->[1]];
+        push @magnets, [$val, $id];
     }
     $h->finish;
 
@@ -1403,18 +1426,19 @@ sub add_words_to_bucket__
 
     my $words;
     $words = join( ',', map( $self->db_()->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    $self->{get_wordids__} = $self->db_()->prepare(        # PROFILE BLOCK START
+    $self->{get_wordids__} = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
              "select id, word
                   from words
-                  where word in ( $words );" );             # PROFILE BLOCK STOP
-    $self->{get_wordids__}->execute;
+                  where word in ( $words );" );                                     # PROFILE BLOCK STOP
 
     my @id_list;
     my %wordmap;
+    my ( $wordid, $word );
 
-    while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
-        push @id_list, ($row->[0]);
-        $wordmap{$row->[1]} = $row->[0];
+    $self->{get_wordids__}->bind_columns( \$wordid, \$word );
+    while ( $self->{get_wordids__}->fetchrow_arrayref ) {
+        push @id_list, $wordid;
+        $wordmap{$word} = $wordid;
     }
 
     $self->{get_wordids__}->finish;
@@ -1422,18 +1446,19 @@ sub add_words_to_bucket__
 
     my $ids = join( ',', @id_list );
 
-    $self->{db_getwords__} = $self->db_()->prepare(                                         # PROFILE BLOCK START
-             "select matrix.times, matrix.wordid
+    $self->{db_getwords__} = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            "select matrix.times, matrix.wordid
                   from matrix
                   where matrix.wordid in ( $ids )
-                    and matrix.bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};" );  # PROFILE BLOCK STOP
-
-    $self->{db_getwords__}->execute;
+                    and matrix.bucketid = ?;",
+            $self->{db_bucketid__}{$userid}{$bucket}{id} );                         # PROFILE BLOCK STOP
 
     my %counts;
+    my $count;
 
-    while ( my $row = $self->{db_getwords__}->fetchrow_arrayref ) {
-        $counts{$row->[1]} = $row->[0];
+    $self->{db_getwords__}->bind_columns( \$count, \$wordid );
+    while ( $self->{db_getwords__}->fetchrow_arrayref ) {
+        $counts{$wordid} = $count;
     }
 
     $self->{db_getwords__}->finish;
@@ -1449,8 +1474,12 @@ sub add_words_to_bucket__
         # set_value_ which would need to look up the wordid again
 
         if ( defined( $wordmap{$word} ) && defined( $counts{$wordmap{$word}} ) ) {
-            $self->{db_put_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id},               # PROFILE BLOCK START
-                $wordmap{$word}, $counts{$wordmap{$word}} + $subtract * $self->{parser__}->{words__}{$word} ); # PROFILE BLOCK STOP
+            $self->database_()->validate_sql_prepare_and_execute(                  # PROFILE BLOCK START
+                    $self->{db_put_word_count__},
+                    $self->{db_bucketid__}{$userid}{$bucket}{id},
+                    $wordmap{$word},
+                    $counts{$wordmap{$word}} +
+                        $subtract * $self->{parser__}->{words__}{$word} )->finish; # PROFILE BLOCK STOP
         } else {
 
             # If the word is not in the database and we are trying to
@@ -1468,7 +1497,9 @@ sub add_words_to_bucket__
     # removed
 
     if ( $subtract == -1 ) {
-        $self->{db_delete_zero_words__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
+        $self->database_()->validate_sql_prepare_and_execute(           # PROFILE BLOCK START
+                $self->{db_delete_zero_words__},
+                $self->{db_bucketid__}{$userid}{$bucket}{id} )->finish; # PROFILE BLOCK STOP
     }
 
     $self->db_()->commit;
@@ -1726,7 +1757,8 @@ sub get_session_key
 
     my $hash = md5_hex( $user . '__popfile__' . $pwd );
 
-    $self->{db_get_userid__}->execute( $user, $hash );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_userid__}, $user, $hash );      # PROFILE BLOCK STOP
     my $result = $self->{db_get_userid__}->fetchrow_arrayref;
     if ( !defined( $result ) ) {
 
@@ -1928,8 +1960,9 @@ sub get_session_key_from_token
             # Check the token against the associations in the database and
             # figure out which user is being talked about
 
-            my $result = $self->{db_get_user_from_account__}->execute( # PROFILE BLOCK START
-                    "$module:$token" );                                # PROFILE BLOCK STOP
+            my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                    $self->{db_get_user_from_account__},
+                    "$module:$token" );                                         # PROFILE BLOCK STOP
             if ( !defined( $result ) ) {
                 $self->log_( 1, "Unknown account $module:$token" );
                 return undef;
@@ -2157,23 +2190,24 @@ sub classify
 
     my $words;
     $words = join( ',', map( $self->db_()->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    $self->{get_wordids__} = $self->db_()->prepare(  # PROFILE BLOCK START
+    $self->{get_wordids__} = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
              "select id, word
                   from words
                   where word in ( $words )
-                  order by id;" );                    # PROFILE BLOCK STOP
-    $self->{get_wordids__}->execute;
+                  order by id;" );                                                  # PROFILE BLOCK STOP
 
     my @id_list;
     my %temp_idmap;
+    my ( $wordid, $word );
 
     if ( !defined( $idmap ) ) {
         $idmap = \%temp_idmap;
     }
 
-    while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
-        push @id_list, ($row->[0]);
-        $$idmap{$row->[0]} = $row->[1];
+    $self->{get_wordids__}->bind_columns( \$wordid, \$word );
+    while ( $self->{get_wordids__}->fetchrow_arrayref ) {
+        push @id_list, $wordid;
+        $$idmap{$wordid} = $word;
     }
 
     $self->{get_wordids__}->finish;
@@ -2181,26 +2215,26 @@ sub classify
 
     my $ids = join( ',', @id_list );
 
-    $self->{db_classify__} = $self->db_()->prepare(            # PROFILE BLOCK START
+    $self->{db_classify__} = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
              "select matrix.times, matrix.wordid, buckets.name
                   from matrix, buckets
                   where matrix.wordid in ( $ids )
                     and matrix.bucketid = buckets.id
-                    and buckets.userid = $userid;" );           # PROFILE BLOCK STOP
-
-    $self->{db_classify__}->execute;
+                    and buckets.userid = ?;", $userid );                            # PROFILE BLOCK STOP
 
     # %matrix maps wordids and bucket names to counts
     # $matrix{$wordid}{$bucket} == $count
 
     my %temp_matrix;
+    my ( $count, $bucketname );
 
     if ( !defined( $matrix ) ) {
         $matrix = \%temp_matrix;
     }
 
-    while ( my $row = $self->{db_classify__}->fetchrow_arrayref ) {
-        $$matrix{$row->[1]}{$row->[2]} = $row->[0];
+    $self->{db_classify__}->bind_columns( \$count, \$wordid, \$bucketname );
+    while ( $self->{db_classify__}->fetchrow_arrayref ) {
+        $$matrix{$wordid}{$bucketname} = $count;
     }
 
     $self->{db_classify__}->finish;
@@ -3043,8 +3077,8 @@ sub get_accounts
 
     # If user is an admin then grab the accounts for the user requested
 
-    my $h = $self->db_()->prepare( "select account from accounts where userid = ?;" );
-    $h->execute( $id );
+    my $h = $self->database_()->validate_sql_prepare_and_execute(    # PROFILE BLOCK START
+            'select account from accounts where userid = ?;', $id ); # PROFILE BLOCK STOP
     my @accounts;
     while ( my $row = $h->fetchrow_arrayref ) {
         push ( @accounts, $row->[0] );
@@ -3082,7 +3116,8 @@ sub add_account
     # User is admin so try to insert the new account after checking to see
     # if someone already has this account
 
-    my $result = $self->{db_get_user_from_account__}->execute( "$module:$account" );
+    my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_user_from_account__}, "$module:$account" );  # PROFILE BLOCK STOP
     if ( !defined( $result ) ) {
         return 0;
     }
@@ -3090,8 +3125,10 @@ sub add_account
         return -1;
     }
 
-    my $h = $self->db_()->prepare( "insert into accounts ( userid, account ) values ( ?, ? );" );
-    if ( !defined( $h->execute( $id, "$module:$account" ) ) ) {
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'insert into accounts ( userid, account ) values ( ?, ? );',
+            $id, "$module:$account" );                             # PROFILE BLOCK STOP
+    if ( !defined( $h ) ) {
         return 0;
     }
 
@@ -3121,8 +3158,9 @@ sub remove_account
         return 0;
     }
 
-    my $quoted_account = $self->db_()->quote( "$module:$account" );
-    my $result = $self->db_()->do( "delete from accounts where account = $quoted_account;" );
+    my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'delete from accounts where account = ?;',
+            "$module:$account" )->finish;                               # PROFILE BLOCK STOP
 
     return defined( $result );
 }
@@ -3341,11 +3379,14 @@ sub get_bucket_word_list
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    $prefix =~ s/\0//g;
+    $prefix = $self->db_()->quote( $prefix . '%' );
+
     my $result = $self->db_()->selectcol_arrayref(  # PROFILE BLOCK START
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
                matrix.bucketid = $bucketid and
-               words.word like '$prefix%';");        # PROFILE BLOCK STOP
+               words.word like $prefix;");        # PROFILE BLOCK STOP
 
     return @{$result};
 }
@@ -3370,6 +3411,8 @@ sub get_bucket_word_prefixes
     my $prev = '';
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    return undef if ( !defined( $bucketid ) );
+
     my $result = $self->db_()->selectcol_arrayref(   # PROFILE BLOCK START
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
@@ -3407,7 +3450,8 @@ sub get_word_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{db_get_full_total__}->execute( $userid );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_full_total__}, $userid );       # PROFILE BLOCK STOP
     return $self->{db_get_full_total__}->fetchrow_arrayref->[0];
 }
 
@@ -3471,7 +3515,8 @@ sub get_unique_word_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{db_get_unique_word_count__}->execute( $userid );
+    $self->database_()->validate_sql_prepare_and_execute(   # PROFILE BLOCK START
+            $self->{db_get_unique_word_count__}, $userid ); # PROFILE BLOCK STOP
     return $self->{db_get_unique_word_count__}->fetchrow_arrayref->[0];
 }
 
@@ -3552,17 +3597,19 @@ sub get_bucket_parameter
 
     # If there is a non-default value for this parameter then return it.
 
-    $self->{db_get_bucket_parameter__}->execute(        # PROFILE BLOCK START
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_bucket_parameter__},
             $self->{db_bucketid__}{$userid}{$bucket}{id},
-            $self->{db_parameterid__}{$parameter} );    # PROFILE BLOCK STOP
+            $self->{db_parameterid__}{$parameter} );       # PROFILE BLOCK STOP
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
     # If this parameter has not been defined for this specific bucket then
     # get the default value
 
     if ( !defined( $result ) ) {
-        $self->{db_get_bucket_parameter_default__}->execute(  # PROFILE BLOCK START
-            $self->{db_parameterid__}{$parameter} );          # PROFILE BLOCK STOP
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                $self->{db_get_bucket_parameter_default__},
+                $self->{db_parameterid__}{$parameter} );       # PROFILE BLOCK STOP
         $result = $self->{db_get_bucket_parameter_default__}->fetchrow_arrayref;
     }
 
@@ -3615,11 +3662,10 @@ sub create_user
 
     my $password_hash = md5_hex( $new_user . '__popfile__' . $password );
 
-    my $quoted_user = $self->db_()->quote( $new_user );
-    my $quoted_hash = $self->db_()->quote( $password_hash );
-    $self->db_()->do(                                               # PROFILE BLOCK START
-            "insert into users ( name, password )
-                         values ( $quoted_user, $quoted_hash );" ); # PROFILE BLOCK STOP
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'insert into users ( name, password )
+                         values ( ?, ? );',
+            $new_user, $password_hash )->finish;           # PROFILE BLOCK STOP
 
     my $id = $self->get_user_id( $session, $new_user );
 
@@ -3643,9 +3689,9 @@ sub create_user
 
         # Clone user's parameters
 
-        my $h = $self->db_()->prepare(                                   # PROFILE BLOCK START
-                "select utid, val from user_params where userid = ?;" ); # PROFILE BLOCK STOP
-        $h->execute( $clid );
+        my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                'select utid, val from user_params where userid = ?;',
+                $clid );                                               # PROFILE BLOCK STOP
 
         my %add;
         while ( my $row = $h->fetchrow_arrayref ) {
@@ -3657,15 +3703,15 @@ sub create_user
              "insert into user_params ( userid, utid, val )
                                values ( ?, ?, ? );" );  # PROFILE BLOCK STOP
         foreach my $utid (keys %add) {
-            $h->execute( $id, $utid, $add{$utid} );
+            $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                    $h, $id, $utid, $add{$utid} );                 # PROFILE BLOCK STOP
         }
         $h->finish;
 
         # Clone buckets
 
-        $h = $self->db_()->prepare(                                  # PROFILE BLOCK START
-             "select name, pseudo from buckets where userid = ?;" ); # PROFILE BLOCK STOP
-        $h->execute( $clid );
+        $h = $self->database_()->validate_sql_prepare_and_execute(          # PROFILE BLOCK START
+             'select name, pseudo from buckets where userid = ?;', $clid ); # PROFILE BLOCK STOP
         my %buckets;
         while ( my $row = $h->fetchrow_arrayref ) {
             $buckets{$row->[0]} = $row->[1];
@@ -3673,21 +3719,22 @@ sub create_user
         $h->finish;
 
         $h = $self->db_()->prepare(                     # PROFILE BLOCK START
-             "insert into buckets ( userid, name, pseudo )
-                           values ( ?, ?, ? );" );      # PROFILE BLOCK STOP
+             'insert into buckets ( userid, name, pseudo )
+                           values ( ?, ?, ? );' );      # PROFILE BLOCK STOP
         foreach my $name (keys %buckets) {
-            $h->execute( $id, $name, $buckets{$name} );
+            $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                    $h, $id, $name, $buckets{$name} );             # PROFILE BLOCK STOP
         }
         $h->finish;
 
         # Fetch new bucket ids and cloned bucket ids
 
         $h = $self->db_()->prepare(                     # PROFILE BLOCK START
-            "select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2 
-                 where bucket1.userid = $id and
+            'select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2 
+                 where bucket1.userid = ? and
                        bucket1.name = bucket2.name and
-                       bucket2.userid = ?;" );          # PROFILE BLOCK STOP
-        $h->execute( $clid );
+                       bucket2.userid = ?;' );          # PROFILE BLOCK STOP
+        $self->database_()->validate_sql_prepare_and_execute( $h, $id, $clid );
 
         my %new_buckets;
         while ( my $row = $h->fetchrow_arrayref ) {
@@ -3697,12 +3744,12 @@ sub create_user
 
         # Clone bucket parameters
 
-        $h = $self->db_()->prepare(                             # PROFILE BLOCK START
+        $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
             "select bucketid, btid, val from buckets, bucket_params, bucket_template
                  where userid = ? and
                        buckets.id = bucket_params.bucketid and
-                       bucket_template.name not in ( 'fncount', 'fpcount','count' );" ); # PROFILE BLOCK STOP
-        $h->execute( $clid );
+                       bucket_template.name not in ( 'fncount', 'fpcount','count' );",
+             $clid );                                               # PROFILE BLOCK STOP
 
         my %bucket_params;
         while ( my $row = $h->fetchrow_arrayref ) {
@@ -3711,12 +3758,13 @@ sub create_user
         $h->finish;
 
         $h = $self->db_()->prepare(                      # PROFILE BLOCK START
-             "insert into bucket_params ( bucketid, btid, val)
-                                 values ( ?, ?, ? );" ); # PROFILE BLOCK STOP
+             'insert into bucket_params ( bucketid, btid, val)
+                                 values ( ?, ?, ? );' ); # PROFILE BLOCK STOP
         foreach my $bucketid ( keys %bucket_params ) {
             foreach my $btid ( keys %{$bucket_params{$bucketid}} ) {
                 my $val = $bucket_params{$bucketid}{$btid};
-                $h->execute( $bucketid, $btid, $val );
+                $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                        $h, $bucketid, $btid, $val );                  # PROFILE BLOCK STOP
             }
         }
         $h->finish;
@@ -3724,11 +3772,10 @@ sub create_user
         # Clone magnets (optional)
 
         if ( $copy_magnets ) {
-            $h = $self->db_()->prepare(                 # PROFILE BLOCK START
-                "select magnets.bucketid, magnets.mtid, magnets.val from magnets, buckets
+            $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                'select magnets.bucketid, magnets.mtid, magnets.val from magnets, buckets
                         where magnets.bucketid = buckets.id and
-                              buckets.userid = ?;" );   # PROFILE BLOCK STOP
-            $h->execute( $clid );
+                              buckets.userid = ?;', $clid );            # PROFILE BLOCK STOP
 
             my %magnets;
             while ( my $row = $h->fetchrow_arrayref ) {
@@ -3737,12 +3784,13 @@ sub create_user
             $h->finish;
 
             $h = $self->db_()->prepare(                # PROFILE BLOCK START
-                 "insert into magnets ( bucketid, mtid, val )
-                               values ( ?, ?, ? );" ); # PROFILE BLOCK STOP
+                 'insert into magnets ( bucketid, mtid, val )
+                               values ( ?, ?, ? );' ); # PROFILE BLOCK STOP
             foreach my $bucketid ( keys %magnets ) {
                 foreach my $mtid ( keys %{$magnets{$bucketid}} ) {
                     my $val = $magnets{$bucketid}{$mtid};
-                    $h->execute( $bucketid, $mtid, $val );
+                    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                            $h, $bucketid, $mtid, $val );                  # PROFILE BLOCK STOP
                 }
             }
             $h->finish;
@@ -3751,11 +3799,10 @@ sub create_user
         # Clone corpus data (optional)
 
         if ( $copy_corpus ) {
-            $h = $self->db_()->prepare(                     # PROFILE BLOCK START
-                 "select matrix.bucketid, matrix.wordid, matrix.times from matrix, buckets
+            $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                 'select matrix.bucketid, matrix.wordid, matrix.times from matrix, buckets
                          where matrix.bucketid = buckets.id and
-                               buckets.userid = ?;" );      # PROFILE BLOCK STOP
-            $h->execute( $clid );
+                               buckets.userid = ?;', $clid );           # PROFILE BLOCK STOP
 
             my %matrix;
             while ( my $row = $h->fetchrow_arrayref ) {
@@ -3764,12 +3811,13 @@ sub create_user
             $h->finish;
 
             $h = $self->db_()->prepare(                     # PROFILE BLOCK START
-                 "insert into matrix ( bucketid, wordid, times )
-                              values ( ?, ?, ? );" );       # PROFILE BLOCK STOP
+                 'insert into matrix ( bucketid, wordid, times )
+                              values ( ?, ?, ? );' );       # PROFILE BLOCK STOP
             foreach my $bucketid ( keys %matrix ) {
                 foreach my $wordid ( keys %{$matrix{$bucketid}} ) {
                     my $times = $matrix{$bucketid}{$wordid};
-                    $h->execute( $bucketid, $wordid, $times );
+                    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                            $h, $bucketid, $wordid, $times );              # PROFILE BLOCK STOP
                 }
             }
             $h->finish;
@@ -3785,9 +3833,10 @@ sub create_user
         # If we are not cloning a user then they need at least the
         # default settings
 
-        $self->db_()->do(                                           # PROFILE BLOCK START
-                "insert into buckets ( name, pseudo, userid )
-                             values ( 'unclassified', 1, $id );" ); # PROFILE BLOCK STOP
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                'insert into buckets ( name, pseudo, userid )
+                              values ( ?, ?, ? );',
+                'unclassified', 1, $id )->finish;              # PROFILE BLOCK STOP
 
         # Copy the global language setting to the user's language setting
 
@@ -3865,9 +3914,9 @@ sub rename_user
             my $password = $self->generate_users_password();
 
             my $password_hash = md5_hex( $newname . '__popfile__' . $password );
-            my $h = $self->db_()->prepare( "update users set name = ?, password = ? where id = ?" );
-            $h->execute( $newname, $password_hash, $id );
-            $h->finish;
+            my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                    'update users set name = ?, password = ? where id = ?',
+                    $newname, $password_hash, $id )->finish;               # PROFILE BLOCK STOP
 
             return ( 0, $password );
         }
@@ -3910,8 +3959,8 @@ sub remove_user
     if ( defined( $id ) ) {
         my ( $val, $def ) = $self->get_user_parameter_from_id( $id, 'GLOBAL_can_admin' );
         if ( $val == 0 ) {
-            my $quoted_user = $self->db_()->quote( $user );
-            $self->db_()->do( "delete from users where name = $quoted_user;" );
+            $self->database_()->validate_sql_prepare_and_execute(         # PROFILE BLOCK START
+                    'delete from users where name = ?;', $user )->finish; # PROFILE BLOCK STOP
             return 0;
         } else {
             return 2;
@@ -4026,7 +4075,8 @@ sub validate_password
 
     my $hash = md5_hex( $user . '__popfile__' . $password );
 
-    $self->{db_get_userid__}->execute( $user, $hash );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_userid__}, $user, $hash );      # PROFILE BLOCK STOP
     my $result = $self->{db_get_userid__}->fetchrow_arrayref;
     if ( !defined( $result ) ) {
         return 0;
@@ -4097,8 +4147,9 @@ sub set_password_for_user
 
     my $hash = md5_hex( $user . '__popfile__' . $password );
 
-    my $quoted_hash = $self->db_()->quote( $hash );
-    $self->db_()->do( "update users set password = $quoted_hash where id = $userid;" );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'update users set password = ? where id = ?;',
+            $hash, $userid )->finish;                      # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -4126,7 +4177,8 @@ sub get_user_list
     }
 
     my %users;
-    $self->{db_get_user_list__}->execute();
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_user_list__} );                 # PROFILE BLOCK STOP
     while ( my $row = $self->{db_get_user_list__}->fetchrow_arrayref ) {
         $users{$row->[0]} = $row->[1];
     }
@@ -4204,8 +4256,8 @@ sub get_user_id
         return undef;
     }
 
-    my $h = $self->db_()->prepare( "select id from users where name = ?;" );
-    $h->execute( $user );
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select id from users where name = ?;', $user );       # PROFILE BLOCK STOP
     if ( my $row = $h->fetchrow_arrayref ) {
         $h->finish;
         return $row->[0];
@@ -4263,7 +4315,10 @@ sub get_user_parameter_from_id
 
     # If there is a non-default value for this parameter then return it.
 
-    $self->{db_get_user_parameter__}->execute( $user, $self->{db_user_parameterid__}{$parameter} );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_user_parameter__},
+            $user,
+            $self->{db_user_parameterid__}{$parameter} );  # PROFILE BLOCK STOP
     my $result = $self->{db_get_user_parameter__}->fetchrow_arrayref;
 
     # If this parameter has not been defined for this specific user then
@@ -4271,8 +4326,9 @@ sub get_user_parameter_from_id
 
     my $default = 0;
     if ( !defined( $result ) ) {
-        $self->{db_get_user_parameter_default__}->execute(    # PROFILE BLOCK START
-                $self->{db_user_parameterid__}{$parameter} ); # PROFILE BLOCK STOP
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                $self->{db_get_user_parameter_default__},
+                $self->{db_user_parameterid__}{$parameter} );  # PROFILE BLOCK STOP
         $result = $self->{db_get_user_parameter_default__}->fetchrow_arrayref;
         $default = 1;
     }
@@ -4307,8 +4363,8 @@ sub get_user_name_from_id
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $h = $self->db_()->prepare( "select name from users where id = ?;" );
-    $h->execute( $id );
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select name from users where id = ?;', $id );         # PROFILE BLOCK STOP
     if ( my $row = $h->fetchrow_arrayref ) {
         $h->finish;
         return $row->[0];
@@ -4347,7 +4403,9 @@ sub set_bucket_parameter
 
     # Exactly one row should be affected by this statement
 
-    $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_set_bucket_parameter__},
+            $bucketid, $btid, $value );                    # PROFILE BLOCK STOP
 
     if ( defined( $self->{db_parameters__}{$userid}{$bucket}{$parameter} ) ) {
         $self->{db_parameters__}{$userid}{$bucket}{$parameter} = $value;
@@ -4386,14 +4444,19 @@ sub set_user_parameter_from_id
 
     my $default = 0;
 
-    $self->{db_get_user_parameter_default__}->execute( $utid );
+    $self->database_()->validate_sql_prepare_and_execute(      # PROFILE BLOCK START
+            $self->{db_get_user_parameter_default__}, $utid ); # PROFILE BLOCK STOP
     my $result = $self->{db_get_user_parameter_default__}->fetchrow_arrayref;
 
     if ( $result->[0] eq $value ) {
         $default = 1;
-        $self->db_()->do( "delete from user_params where userid = $user and utid = $utid;" );
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                'delete from user_params where userid = ? and utid = ?;',
+                $user, $utid )->finish;                        # PROFILE BLOCK STOP
     } else {
-        $self->{db_set_user_parameter__}->execute( $user, $utid, $value );
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                $self->{db_set_user_parameter__},
+                $user, $utid, $value );                        # PROFILE BLOCK STOP
     }
 
     if ( exists( $self->{cached_user_parameters__}{$user}{$parameter} ) ) {
@@ -4494,11 +4557,10 @@ sub create_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $bucket = $self->db_()->quote( $bucket );
-
-    $self->db_()->do(                                   # PROFILE BLOCK START
-        "insert into buckets ( name, pseudo, userid )
-                values ( $bucket, 0, $userid );" );     # PROFILE BLOCK STOP
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+        'insert into buckets ( name, pseudo, userid )
+                      values ( ?, ?, ? );',
+        $bucket, 0, $userid )->finish;                     # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 
     return 1;
@@ -4527,12 +4589,12 @@ sub delete_bucket
         return 0;
     }
 
-    my $quoted_bucket = $self->db_()->quote( $bucket );
-    $self->db_()->do(                                   # PROFILE BLOCK START
-        "delete from buckets where 
-             buckets.userid = $userid and 
-             buckets.name = $quoted_bucket and 
-             buckets.pseudo = 0;" );                    # PROFILE BLOCK STOP
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+        'delete from buckets where 
+             buckets.userid = ? and 
+             buckets.name = ? and 
+             buckets.pseudo = 0;',
+         $userid, $bucket )->finish;                       # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 
     return 1;
@@ -4568,12 +4630,13 @@ sub rename_bucket
         return 0;
     }
 
-    my $id = $self->db_()->quote( $self->{db_bucketid__}{$userid}{$old_bucket}{id} );
-    $new_bucket = $self->db_()->quote( $new_bucket );
+    my $id = $self->{db_bucketid__}{$userid}{$old_bucket}{id};
 
     $self->log_( 1, "Rename bucket $old_bucket to $new_bucket" );
 
-    my $result = $self->db_()->do( "update buckets set name = $new_bucket where id = $id;" );
+    my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'update buckets set name = ? where id = ?;',
+            $new_bucket, $id )->finish;                                 # PROFILE BLOCK STOP
 
     if ( !defined( $result ) || ( $result == -1 ) ) {
         return 0;
@@ -4689,7 +4752,8 @@ sub get_buckets_with_magnets
 
     my @result;
 
-    $self->{db_get_buckets_with_magnets__}->execute( $userid );
+    $self->database_()->validate_sql_prepare_and_execute(      # PROFILE BLOCK START
+            $self->{db_get_buckets_with_magnets__}, $userid ); # PROFILE BLOCK STOP
     while ( my $row = $self->{db_get_buckets_with_magnets__}->fetchrow_arrayref ) {
         push @result, ($row->[0]);
     }
@@ -4717,15 +4781,14 @@ sub get_magnet_types_in_bucket
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->db_()->prepare(                      # PROFILE BLOCK START
-        "select magnet_types.mtype from magnet_types, magnets, buckets
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+        'select magnet_types.mtype from magnet_types, magnets, buckets
              where magnet_types.id = magnets.mtid and
                    magnets.bucketid = buckets.id and
                    buckets.id = ?
                    group by magnet_types.mtype
-                   order by magnet_types.mtype;" );     # PROFILE BLOCK STOP
+                   order by magnet_types.mtype;', $bucketid );     # PROFILE BLOCK STOP
 
-    $h->execute( $bucketid );
     while ( my $row = $h->fetchrow_arrayref ) {
         push @result, ($row->[0]);
     }
@@ -4753,7 +4816,9 @@ sub clear_bucket
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
-    $self->db_()->do( "delete from matrix where matrix.bucketid = $bucketid;" );
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'delete from matrix where matrix.bucketid = ?;',
+            $bucketid )->finish;                           # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 }
 
@@ -4775,7 +4840,9 @@ sub clear_magnets
 
     for my $bucket (keys %{$self->{db_bucketid__}{$userid}}) {
         my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-        $self->db_()->do( "delete from magnets where magnets.bucketid = $bucketid" );
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                'delete from magnets where magnets.bucketid = ?',
+                $bucketid )->finish;                           # PROFILE BLOCK STOP
     }
 }
 
@@ -4800,14 +4867,14 @@ sub get_magnets
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->db_()->prepare(                                  # PROFILE BLOCK START
-        "select magnets.val from magnets, magnet_types
-             where magnets.bucketid = $bucketid and
-                   magnets.id != 0 and
-                   magnet_types.id = magnets.mtid and
-                   magnet_types.mtype = ? order by magnets.val;" ); # PROFILE BLOCK STOP
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select magnets.val from magnets, magnet_types
+                 where magnets.bucketid = ? and
+                       magnets.id != 0 and
+                       magnet_types.id = magnets.mtid and
+                       magnet_types.mtype = ? order by magnets.val;',
+            $bucketid, $type );                                    # PROFILE BLOCK STOP
 
-    $h->execute( $type );
     while ( my $row = $h->fetchrow_arrayref ) {
         push @result, ($row->[0]);
     }
@@ -4836,17 +4903,19 @@ sub create_magnet
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->db_()->selectrow_arrayref(      # PROFILE BLOCK START
-        "select magnet_types.id from magnet_types
-             where magnet_types.mtype = '$type';" );    # PROFILE BLOCK STOP
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select magnet_types.id from magnet_types
+                 where magnet_types.mtype = ?;',
+            $type );                                               # PROFILE BLOCK STOP
+    my $result = $h->fetchrow_arrayref;
+    $h->finish;
 
     my $mtid = $result->[0];
 
-    $text = $self->db_()->quote( $text );
-
-    $self->db_()->do(                                       # PROFILE BLOCK START
-            "insert into magnets ( bucketid, mtid, val )
-                    values ( $bucketid, $mtid, $text );" ); # PROFILE BLOCK STOP
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'insert into magnets ( bucketid, mtid, val )
+                          values (        ?,    ?,   ? );',
+            $bucketid, $mtid, $text )->finish;             # PROFILE BLOCK STOP
 }
 
 #----------------------------------------------------------------------------
@@ -4867,11 +4936,10 @@ sub get_magnet_types
 
     my %result;
 
-    my $h = $self->db_()->prepare(                        # PROFILE BLOCK START
-            "select magnet_types.mtype, magnet_types.header
-                    from magnet_types order by mtype;" ); # PROFILE BLOCK STOP
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select magnet_types.mtype, magnet_types.header
+                    from magnet_types order by mtype;' );          # PROFILE BLOCK STOP
 
-    $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
         $result{$row->[0]} = $row->[1];
     }
@@ -4900,18 +4968,20 @@ sub delete_magnet
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->db_()->selectrow_arrayref(      # PROFILE BLOCK START
-        "select magnet_types.id from magnet_types
-             where magnet_types.mtype = '$type';" );    # PROFILE BLOCK STOP
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select magnet_types.id from magnet_types
+                 where magnet_types.mtype = ?;', $type );          # PROFILE BLOCK STOP
+    my $result = $h->fetchrow_arrayref;
+    $h->finish;
 
     my $mtid = $result->[0];
-    $text = $self->db_()->quote( $text );
 
-    $self->db_()->do(                                   # PROFILE BLOCK START
-            "delete from magnets
-                    where magnets.bucketid = $bucketid and
-                          magnets.mtid = $mtid and
-                          magnets.val  = $text;" );     # PROFILE BLOCK STOP
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'delete from magnets
+                    where magnets.bucketid = ? and
+                          magnets.mtid = ? and
+                          magnets.val  = ?;',
+            $bucketid, $mtid, $text )->finish;             # PROFILE BLOCK STOP
 }
 
 #----------------------------------------------------------------------------
@@ -4931,11 +5001,11 @@ sub get_magnet_header_and_value
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $m = $self->db_()->prepare(                                           # PROFILE BLOCK START
-        "select magnet_types.header, magnets.val from magnet_types, magnets
-                where magnet_types.id = magnets.mtid and magnets.id = ?;" ); # PROFILE BLOCK STOP
+    my $m = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+        'select magnet_types.header, magnets.val from magnet_types, magnets
+                where magnet_types.id = magnets.mtid and magnets.id = ?;',
+        $magnetid);                                                # PROFILE BLOCK STOP
 
-    $m->execute( $magnetid );
     my $result = $m->fetchrow_arrayref;
     $m->finish;
 
@@ -4984,11 +5054,12 @@ sub magnet_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $result = $self->db_()->selectrow_arrayref(      # PROFILE BLOCK START
-        "select count(*) from magnets, buckets
-             where buckets.userid = $userid and
+    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+        'select count(*) from magnets, buckets
+             where buckets.userid = ? and
                    magnets.id != 0 and
-                   magnets.bucketid = buckets.id;" );   # PROFILE BLOCK STOP
+                   magnets.bucketid = buckets.id;', $userid );     # PROFILE BLOCK STOP
+    my $result = $h->fetchrow_arrayref;
 
     if ( defined( $result ) ) {
         return $result->[0];
