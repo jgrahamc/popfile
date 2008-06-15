@@ -78,7 +78,7 @@ Configuration_Error2                    Webgränssnittets post måste vara ett tal
 Configuration_Error3                    POP3 porten måste vara ett tal mellan 1 och 65535
 Configuration_Error4                    Sidans storlek måste vara ett tal mellan 1 och 1000
 Configuration_Error5                    Antal dagar i 'histora' måste vara ett tal mellan 1 och 366
-Configuration_Error6                    TCP timeout måste vara ett tal mellan 10 och 300
+Configuration_Error6                    TCP timeout måste vara ett tal mellan 10 och 1800
 Configuration_POP3Port                  POP3 port
 Configuration_POP3Update                Uppdaterade porten till %s; denna ändring kommer inte att gälla förrän servern är omstartad.
 Configuration_Separator                 Avskiljare

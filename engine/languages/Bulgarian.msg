@@ -80,7 +80,7 @@ Configuration_Error2                    Портът за потребителския интерфейс трябв
 Configuration_Error3                    Работният порт за POP3 трябва да бъде число между 1 и 65535
 Configuration_Error4                    Размерът на страницата трябва да бъде число между 1 и 1000
 Configuration_Error5                    Броят дни в хрониката трябва да бъде число между 1 и 366
-Configuration_Error6                    TCP таймаутът трябва да бъде число между 10 и 300
+Configuration_Error6                    TCP таймаутът трябва да бъде число между 10 и 1800
 Configuration_POP3Port                  Работен порт за POP3
 Configuration_POP3Update                Работният порт е променен на %s; тази промяна ще се отрази при следващото стартиране на POPFile.
 Configuration_Separator                 Разделител

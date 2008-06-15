@@ -80,7 +80,7 @@ Configuration_Error2                    Kontrolcenterets port skal være et tal m
 Configuration_Error3                    POP3-porten skal være et tal mellem 1 og 65535
 Configuration_Error4                    Sidens størelse skal være mellem 1 og 1000
 Configuration_Error5                    Antal dage i historikken skal være et tal mellem 1 og 366
-Configuration_Error6                    TCP-timeouten skal være et tal mellem 10 og 300
+Configuration_Error6                    TCP-timeouten skal være et tal mellem 10 og 1800
 Configuration_Error7                    XML-RPC-porten skal være et tal mellem 1 og 65535
 Configuration_POP3Port                  POP3-port
 Configuration_POP3Update                Opdaterede POP3-porten til %s. Denne ændring vil ikke træde i kraft før POPFile er genstartet

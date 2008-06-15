@@ -116,7 +116,7 @@ Configuration_Error2                    La porta per l'interfaccia utente deve e
 Configuration_Error3                    La porta per il POP3 deve essere un numero compreso tra 1 e 65535
 Configuration_Error4                    La dimensione della pagina deve essere un numero compreso tra 1 e 1000
 Configuration_Error5                    Il numero di giorni nello storico deve essere un numero tra 1 e 366
-Configuration_Error6                    Il timeout TCP deve essere un numero tra 10 e 300
+Configuration_Error6                    Il timeout TCP deve essere un numero tra 10 e 1800
 Configuration_Error7                    La porta per l'XML-RPC deve essere un numero compreso tra 1 e 65535
 Configuration_Error8                    La porta proxy SOCKS V deve essere un numero compreso tra 1 e 65535
 Configuration_POP3Port                  Porta POP3

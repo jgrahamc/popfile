@@ -120,7 +120,7 @@ Configuration_Error2                    The user interface port must be a number
 Configuration_Error3                    The POP3 listen port must be a number between 1 and 65535
 Configuration_Error4                    The page size must be a number between 1 and 1000
 Configuration_Error5                    The number of days in the history must be a number between 1 and 366
-Configuration_Error6                    The TCP timeout must be a number between 10 and 300
+Configuration_Error6                    The TCP timeout must be a number between 10 and 1800
 Configuration_Error7                    The XML RPC listen port must be a number between 1 and 65535
 Configuration_Error8                    The SOCKS V proxy port must be a number between 1 and 65535
 Configuration_POP3Port                  POP3 listen port

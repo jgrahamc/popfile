@@ -111,7 +111,7 @@ Configuration_Error2                    Le port de l'interface utilisateur doit 
 Configuration_Error3                    Le port d'écoute POP3 doit être un nombre compris entre 1 et 65535
 Configuration_Error4                    La taille de page doit être un nombre compris entre 1 et 1000
 Configuration_Error5                    Le nombre de jours d'historique doit être un nombre compris entre 1 et 366
-Configuration_Error6                    Le délai d'expiration TCP doit être un nombre compris entre 10 et 300
+Configuration_Error6                    Le délai d'expiration TCP doit être un nombre compris entre 10 et 1800
 Configuration_Error7                    Le port d'écoute XML-RPC doit être un nombre compris entre 1 et 65535
 Configuration_Error8                    Le port du proxy SOCKS V doit être un nombre compris entre 1 et 65535
 Configuration_POP3Port                  Port d'écoute POP3

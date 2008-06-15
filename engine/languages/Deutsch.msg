@@ -124,7 +124,7 @@ Configuration_Error2                    Der Port f¸r das Kontrollzentrum muﬂ zwi
 Configuration_Error3                    Der POP3 Port muﬂ zwischen 1 und 65535 liegen.
 Configuration_Error4                    Die Seitengrˆﬂe muﬂ zwischen 1 und 1000 liegen.
 Configuration_Error5                    Die Anzahl der Tage im Verlauf muﬂ zwischen 1 und 366 liegen.
-Configuration_Error6                    Der TCP Timeout muﬂ zwischen 10 und 300 liegen.
+Configuration_Error6                    Der TCP Timeout muﬂ zwischen 10 und 1800 liegen.
 Configuration_Error7                    Der XML-RPC Port muﬂ zwischen 1 und 65535 liegen.
 Configuration_Error8                    Der SOCKS V Proxy Port muﬂ zwischen 1 und 65535 liegen.
 Configuration_POP3Port                  POP3 Port

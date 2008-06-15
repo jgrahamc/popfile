@@ -90,7 +90,7 @@ Configuration_Error2                    Numer portu musi siê mie¶ciæ miêdzy 1 a 
 Configuration_Error3                    Port POP3 musi siê zawieraæ miêdzy 1 a 65535
 Configuration_Error4                    Rozmiar strony musi siê zawieraæ miêdzy 1 a 1000
 Configuration_Error5                    Liczba dni historii musi siê zawieraæ miêdzy 1 a 366
-Configuration_Error6                    TCP timeout musi byæ miêdzy 10 a 300
+Configuration_Error6                    TCP timeout musi byæ miêdzy 10 a 1800
 Configuration_Error7                    Port XML RPC musi byæ miêdzy 1 i 65535
 Configuration_POP3Port                  Port POP3
 Configuration_POP3Update                Zmieniono port POP3 na %s; ta zmiana zadzia³a dopiero po restarcie POPFile'a.

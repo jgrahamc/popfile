@@ -117,7 +117,7 @@ Configuration_Error2                    使用者介面的連接埠一定要介於 1 和 65535 
 Configuration_Error3                    POP3 聆聽連接埠一定要介於 1 和 65535 之間
 Configuration_Error4                    頁面大小一定要介於 1 和 1000 之間
 Configuration_Error5                    歷史裏要保留的日數一定要介於 1 和 366 之間
-Configuration_Error6                    TCP 逾時值一定要介於 10 和 300 之間
+Configuration_Error6                    TCP 逾時值一定要介於 10 和 1800 之間
 Configuration_Error7                    XML RPC 聆聽連接埠一定要介於 1 和 65535 之間
 Configuration_Error8                    SOCKS V 代理伺服器連接埠一定要介於 1 和 65535 之間
 Configuration_POP3Port                  POP3 聆聽連接埠

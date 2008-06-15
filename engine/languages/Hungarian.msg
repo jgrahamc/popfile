@@ -80,7 +80,7 @@ Configuration_Error2                    A felhasználói interfész port egy szám k
 Configuration_Error3                    A POP3 port egy szám kell hogy legyen 1 és 65535 között.
 Configuration_Error4                    A lapszám egy szám kell hogy legyen 1 és 1000 között.
 Configuration_Error5                    A history-ban lévõ napok száma egy szám kell hogy legyen 1 és 366 között.
-Configuration_Error6                    A TCP idõtúllépés egy szám kell hogy legyen 10 és 300 között.
+Configuration_Error6                    A TCP idõtúllépés egy szám kell hogy legyen 10 és 1800 között.
 Configuration_POP3Port                  POP3 figyelõ port
 Configuration_POP3Update                Az új port: %s; A változtatás életbeléptetéséhez újra kell inditanod POPFile-t.
 Configuration_Separator                 Elválasztó karakter

@@ -114,7 +114,7 @@ Configuration_Error2                    K&auml;ytt&ouml;liittym&auml;n porttinum
 Configuration_Error3                    POP3-kuunteluportin numero pit&auml;&auml; olla 1 ja 65535 v&auml;lilt&auml;
 Configuration_Error4                    Sivun koon pit&auml;&auml; olla 1 ja 1000 v&auml;lilt&auml;
 Configuration_Error5                    Historian p&auml;ivien m&auml;&auml;r&auml; pit&auml;&auml; olla 1 ja 366 v&auml;lilt&auml;
-Configuration_Error6                    TCP aikakatkaisun pit&auml;&auml; olla 10 ja 300 v&auml;lilt&auml;
+Configuration_Error6                    TCP aikakatkaisun pit&auml;&auml; olla 10 ja 1800 v&auml;lilt&auml;
 Configuration_Error7                    XML RPC:n kuunteluportti pit&auml;&auml; olla 1 ja 65536 v&auml;lilt&auml;.
 Configuration_Error8                    SOCKS V -v&auml;lityspalvelimen porttinumeron pit&auml;&auml; olla 1 ja 65535 v&auml;lilt&auml;.
 Configuration_POP3Port                  POP3-kuunteluportti

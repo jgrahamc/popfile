@@ -88,7 +88,7 @@ Configuration_Error2                    Το  user interface port πρέπει να είναι 
 Configuration_Error3                    Το POP3 listen port πρέπει να είναι μεταξύ 1 και 65535
 Configuration_Error4                    Το μέγεθος σελίδας πρέπει να είναι μεταξύ 1 και 1000
 Configuration_Error5                    Ο αριθμός ημερών για τήρηση ιστορικού πρέπει να είναι μεταξύ 1 και 366
-Configuration_Error6                    Η παράμετρος TCP timeout πρέπει να είναι μεταξύ 10 και 300
+Configuration_Error6                    Η παράμετρος TCP timeout πρέπει να είναι μεταξύ 10 και 1800
 Configuration_Error7                    Η παράμετρος XML RPC listen port πρέπει να είναι μεταξύ 1 και 65535
 Configuration_POP3Port                  POP3 listen port
 Configuration_POP3Update                Η παράμετρος POP3 port άλλαξε σε %s; Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile

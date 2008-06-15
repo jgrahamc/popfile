@@ -95,7 +95,7 @@ Configuration_Error2                    Порт ╕нтерфейсу користувача повинен бути
 Configuration_Error3                    Порт POP3 повинен бути числом в╕д 1 до 65535
 Configuration_Error4                    Розм╕р стор╕нки повинен бути числом в╕д 1 до 1000
 Configuration_Error5                    К╕льк╕сть дн╕в в ╕стор╕╖ повинна бути числом в╕д 1 до 366
-Configuration_Error6                    Обмеження по затримц╕ TCP повинно бути числом в╕д 10 до 300
+Configuration_Error6                    Обмеження по затримц╕ TCP повинно бути числом в╕д 10 до 1800
 Configuration_Error7                    Порт XML-RPC повинен бути числом в╕д 1 до 65535
 Configuration_POP3Port                  Порт POP3
 Configuration_POP3Update                Зм╕нено POP3 порт на %s; ця зм╕на не буде д╕йсною поки ви не рестарту╓те POPFile

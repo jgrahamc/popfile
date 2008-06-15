@@ -89,7 +89,7 @@ Configuration_Error2                    Номер порта для web-интерфейса должен бы
 Configuration_Error3                    Номер порта POP3 должен быть числом от 1 до 65535
 Configuration_Error4                    Размер страницы должен быть числом от 1 до 1000
 Configuration_Error5                    Число дней истории должно быть числом от 1 до 366
-Configuration_Error6                    Значение таймаута TCP должно быть числом от 10 до 300
+Configuration_Error6                    Значение таймаута TCP должно быть числом от 10 до 1800
 Configuration_POP3Port                  Слушать POP3 порт
 Configuration_POP3Update                Номер порта изменён на %s; изменения вступят в силу после перезапуска POPFile
 Configuration_Separator                 Разделитель

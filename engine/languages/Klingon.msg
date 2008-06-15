@@ -91,7 +91,7 @@ Configuration_Error2                	SeHlaw cher Daq lu' mI' joj 1 'ej 65535
 Configuration_Error3                	POP3 'Ij Daq lu' mI' joj 1 'ej 65535
 Configuration_Error4                	nav ngI' lu' mI' joj 1 'ej 1000
 Configuration_Error5                	mI' Hu' 'el leS lu' mI' joj 1 'ej 366
-Configuration_Error6                	TCP poH luj lu' mI' joj 10 'ej 300
+Configuration_Error6                	TCP poH luj lu' mI' joj 10 'ej 1800
 Configuration_POP3Port              	POP3 'Ij Daq
 Configuration_POP3Update            	chu' POP3 Daq %s; choH luj qaS ghorgh SoH juS tagh POP-teywI'
 Configuration_Separator             	mob I

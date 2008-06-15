@@ -118,7 +118,7 @@ Configuration_Error2                    使用者接口的连接埠一定要介于 1 和 65535 
 Configuration_Error3                    POP3 聆听连接埠一定要介于 1 和 65535 之间
 Configuration_Error4                    页面大小一定要介于 1 和 1000 之间
 Configuration_Error5                    历史里要保留的日数一定要介于 1 和 366 之间
-Configuration_Error6                    TCP 逾时值一定要介于 10 和 300 之间
+Configuration_Error6                    TCP 逾时值一定要介于 10 和 1800 之间
 Configuration_Error7                    XML RPC 聆听连接埠一定要介于 1 和 65535 之间
 Configuration_Error8                    SOCKS V 代理服务器连接埠一定要介于 1 和 65535 之间
 Configuration_POP3Port                  POP3 聆听连接埠

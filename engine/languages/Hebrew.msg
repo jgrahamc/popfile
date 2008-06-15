@@ -89,7 +89,7 @@ Configuration_Error2                    הגדרת השער של ממשק המש
 Configuration_Error3                    הגדרת השער של 'POP3' צריכה להיות מספר בין 1 ל 65535
 Configuration_Error4                    גודל העמוד צריך להיות מספר בין 1 ל 1000 
 Configuration_Error5                    מספר הימים שהתוכנה תשמור היסטוריה צריך להיות בין 1 ל 366
-Configuration_Error6                    מגבלת הזמן להתחברות TCP צריכה להיות בין 10 ל 300 מילישניות
+Configuration_Error6                    מגבלת הזמן להתחברות TCP צריכה להיות בין 10 ל 1800 מילישניות
 Configuration_POP3Port                  POP3 שער ההאזנה לפרוטוקול 
 Configuration_POP3Update                הגדרת השער שונתה ל %s. השינוי יכנס לתוקף  רק אחרי איתחול POPFile מחדש
 Configuration_UI                        שער החיבור של ממשק המשתמש

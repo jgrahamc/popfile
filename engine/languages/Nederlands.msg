@@ -80,7 +80,7 @@ Configuration_Error2                    De gebruikers interface poort moet een g
 Configuration_Error3                    De POP3 luisterpoort moet een getal zijn tussen 1 en 65535
 Configuration_Error4                    De pagina grootte moet een getal zijn tussen 1 en 1000
 Configuration_Error5                    Het aantal dagen in de geschiedenis moet een getal zijn tussen 1 en 366
-Configuration_Error6                    De TCP timeout moet een getal zijn tussen 10 en 300
+Configuration_Error6                    De TCP timeout moet een getal zijn tussen 10 en 1800
 Configuration_POP3Port                  POP3 luisterpoort
 Configuration_POP3Update                Poort veranderd naar %s; deze verandering krijgt effect zodra je POPFile herstart hebt
 Configuration_Separator                 Scheidingsteken

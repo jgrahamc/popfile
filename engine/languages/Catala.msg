@@ -116,7 +116,7 @@ Configuration_Error2                    El port de l'interfície d'usuari ha de s
 Configuration_Error3                    El port que rep les connexions POP3 ha de ser un número entre 1 i 65535
 Configuration_Error4                    El tamany de pàgina ha de ser un número entre 1 i 1000
 Configuration_Error5                    El nombre de dies a l'històric ha de ser un número entre 1 i 366
-Configuration_Error6                    El temps d'espera de TCP ha de ser un número entre 10 i 300
+Configuration_Error6                    El temps d'espera de TCP ha de ser un número entre 10 i 1800
 Configuration_Error7                    El port que rep les connexions XML RPC ha de ser un número entre 1 i 65535
 Configuration_Error8                    El port intermedi SOCKS V ha de ser un número entre 1 i 65535
 Configuration_POP3Port                  Port que rep les connexions POP3

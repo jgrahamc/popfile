@@ -87,7 +87,7 @@ Configuration_Error2                    Port uživatelského rozhraní musí být èís
 Configuration_Error3                    Port protokolu POP3 musí být èíslo mezi 1 a 65535
 Configuration_Error4                    Velikost stránky musí být èíslo mezi 1 a 1000
 Configuration_Error5                    Poèet dnù platnosti historie musí být èíslo mezi 1 a 366
-Configuration_Error6                    Doba èekání TCP musí být èíslo mezi 10 a 300
+Configuration_Error6                    Doba èekání TCP musí být èíslo mezi 10 a 1800
 Configuration_Error7                    Port pro XML-RPC musí být èíslo mezi 1 a 65535
 Configuration_POP3Port                  Port protokolu POP3
 Configuration_POP3Update                Nový port POP3 je %s; tato zmìna se projeví až po restartu POPFile

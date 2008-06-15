@@ -1417,7 +1417,7 @@ sub administration_page
         if ( defined($self->{form_}{timeout}) ) {
             if ( ( $self->{form_}{timeout} =~ /^\d+$/ ) &&  # PROFILE BLOCK START
                  ( $self->{form_}{timeout} >= 10 ) &&
-                 ( $self->{form_}{timeout} <= 300 ) ) {     # PROFILE BLOCK STOP
+                 ( $self->{form_}{timeout} <= 1800 ) ) {     # PROFILE BLOCK STOP
                 if ( $self->global_config_( 'timeout' ) ne $self->{form_}{timeout} ) {
                     $self->global_config_( 'timeout', $self->{form_}{timeout} );
                     $self->status_message__(                                 # PROFILE BLOCK START

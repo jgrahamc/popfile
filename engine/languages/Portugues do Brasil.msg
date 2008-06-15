@@ -125,7 +125,7 @@ Configuration_Error2                    O porta da interface de usuário deve ser
 Configuration_Error3                    A porta de escuta POP3 deve ser um número entre 1 e 65535
 Configuration_Error4                    O tamanho da página deve ser um número entre 1 e 1000
 Configuration_Error5                    O número de dias no histórico deve ser um número entre 1 e 366
-Configuration_Error6                    O tempo limite TCP deve ser um número entre 10 e 300
+Configuration_Error6                    O tempo limite TCP deve ser um número entre 10 e 1800
 Configuration_Error7                    A porta de escuta XML-RPC deve ser um número entre 1 e 65535
 Configuration_Error8                    A porta do proxy SOCKS V deve ser um número entre 1 e 65535
 Configuration_POP3Port                  Porta de escuta POP3

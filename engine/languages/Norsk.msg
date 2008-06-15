@@ -80,7 +80,7 @@ Configuration_Error2                    Brukergrensesnittets port skal være et n
 Configuration_Error3                    POP3-porten skal være et nummer mellom 1 og 65535
 Configuration_Error4                    Sidens størrelse skal være mellom 1 og 1000
 Configuration_Error5                    Antall dager i loggen skal være et tall mellom 1 og 366
-Configuration_Error6                    TCP-tidsavbrudd skal være et tall mellom 10 og 300
+Configuration_Error6                    TCP-tidsavbrudd skal være et tall mellom 10 og 1800
 Configuration_POP3Port                  POP3-porten
 Configuration_POP3Update                Oppdaterte porten til %s; Denne endringen vil ikke tre i kraft før POPFile er startet på nytt
 Configuration_Separator                 Skilletegn

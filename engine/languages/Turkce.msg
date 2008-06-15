@@ -117,7 +117,7 @@ Configuration_Error2                    Kullanýcý arayüzü portu 1 ile 65535 aras
 Configuration_Error3                    POP3 dinleme portu 1 ile 65535 arasýnda bir sayý olmalýdýr
 Configuration_Error4                    Sayfa boyutu 1 ile 1000 arasýnda bir sayý olmalýdýr
 Configuration_Error5                    Geçmiþteki gün sayýsý 1 ile 366 arasýnda bir sayý olmalýdýr
-Configuration_Error6                    TCP zaman aþýmý 10 ile 300 arasýnda bir sayý olmalýdýr
+Configuration_Error6                    TCP zaman aþýmý 10 ile 1800 arasýnda bir sayý olmalýdýr
 Configuration_Error7                    XML RPC dinleme portu 1 ile 65535 arasýnda bir numara olmalýdýr
 Configuration_Error8                    SOCKS V proxy port sayýsý 1 ve 65535 arasýnda bir sayý olmalýdýr
 Configuration_POP3Port                  POP3 dinleme portu

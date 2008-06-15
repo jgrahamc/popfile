@@ -88,7 +88,7 @@ Configuration_Error2                    사용자 인터페이스의 포트는 반드시 1부터 
 Configuration_Error3                    POP3 포트는 반드시 1부터 65535 사이의 숫자여야 합니다.
 Configuration_Error4                    페이지 크기는 반드시 1부터 1000 사이의 숫자여야 합니다.
 Configuration_Error5                    히스토리의 보존 기간은 반드시 1부터 366 사이의 숫자여야 합니다. 
-Configuration_Error6                    TCP 타임아웃은 반드시 10부터 300 사이의 숫자여야 합니다. The TCP timeout must be a number between 10 and 300
+Configuration_Error6                    TCP 타임아웃은 반드시 10부터 1800 사이의 숫자여야 합니다. The TCP timeout must be a number between 10 and 1800
 Configuration_Error7                    XML RPC 리슨 포트는 반드시 1부터 65535 사이의 숫자여야 합니다.
 Configuration_POP3Port                  POP3 포트
 Configuration_POP3Update                %s로 포트를 변경했습니다. 이것은 팝파일을 재시작하기 전까지는 적용되지 않습니다.

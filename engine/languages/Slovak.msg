@@ -81,7 +81,7 @@ Configuration_Error2                    Port uívate¾ského rozhrania musí by v 
 Configuration_Error3                    Port pre POP3 musí by v rozpätí èísel 1 a 65535
 Configuration_Error4                    Ve¾kos stránky musí by v rozpätí èísel 1 a 1000
 Configuration_Error5                    Poèet dní v histórii musí by v rozpätí èísel 1 a 366
-Configuration_Error6                    Hodnota èakania na TCP musí by v rozpätí èísel 10 a 300
+Configuration_Error6                    Hodnota èakania na TCP musí by v rozpätí èísel 10 a 1800
 Configuration_POP3Port                  Port pre POP3
 Configuration_POP3Update                Port zmenenı na %s; this change will not take affect until you restart POPFile
 Configuration_Separator                 Znak oddelovaèa

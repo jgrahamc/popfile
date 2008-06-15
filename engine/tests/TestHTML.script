@@ -1579,7 +1579,7 @@ INPUTIS   timeout 61
 CONFIGIS  GLOBAL_timeout 61
 MATCH Updated connection timeout to 61
 SETSUBMIT timeout 0
-MATCH The TCP timeout must be a number between 10 and 300
+MATCH The TCP timeout must be a number between 10 and 1800
 INPUTIS   timeout 61
 
 # Check change session timeout

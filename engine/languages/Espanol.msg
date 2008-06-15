@@ -88,7 +88,7 @@ Configuration_Error2                    El puerto del GUI tiene que ser un nº en
 Configuration_Error3                    El puerto de escucha POP3 tiene que ser un nº entre 1 y 65535
 Configuration_Error4                    El tamaño de la página tiene que ser un nº entre 1 y 1000
 Configuration_Error5                    El nº de dias en el historial tiene que ser un nº entre 1 y 366
-Configuration_Error6                    La temporización TCP debe ser un nº entre 10 y 300
+Configuration_Error6                    La temporización TCP debe ser un nº entre 10 y 1800
 Configuration_Error7                    El puerto de escucha XML RPC listen debe ser un número entre 1 y 65535
 Configuration_POP3Port                  Puerto de escucha POP3
 Configuration_POP3Update                Puerto actualizado a %s; este cambio será efectivo al siguiente reinicio de POPFile
