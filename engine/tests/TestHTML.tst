@@ -31,10 +31,10 @@ if ( $^O eq 'MSWin32' && setlocale(LC_COLLATE) eq 'Japanese_Japan.932' ) {
 
 rmtree( 'corpus' );
 rec_cp( 'corpus.base', 'corpus' );
-rmtree( 'corpus/CVS' );
-rmtree( 'corpus/other/CVS' );
-rmtree( 'corpus/spam/CVS' );
-rmtree( 'corpus/personal/CVS' );
+rmtree( 'corpus/.svn' );
+rmtree( 'corpus/other/.svn' );
+rmtree( 'corpus/spam/.svn' );
+rmtree( 'corpus/personal/.svn' );
 rmtree( 'messages' );
 
 my @dbs = glob '__db.*';

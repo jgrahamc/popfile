@@ -24,7 +24,7 @@
 rmtree( 'messages' );
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/CVS' );
+rmtree( 'corpus/.svn' );
 rmtree( 'corpus/.svn' );
 
 unlink 'popfile.cfg';

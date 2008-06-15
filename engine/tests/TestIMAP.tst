@@ -839,7 +839,7 @@ sub start_popfile {
     rmtree( 'messages' );
     rmtree( 'corpus' );
     test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-    test_assert( rmtree( 'corpus/CVS' ) > 0 ) if -e 'corpus/CVS';
+    test_assert( rmtree( 'corpus/.svn' ) > 0 ) if -e 'corpus/.svn';
 
     unlink 'popfile.db';
     unlink 'stopwords';

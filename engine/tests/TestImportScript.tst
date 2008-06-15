@@ -31,7 +31,7 @@ rmtree( 'import' );
 mkdir( 'import' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
 test_assert( rec_cp( 'corpus.base', 'import/corpus' ) );
-rmtree( 'corpus/CVS' );
+rmtree( 'corpus/.svn' );
 unlink( 'popfile.db' );
 unlink( 'popfile.cfg' );
 

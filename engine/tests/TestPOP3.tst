@@ -42,7 +42,7 @@ my $eol = "$cr$lf";
 
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/CVS' );
+rmtree( 'corpus/.svn' );
 rmtree( 'messages' );
 
 use POSIX ":sys_wait_h";
