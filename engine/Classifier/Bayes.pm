@@ -788,7 +788,7 @@ sub db_prepare__
              'select id, name from users order by name;' );                              # PROFILE BLOCK STOP
 
     $self->{db_get_user_from_account__} = $self->db_()->prepare(                        # PROFILE BLOCK START
-             'select userid from accounts where account = ?' );                          # PROFILE BLOCK STOP
+             'select userid from accounts where account = ?;' );                         # PROFILE BLOCK STOP
 
     $self->{db_insert_word__} = $self->db_()->prepare(                                 # PROFILE BLOCK START
              'insert into words ( word )
@@ -3915,7 +3915,7 @@ sub rename_user
 
             my $password_hash = md5_hex( $newname . '__popfile__' . $password );
             my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-                    'update users set name = ?, password = ? where id = ?',
+                    'update users set name = ?, password = ? where id = ?;',
                     $newname, $password_hash, $id )->finish;               # PROFILE BLOCK STOP
 
             return ( 0, $password );
@@ -4493,7 +4493,7 @@ sub get_html_colored_message
     $self->{parser__}->{bayes__} = bless $self;
 
     my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START
-           $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
+           $self->global_config_( 'message_cutoff' ) );  # PROFILE BLOCK STOP
 
     $self->{parser__}->{color__} = '';
 
@@ -4526,9 +4526,9 @@ sub fast_get_html_colored_message
     $self->{parser__}->{color_userid__} = $userid;
     $self->{parser__}->{bayes__}        = bless $self;
 
-    my $result = $self->{parser__}->parse_file(            # PROFILE BLOCK START
+    my $result = $self->{parser__}->parse_file(          # PROFILE BLOCK START
             $file,
-            $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
+            $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
 
     $self->{parser__}->{color__} = '';
 
@@ -4676,7 +4676,7 @@ sub add_messages_to_bucket
 
     foreach my $file (@files) {
         $self->{parser__}->parse_file( $file,  # PROFILE BLOCK START
-            $self->global_config_( 'message_cutoff'   ),
+            $self->global_config_( 'message_cutoff' ),
             0 );  # PROFILE BLOCK STOP (Do not reset word list)
     }
 
@@ -4841,7 +4841,7 @@ sub clear_magnets
     for my $bucket (keys %{$self->{db_bucketid__}{$userid}}) {
         my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
         $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-                'delete from magnets where magnets.bucketid = ?',
+                'delete from magnets where magnets.bucketid = ?;',
                 $bucketid )->finish;                           # PROFILE BLOCK STOP
     }
 }
