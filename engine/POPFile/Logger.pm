@@ -145,7 +145,25 @@ sub start
         $self->log_( 0, "Failed to create directory " . $self->config_( 'logdir' ) );
     }
 
+    $self->debug( 0, '-----------------------' );
+    $self->debug( 0, 'POPFile ' . $self->version() . ' starting' );
+
     return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# stop
+#
+# Called to stop the logger module
+#
+#----------------------------------------------------------------------------
+sub stop
+{
+    my ( $self ) = @_;
+
+    $self->debug( 0, 'POPFile stopped' );
+    $self->debug( 0, '---------------' );
 }
 
 # ---------------------------------------------------------------------------
