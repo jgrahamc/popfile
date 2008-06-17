@@ -55,8 +55,10 @@ unlink( $l->debug_filename() );
 # Test that the last ten functionality works
 my @last_ten = $l->last_ten();
 
-test_assert_equal( $#last_ten, 0 );
-test_assert_equal( $last_ten[0], 'log empty' );
+test_assert_equal( $#last_ten, 1 );
+test_assert_regexp( $last_ten[0], "-----------------------\n" );
+my $version = $l->version();
+test_assert_regexp( $last_ten[1], "POPFile $version starting\n" );
 
 # Check that control character transformation works
 
@@ -64,16 +66,16 @@ $l->debug( 0, "\rtest1\t\n" );
 
 @last_ten = $l->last_ten();
 
-test_assert_equal( $#last_ten, 0 );
-test_assert_regexp( $last_ten[0], '\[0d\]test1\[09\]\[0a\]' );
+test_assert_equal( $#last_ten, 2 );
+test_assert_regexp( $last_ten[2], '\[0d\]test1\[09\]\[0a\]' );
 
 $l->debug( 0,  'test2' );
 
 @last_ten = $l->last_ten();
 
-test_assert_equal( $#last_ten, 1 );
-test_assert_regexp( $last_ten[0], '\[0d\]test1\[09\]\[0a\]' );
-test_assert_regexp( $last_ten[1], 'test2' );
+test_assert_equal( $#last_ten, 3 );
+test_assert_regexp( $last_ten[2], '\[0d\]test1\[09\]\[0a\]' );
+test_assert_regexp( $last_ten[3], 'test2' );
 
 # test size limiting on last ten, note the test
 # of log level here as well
