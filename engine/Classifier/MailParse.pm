@@ -569,6 +569,8 @@ sub add_line
     my ($self, $bigline, $encoded, $prefix) = @_;
     my $p = 0;
 
+    return if ( !defined( $bigline ) );
+
     print "add_line: [$bigline]\n" if $self->{debug__};
 
     # If the line is really long then split at every 1k and feed it to
@@ -1184,6 +1186,8 @@ sub add_url
     my $path;
     my $query;
     my $hash;
+
+    return undef if ( !defined( $url ) );
 
     # Strip the protocol part of a URL (e.g. http://)
 
@@ -2401,9 +2405,9 @@ sub parse_css_color
     $found = 0 if ($error);
 
     if ( $found &&                                    # PROFILE BLOCK START
-         defined($r) && ( 0 <= $r) && ($r <= 255) &&
-         defined($g) && ( 0 <= $g) && ($g <= 255) &&
-         defined($b) && ( 0 <= $b) && ($b <= 255) ) { # PROFILE BLOCK STOP
+         defined($r) && ( 0 <= $r ) && ( $r <= 255 ) &&
+         defined($g) && ( 0 <= $g ) && ( $g <= 255 ) &&
+         defined($b) && ( 0 <= $b ) && ( $b <= 255 ) ) { # PROFILE BLOCK STOP
         if (wantarray) {
             return ( $r, $g, $b );
         } else {
@@ -2600,6 +2604,7 @@ sub convert_encoding
 
         # Workaround for Encode::Unicode error bug.
         eval {
+            no warnings 'utf8';
             if (ref $enc) {
                 $string = Encode::encode($to, $enc->decode($string));
             } else {
