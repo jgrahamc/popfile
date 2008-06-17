@@ -868,7 +868,7 @@ sub update_tag
 
                 # Add a pseudo-word when CID source links are detected
 
-                $self->update_pseudoword( 'html', 'cidsrc' );
+                $self->update_pseudoword( 'html', 'cidsrc', $encoded, $original );
 
                 # TODO: I've seen virus messages try to use a CID:
                 # href
@@ -985,7 +985,7 @@ sub update_tag
 
         if ( ( $attribute =~ /^(bgcolor|back)$/i ) && ( $tag =~ /^(td|table|body|tr|th|font)$/i ) ) {
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
-            $self->update_pseudoword( 'html', "backcolor$value" );
+            $self->update_pseudoword( 'html', "backcolor$value", $encoded, $original );
             $self->{htmlbackcolor__} = map_color($self, $value);
             print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
 
