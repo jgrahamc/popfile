@@ -2102,10 +2102,16 @@ sub classify
                                        $self->global_config_( 'message_cutoff'   ) );   # PROFILE BLOCK STOP
     }
 
-    # Check to see if this email should be classified based on a magnet
     # Get the list of buckets
 
     my @buckets = $self->get_buckets( $session );
+
+    # If the user has not defined any buckets then we escape here
+    # return unclassified
+
+    return "unclassified" if ( $#buckets == -1 );
+
+    # Check to see if this email should be classified based on a magnet
 
     for my $bucket ($self->get_buckets_with_magnets( $session ))  {
         for my $type ($self->get_magnet_types_in_bucket( $session, $bucket )) {
@@ -2115,11 +2121,6 @@ sub classify
             }
         }
     }
-
-    # If the user has not defined any buckets then we escape here
-    # return unclassified
-
-    return "unclassified" if ( $#buckets == -1 );
 
     # The score hash will contain the likelihood that the given
     # message is in each bucket, the buckets are the keys for score
@@ -2143,6 +2144,11 @@ sub classify
     }
 
     @buckets = @ok_buckets;
+
+    # If the user does not have at least two buckets which contains
+    # some words then we escape here return unclassified
+
+    return "unclassified" if ( $#buckets == -1 );
 
     # For each word go through the buckets and calculate
     # P(word|bucket) and then calculate P(word|bucket) ^ word count
