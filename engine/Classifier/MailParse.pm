@@ -1735,16 +1735,17 @@ sub parse_line
             print ">>> $line" if $self->{debug__};
 
             # Decode quoted-printable
+
             if ( !$self->{in_headers__} && $self->{encoding__} =~ /quoted\-printable/i) {
-                if ( $self->{lang__} eq 'Nihongo') {
-                    if ( $line =~ s/=\r\n$// ) {
-                        # Encoded in multiple lines
-                        $self->{prev__} .= $line;
-                        next;
-                    } else {
-                        $line = $self->{prev__} . $line;
-                        $self->{prev__} = '';
-                    }
+                if ( $line =~ s/=\r\n$// ) {
+
+                    # Encoded in multiple lines
+
+                    $self->{prev__} .= $line;
+                    next;
+                } else {
+                    $line = $self->{prev__} . $line;
+                    $self->{prev__} = '';
                 }
                 $line = decode_qp( $line );
                 $line =~ s/\x00/NUL/g;
