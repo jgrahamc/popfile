@@ -3386,8 +3386,7 @@ sub history_page
 
     # Redirect somewhere safe if non-idempotent action has been taken
 
-    if ( defined( $self->{form_}{deletemessage}  ) ||  # PROFILE BLOCK START
-         defined( $self->{form_}{clearpage}      ) ||
+    if ( defined( $self->{form_}{clearpage}      ) ||  # PROFILE BLOCK START
          defined( $self->{form_}{undo}           ) ||
          defined( $self->{form_}{reclassify}     ) ) { # PROFILE BLOCK STOP
         return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','negate') ), $session );
