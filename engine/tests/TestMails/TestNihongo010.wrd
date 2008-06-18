@@ -1,13 +1,14 @@
-.jp 3
-beingmail 2
-bestmail 2
+.dk 2
+.jp 5
+beingmail.dyndns.dk 2
+bestmail.mydns.jp 2
 bigtrail777@yahoo.co.jp 3
 blat 1
 cbe 1
 charset:iso-2022-jp 2
 co.jp 3
 deleteform 2
-dyndns 2
+dyndns.dk 2
 filetime 1
 from:.jp 1
 from:bigtrail777@yahoo.co.jp 1
@@ -24,7 +25,7 @@ header:Subject 1
 header:To 1
 header:X-Mailer 1
 header:X-OriginalArrivalTime 1
-mydns 2
+mydns.jp 2
 scripts 2
 subject:しています 1
 subject:開業 1

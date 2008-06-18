@@ -1,6 +1,6 @@
 #ffffff 2
 .com 27
-.fi 4
+.fi 12
 10.10.20.81 2
 10.10.20.87 1
 127.0.0.1 1
@@ -68,10 +68,10 @@ html:td 14
 hydroderm 2
 images2.laih.com 4
 internet 1
-kyyhky 3
+kyyhky2.mbnet.fi 3
 laih.com 4
-mbnet 8
-mbnet.fi 4
+mail4.mbnet.fi 2
+mbnet.fi 12
 microsoft 1
 mx10.sheck-buy.com 6
 mx3.sheck-buy.com 9
@@ -80,7 +80,7 @@ partner2profit.com 1
 playa 1
 please 1
 postfix 2
-posti 2
+posti.mbnet.fi 2
 release 1
 sales@sheck-buy.com 1
 secure 1
@@ -105,7 +105,7 @@ unsubscribe 1
 unsubscribe@sheck-buy.com 1
 utc 1
 virus 1
-webmail 1
+webmail.mbnet.fi 1
 webmail0.mbnet.fi 3
 www.partner2profit.com 1
 www.sheck-buy.com 2

@@ -652,9 +652,46 @@ sub add_line
                 add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
             }
 
-            # Grab domain names
+            # Grab domain names (gTLD)
+            # http://en.wikipedia.org/wiki/List_of_Internet_top-level_domains
 
-            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro)([^[:alpha:]0-9\-_\.]|$)/$4/i )  {
+            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)
+                    (aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|
+                     mobi|museum|name|net|org|pro|tel|travel)
+                    ([^[:alpha:]0-9\-_\.]|$)/$4/ix )  {
+                 add_url($self, "$1$3", $encoded, '', '', $prefix);
+            }
+
+            # Grab country domain names (ccTLD)
+            # http://en.wikipedia.org/wiki/List_of_Internet_top-level_domains
+
+            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)
+                    (a[cdefgilmnoqrstuwxz]|
+                     b[abdefghijmnorstvwyz]|
+                     c[acdfghiklmnoruvxyz]|
+                     d[ejkmoz]|
+                     e[cegrstu]|
+                     f[ijkmor]|
+                     g[abdefghilmnpqrstuwy]|
+                     h[kmnrtu]|
+                     i[delmnoqrst]|
+                     j[emop]|
+                     k[eghimnprwyz]|
+                     l[abcikrstuvy]|
+                     m[acdeghklmnopqrstuvwxyz]|
+                     n[acefgilopruz]|
+                     om|
+                     p[aefghklmnrstwy]|
+                     qa|
+                     r[eosuw]|
+                     s[abcdeghijklmnorsvyz]|
+                     t[cdfghjklmnoprtvwz]|
+                     u[agksyz]|
+                     v[aceginu]|
+                     w[fs]|
+                     y[etu]|
+                     z[amw])
+                    ([^[:alpha:]0-9\-_\.]|$)/$4/ix )  {
                  add_url($self, "$1$3", $encoded, '', '', $prefix);
             }
 

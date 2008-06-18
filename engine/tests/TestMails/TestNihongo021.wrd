@@ -1,11 +1,10 @@
-.jp 2
+.jp 3
 12.235.202.19 1
 alias 1
 charset:iso-2022-jp 3
-co.jp 2
+co.jp 3
 dareka@dokoka.co.jp 1
-dokoka 1
-dokoka.co.jp 1
+dokoka.co.jp 2
 dokokanohost 1
 encoding:7bit 1
 express 1

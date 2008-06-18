@@ -126,11 +126,11 @@ blue 1
 column 1
 cobol 4
 gss' 1
-tpkm.ru 4
+mail.tpkm.ru 2
+tpkm.ru 6
 sources 1
 charset:us-ascii 1
 category 1
-tpkm 2
 release 1
 extraction 1
 computation 3
@@ -157,7 +157,7 @@ visual 1
 priority 1
 to:.com 2
 to:.ru 1
-.ru 4
+.ru 6
 .com 10
 from:.ru 1
 .net 1

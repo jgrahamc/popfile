@@ -1,4 +1,4 @@
-.jp 2
+.jp 8
 aaa 1
 charset:iso-2022-jp 4
 co.jp 2
@@ -7,7 +7,7 @@ from:co.jp 1
 from:info_click3004@yahoo.co.jp 1
 from:yahoo.co.jp 1
 from:¹­¹ð¼ýÆþ¤Î¤´°ÆÆâ 1
-geocities 6
+geocities.jp 6
 header:Content-Type 1
 header:Date 1
 header:From 1
@@ -36,6 +36,7 @@ to:test@example.com 1
 url 1
 yahoo.co.jp 2
 zeroro 6
+www.geocities.jp 6
 £È£Ð 1
 £Ï£Ë 1
 ¤¤¤¿¤·¤Þ¤¹ 1

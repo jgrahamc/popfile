@@ -1,9 +1,10 @@
 .com 1
+.jp 3
 apple 3
 charset:iso-2022-jp 1
 dream-future.com 1
 encoding:base64 1
-eyc 3
+eyc.jp 3
 from:.ge 1
 from:984654935480934622@egwxwoj.ge 1
 from:ayu 1
@@ -23,6 +24,7 @@ subject:qootn 1
 to:.com 1
 to:example.com 1
 to:test@example.com 1
+www.eyc.jp 3
 いらっし 1
 けて 1
 させていただきます 1

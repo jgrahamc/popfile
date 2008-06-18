@@ -562,7 +562,7 @@ if ( $have_text_kakasi ) {
     $cl->{kakasi_mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
     $cl->{need_kakasi_mutex__} = 1;
 
-    my @parse_tests = sort glob 'TestNihongo*.msg';
+    my @parse_tests = sort glob 'TestMails/TestNihongo*.msg';
     
     for my $parse_test (@parse_tests) {
         

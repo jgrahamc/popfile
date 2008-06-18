@@ -1,3 +1,4 @@
+.au 1
 .com 5
 .net 1
 .se 1
@@ -30,6 +31,7 @@ header:X-Auth-No 1
 home.se 1
 html:cidsrc 5
 html:td 5
+mail.nex.net.au 1
 medical 5
 mimeextension:gif 5
 mimename:1 1
@@ -38,9 +40,10 @@ mimename:3 1
 mimename:4 1
 mimename:5 1
 myrealbox.com 1
+net.au 1
 netmail 1
 netware 1
-nex 1
+nex.net.au 1
 novell 1
 phrekiesomeone@home.se 1
 revision 1

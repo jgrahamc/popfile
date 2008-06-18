@@ -1,4 +1,6 @@
+.jp 1
 216.104.176.121 2
+7744.jp 1
 advance 1
 charset:iso-2022-jp 1
 current 1
@@ -20,6 +22,7 @@ system 1
 to:.com 1
 to:example.com 1
 to:test@example.com 1
+www.7744.jp 1
 £°£° 2
 £±£± 1
 £±£´ 1

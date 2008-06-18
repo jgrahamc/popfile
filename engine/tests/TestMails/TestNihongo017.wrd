@@ -4,9 +4,9 @@
 #ff0000 14
 #ff00ff 1
 #ff9900 6
-.jp 30
+.jp 31
 .org 2
-18kin.jp 30
+18kin.jp 31
 av.18kin.jp 24
 charset:iso-2022-jp 3
 delmail@18kin.jp 4
@@ -52,7 +52,6 @@ html:imgwidth630 2
 html:td 44
 japan 2
 jst 1
-kin 1
 news 4
 subject:test 1
 to:.com 1

@@ -69,7 +69,6 @@ vi.rltvty.com 1
 archives 1
 postfix 3
 confirmed 1
-tpkm 3
 to:elia@tpkm.ru 1
 to:bugtracker@rltvty.com 1
 server 1
@@ -137,6 +136,6 @@ from:.net 1
 .net 1
 rescuebre@tpkm.ru 1
 run@mail.tpkm.ru 1
-mail.tpkm.ru 1
-tpkm.ru 2
-.ru 2
+mail.tpkm.ru 4
+tpkm.ru 5
+.ru 5
