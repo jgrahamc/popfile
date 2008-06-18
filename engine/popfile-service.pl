@@ -69,6 +69,10 @@ sub Startup
 
     $POPFile->CORE_signals();
 
+    # Avoid to stop when users logged off
+
+    $SIG{QUIT}  = 'IGNORE';
+
     # Create the main objects that form the core of POPFile.  Consists
     # of the configuration modules, the classifier, the UI (currently
     # HTML based), platform specific code, and the POP3 proxy.  The
