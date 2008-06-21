@@ -77,6 +77,8 @@ sub new
     #
     # $self->{good_response_}            = '';
 
+    $self->{ssl_not_supported_error_}  = '-ERR SSL connection is not supported since required modules are not installed';
+
     # Connect Banner returned by the real server
     $self->{connect_banner__} = '';
 
@@ -125,8 +127,22 @@ sub start
     my $name = $self->name();
 
     if ( $name eq 'pop3s' ) {
-        require IO::Socket::SSL;
-#        $IO::Socket::SSL::DEBUG = 4;
+        eval {
+            require IO::Socket::SSL;
+        };
+        if ( $@ ) {
+            # Cannot load IO::Socket::SSL
+
+            print STDERR <<EOM; # PROFILE BLOCK START
+
+\nCouldn't start the $name proxy because POPFile could not load the
+IO::Socket::SSL module. This is because either IO::socket::SSL or
+Net::SSLeay module is not installed.
+
+EOM
+# PROFILE BLOCK STOP
+            return 0;
+        }
         $self->{server__} = IO::Socket::SSL->new( Proto     => 'tcp', # PROFILE BLOCK START
                                     ($self->config_( 'local' ) || 0) == 1 ? (LocalAddr => 'localhost') : (),
                                     LocalPort => $self->config_( 'port' ),
@@ -550,7 +566,15 @@ sub verify_connected_
                     . ProxyPort => $self->config_( 'socks_port' ) ); # PROFILE BLOCK STOP
     } else {
         if ( $ssl ) {
-            require IO::Socket::SSL;
+            eval {
+                require IO::Socket::SSL;
+            };
+            if ( $@ ) {
+                # Cannot load IO::Socket::SSL
+
+                $self->tee_( $client, "$self->{ssl_not_supported_error_}$eol" );
+                return undef;
+            }
             $mail = IO::Socket::SSL->new( # PROFILE BLOCK START
                         Proto    => "tcp",
                         PeerAddr => $hostname,
