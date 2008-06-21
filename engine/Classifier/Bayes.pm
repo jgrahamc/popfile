@@ -2806,45 +2806,46 @@ sub classify_and_modify
     # Add the Subject line modification or the original line back again
     # Don't add the classification unless it is not present
 
-    if (  ( defined( $msg_subject ) && ( $msg_subject !~ /\Q$modification\E/ ) ) && # PROFILE BLOCK START
-          ( $subject_modification == 1 ) &&
-          ( $quarantine == 0 ) )  {                                                 # PROFILE BLOCK STOP
-         $msg_subject = " $modification$msg_subject";
+    if ( ( $subject_modification ) && ( !$quarantine ) ) {
+        if ( !defined( $msg_subject ) ) {   # PROFILE BLOCK START
+            $msg_subject = " $modification";
+        } elsif ( $msg_subject !~ /\Q$modification\E/ ) {
+            $msg_subject = " $modification$msg_subject";
+        }                                   # PROFILE BLOCK STOP
     }
 
-    if ( !defined( $msg_subject )       &&                                         # PROFILE BLOCK START
-         ( $subject_modification == 1 ) &&
-         ( $quarantine == 0 ) )  {                                                 # PROFILE BLOCK STOP
-         $msg_subject = " $modification";
+    if ( defined( $msg_subject ) ) {
+        $msg_head_before .= "Subject:$msg_subject$crlf";
     }
 
-    $msg_subject = '' if ( !defined( $msg_subject ) );
+    # Add LF if $msg_head_after ends with CR to avoid header concatination
 
-    $msg_head_before .= 'Subject:' . $msg_subject;
-    $msg_head_before .= $crlf;
+    $msg_head_after =~ s/\015\z/$eol/;
 
     # Add the XTC header
-    $msg_head_after .= "X-Text-Classification: $classification$crlf" if ( ( $xtc_insertion   ) && # PROFILE BLOCK START
-                                                                          ( $quarantine == 0 ) ); # PROFILE BLOCK STOP
+
+    if ( ( $xtc_insertion ) && ( !$quarantine ) ) {
+        $msg_head_after .= "X-Text-Classification: $classification$crlf";
+    }
 
     # Add the XPL header
 
-    my $xpl = $self->user_config_( $userid, 'xpl_angle' )?'<':'';
+    my $xpl;
 
-    my $xpl_localhost = ($self->config_( 'localhostname' ) eq '')?"127.0.0.1":$self->config_( 'localhostname' );
+    if ( $xpl_insertion ) {
 
-    $xpl .= "http://";
-    $xpl .= $self->module_config_( 'html', 'local' )?$xpl_localhost:$self->config_( 'hostname' );
-    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot";
+        my $host = $self->module_config_( 'html', 'local' ) ?   # PROFILE BLOCK START
+                $self->config_( 'localhostname' ) || '127.0.0.1' :
+                $self->config_( 'hostname' );                   # PROFILE BLOCK STOP
+        my $port = $self->module_config_( 'html', 'port' );
 
-    if ( $self->user_config_( $userid, 'xpl_angle' ) ) {
-        $xpl .= '>';
-    }
+        $xpl = "http://$host:$port/jump_to_message?view=$slot";
 
-    $xpl .= "$crlf";
+        $xpl = "<$xpl>" if ( $self->config_( 'xpl_angle' ) );
 
-    if ( $xpl_insertion && ( $quarantine == 0 ) ) {
-        $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
+        if ( !$quarantine ) {
+            $msg_head_after .= "X-POPFile-Link: $xpl$crlf";
+        }
     }
 
     $msg_head_after .= $msg_head_q . "$crlf";
@@ -2883,7 +2884,7 @@ sub classify_and_modify
            }
            print $client "Subject:$msg_subject$crlf";
            print $client "X-Text-Classification: $classification$crlf" if ( $xtc_insertion );
-           print $client 'X-POPFile-Link: ' . $xpl if ( $xpl_insertion );
+           print $client "X-POPFile-Link: $xpl$crlf" if ( $xpl_insertion );
            print $client "MIME-Version: 1.0$crlf";
            print $client "Content-Type: multipart/report; boundary=\"$slot\"$crlf$crlf--$slot$crlf";
            print $client "Content-Type: text/plain";
@@ -2897,7 +2898,7 @@ sub classify_and_modify
            print $client "Original Subject: $orig_subject$crlf";
 
            print $client "To examine the email open the attachment. ";
-           print $client "To change this mail's classification go to $xpl";
+           print $client "To change this mail's classification go to $xpl$crlf";
            print $client "$crlf";
            print $client "The first 20 words found in the email are:$crlf$crlf";
 
