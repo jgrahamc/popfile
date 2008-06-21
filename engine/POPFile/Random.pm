@@ -57,7 +57,7 @@ sub new
     if ( $has_module ) {
         return bless $self, $type;
     } else {
-        return undef;
+        return "could not find required module $module.";
     }
 }
 
