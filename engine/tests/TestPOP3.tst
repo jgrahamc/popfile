@@ -894,12 +894,13 @@ if ( $pid == 0 ) {
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
             test_assert( $result =~ /\015/ );
-            $result =~ s/\015//;
+            $result =~ s/[$cr$lf]//g;
+            $line   =~ s/[$cr$lf]//g;
             test_assert_equal( $result, $line );
             if ( $headers == 0 ) {
                 $countdown -= 1;
             }
-            if ( $line =~ /^[\r\n]+$/ ) {
+            if ( $line eq '' ) {
                 $headers = 0;
             }
         }
@@ -932,7 +933,8 @@ if ( $pid == 0 ) {
             $result =~ s/view=3/view=popfile0=0.msg/;
             $result =~ s/127\.0\.0\.1:$http_port/127.0.0.1:8080/;
             test_assert( $result =~ /\015/ );
-            $result =~ s/\015//;
+            $result =~ s/[$cr$lf]//g;
+            $line   =~ s/[$cr$lf]//g;
             test_assert_equal( $result, $line );
         }
         close FILE;
@@ -1039,12 +1041,13 @@ if ( $pid == 0 ) {
             $result =~ s/view=4/view=popfile0=0.msg/;
             $result =~ s/127\.0\.0\.1:$http_port/127.0.0.1:8080/;
             test_assert( $result =~ /\015/ );
-            $result =~ s/\015//;
+            $result =~ s/[$cr$lf]//g;
+            $line   =~ s/[$cr$lf]//g;
             test_assert_equal( $result, $line, "[$result][$line]" );
             if ( $headers == 0 ) {
                 $countdown -= 1;
             }
-            if ( $line =~ /^[\r\n]+$/ ) {
+            if ( $line eq '' ) {
                 $headers = 0;
             }
         }
@@ -1123,7 +1126,8 @@ if ( $pid == 0 ) {
             $result =~ s/view=5/view=popfile0=0.msg/;
             $result =~ s/127\.0\.0\.1:$http_port/127.0.0.1:8080/;
             test_assert( $result =~ /\015/ );
-            $result =~ s/\015//;
+            $result =~ s/[$cr$lf]//g;
+            $line   =~ s/[$cr$lf]//g;
             test_assert_equal( $result, $line );
         }
         close FILE;
@@ -1225,13 +1229,13 @@ if ( $pid == 0 ) {
             $result =~ s/view=6/view=popfile0=0.msg/;
             $result =~ s/127\.0\.0\.1:$http_port/127.0.0.1:8080/;
             test_assert( $result =~ /\015/ );
-            $result =~ s/\015//;
-            $line =~ s/\015//;
+            $result =~ s/[$cr$lf]//g;
+            $line   =~ s/[$cr$lf]//g;
             test_assert_equal( $result, $line );
             if ( $headers == 0 ) {
                 $countdown -= 1;
             }
-            if ( $line =~ /^[\r\n]+$/ ) {
+            if ( $line eq '' ) {
                 $headers = 0;
             }
         }
