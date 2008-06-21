@@ -152,7 +152,7 @@ sub new
 
     $self->{modules__}       = {};
 
-    # Reference to the POPFile::Loader module which is set by a 
+    # Reference to the POPFile::Loader module which is set by a
     # call to loader() and used by get_module__
 
     $self->{loader__}        = {};
@@ -670,7 +670,7 @@ sub flush_slurp_data__
                     $can_read = defined( $slurp_data__{"$handle"}{select}->can_read( $self->global_config_( 'timeout' ) ) );
                 }
             }
- 
+
             if ( $can_read ) {
 
                 my $c;
@@ -955,6 +955,11 @@ sub random_
 
     if ( !defined( $self->{random__} ) ) {
         $self->{random__} = new POPFile::Random( $self->global_config_( 'random_module' ) );
+        unless ( ref $self->{random__} ) {
+            $self->log_( 0, $self->{random__} );
+            warn $self->{random__};
+            $self->{random__} = undef;
+        }
     }
 
     return $self->{random__};
