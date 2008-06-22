@@ -91,16 +91,20 @@ sub generate_random_string
                     Device   => $device,
                );                                 # PROFILE BLOCK STOP
     }
-
-    if ( $self->{module__} eq 'Crypt::OpenSSL::Random' ) {
+    elsif ( $self->{module__} eq 'Crypt::OpenSSL::Random' ) {
         require Crypt::OpenSSL::Random;
 
         return Crypt::OpenSSL::Random::random_bytes( $length );
     }
+    elsif ( $self->{module__} eq 'Crypt::CBC' ) {
+        require Crypt::CBC;
 
-    require Crypt::CBC;
+        return Crypt::CBC->random_bytes( $length );
+    }
 
-    return Crypt::CBC->random_bytes( $length );
+    warn "No random module found. Something is wrong";
+
+    return;
 }
 
 #----------------------------------------------------------------------------

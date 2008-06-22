@@ -19,33 +19,29 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
-#
 # ----------------------------------------------------------------------------
 
 use POPFile::Random;
 use POSIX ":sys_wait_h";
 
 my @random_modules = (
-        POPFile::Random->new( 'Crypt::Random' ),
-        POPFile::Random->new( 'Crypt::OpenSSL::Random' ),
-        POPFile::Random->new( 'Crypt::CBC' ),
+        'Crypt::Random',
+        'Crypt::OpenSSL::Random',
+        'Crypt::CBC',
 );
 
 foreach my $random_module ( @random_modules ) {
-    my $has_module = 0;
+    my $object = POPFile::Random->new( $random_module );
 
-    $has_module = eval "require $random_module->{module__}; 1;";
-
-    if ( $has_module ) {
-        my $rand_string = $random_module->generate_random_string(
+    if ( ref $object ) {
+        my $rand_string = $object->generate_random_string(
                 128 );
 
         test_assert( defined( $rand_string ) );
         test_assert_equal( length( $rand_string ), 128 );
 
-        if ( $random_module->{module__} eq 'Crypt::Random' ) {
-            $rand_string = $random_module->generate_random_string(
+        if ( $object->{module__} eq 'Crypt::Random' ) {
+            $rand_string = $object->generate_random_string(
                     128,
                     1,
                     '' );
@@ -54,16 +50,16 @@ foreach my $random_module ( @random_modules ) {
             test_assert_equal( length( $rand_string ), 128 );
         };
 
-        if ( $random_module->{module__} eq 'Crypt::OpenSSL::Random' ) {
-            $random_module->rand_seed( time );
+        if ( $object->{module__} eq 'Crypt::OpenSSL::Random' ) {
+            $object->rand_seed( time );
 
-            my $rand_string = $random_module->generate_random_string(
+            my $rand_string = $object->generate_random_string(
                     128 );
 
             test_assert( defined( $rand_string ) );
             test_assert_equal( length( $rand_string ), 128 );
         }
     } else {
-        print "Warning: skipping $$random_module->{module__} test since the module is not installed\n";
+        print "Warning: skipping $random_module test since the module is not installed\n";
     }
 }
