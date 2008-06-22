@@ -106,7 +106,7 @@ test_assert_regexp( $last_ten[8], 'test10' );
 test_assert_regexp( $last_ten[9], 'test11' );
 
 # Check the time function is working to generate times to the nearest day
-test_assert_equal( $l->{today__},  int( time / 86400 ) * 86400 );
+test_assert_equal( $l->{today__},  int( time / 86400 ) * 86400 );  #/ sorry. Eclise wants the comment.
 
 # Read the debug file and check that it contains what we expect
 open DEBUG, '<' . $l->debug_filename();
@@ -125,22 +125,17 @@ test_assert( $mq );
 test_assert( defined( $mq->{queue__}{TICKD}[0] ), "checking TICKD message" );
 
 # Move the date ahead three days and check that the debug
-# file gets deleted, this relies on the GNU date program
+# file gets deleted
 
-if ( getlogin() eq 'root' ) {
-    my $file = $l->debug_filename();
-    `date --set='2 days'`;  # todo: make tool independent
-    $POPFile->CORE_service( 1 );
-    my $exists = ( -e $file );
-    test_assert( $exists, "checking that debug file was deleted" );
-    `date --set='1 day'`;  # todo: make tool independent
-    $POPFile->CORE_service( 1 );
-    $exists = ( -e $file );
-    test_assert( !$exists, "checking that debug file was deleted" );
-    `date --set='3 days ago'`;  # todo: make tool independent
-} else {
-    print "Warning: skipping clean up tests because you are not root\n";
-}
+my $file = $l->debug_filename();
+*POPFile::Logger::time = sub { return time + 2 * 24 * 3600; };
+$POPFile->CORE_service( 1 );
+my $exists = ( -e $file );
+test_assert( $exists, "checking that debug file was deleted" );
+*POPFile::Logger::time = sub { return time + 3 * 24 * 3600; };
+$POPFile->CORE_service( 1 );
+$exists = ( -e $file );
+test_assert( !$exists, "checking that debug file was deleted" );
 
 $POPFile->CORE_stop();
 

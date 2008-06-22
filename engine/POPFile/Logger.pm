@@ -181,13 +181,28 @@ sub service
     # can do clean up tasks that need to be done regularly but not
     # often
 
-    if ( time > ( $self->{last_tickd__} + 3600 ) ) {
+    if ( $self->time > ( $self->{last_tickd__} + 3600 ) ) {
         $self->mq_post_( 'TICKD' );
-        $self->{last_tickd__} = time;
+        $self->{last_tickd__} = $self->time;
     }
 
     return 1;
 }
+
+
+# ---------------------------------------------------------------------------
+#
+# time
+#
+# Does the same as the built-in time function but can be overriden
+# by the test suite to trick the module into thinking that a lot
+# of time has passed.
+#
+# ---------------------------------------------------------------------------
+sub time {
+    return time;
+}
+
 
 # ---------------------------------------------------------------------------
 #
@@ -201,7 +216,7 @@ sub calculate_today__
     my ( $self ) = @_;
 
     # Create the name of the debug file for the debug() function
-    $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
+    $self->{today__} = int( $self->time / $seconds_per_day ) * $seconds_per_day; #/ sorry. Again: the Eclipse parser needs this
 
     # Note that 0 parameter than allows the logdir to be outside the user
     # sandbox
@@ -230,7 +245,7 @@ sub remove_debug_files
         # Extract the epoch information from the popfile log file name
         if ( $debug_file =~ /popfile([0-9]+)\.log/ )  {
             # If older than now - 3 days then delete
-            unlink($debug_file) if ( $1 < (time - 3 * $seconds_per_day) );
+            unlink($debug_file) if ( $1 < ($self->time - 3 * $seconds_per_day) );
         }
     }
 }
@@ -240,7 +255,7 @@ sub remove_debug_files
 # debug
 #
 # $level      The level of this message
-# $message    A string containing a debug message that may or may not be 
+# $message    A string containing a debug message that may or may not be
 #             printed
 #
 # Prints the passed string if the global $debug is true
