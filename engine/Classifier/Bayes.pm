@@ -3459,7 +3459,7 @@ sub get_word_count
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
             $self->{db_get_full_total__}, $userid );       # PROFILE BLOCK STOP
-    return $self->{db_get_full_total__}->fetchrow_arrayref->[0];
+    return $self->{db_get_full_total__}->fetchrow_arrayref->[0] || 0;
 }
 
 #----------------------------------------------------------------------------
@@ -3737,7 +3737,7 @@ sub create_user
         # Fetch new bucket ids and cloned bucket ids
 
         $h = $self->db_()->prepare(                     # PROFILE BLOCK START
-            'select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2 
+            'select bucket1.id, bucket2.id from buckets as bucket1, buckets as bucket2
                  where bucket1.userid = ? and
                        bucket1.name = bucket2.name and
                        bucket2.userid = ?;' );          # PROFILE BLOCK STOP
@@ -4597,9 +4597,9 @@ sub delete_bucket
     }
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-        'delete from buckets where 
-             buckets.userid = ? and 
-             buckets.name = ? and 
+        'delete from buckets where
+             buckets.userid = ? and
+             buckets.name = ? and
              buckets.pseudo = 0;',
          $userid, $bucket )->finish;                       # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
