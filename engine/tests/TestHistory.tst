@@ -68,6 +68,7 @@ my ( $result, $password ) = $h->classifier_()->create_user( $session, 'test' );
 test_assert( defined( $result ) );
 test_assert_equal( $result, 0 );
 test_assert( defined( $password ) );
+test_assert( length $password );
 
 my $user_session = $h->classifier_()->get_session_key( 'test', $password );
 test_assert( defined( $user_session ) );
@@ -79,7 +80,6 @@ $h->classifier_()->create_bucket( $user_session, 'other' );
 history_test( $user_session );
 
 $h->classifier_()->release_session_key( $user_session );
-
 $h->classifier_()->release_session_key( $session );
 
 $POPFile->CORE_stop();
@@ -225,7 +225,7 @@ EOF
     # Check that the three messages were correctly inserted into
     # the database
 
-    @result = $h->db_()->selectrow_array( "select * from history where id = $slot;" );
+    @result = $h->db_()->selectrow_array( "select * from history where id = $slot and userid = $userid;" );
     test_assert_equal( $#result, 17 );
     test_assert_equal( $result[0], $slot ); # id
     test_assert_equal( $result[1], $userid ); # userid
@@ -393,7 +393,7 @@ EOF
 
     # Now try a search
 
-    $h->set_query( $q, '', 'john', '', 0 );
+    $h->set_query( $q, '', 'John', '', 0 );
     test_assert_equal( $h->get_query_size( $q ), 1 );
     @rows = $h->get_query_rows( $q, 1, 1 );
     test_assert_equal( $#rows, 0 );
@@ -418,7 +418,7 @@ EOF
     $h->set_query( $q, '', 's', '', 1 );
     test_assert_equal( $h->get_query_size( $q ), 0 );
 
-    $h->set_query( $q, '', 'john', '', 1 );
+    $h->set_query( $q, '', 'John', '', 1 );
     test_assert_equal( $h->get_query_size( $q ), 2 );
     @rows = $h->get_query_rows( $q, 1, 2 );
     test_assert_equal( $#rows, 1 );
@@ -525,8 +525,9 @@ EOF
     @rows = $h->get_query_rows( $q, 1, 3 );
     test_assert_equal( $#rows, 2 );
     if ( $userid eq 1 ) {
-        test_assert_equal( $rows[0][1], 'Another Person' );
-        test_assert_equal( $rows[1][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+        use Data::Dumper; warn Dumper( \@rows );
+        test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+        test_assert_equal( $rows[1][1], 'Another Person' );
         test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
     } else {
         test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
@@ -548,3 +549,4 @@ EOF
 
     test_assert( !defined( $h->{queries__}{$q} ) );
 }
+
