@@ -23,16 +23,6 @@
 #
 # ----------------------------------------------------------------------------
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
-
-unlink 'popfile.db';
-unlink 'popfile.pid';
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
 use POSIX ":sys_wait_h";
 
 use POPFile::Loader;
@@ -45,7 +35,6 @@ my %valid = ( 'POPFile/Database' => 1,
               'POPFile/Logger' => 1,
               'POPFile/MQ'     => 1,
               'Classifier/Bayes'     => 1,
-#              'UI/XMLRPC'     => 1,
               'POPFile/Configuration' => 1 );
 
 use UI::XMLRPC;
@@ -55,7 +44,7 @@ $x->loader( $POPFile );
 $POPFile->CORE_load( 0, \%valid );
 $POPFile->CORE_initialize();
 $POPFile->CORE_config( 1 );
-#my $x = $POPFile->get_module( 'POPFile/MQ' );
+
 $x->initialize();
 $x->config_( 'enabled', 1 );
 my $xport = 12000 + int( rand( 2000 ) );
@@ -90,11 +79,11 @@ if ( $pid == 0 ) {
 
     print "Testing $xport\n";
 
-    my $session = XMLRPC::Lite 
+    my $session = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
     -> call('POPFile/API.get_session_key','admin', '')
     -> result;
- 
+
     test_assert( $session ne '' );
 
     my $set_bucket_color = XMLRPC::Lite
@@ -126,7 +115,7 @@ if ( $pid == 0 ) {
 
     select( undef, undef, undef, .2 );
 
-    XMLRPC::Lite 
+    XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
     -> call('POPFile/API.release_session_key', $session );
 

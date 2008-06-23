@@ -24,20 +24,6 @@
 # global to store STDOUT when doing backticks
 
 my @stdout;
-
-rmtree( 'messages' );
-rmtree( 'corpus' );
-rmtree( 'import' );
-mkdir( 'import' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-test_assert( rec_cp( 'corpus.base', 'import/corpus' ) );
-rmtree( 'corpus/.svn' );
-unlink( 'popfile.db' );
-unlink( 'popfile.cfg' );
-
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
 my $import = 'perl -I ../ ../import.pl';
 
 # One or no command line arguments

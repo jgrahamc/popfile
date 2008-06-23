@@ -25,16 +25,6 @@
 
 my @stdout;
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
-unlink( 'popfile.db' );
-unlink( 'popfile.cfg' );
-
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
 my $insert = 'perl -I ../ ../insert.pl';
 
 # One or no command line arguments
@@ -209,6 +199,8 @@ open STDERR, ">temp.tmp";
 @stdout =`$insert testuser newbucket TestMails/TestMailParse021.msg`;
 $code = ($? >> 8);
 close STDERR;
+
+unlink 'temp.tmp';
 
 test_assert_equal( $code, 0 );
 

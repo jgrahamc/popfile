@@ -21,8 +21,6 @@
 #
 # ----------------------------------------------------------------------------
 
-unlink 'popfile.cfg';
-
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -371,6 +369,9 @@ close TEMP2;
 open TEMP2, "<slurp2.tmp";
 test_assert( !defined(<TEMP2>) );
 close TEMP2;
+
+unlink 'slurp.tmp';
+unlink 'slurp2.tmp';
 
 # get_user_path_ (note Makefile sets POPFILE_USER to ../tests/)
 

@@ -21,9 +21,6 @@
 #
 # ---------------------------------------------------------------------------------------------
 
-unlink 'popfile.db';
-unlink 'popfile.cfg';
-
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -531,8 +528,6 @@ $sp->initialize();
 $sp->setchildexit( $POPFile->{childexit__} );
 $sp->config_( 'port', $port );
 
-#$sp->classifier( $b );
-
 test_assert_equal( $sp->start(), 1 );
 test_assert_equal( $sp->start_server(), 1 );
 $client = IO::Socket::INET->new(
@@ -615,8 +610,6 @@ $sp->forker( \&forker );
 $sp->initialize();
 $sp->config_( 'port', $port );
 
-#$sp->classifier( $b );
-
 $sp->{connection_failed_error_} = 'failed error';
 
 undef $client;
@@ -640,8 +633,6 @@ $sp2->forker( \&forker );
 $sp2->initialize();
 $sp2->config_( 'port', -1 );
 
-#$sp2->classifier( $b );
-
 open my $old_stderr, ">&STDERR";
 open STDERR, ">stdout.tmp";
 test_assert( !$sp2->start() );
@@ -657,7 +648,6 @@ close TEMP;
 $sp->stop();
 $sp2->stop();
 
-#$b->stop();
 $POPFile->CORE_stop();
 
 1;

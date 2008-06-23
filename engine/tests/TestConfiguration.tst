@@ -21,9 +21,6 @@
 #
 # ----------------------------------------------------------------------------
 
-unlink 'popfile.cfg';
-unlink 'popfile.pid';
-
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -67,10 +64,13 @@ open $old_stderr, ">&STDERR";
 # contains the correct process ID
 
 $c->config_( 'piddir', '../tests/' );
+$c->{pid_delay__} = 1;
+open (STDERR, ">stdout.tmp");
+
 test_assert_equal( $c->start(), 1 );
 test_assert( $c->check_pid_() );
 test_assert_equal( $c->get_pid_(), $$ );
-open (STDERR, ">stdout.tmp");
+
 test_assert_equal( $c->start(), 1 );
 $c->stop();
 test_assert( !$c->check_pid_() );
@@ -113,47 +113,35 @@ if ($process != 0) {
 
 close STDERR;
 $c->stop();
-
 # Check that the popfile.cfg was written
 
+my @expected_config = (
+ 'config_piddir ../tests/',
+ 'GLOBAL_ca_file ./certs/ca.pem',
+ 'GLOBAL_cert_file ./certs/server-cert.pem',
+ 'GLOBAL_crypt_device ',
+ 'GLOBAL_crypt_strength 0',
+ 'GLOBAL_debug 0',
+ 'GLOBAL_key_file ./certs/server-key.pem',
+ 'GLOBAL_language English',
+ 'GLOBAL_message_cutoff 100000',
+ 'GLOBAL_msgdir messages/',
+ 'GLOBAL_random_module Crypt::OpenSSL::Random',
+ 'GLOBAL_session_timeout 1800',
+ 'GLOBAL_single_user 1',
+ 'GLOBAL_timeout 60',
+ 'logger_format default',
+ 'logger_level 0',
+ 'logger_logdir ./',
+ 'testparam testvalue',
+);
+
 open FILE, "<popfile.cfg";
-my $line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_ca_file ./certs/ca.pem' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_cert_file ./certs/server-cert.pem' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_crypt_device ' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_crypt_strength 0' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_debug 0' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_key_file ./certs/server-key.pem' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_language English' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_message_cutoff 100000' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_msgdir messages/' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_random_module Crypt::OpenSSL::Random' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_session_timeout 1800' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_single_user 1' );
-$line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_timeout 60' );
-$line = <FILE>;
-test_assert_regexp( $line, 'config_piddir ../tests/' );
-$line = <FILE>;
-test_assert_regexp( $line, 'logger_format default' );
-$line = <FILE>;
-test_assert_regexp( $line, 'logger_level 0' );
-$line = <FILE>;
-test_assert_regexp( $line, 'logger_logdir ./' );
-$line = <FILE>;
-test_assert_regexp( $line, 'testparam testvalue' );
-$line = <FILE>;
+foreach ( @expected_config ) {
+    my $line = <FILE>;
+    chomp $line;
+    test_assert_equal( $line, $_ );
+}
 close FILE;
 
 # Now add a parameter and reload the configuration
@@ -267,7 +255,6 @@ test_assert_regexp( $line, 'Expected a command line option and got baz' );
 # Restore STDERR
 
 open STDERR, ">&", $old_stderr;
-
 # path_join__
 
 test_assert_equal( $c->path_join( 'foo', '/root', 0 ), '/root' );
@@ -326,5 +313,9 @@ $c->{popfile_root__} = '../';
 # TODO : multi user test
 
 $POPFile->CORE_stop();
+
+#unlink 'stdout.tmp';
+
+print "\nfinished\n";
 
 1;

@@ -21,15 +21,6 @@
 #
 # ----------------------------------------------------------------------------
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-unlink 'popfile.db';
-unlink 'popfile.cfg';
-rmtree( 'corpus/.svn' );
-
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 my $pipe = 'perl -I ../ ../pipe.pl';
 
@@ -70,5 +61,7 @@ while ( <TEMP> ) {
 
 close CAM;
 close TEMP;
+
+unlink 'temp.tmp';
 
 1;

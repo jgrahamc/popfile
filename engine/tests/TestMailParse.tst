@@ -21,16 +21,6 @@
 #
 # ----------------------------------------------------------------------------
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
-unlink 'popfile.db';
-unlink 'popfile.pid';
-
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -563,17 +553,17 @@ if ( $have_text_kakasi ) {
     $cl->{need_kakasi_mutex__} = 1;
 
     my @parse_tests = sort glob 'TestMails/TestNihongo*.msg';
-    
+
     for my $parse_test (@parse_tests) {
-        
+
         my $words = $parse_test;
         $words    =~ s/msg/wrd/;
-        
+
         # Parse the document and then check the words hash against the words in the
         # wrd file
-        
+
         $cl->parse_file( $parse_test );
-        
+
         open WORDS, "<$words";
         while ( <WORDS> ) {
             if ( /^(.+) (\d+)/ ) {
@@ -583,15 +573,15 @@ if ( $have_text_kakasi ) {
             }
         }
         close WORDS;
-        
+
         foreach my $missed ( sort( keys %{$cl->{words__}} ) ) {
             test_assert( 0, "$missed $cl->{words__}{$missed} missing in $words" );
-        
+
             # Only use this if once you KNOW FOR CERTAIN that it's
             # not going to update the WRD files with bogus entries
             # First manually check the test failures and then switch the
             # 0 to 1 and run once
-        
+
             if ( 0 ) {
                  open UPDATE, ">>$words";
                  print UPDATE "$missed $cl->{words__}{$missed}\n";

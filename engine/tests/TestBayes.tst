@@ -21,19 +21,6 @@
 #
 # ----------------------------------------------------------------------------
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
-rmtree( 'corpus/.svn' );
-
-unlink 'popfile.cfg';
-unlink 'popfile.db';
-unlink 'popfile.pid';
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
-mkdir 'messages';
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
@@ -491,7 +478,7 @@ test_assert( $accounts[0] eq 'pop3:foo:bar' );
 test_assert( $b->remove_account( $session, 'pop3', 'foo:bar' ) == 1 );
 
 my $session3 = $b->get_session_key_from_token( $session, 'pop3', 'foo:bar' );
-test_assert( !defined( $session3 ) ); 
+test_assert( !defined( $session3 ) );
 
 # get_all_buckets
 
@@ -981,7 +968,6 @@ for my $class_test (@class_tests) {
 # glob the tests directory for files called TestMails/TestMailParse\d+.msg which consist of messages
 # to be sent through classify_and_modify
 
-$b->config_( 'msgdir', '../tests/' );
 $b->module_config_( 'html', 'port',  8080 );
 $b->module_config_( 'html', 'local',    1 );
 $b->module_config_( 1, 'pop3', 'local', 1 );
@@ -1468,5 +1454,8 @@ if ( $have_text_kakasi ) {
 }
 
 $POPFile->CORE_stop();
+
+unlink 'temp.tmp';
+unlink 'temp2.tmp';
 
 1;

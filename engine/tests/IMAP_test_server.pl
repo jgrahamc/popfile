@@ -49,7 +49,7 @@ $SIG{CHLD} = 'IGNORE';
 my $cr = "\015";
 my $lf = "\012";
 my $eol = "$cr$lf";
-my $debug = 1;
+my $debug = 0;
 my $spool = "imap.spool";
 my $uid_file = 'imap.uids';
 

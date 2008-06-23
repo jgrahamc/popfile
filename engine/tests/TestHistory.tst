@@ -23,18 +23,6 @@
 
 use strict;
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
-
-unlink 'popfile.db';
-unlink 'popfile.pid';
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
-mkdir 'messages';
-
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -183,12 +171,12 @@ EOF
 
     sleep(2);
 
-    # This is a message for testing evil spammer header tricks or 
+    # This is a message for testing evil spammer header tricks or
     # unusual header malformations that may end up parsed into our
     # history database
 
     # Please list tricks or malformations here
-    # Subject: =?UNKNOWN?B??= (Should produce a "header missing" string in the 
+    # Subject: =?UNKNOWN?B??= (Should produce a "header missing" string in the
     #                            database rather than an empty string)
     #
     # To: =?utf-8?q?Do you covet to perc?=

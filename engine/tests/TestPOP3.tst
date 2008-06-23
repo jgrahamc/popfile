@@ -27,25 +27,18 @@
 use IO::Handle;
 use IO::Socket;
 use Digest::MD5;
+use POSIX ":sys_wait_h";
 use strict;
 
-unlink 'popfile.db';
-unlink 'popfile.cfg';
-unlink 'popfile.pid';
-
-use POSIX ":sys_wait_h";
 
 my $cr = "\015";
 my $lf = "\012";
 
 my $eol = "$cr$lf";
 
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
-rmtree( 'messages' );
-
 use POSIX ":sys_wait_h";
+
+
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
@@ -808,6 +801,7 @@ if ( $pid == 0 ) {
         }
         close FILE;
         close RESULT;
+        unlink "$messages[27]_testpop3-got.cam";
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );

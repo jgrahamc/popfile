@@ -836,17 +836,6 @@ sub configure_imap_module {
 ##
 
 sub start_popfile {
-    rmtree( 'messages' );
-    rmtree( 'corpus' );
-    test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-    test_assert( rmtree( 'corpus/.svn' ) > 0 ) if -e 'corpus/.svn';
-
-    unlink 'popfile.db';
-    unlink 'stopwords';
-    test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
-    mkdir 'messages';
-
     my $POPFile = POPFile::Loader->new();
     $POPFile->CORE_loader_init();
     $POPFile->CORE_signals();

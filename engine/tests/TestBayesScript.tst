@@ -21,15 +21,6 @@
 #
 # ----------------------------------------------------------------------------
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
-unlink( 'popfile.db' );
-
-unlink 'stopwords';
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
 my $bayes = 'perl -I ../ ../bayes.pl';
 
 my @stdout;
@@ -97,4 +88,7 @@ foreach my $word (keys %output) {
     test_assert_equal( $words{$word}, $output{$word}, $word );
 }
 
+unlink 'temp.tmp';
+unlink 'temp2.tmp';
+rmtree( 'bayes.pl.' );
 1;

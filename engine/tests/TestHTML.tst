@@ -29,13 +29,6 @@ if ( $^O eq 'MSWin32' && setlocale(LC_COLLATE) eq 'Japanese_Japan.932' ) {
 # Set up the test corpus and use the Test msg and cls files
 # to create a current history set
 
-rmtree( 'corpus' );
-rec_cp( 'corpus.base', 'corpus' );
-rmtree( 'corpus/.svn' );
-rmtree( 'corpus/other/.svn' );
-rmtree( 'corpus/spam/.svn' );
-rmtree( 'corpus/personal/.svn' );
-rmtree( 'messages' );
 
 my @dbs = glob '__db.*';
 foreach my $db (@dbs) {
@@ -47,14 +40,6 @@ foreach my $err_html (@err_html_list) {
     unlink $err_html;
 }
 
-unlink 'popfile.cfg';
-unlink 'popfile.db';
-unlink 'popfile.pid';
-
-unlink( 'stopwords' );
-test_assert( copy ( 'stopwords.base', 'stopwords' ) );
-
-mkdir 'messages';
 my @messages = glob 'TestMails/TestMailParse*.msg';
 
 my $count = 0;
@@ -652,6 +637,7 @@ skip:
     }
 }
 
+unlink 'TestHTML_cookie';
 
 # Helper function that finds a form in @forms with the
 # named input element, returns the form object and input

@@ -21,10 +21,6 @@
 #
 # ----------------------------------------------------------------------------
 
-rmtree( 'messages' );
-rmtree( 'corpus' );
-test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-rmtree( 'corpus/.svn' );
 
 sub my_handler
 {
@@ -220,6 +216,10 @@ test_assert_regexp( $line, "Couldn't start the simple HTTP interface" );
 close TEMP;
 
 $h2->stop();
+
+unlink 'temp.tmp';
+unlink 'stdout.tmp';
+unlink 'send.tmp';
 
 # Fork into a subprocess that keeps calling service() on the HTTP
 # module to handle requests and a top level process that sends down
