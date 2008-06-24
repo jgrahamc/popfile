@@ -318,7 +318,11 @@ sub db_connect_helper__
 
         # For Japanese compatibility
 
-        $db->do( 'pragma case_sensitive_like=1;' );
+        if ( $self->global_config_( 'language' ) eq 'Nihongo' ) {
+            $db->do( 'pragma case_sensitive_like=1;' );
+        } else {
+            $db->do( 'pragma case_sensitive_like=0;' );
+        }
     }
 
     if ( !defined( $db ) ) {
