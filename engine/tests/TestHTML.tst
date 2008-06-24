@@ -21,18 +21,22 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+use strict;
+use warnings;
+
 use POSIX qw(locale_h);
+use POSIX ":sys_wait_h";
+use HTML::Form;
+use LWP::UserAgent;
+use HTTP::Cookies;
+use URI::URL;
+use String::Interpolate;
+
+use POPFile::Loader;
+use UI::HTML;
 
 if ( $^O eq 'MSWin32' && setlocale(LC_COLLATE) eq 'Japanese_Japan.932' ) {
     setlocale(LC_COLLATE,'C');
-}
-# Set up the test corpus and use the Test msg and cls files
-# to create a current history set
-
-
-my @dbs = glob '__db.*';
-foreach my $db (@dbs) {
-	unlink $db;
 }
 
 my @err_html_list = glob 'testhtml_match*.html';
@@ -40,31 +44,12 @@ foreach my $err_html (@err_html_list) {
     unlink $err_html;
 }
 
-my @messages = glob 'TestMails/TestMailParse*.msg';
 
-my $count = 0;
-my $dl    = 0;
-foreach my $msg (@messages) {
-    my $name = "messages/popfile$dl" . "=" . "$count";
-    test_assert( copy ( $msg, "$name.msg") );
-    $msg =~ s/\.msg$/\.cls/;
-    test_assert( copy ( $msg, "$name.cls") );
-    $count += 1;
-    if ( rand(1) > 0.5 ) {
-        $dl += 1;
-    }
-}
-
-
-use POSIX ":sys_wait_h";
-
-use HTML::Form;
 my @forms;
 
 my $hidden = 0;
 
 
-use UI::HTML;
 my $h = new UI::HTML;
 
 test_assert_equal( $h->url_encode_( ']'     ), '%5d'       );
@@ -78,7 +63,6 @@ $h->{language__}{global}{Locale_Thousands} = '&nbsp;';
 test_assert_equal( $h->pretty_number( 1234 ), '1&nbsp;234' );
 $h->{language__}{global}{Locale_Thousands} = '';
 
-
 our $port = 9001 + int(rand(1000));
 pipe my $dreader, my $dwriter;
 pipe my $ureader, my $uwriter;
@@ -86,28 +70,26 @@ my $pid = fork();
 
 if ( $pid == 0 ) {
 
-    use POPFile::Loader;
     my $POPFile = POPFile::Loader->new();
-#    $POPFile->{debug__} = 1;
+    # $POPFile->{debug__} = 1;
     $POPFile->CORE_loader_init();
     $POPFile->CORE_signals();
 
-    my %valid = ( 'POPFile/Database'       => 1,
-                  'POPFile/Logger'         => 1,
-                  'POPFile/MQ'             => 1,
-                  'POPFile/History'        => 1,
-                  'Classifier/Bayes'       => 1,
-                  'Classifier/WordMangle'  => 1,
-                  'POPFile/Configuration'  => 1,
-                  'UI/HTML'                => 1,
-                  'Proxy/POP3'             => 1 );
+    my %valid = ( 'POPFile/Logger'        => 1,
+                  'POPFile/MQ'            => 1,
+                  'POPFile/Configuration' => 1,
+                  'POPFile/Database'      => 1,
+                  'POPFile/History'       => 1,
+                  'UI/HTML'               => 1,
+                  'Proxy/POP3'            => 1,
+                  'Classifier/Bayes'      => 1,
+                  'Classifier/WordMangle' => 1 );
 
     $POPFile->CORE_load( 0, \%valid );
-
-    $h->loader( $POPFile );
-
     $POPFile->CORE_initialize();
     $POPFile->CORE_config( 1 );
+
+    $h->loader( $POPFile );
 
     my $c  = $POPFile->get_module( 'POPFile/Configuration' );
     my $mq = $POPFile->get_module( 'POPFile/MQ'            );
@@ -115,20 +97,44 @@ if ( $pid == 0 ) {
     my $b  = $POPFile->get_module( 'Classifier/Bayes'      );
     my $w  = $POPFile->get_module( 'Classifier/WordMangle' );
     my $hi = $POPFile->get_module( 'POPFile/History'       );
+    my $p  = $POPFile->get_module( 'Proxy/POP3'            );
 
     $l->config_( 'level', 0 );
     $mq->pipeready( \&pipeready );
 
+    $p->initialize();
+
     $c->module_config_( 'pop3', 'enabled',       1 );
     $c->module_config_( 'pop3', 'port',       9110 );
     $c->module_config_( 'pop3', 'force_fork',    0 );
-
     $c->module_config_( 'html', 'port', $port + 1 );
-    $POPFile->CORE_start();
 
+    $POPFile->CORE_start();
     $hi->service();
+    $mq->service();
 
     my $session = $b->get_administrator_session_key();
+    my $inserted_time = time - 100;
+
+    # Use the Test msg and cls files
+    # to create a current history set
+
+    my @messages = sort glob 'TestMails/TestMailParse*.msg';
+    foreach my $msg (@messages) {
+        next if ( $msg =~ /TestMailParse026/ );
+        my $cls = $msg;
+        $cls =~ s/\.msg$/\.cls/;
+        if ( open my $CLS, '<', $cls ) {
+            my $class = <$CLS>;
+            $class =~ s/[\r\n]//g;
+            close $CLS;
+            my ( $slot, $msg_file ) = $hi->reserve_slot( $session, $inserted_time++ );
+            `cp $msg $msg_file`;
+            $hi->commit_slot( $session, $slot, $class, 0 );
+        }
+    }
+    $mq->service();
+    $hi->service();
 
     # CHILD THAT WILL RUN THE HTML INTERFACE
 
@@ -216,7 +222,7 @@ if ( $pid == 0 ) {
             }
 
             if ( $command =~ /^__NEWMESSAGE (\d+)/ ) {
-                my ( $slot, $file ) = $hi->reserve_slot( $session, 1 );
+                my ( $slot, $file ) = $hi->reserve_slot( $session );
                 open FILE, ">$file";
                 my ( $bucket, $magnet );
                 if ( $1 == 1 ) {
@@ -285,10 +291,6 @@ EOM
     close $uwriter;
     $dwriter->autoflush(1);
 
-    use LWP::UserAgent;
-    use HTTP::Cookies;
-    use URI::URL;
-    use String::Interpolate;
 
     my $ua = new LWP::UserAgent;
     my $line_number = 0;

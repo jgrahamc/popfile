@@ -880,24 +880,24 @@ USERCONFIGIS admin html_columns +inserted,+from,+to,-cc,+subject,-date,-size,+bu
 
 # Column size
 
-MATCH         Think you&#39;ve seen porn? How about a dog...
+MATCH         (Archive Copy) RE: CW v9 and armlets...
 USERCONFIGIS  admin html_column_characters 39
 CLICK         increase
-MATCH         Think you&#39;ve seen porn? How about a dog ...
+MATCH         (Archive Copy) RE: CW v9 and armlets...
 USERCONFIGIS  admin html_column_characters 40
 
 CLICK         decrease
-MATCH         Think you&#39;ve seen porn? How about a dog...
+MATCH         (Archive Copy) RE: CW v9 and armlets...
 USERCONFIGIS  admin html_column_characters 39
 SETUSERCONFIG admin html_column_characters 6
 USERCONFIGIS  admin html_column_characters 6
 CLICK         decrease
 CLICK         decrease
-MATCH         Think...
+MATCH         test...
 USERCONFIGIS  admin html_column_characters 5
 
 CLICK         automatic
-MATCH         Think you&#39;ve seen porn? How about a dog ...
+MATCH         (Archive Copy) RE: CW v9 and armlets...
 USERCONFIGIS  admin html_column_characters 0
 
 # History Page
@@ -908,13 +908,53 @@ GET /history
 # are links from the bucket names, check that the basic
 # sort options are present
 
-MATCH &lt;subject header missing&gt;
-MATCH from: Leandro
-MATCH jI775QsT823y17g\@aol.com
-MATCH Re: screename change again lol
+MATCH &quot;Dr. Robert Ezenshtein&quot; &lt;phrekiesomeone\@
+MATCH &quot;Sheck-Buy&quot; &lt;ADV\@Sheck-Buy.com&gt;
 MATCH &lt;from header missing&gt;
+MATCH &quot;Becky&quot;  &lt;81355329526\@mail2.great-babes-online.com&gt;
+MATCH &quot;Willie Eason&quot; &lt;5x8njuc1ydwu\@mail2Honey.com&gt;
+MATCH test\@test.com
+MATCH &quot;MARGIT&quot; &lt;cxcse231\@yahoo.com&gt;
+MATCH Sascha Schwabbauer &lt;cybersystem\@gentoo.o...
+MATCH &lt;bugs\@drnn.net&gt;
+MATCH &lt;elia\@tpkm.ru&gt;
+MATCH hottest_site_on_net22840\@yahoo.com
+MATCH wendyoufp\@msn.com
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
+MATCH RN &lt;rrr\@nnnnnnnnn.com&gt;
+MATCH Brianna121 &lt;Brianna121\@aol.com&gt;
+MATCH &quot;Acaynya&quot;&lt;hornydarla3553qqoe1\@free.fr&gt;
+
+MATCH asdfsomebody\@mbnet.fi
 MATCH &lt;to header missing&gt;
-MATCH <a href="/buckets?showbucket=spam">
+MATCH xxx\@xxx.net
+MATCH &quot;Willie Eason&quot; &lt;5x8njuc1ydwu\@mail2Honey....
+MATCH someone\@somewhere.com
+MATCH >dsmith\@ctaz.com, dsmith\@dol.net, dsmith\@...
+MATCH gentoo-announce\@gentoo.org
+MATCH elia\@tpkm.ru, rescuebre\@tpkm.ru, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH rescuebre\@tpkm.ru, bugs\@drnn.net, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH &lt;Undisclosed Recipients&gt;
+MATCH cfzvcvhr\@worldnet.att.net
+MATCH &quot;Armlet Forum&quot; &lt;armlet-forum\@news.palmos.com&gt;
+MATCH &lt;webmaster\@jgc.org&gt;
+MATCH spamaddy\@domain
+
+MATCH Re[69537]: Information for YOU
+MATCH ADV: Turn Back the Hands of Time - Compl...
+MATCH Luscious Black Nymphos!
+MATCH test for various HTML parts
+MATCH Enlarge your package Doctor ApprovedNHOB...
+MATCH Fix for kde 3.1+3.0.x installs (x86) (bu..
+MATCH VI ID: 24149  Status: Dev Confirmed Fix ..
+MATCH VI ID: 24052  Status: Open  Sev: 2
+MATCH Mooo
+MATCH 5uj9s
+MATCH (Archive Copy) RE: CW v9 and armlets..
+MATCH [spam] Want to see a huge horse c*ck in ...
+MATCH spamaddy,what ?
+MATCH &lt;subject header missing&gt;
+MATCH blank
 MATCH
 <span style="color:blue">
 spam
@@ -931,9 +971,20 @@ Jump to page:
 [<a href="/history?start_message=20&amp;sort=-inserted">2</a>]
 [<a href="/history?start_message=20&amp;sort=-inserted">Next &gt;</a>]
 ENDMATCH
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH XoSeXyGoDdEsSm\@hotmail.com
-MATCH from: Leandro
+MATCH asdfsomebody\@mbnet.fi
+MATCH &lt;to header missing&gt;
+MATCH xxx\@xxx.net
+MATCH &quot;Willie Eason&quot; &lt;5x8njuc1ydwu\@mail2Honey....
+MATCH someone\@somewhere.com
+MATCH >dsmith\@ctaz.com, dsmith\@dol.net, dsmith\@...
+MATCH gentoo-announce\@gentoo.org
+MATCH elia\@tpkm.ru, rescuebre\@tpkm.ru, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH rescuebre\@tpkm.ru, bugs\@drnn.net, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH &lt;Undisclosed Recipients&gt;
+MATCH cfzvcvhr\@worldnet.att.net
+MATCH &quot;Armlet Forum&quot; &lt;armlet-forum\@news.palmos.com&gt;
+MATCH &lt;webmaster\@jgc.org&gt;
+MATCH spamaddy\@domain
 
 GET /history?start_message=20&amp;sort=-inserted
 MATCH
@@ -942,9 +993,22 @@ Jump to page:
 [<a href="/history?start_message=0&amp;sort=-inserted">1</a>]
 <b>2</b>
 ENDMATCH
-NOTMATCH XoSeXyGoDdEsSm\@hotmail.com
-NOTMATCH from: Leandro
-NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
+MATCH XoSeXyGoDdEsSm\@hotmail.com
+MATCH from: Leandro
+NOTMATCH asdfsomebody\@mbnet.fi
+MATCH &lt;to header missing&gt;
+NOTMATCH xxx\@xxx.net
+NOTMATCH &quot;Willie Eason&quot; &lt;5x8njuc1ydwu\@mail2Honey....
+NOTMATCH someone\@somewhere.com
+NOTMATCH >dsmith\@ctaz.com, dsmith\@dol.net, dsmith\@...
+NOTMATCH gentoo-announce\@gentoo.org
+NOTMATCH elia\@tpkm.ru, rescuebre\@tpkm.ru, kcruz\@rltvty.com, bugtracker\@rltvty.com
+NOTMATCH rescuebre\@tpkm.ru, bugs\@drnn.net, kcruz\@rltvty.com, bugtracker\@rltvty.com
+NOTMATCH &lt;Undisclosed Recipients&gt;
+NOTMATCH cfzvcvhr\@worldnet.att.net
+NOTMATCH &quot;Armlet Forum&quot; &lt;armlet-forum\@news.palmos.com&gt;
+NOTMATCH &lt;webmaster\@jgc.org&gt;
+NOTMATCH spamaddy\@domain
 
 SETSUBMIT jumptopage 1
 MATCH
@@ -954,8 +1018,20 @@ Jump to page:
 [<a href="/history?start_message=20&amp;sort=-inserted">Next &gt;</a>]
 ENDMATCH
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH XoSeXyGoDdEsSm\@hotmail.com
-MATCH from: Leandro
+MATCH asdfsomebody\@mbnet.fi
+MATCH &lt;to header missing&gt;
+MATCH xxx\@xxx.net
+MATCH &quot;Willie Eason&quot; &lt;5x8njuc1ydwu\@mail2Honey....
+MATCH someone\@somewhere.com
+MATCH >dsmith\@ctaz.com, dsmith\@dol.net, dsmith\@...
+MATCH gentoo-announce\@gentoo.org
+MATCH elia\@tpkm.ru, rescuebre\@tpkm.ru, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH rescuebre\@tpkm.ru, bugs\@drnn.net, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH &lt;Undisclosed Recipients&gt;
+MATCH cfzvcvhr\@worldnet.att.net
+MATCH &quot;Armlet Forum&quot; &lt;armlet-forum\@news.palmos.com&gt;
+MATCH &lt;webmaster\@jgc.org&gt;
+MATCH spamaddy\@domain
 
 SETSUBMIT jumptopage 3
 MATCH
@@ -965,8 +1041,20 @@ Jump to page:
 [<a href="/history?start_message=20&amp;sort=-inserted">Next &gt;</a>]
 ENDMATCH
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH XoSeXyGoDdEsSm\@hotmail.com
-MATCH from: Leandro
+MATCH asdfsomebody\@mbnet.fi
+MATCH &lt;to header missing&gt;
+MATCH xxx\@xxx.net
+MATCH &quot;Willie Eason&quot; &lt;5x8njuc1ydwu\@mail2Honey....
+MATCH someone\@somewhere.com
+MATCH >dsmith\@ctaz.com, dsmith\@dol.net, dsmith\@...
+MATCH gentoo-announce\@gentoo.org
+MATCH elia\@tpkm.ru, rescuebre\@tpkm.ru, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH rescuebre\@tpkm.ru, bugs\@drnn.net, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH &lt;Undisclosed Recipients&gt;
+MATCH cfzvcvhr\@worldnet.att.net
+MATCH &quot;Armlet Forum&quot; &lt;armlet-forum\@news.palmos.com&gt;
+MATCH &lt;webmaster\@jgc.org&gt;
+MATCH spamaddy\@domain
 
 SETSUBMIT jumptopage 0
 MATCH
@@ -975,9 +1063,20 @@ Jump to page:
 [<a href="/history?start_message=20&amp;sort=-inserted">2</a>]
 [<a href="/history?start_message=20&amp;sort=-inserted">Next &gt;</a>]
 ENDMATCH
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH XoSeXyGoDdEsSm\@hotmail.com
-MATCH from: Leandro
+MATCH asdfsomebody\@mbnet.fi
+MATCH &lt;to header missing&gt;
+MATCH xxx\@xxx.net
+MATCH &quot;Willie Eason&quot; &lt;5x8njuc1ydwu\@mail2Honey....
+MATCH someone\@somewhere.com
+MATCH >dsmith\@ctaz.com, dsmith\@dol.net, dsmith\@...
+MATCH gentoo-announce\@gentoo.org
+MATCH elia\@tpkm.ru, rescuebre\@tpkm.ru, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH rescuebre\@tpkm.ru, bugs\@drnn.net, kcruz\@rltvty.com, bugtracker\@rltvty.com
+MATCH &lt;Undisclosed Recipients&gt;
+MATCH cfzvcvhr\@worldnet.att.net
+MATCH &quot;Armlet Forum&quot; &lt;armlet-forum\@news.palmos.com&gt;
+MATCH &lt;webmaster\@jgc.org&gt;
+MATCH spamaddy\@domain
 
 GET /history
 
@@ -1363,13 +1462,13 @@ NOTMATCH Testing Refresh
 
 # Check delete some messages
 
-MATCH    from: Leandro
-MATCH    spamaddy
-SETINPUT remove_20 on
-SETINPUT remove_28 on
+MATCH    foo-magnet\@magnetmania.com
+MATCH    Dr. Robert Ezenshtein
+SETINPUT remove_30 on
+SETINPUT remove_32 on
 CLICK    clearchecked
-NOTMATCH from: Leandro
-NOTMATCH spamaddy
+NOTMATCH foo-magnet\@magnetmania.com
+NOTMATCH Dr. Robert Ezenshtein
 
 # Check delete page of messages
 
@@ -1377,7 +1476,8 @@ GET /history
 CLICK clearpage
 NOTMATCH Jump to message
 MATCH Recent Messages (9)
-MATCH ADV: Turn Back the Hands of Time
+MATCH Luke Perry
+MATCH serafina venter
 
 # Check delete all messages
 # TODO : need to fix
@@ -1852,7 +1952,7 @@ ENDMATCH
 
 MATCH
 <td align="right">
-134
+164
 </td>
 ENDMATCH
 MATCH
@@ -1862,7 +1962,7 @@ MATCH
 ENDMATCH
 MATCH
 <td align="right">
-99.25%
+99.39%
 </td>
 ENDMATCH
 CLICK reset_stats
