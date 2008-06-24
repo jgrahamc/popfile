@@ -4294,7 +4294,7 @@ sub calculate_today
 {
     my ( $self ) = @_;
 
-    $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
+    $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day; # A slash / for eclipse
 }
 
 #----------------------------------------------------------------------------
