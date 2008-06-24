@@ -29,6 +29,34 @@ use File::Copy;
 use File::Find;
 use File::Path;
 
+
+
+sub use_base_environment {
+    rmtree( 'messages' );
+    rmtree( 'corpus' );
+
+    rmtree( 'corpus/.svn' );
+    rec_cp( 'corpus.base', 'corpus' );
+    unlink 'popfile.db';
+    unlink 'stopwords';
+    unlink 'popfile.pid';
+    unlink 'popfile.cfg';
+
+    copy ( 'stopwords.base', 'stopwords' );
+
+    mkdir 'messages';
+}
+
+sub cleanup {
+    unlink 'popfile.db';
+    unlink 'popfile.pid';
+    unlink 'popfile.cfg';
+    unlink 'stopwords';
+    rmtree 'messages';
+
+}
+
+
 sub rec_cp
 {
     my ( $from, $to ) = @_;
@@ -251,6 +279,7 @@ my @patterns= ( '.*' );
 @patterns = split( /,/, $ARGV[0] ) if ( $#ARGV == 0 );
 
 my $code = 0;
+my %tests = ();
 
 foreach my $test (@tests) {
 
@@ -272,6 +301,7 @@ foreach my $test (@tests) {
 
         my $current_test_count  = $test_count;
         my $current_error_count = $test_failures;
+        use_base_environment();
 
         print "\nRunning $test... at line: ";
         flush STDOUT;
@@ -306,9 +336,29 @@ foreach my $test (@tests) {
         } else {
                 print STDERR "ok (" . ( $test_count - $current_test_count ) . " ok)";
         }
+        $tests{$test} = { FAIL => ( $test_failures - $current_error_count ), OK => ( $test_count - $current_test_count ) };
+        cleanup();
     }
+
 }
 
 print STDERR "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";
 print "\n";
+
+# Display a summary of the results if more than 1 test was run:
+if ( scalar keys %tests > 1 ) {
+    foreach ( sort keys %tests ) {
+        if ( $tests{$_}->{FAIL} == 0 ) {
+            printf "   %-22s    PASS\n", $_;
+        }
+        else {
+            printf "   %-22s %4d failed %4d OK\n", $_, $tests{$_}->{FAIL}, $tests{$_}->{OK};
+        }
+    }
+    print "\n";
+}
+
+if ( $test_failures == 0 ) {
+    unlink <popfile*.log>;
+}
 exit $code;
