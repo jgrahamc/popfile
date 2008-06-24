@@ -236,9 +236,10 @@ sub deliver
 # entry should be added to the history).
 #
 #----------------------------------------------------------------------------
-sub reserve_slot
-{
-    my ( $self, $session ) = @_;
+sub reserve_slot {
+    my $self          = shift;
+    my $session       = shift;
+    my $inserted_time = shift || time;
 
     my $userid = $self->classifier_()->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
@@ -261,7 +262,7 @@ sub reserve_slot
         # when we received it
 
         my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-                $insert_sth, $userid, $r, time );                           # PROFILE BLOCK STOP
+                $insert_sth, $userid, $r, $inserted_time );                 # PROFILE BLOCK STOP
         next if ( !defined( $result ) );
 
         if ( $is_sqlite2 ) {
@@ -995,9 +996,9 @@ sub set_query
     # If there's a search portion then add the appropriate clause
     # to find the from/subject header
 
-    my $not_word  = $not?'not':'';
-    my $not_equal = $not?'!=':'=';
-    my $equal     = $not?'=':'!=';
+    my $not_word  = $not ? 'not' : '';
+    my $not_equal = $not ? '!='  : '=';
+    my $equal     = $not ? '='   : '!=';
 
     if ( $search ne '' ) {
         $search = $self->db_()->quote( '%' . $search . '%' );
