@@ -3444,7 +3444,7 @@ sub history_page
         $templ->param( 'History_Start_Message' => $start_message );
 
         my $stop_message  = $start_message + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) - 1;
-        $stop_message = $self->history_()->get_query_size( $q ) - 1 if ( $stop_message >= $self->history_()->get_query_size( $q ) );
+        $stop_message = $c - 1 if ( $stop_message >= $c );
 
         $self->set_history_navigator__( $templ, $start_message, $stop_message, $session );
 
@@ -3881,11 +3881,11 @@ sub view_page
             if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
                 my $head = $1;
                 my $arg  = $2;
-            
+
                 if ( $head =~ /\Q$header\E/i ) {
-            
+
                     $value = $self->escape_html_( $value );
-            
+
                     if ( $arg =~ /\Q$value\E/i ) {
                         my $new_color = $self->classifier_()->get_bucket_color( $session, $bucket );
                         $line =~ s/(\Q$header\E|\Q$value\E)/<b style=\"color:$new_color\">$1<\/b>/g;
@@ -3957,7 +3957,7 @@ sub password_page
             return ($session, $self->url_decode_($self->{form_}{next}));
         } else {
             $self->error_message__( $templ,                                # PROFILE BLOCK START
-                       ( $single_user ? 
+                       ( $single_user ?
                          $self->language($session)->{Password_Error1} :
                          $self->language($session)->{Password_Error2} ) ); # PROFILE BLOCK STOP
         }
@@ -4254,7 +4254,7 @@ sub cache_language_for_user
 # Fill the language hash with the language strings that are from the
 # named language file
 #
-# 
+#
 #
 # $lang          - The language to load (no .msg extension)
 # $session       - A valid session key
