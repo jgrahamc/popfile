@@ -393,7 +393,7 @@ EOF
 
     # Now try a search
 
-    $h->set_query( $q, '', 'John', '', 0 );
+    $h->set_query( $q, '', 'john', '', 0 );
     test_assert_equal( $h->get_query_size( $q ), 1 );
     @rows = $h->get_query_rows( $q, 1, 1 );
     test_assert_equal( $#rows, 0 );
@@ -418,7 +418,7 @@ EOF
     $h->set_query( $q, '', 's', '', 1 );
     test_assert_equal( $h->get_query_size( $q ), 0 );
 
-    $h->set_query( $q, '', 'John', '', 1 );
+    $h->set_query( $q, '', 'john', '', 1 );
     test_assert_equal( $h->get_query_size( $q ), 2 );
     @rows = $h->get_query_rows( $q, 1, 2 );
     test_assert_equal( $#rows, 1 );
