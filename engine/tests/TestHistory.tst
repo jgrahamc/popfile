@@ -525,8 +525,8 @@ EOF
     @rows = $h->get_query_rows( $q, 1, 3 );
     test_assert_equal( $#rows, 2 );
     if ( $userid eq 1 ) {
-        test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
-        test_assert_equal( $rows[1][1], 'Another Person' );
+        test_assert_equal( $rows[0][1], 'Another Person' );
+        test_assert_equal( $rows[1][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
         test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
     } else {
         test_assert_equal( $rows[0][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
