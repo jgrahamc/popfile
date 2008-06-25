@@ -21,6 +21,10 @@
 #
 # ----------------------------------------------------------------------------
 
+use locale;
+use POSIX qw( locale_h );
+setlocale( LC_COLLATE, 'C' );
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -116,7 +120,6 @@ $c->stop();
 # Check that the popfile.cfg was written
 
 my @expected_config = (
- 'config_piddir ../tests/',
  'GLOBAL_ca_file ./certs/ca.pem',
  'GLOBAL_cert_file ./certs/server-cert.pem',
  'GLOBAL_crypt_device ',
@@ -130,6 +133,7 @@ my @expected_config = (
  'GLOBAL_session_timeout 1800',
  'GLOBAL_single_user 1',
  'GLOBAL_timeout 60',
+ 'config_piddir ../tests/',
  'logger_format default',
  'logger_level 0',
  'logger_logdir ./',
