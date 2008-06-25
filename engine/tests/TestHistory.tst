@@ -153,7 +153,7 @@ EOF
     my $size = -s $file;
     my $slot1;
 
-    sleep(2);
+    sleep 2;
 
     ( $slot1, $file ) = $h->reserve_slot( $session );
     open FILE, ">$file";
@@ -169,7 +169,7 @@ EOF
     close FILE;
     my $size2 = -s $file;
 
-    sleep(2);
+    sleep 2;
 
     # This is a message for testing evil spammer header tricks or
     # unusual header malformations that may end up parsed into our
@@ -453,6 +453,8 @@ EOF
     $h->stop_query( $q );
 
     if ( $userid eq 1 ) {
+        sleep 2;
+
         # Make sure that we can upgrade an existing file with a specific
         # classification
 
@@ -538,7 +540,7 @@ EOF
     $h->stop_query( $q );
 
     $h->user_config_( 1, 'history_days', 0 ); # Clean up userid = 1 only
-    sleep( 2 );
+    sleep 2;
     $h->cleanup_history();
 
     my $qq = $h->start_query( $session );
