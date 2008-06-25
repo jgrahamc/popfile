@@ -570,7 +570,6 @@ if ( $pid == 0 ) {
 
         $POPFile->CORE_stop();
 
-        sleep(1);
         exit(0);
     } else {
 

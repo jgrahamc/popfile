@@ -84,20 +84,17 @@ if ( $pid == 0 ) {
     my $w  = $POPFile->get_module( 'Classifier/WordMangle' );
     my $hi = $POPFile->get_module( 'POPFile/History'       );
     my $p  = $POPFile->get_module( 'Proxy/POP3'            );
-    my $h  = $POPFile->get_module( 'interface/HTML' );
+    my $h  = $POPFile->get_module( 'UI/HTML'               );
 
-    $l->config_( 'level', 0 );
-    $mq->pipeready( \&pipeready );
-
-    $p->initialize();
-    $h->initialize();
-
-    $c->module_config_( 'pop3', 'enabled',       1 );
-    $c->module_config_( 'pop3', 'port',       9110 );
-    $c->module_config_( 'pop3', 'force_fork',    0 );
-    $c->module_config_( 'html', 'port',      $port );
-    $c->module_config_( 'html', 'local',         1 );
+    $l->config_( 'level',         0 );
+    $p->config_( 'enabled',       1 );
+    $p->config_( 'port',       9110 );
+    $p->config_( 'force_fork',    0 );
+    $h->config_( 'port',      $port );
+    $h->config_( 'local',         1 );
     $h->version( '?.?.?' );
+
+    $mq->pipeready( \&pipeready );
 
     $POPFile->CORE_start();
     $hi->service();
@@ -120,7 +117,7 @@ if ( $pid == 0 ) {
             $class =~ s/[\r\n]//g;
             close $CLS;
             my ( $slot, $msg_file ) = $hi->reserve_slot( $session, $inserted_time++ );
-            `cp $msg $msg_file`;
+            copy $msg, $msg_file;
             $hi->commit_slot( $session, $slot, $class, 0 );
         }
     }
@@ -615,6 +612,7 @@ skip:
     close $ureader;
 
     while ( waitpid( $pid, &WNOHANG ) != $pid ) {
+        sleep 1;
     }
 }
 

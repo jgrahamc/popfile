@@ -857,6 +857,7 @@ sub get_module
         $name = lc($4);
 
         $type =~ s/^POPFile$/core/i;
+        $type =~ s/^UI$/interface/i;
     }
 
     $name =~ s/configuration/config/;
