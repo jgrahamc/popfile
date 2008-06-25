@@ -46,9 +46,7 @@ foreach my $err_html (@err_html_list) {
 
 
 my @forms;
-
 my $hidden = 0;
-
 
 my $h = new UI::HTML;
 
@@ -63,15 +61,18 @@ $h->{language__}{global}{Locale_Thousands} = '&nbsp;';
 test_assert_equal( $h->pretty_number( 1234 ), '1&nbsp;234' );
 $h->{language__}{global}{Locale_Thousands} = '';
 
-our $port = 9001 + int(rand(1000));
+undef $h;
+
+our $port = 9999;
 pipe my $dreader, my $dwriter;
 pipe my $ureader, my $uwriter;
+
 my $pid = fork();
 
+# CHILD THAT WILL RUN THE HTML INTERFACE
 if ( $pid == 0 ) {
 
     my $POPFile = POPFile::Loader->new();
-    # $POPFile->{debug__} = 1;
     $POPFile->CORE_loader_init();
     $POPFile->CORE_signals();
 
@@ -89,8 +90,6 @@ if ( $pid == 0 ) {
     $POPFile->CORE_initialize();
     $POPFile->CORE_config( 1 );
 
-    $h->loader( $POPFile );
-
     my $c  = $POPFile->get_module( 'POPFile/Configuration' );
     my $mq = $POPFile->get_module( 'POPFile/MQ'            );
     my $l  = $POPFile->get_module( 'POPFile/Logger'        );
@@ -98,20 +97,25 @@ if ( $pid == 0 ) {
     my $w  = $POPFile->get_module( 'Classifier/WordMangle' );
     my $hi = $POPFile->get_module( 'POPFile/History'       );
     my $p  = $POPFile->get_module( 'Proxy/POP3'            );
+       $h  = $POPFile->get_module( 'interface/HTML' );
 
     $l->config_( 'level', 0 );
     $mq->pipeready( \&pipeready );
 
     $p->initialize();
+    $h->initialize();
 
     $c->module_config_( 'pop3', 'enabled',       1 );
     $c->module_config_( 'pop3', 'port',       9110 );
     $c->module_config_( 'pop3', 'force_fork',    0 );
-    $c->module_config_( 'html', 'port', $port + 1 );
+    $c->module_config_( 'html', 'port',      $port );
+    $c->module_config_( 'html', 'local',         1 );
+    $h->version( '?.?.?' );
 
     $POPFile->CORE_start();
     $hi->service();
     $mq->service();
+    $h->service();
 
     my $session = $b->get_administrator_session_key();
     my $inserted_time = time - 100;
@@ -136,23 +140,11 @@ if ( $pid == 0 ) {
     $mq->service();
     $hi->service();
 
-    # CHILD THAT WILL RUN THE HTML INTERFACE
-
     close $dwriter;
     close $ureader;
 
     $uwriter->autoflush(1);
-
-    $h->initialize();
-
-    $h->config_( 'port',  $port );
-    $h->config_( 'local',     1 );
-    $h->version( '?.?.?' );
-
-    $h->start();
-
     $mq->{pid__} = $$;
-
     $mq->service();
 
     my $lang = $h->language();
@@ -164,7 +156,7 @@ if ( $pid == 0 ) {
         $mq->service();
 
         if ( pipeready( $dreader ) ) {
-            my $command = <$dreader>;
+            my $command = <$dreader> || '';
 
             if ( $command =~ /^__QUIT/ ) {
                 $h->stop();

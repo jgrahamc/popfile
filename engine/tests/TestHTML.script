@@ -62,6 +62,10 @@
 # Look for elements that should appear at the TOP and BOTTOM
 # of every page
 
+GET /administration
+MATCH pop3_port
+
+
 GET /
 
 # Common TOP parts
