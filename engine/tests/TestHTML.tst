@@ -48,20 +48,7 @@ foreach my $err_html (@err_html_list) {
 my @forms;
 my $hidden = 0;
 
-my $h = new UI::HTML;
-
-test_assert_equal( $h->url_encode_( ']'     ), '%5d'       );
-test_assert_equal( $h->url_encode_( '['     ), '%5b'       );
-test_assert_equal( $h->url_encode_( '[]'    ), '%5b%5d'    );
-test_assert_equal( $h->url_encode_( '[foo]' ), '%5bfoo%5d' );
-
-$h->{language__}{global}{Locale_Thousands} = ',';
-test_assert_equal( $h->pretty_number( 1234 ), '1,234'      );
-$h->{language__}{global}{Locale_Thousands} = '&nbsp;';
-test_assert_equal( $h->pretty_number( 1234 ), '1&nbsp;234' );
-$h->{language__}{global}{Locale_Thousands} = '';
-
-undef $h;
+unit_tests();
 
 our $port = 9999;
 pipe my $dreader, my $dwriter;
@@ -97,7 +84,7 @@ if ( $pid == 0 ) {
     my $w  = $POPFile->get_module( 'Classifier/WordMangle' );
     my $hi = $POPFile->get_module( 'POPFile/History'       );
     my $p  = $POPFile->get_module( 'Proxy/POP3'            );
-       $h  = $POPFile->get_module( 'interface/HTML' );
+    my $h  = $POPFile->get_module( 'interface/HTML' );
 
     $l->config_( 'level', 0 );
     $mq->pipeready( \&pipeready );
@@ -706,6 +693,24 @@ sub pipeready
         my $ready = select( $rin, undef, undef, 0.01 );
         return ( $ready > 0 );
     }
+}
+
+
+sub unit_tests {
+    my $h = new UI::HTML;
+
+    test_assert_equal( $h->url_encode_( ']'     ), '%5d'       );
+    test_assert_equal( $h->url_encode_( '['     ), '%5b'       );
+    test_assert_equal( $h->url_encode_( '[]'    ), '%5b%5d'    );
+    test_assert_equal( $h->url_encode_( '[foo]' ), '%5bfoo%5d' );
+
+    $h->{language__}{global}{Locale_Thousands} = ',';
+    test_assert_equal( $h->pretty_number( 1234 ), '1,234'      );
+
+    $h->{language__}{global}{Locale_Thousands} = '&nbsp;';
+    test_assert_equal( $h->pretty_number( 1234 ), '1&nbsp;234' );
+
+
 }
 
 1;
