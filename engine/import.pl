@@ -114,6 +114,7 @@ if ( $#ARGV > 0 ) {
     $row = $h->fetchrow_arrayref;
     my $userid = $row->[0];
     $h->finish;
+    undef $h;
 
     if ( !defined( $userid) ) {
         $POPFile2->CORE_stop();
@@ -228,6 +229,7 @@ if ( $#ARGV > 0 ) {
             $b2->add_words_to_bucket__( $user_session, $bucket, 1 );
         }
         $h->finish;
+        undef $h;
 
         print "Imported the database successfully\n";
 
