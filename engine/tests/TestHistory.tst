@@ -97,7 +97,9 @@ sub history_test
     $bucketids{spam} = $h->classifier_()->get_bucket_id( $session, 'spam' );
     $bucketids{personal} = $h->classifier_()->get_bucket_id( $session, 'personal' );
 
-    my ( $slot, $file ) = $h->reserve_slot( $session );
+    my $insert_time = time - 100;
+
+    my ( $slot, $file ) = $h->reserve_slot( $session, $insert_time++ );
 
     test_assert( defined( $slot ) );
     test_assert( !( -e $file ) );
@@ -134,7 +136,7 @@ sub history_test
     # then commit it and call service to get it added.  Ensure that the
     # slot is now committed and has the right fields
 
-    ( $slot, $file ) = $h->reserve_slot( $session );
+    ( $slot, $file ) = $h->reserve_slot( $session, $insert_time++ );
 
     open FILE, ">$file";
     print FILE <<EOF;
@@ -153,9 +155,7 @@ EOF
     my $size = -s $file;
     my $slot1;
 
-    sleep 2;
-
-    ( $slot1, $file ) = $h->reserve_slot( $session );
+    ( $slot1, $file ) = $h->reserve_slot( $session, $insert_time++ );
     open FILE, ">$file";
 print FILE <<EOF;
 From: Evil Spammer <nospam\@jgc.org>
@@ -168,8 +168,6 @@ This is the message body
 EOF
     close FILE;
     my $size2 = -s $file;
-
-    sleep 2;
 
     # This is a message for testing evil spammer header tricks or
     # unusual header malformations that may end up parsed into our
@@ -187,7 +185,7 @@ EOF
 
     my $slot2;
 
-    ( $slot2, $file ) = $h->reserve_slot( $session );
+    ( $slot2, $file ) = $h->reserve_slot( $session, $insert_time++ );
     open FILE, ">$file";
     print FILE <<EOF;
 From: Evil Spammer who does tricks <nospam\@jgc.org>
