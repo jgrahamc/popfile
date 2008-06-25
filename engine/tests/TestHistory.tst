@@ -451,8 +451,6 @@ EOF
     $h->stop_query( $q );
 
     if ( $userid eq 1 ) {
-        sleep 2;
-
         # Make sure that we can upgrade an existing file with a specific
         # classification
 
