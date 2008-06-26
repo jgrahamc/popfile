@@ -299,9 +299,20 @@ sub CORE_forker
 {
     my ( $self ) = @_;
 
+    my %fork_order = ( # PROFILE BLOCK START
+        'core'        => 1,
+        'classifier'  => 2,
+        'interface'   => 3,
+        'proxy'       => 4,
+        'services'    => 5,
+        'platform'    => 6,
+    );                 # PROFILE BLOCK STOP
+
+    my @types = sort {$fork_order{$a}<=>$fork_order{$b}} keys %{$self->{components__}};
+
     # Tell all the modules that a fork is about to happen
 
-    foreach my $type (sort keys %{$self->{components__}}) {
+    foreach my $type ( @types ) {
         foreach my $name (sort keys %{$self->{components__}{$type}}) {
             $self->{components__}{$type}{$name}->prefork();
         }
@@ -329,10 +340,10 @@ sub CORE_forker
     # caller knows that we are in the child
 
     if ( $pid == 0 ) {
-          foreach my $type (sort keys %{$self->{components__}}) {
-               foreach my $name (sort keys %{$self->{components__}{$type}}) {
-                 $self->{components__}{$type}{$name}->forked( $writer );
-              }
+        foreach my $type ( @types ) {
+            foreach my $name (sort keys %{$self->{components__}{$type}}) {
+                $self->{components__}{$type}{$name}->forked( $writer );
+            }
         }
 
         close $reader;
@@ -351,7 +362,7 @@ sub CORE_forker
     # writer pipe file handle and return our PID (non-zero) indicating
     # that this is the parent process
 
-    foreach my $type (sort keys %{$self->{components__}}) {
+    foreach my $type ( @types ) {
         foreach my $name (sort keys %{$self->{components__}{$type}}) {
             $self->{components__}{$type}{$name}->postfork( $pid, $reader );
         }

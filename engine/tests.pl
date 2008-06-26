@@ -139,7 +139,8 @@ sub test_report
                 }
                 $test_failures += 1;
             print "Test fail at $file:$line ($test)";
-            print " ($context)\n" if ( defined($context) );
+            print " ($context)" if ( defined($context) );
+            print "\n";
         } else {
 #            print "Test pass at $file:$line ($test) ($context)\n";
         }

@@ -124,9 +124,11 @@ test_assert_equal( $h->url_encode_( '{start' ), '%7bstart' );
 # http_error_ tests
 
 open FILE, ">temp.tmp";
+binmode FILE;
 $h->http_error_( \*FILE, 404 );
 close FILE;
 open FILE, "<temp.tmp";
+binmode FILE;
 my $line = <FILE>;
 test_assert_equal( $line, "HTTP/1.0 404 Error$eol" );
 $line = <FILE>;
@@ -143,9 +145,11 @@ close FILE;
 # http_file_ tests
 
 open FILE, ">temp.tmp";
+binmode FILE;
 $h->http_file_( \*FILE, 'doesnotexist.fil' );
 close FILE;
 open FILE, "<temp.tmp";
+binmode FILE;
 my $line = <FILE>;
 test_assert_equal( $line, "HTTP/1.0 404 Error$eol" );
 $line = <FILE>;
@@ -160,13 +164,16 @@ test_assert( $line =~ /^$eol$/ );
 close FILE;
 
 open FILE, ">send.tmp";
+binmode FILE;
 print FILE "somechars$eol";
 close FILE;
 
 open FILE, ">temp.tmp";
+binmode FILE;
 $h->http_file_( \*FILE, 'send.tmp', 'text/plain' );
 close FILE;
 open FILE, "<temp.tmp";
+binmode FILE;
 my $line = <FILE>;
 test_assert_equal( $line, "HTTP/1.0 200 OK$eol" );
 $line = <FILE>;

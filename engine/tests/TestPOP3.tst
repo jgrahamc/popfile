@@ -472,8 +472,7 @@ if ( $pid == 0 ) {
     }
 
     close $server;
-    sleep(1);
-    exit(0);
+    $POPFile->CORE_childexit(0);
 } else {
 
     # This pipe is used to send signals to the child running
@@ -566,11 +565,8 @@ if ( $pid == 0 ) {
         close $uwriter;
 
         $mq->reaper();
-        $p->stop();
 
-        $POPFile->CORE_stop();
-
-        exit(0);
+        $POPFile->CORE_childexit(0);
     } else {
 
         # PARENT THAT WILL SEND COMMAND TO THE PROXY
@@ -2160,6 +2156,9 @@ if ( $pid == 0 ) {
         close $dwriter;
         close $ureader;
 
+        $p->stop();
+        $POPFile->CORE_stop();
+
         while ( waitpid( -1, WNOHANG ) > 0 ) {
             select( undef, undef, undef, 0.1 );
         }
@@ -2432,10 +2431,10 @@ sub forker
     }
 
     if ( $pid == 0 ) {
+        $db->forked( $writer );
         $b->forked( $writer );
         $mq->forked( $writer );
         $h->forked( $writer );
-        $db->forked( $writer );
 #        $p->forked( $writer );
         close $reader;
 
