@@ -33,7 +33,7 @@ FAKECONFIG = ExtUtils-FakeConfig-0.11
 FAKECONFIG_ARCHIVE = $(FAKECONFIG).zip
 FAKECONFIG_URL = http://search.cpan.org/CPAN/authors/id/M/MB/MBARBON/$(FAKECONFIG_ARCHIVE)
 
-DBI = DBI-1.604
+DBI = DBI-1.605
 DBI_ARCHIVE = $(DBI).tar.gz
 DBI_URL = http://search.cpan.org/CPAN/authors/id/T/TI/TIMB/$(DBI_ARCHIVE)
 

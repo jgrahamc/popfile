@@ -32,6 +32,8 @@ PACKAGE_ID=org.getpopfile
 
 RESOURCES=./Resources
 
+UTILITIES=./utilities
+
 PACKAGE=$(PACKAGE_DIST)/$(PACKAGE_NAME).pkg
 
 POPFILE_ROOT=$(PACKAGE_ROOT)/Library/POPFile
@@ -53,7 +55,7 @@ $(ARCHIVE): $(IMAGE)
 	gzip -c $(IMAGE) > $(ARCHIVE)
 	
 	@echo "...done"
-$(IMAGE): installer ssl_installer
+$(IMAGE): installer ssl_installer utility_scripts
 	@rm -f $@
 	
 	@echo "Creating disk image ..."
@@ -129,6 +131,14 @@ installer: $(engine)
 
 ssl_installer: modules
 	$(MAKE) -C ./addssl
+
+utility_scripts: build-utilities
+	if test ! -d $(PACKAGE_DIST)/utilities; then mkdir $(PACKAGE_DIST)/utilities ; fi
+	cp -r $(UTILITIES)/*.app $(PACKAGE_DIST)/utilities
+	cp $(UTILITIES)/Readme.rtf $(PACKAGE_DIST)/utilities
+
+build-utilities:
+	$(MAKE) -C ./utilities
 
 mecab:
 	$(MAKE) -C ./mecab
