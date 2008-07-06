@@ -41,7 +41,7 @@ POPFILE_ROOT=$(PACKAGE_ROOT)/Library/POPFile
 VOLUME_NAME=$(PACKAGE_NAME)
 IMAGE=$(VOLUME_NAME).dmg
 IMAGE_TMP=$(VOLUME_NAME)_tmp.dmg
-ARCHIVE=$(VOLUME_NAME).dmg.gz
+ARCHIVE=$(VOLUME_NAME)-macosx.dmg.gz
 
 PACKAGE_MAKER = /Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
 
