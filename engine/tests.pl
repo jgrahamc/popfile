@@ -28,7 +28,7 @@ require IO::Handle;
 use File::Copy;
 use File::Find;
 use File::Path;
-
+use English qw(-no_match_vars);
 
 
 sub use_base_environment {
@@ -126,26 +126,26 @@ sub spin
 
 sub test_report
 {
-        my ( $ok, $test, $file, $line, $context ) = @_;
+    my ( $ok, $test, $file, $line, $context ) = @_;
 
-        spin( $line );
+    spin( $line );
 
-        $test_count += 1;
+    $test_count += 1;
 
-        if ( !$ok ) {
-                $fail_messages .= "\n    $file:$line failed '$test'";
-                if ( defined( $context ) ) {
-                        $fail_messages .= " ($context)";
-                }
-                $test_failures += 1;
-            print "Test fail at $file:$line ($test)";
-            print " ($context)" if ( defined($context) );
-            print "\n";
-        } else {
-#            print "Test pass at $file:$line ($test) ($context)\n";
+    if ( !$ok ) {
+        $fail_messages .= "\n    $file:$line failed '$test'";
+        if ( defined( $context ) ) {
+                $fail_messages .= " ($context)";
         }
+        $test_failures += 1;
+        print "Test fail at $file:$line ($test)";
+        print " ($context)" if ( defined($context) );
+        print "\n";
+    } else {
+#        print "Test pass at $file:$line ($test) ($context)\n";
+    }
 
-        flush STDOUT;
+    flush STDOUT;
 }
 
 # ----------------------------------------------------------------------------
@@ -290,10 +290,10 @@ foreach my $test (@tests) {
         if ( $test =~ /$pattern/ ) {
             $runit = 1;
             last;
-	  }
-     }
+        }
+    }
 
-     if ( $runit ) {
+    if ( $runit ) {
 
         # This works by reading the entire suite into the $suite variable
         # and then changing calls to test_assert_equal so that they include
@@ -311,13 +311,13 @@ foreach my $test (@tests) {
         my $ln   = 0;
         open SUITE, "<$test";
         while (<SUITE>) {
-                my $line = $_;
-                $ln += 1;
-                $line =~ s/(test_assert_not_regexp\()/$1 '$test', $ln,/g;
-                $line =~ s/(test_assert_regexp\()/$1 '$test', $ln,/g;
-                $line =~ s/(test_assert_equal\()/$1 '$test', $ln,/g;
-                $line =~ s/(test_assert\()/$1 '$test', $ln,/g;
-                $suite .= $line;
+            my $line = $_;
+            $ln += 1;
+            $line =~ s/(test_assert_not_regexp\()/$1 '$test', $ln,/g;
+            $line =~ s/(test_assert_regexp\()/$1 '$test', $ln,/g;
+            $line =~ s/(test_assert_equal\()/$1 '$test', $ln,/g;
+            $line =~ s/(test_assert\()/$1 '$test', $ln,/g;
+            $suite .= $line;
         }
         close SUITE;
 
@@ -331,11 +331,11 @@ foreach my $test (@tests) {
         }
 
         if ( $test_failures > $current_error_count ) {
-                print STDERR "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
-                print STDERR $fail_messages . "\n";
-                $code = 1;
+            print STDERR "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
+            print STDERR $fail_messages . "\n";
+            $code = 1;
         } else {
-                print STDERR "ok (" . ( $test_count - $current_test_count ) . " ok)";
+            print STDERR "ok (" . ( $test_count - $current_test_count ) . " ok)";
         }
         $tests{$test} = { FAIL => ( $test_failures - $current_error_count ), OK => ( $test_count - $current_test_count ) };
         cleanup();
@@ -343,21 +343,68 @@ foreach my $test (@tests) {
 
 }
 
-print STDERR "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";
-print "\n";
+print "\n\n";
+
+# Test report
+my $test_report = './test-report.txt';
+open REPORT, ">$test_report";
+
+print REPORT "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";
 
 # Display a summary of the results if more than 1 test was run:
 if ( scalar keys %tests > 1 ) {
     foreach ( sort keys %tests ) {
         if ( $tests{$_}->{FAIL} == 0 ) {
-            printf "   %-22s    PASS\n", $_;
+            printf REPORT "   %-25s    PASS\n", $_;
         }
         else {
-            printf "   %-22s %4d failed %4d OK\n", $_, $tests{$_}->{FAIL}, $tests{$_}->{OK};
+            printf REPORT "   %-25s %4d failed %4d OK\n", $_, $tests{$_}->{FAIL}, $tests{$_}->{OK};
         }
     }
-    print "\n";
+    print REPORT "\n";
 }
+
+# Perl version report
+printf REPORT "System : %s\n", $English::OSNAME;
+printf REPORT "Perl : %f\n", $English::PERL_VERSION;
+print REPORT "\n";
+
+my $packing_list .= '../popfile.pck';
+
+print REPORT "Installed Perl modules\n\n";
+if ( open PACKING, "<$packing_list" ) {
+    while (<PACKING>) {
+        if ( /^(REQUIRED|OPTIONAL-([^\t]+))\t([^\t]+)\t([^\r\n]+)/ ) {
+            my ( $required, $why, $version, $module ) = ( $1, $2, $3, $4 );
+
+            # Find the module and set $ver to the loaded version, or -1 if
+            # the module was not found
+
+            my $ver = -1;
+            eval "require $module;
+                \$ver = \$${module}::VERSION;
+            ";
+
+            if ( $ver == -1 ) {
+                printf REPORT "   %-25s    <not installed>\n", $module;
+            }
+            else {
+                printf REPORT "   %-25s    %2.3f\n", $module, $ver;
+            }
+        }
+    }
+    close PACKING;
+}
+print REPORT "\n";
+
+close REPORT;
+
+# Output report to STDERR
+open REPORT, "<$test_report";
+while ( <REPORT> ) {
+    print STDERR;
+}
+close REPORT;
 
 if ( $test_failures == 0 ) {
     unlink <popfile*.log>;
