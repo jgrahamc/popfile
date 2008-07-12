@@ -636,6 +636,13 @@ sub verify_connected_
 
             $self->log_( 1, "Connection returned: $buf" );
 
+            # If we cannot read any response from server, close the connection
+
+            if ( $buf eq '' ) {
+                close $mail;
+                last;
+            }
+
             $self->{connect_banner__} = $buf;
 
             # Clean up junk following a newline
