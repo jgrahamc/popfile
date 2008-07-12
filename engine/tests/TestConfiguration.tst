@@ -133,6 +133,7 @@ my @expected_config = (
  'GLOBAL_session_timeout 1800',
  'GLOBAL_single_user 1',
  'GLOBAL_timeout 60',
+ 'config_pidcheck_interval 5',
  'config_piddir ../tests/',
  'logger_format default',
  'logger_level 0',
