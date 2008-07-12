@@ -44,6 +44,8 @@ my %explain = ( 'Encode' => $japanese,
                 'IO::Socket::Socks' => 'Socks Proxy Support',
                 'MeCab' => $japanese,
                 'Text::Kakasi' => $japanese,
+                'Crypt::OpenSSL::Random' => 'Cryptgraphic Random support',
+                'Crypt::Random' => 'Cryptgraphic Random support',,
                 'XMLRPC::Transport::HTTP' => 'XML-RPC Server Support' );
 
 # ARGV should contain the name of the packing list to generate
