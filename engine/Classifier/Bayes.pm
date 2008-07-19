@@ -890,9 +890,9 @@ sub db_update_cache__
     delete $self->{db_bucketid__}{$userid};
 
     my ( $bucketname, $bucketid, $pseudo );
-    $self->{db_get_buckets__}->bind_columns( \$bucketname, \$bucketid, \$pseudo );
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
             $self->{db_get_buckets__}, $userid );          # PROFILE BLOCK STOP
+    $self->{db_get_buckets__}->bind_columns( \$bucketname, \$bucketid, \$pseudo );
     while ( $self->{db_get_buckets__}->fetchrow_arrayref ) {
         $self->{db_bucketid__}{$userid}{$bucketname}{id} = $bucketid;
         $self->{db_bucketid__}{$userid}{$bucketname}{pseudo} = $pseudo;
