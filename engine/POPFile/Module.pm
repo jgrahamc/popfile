@@ -894,6 +894,46 @@ sub flush_extra_
    return $full_buf;
 }
 
+# ----------------------------------------------------------------------------
+#
+# is_valid_number_ - Check if value is valid number
+#
+# Returns 1 if valid
+#
+# $value       The value to check
+# $min         If defined, $value should be greater than or equals to $min
+# $max         If defined, $value should be less than or equals to $max
+#
+# ----------------------------------------------------------------------------
+sub is_valid_number_
+{
+    my ( $self, $value, $min, $max ) = @_;
+
+    return 0 if ( !defined( $value ) );
+    return 0 if ( $value !~ /^-?\d+$/ );
+
+    return 0 if ( defined( $min ) && ( $value < $min ) );
+    return 0 if ( defined( $max ) && ( $value > $max ) );
+
+    return 1;
+}
+
+# ----------------------------------------------------------------------------
+#
+# is_valid_port_ - Check if value is valid port ( from 1 to 65535 )
+#
+# Returns 1 if valid
+#
+# $value       The value to check
+#
+# ----------------------------------------------------------------------------
+sub is_valid_port_
+{
+    my ( $self, $value ) = @_;
+
+    return $self->is_valid_number_( $value, 1, 65535 );
+}
+
 # Functions used to get handles to other POPFile modules
 #
 # If a module needs to get access to the MQ (for example) then

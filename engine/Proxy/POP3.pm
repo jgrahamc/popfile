@@ -801,9 +801,7 @@ sub validate_item
 
     if ( $name eq 'pop3_configuration' ) {
         if ( defined($$form{pop3_port}) ) {
-            if ( ( $$form{pop3_port} =~ /^\d+$/ ) &&       # PROFILE BLOCK START
-                 ( $$form{pop3_port} >= 1 ) &&
-                 ( $$form{pop3_port} < 65536 ) ) {         # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $$form{pop3_port} ) ) {
                 if ( $self->config_( 'port' ) ne $$form{pop3_port} ) {
                     $self->config_( 'port', $$form{pop3_port} );
                     $status_message .= sprintf(                # PROFILE BLOCK START
@@ -873,9 +871,7 @@ sub validate_item
        }
 
         if ( defined($$form{sport}) ) {
-            if ( ( $$form{sport} =~ /^\d+$/ ) &&           # PROFILE BLOCK START
-                 ( $$form{sport} >= 1 ) &&
-                 ( $$form{sport} < 65536 ) ) {             # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $$form{sport} ) ) {
                 if ( $self->config_( 'secure_port' ) ne $$form{sport} ) {
                     $self->config_( 'secure_port', $$form{sport} );
                     $status_message .= sprintf(                       # PROFILE BLOCK START

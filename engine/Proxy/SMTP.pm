@@ -387,9 +387,7 @@ sub validate_item
         }
 
         if ( defined($$form{smtp_port}) ) {
-            if ( ( $$form{smtp_port} =~ /^\d+$/ ) &&       # PROFILE BLOCK START
-                 ( $$form{smtp_port} >= 1 ) &&
-                 ( $$form{smtp_port} < 65536 ) ) {         # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $$form{smtp_port} ) ) {
                 if ( $self->config_( 'port' ) ne $$form{smtp_port} ) {
                     $self->config_( 'port', $$form{smtp_port} );
                     $status .= sprintf(                    # PROFILE BLOCK START
@@ -430,9 +428,7 @@ sub validate_item
 
         if ( defined $$form{smtp_chain_server_port} ) {
 
-            if ( ( $$form{smtp_chain_server_port} =~ /^\d+$/ ) && # PROFILE BLOCK START
-                 ( $$form{smtp_chain_server_port} >= 1 ) &&
-                 ( $$form{smtp_chain_server_port} < 65536 ) ) {   # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $$form{smtp_chain_server_port} ) ) {
                 if ( $self->config_( 'chain_port' ) ne $$form{smtp_chain_server_port} ) {
                     $self->config_( 'chain_port', $$form{smtp_chain_server_port} );
                     $status .= sprintf(                       # PROFILE BLOCK START

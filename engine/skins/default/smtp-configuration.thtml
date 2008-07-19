@@ -3,7 +3,7 @@
         <TMPL_VAR NAME="Localize_Configuration_SMTPPort">:
     </label>
     <br />
-    <input name="smtp_port" type="text" id="configSMTPPort" value="<TMPL_VAR NAME="smtp_port">" />
+    <input name="smtp_port" type="text" id="configSMTPPort" value="<TMPL_VAR NAME="smtp_port" ESCAPE=HTML>" />
     <br />
 
     <input name="smtp_force_fork" id="smtpForceFork" type="checkbox" value="1" <TMPL_IF NAME="smtp_force_fork_on">checked</TMPL_IF> />

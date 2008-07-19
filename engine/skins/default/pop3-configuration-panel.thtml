@@ -3,14 +3,14 @@
         <TMPL_VAR NAME="Localize_Configuration_POP3Port">:
     </label>
     <br />
-    <input name="pop3_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="POP3_Configuration_Port">" />
+    <input name="pop3_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="POP3_Configuration_Port" ESCAPE=HTML>" />
     <br />
 
     <label class="configurationLabel" for="configPopSeparator">
         <TMPL_VAR NAME="Localize_Configuration_POP3Separator">:
     </label>
     <br />
-    <input name="pop3_separator" id="configPopSeparator" type="text" value="<TMPL_VAR NAME="POP3_Configuration_Separator">" maxlength="1" />
+    <input name="pop3_separator" id="configPopSeparator" type="text" value="<TMPL_VAR NAME="POP3_Configuration_Separator" ESCAPE=HTML>" maxlength="1" />
     <br />
 
     <input name="pop3_force_fork" id="pop3forceFork" type="checkbox" value="1" <TMPL_IF NAME="POP3_Configuration_If_Force_Fork">checked</TMPL_IF> />

@@ -144,7 +144,7 @@ function serverMode(state) {
                 <TMPL_ELSE>
                 <tr class="rowEven">
                 </TMPL_IF>
-                    <td aligh="left" ><TMPL_VAR NAME="CurrentSessions_UserName"></td>
+                    <td aligh="left" ><TMPL_VAR NAME="CurrentSessions_UserName" ESCAPE=HTML></td>
                     <td align="left" ><TMPL_VAR NAME="CurrentSessions_LastUsed"></td>
                     <td align="right"><TMPL_VAR NAME="CurrentSessions_IdleTime"></td>
                 </tr>
@@ -167,7 +167,7 @@ function serverMode(state) {
                     <TMPL_VAR NAME="Localize_Configuration_UI">:
                 </label>
                 <br />
-                <input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port">" />
+                <input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port" ESCAPE=HTML>" />
                 <br />
 
                 <br />
@@ -180,7 +180,7 @@ function serverMode(state) {
                     <TMPL_VAR NAME="Localize_Configuration_UIHTTPSPort">:
                 </label>
                 <br />
-                <input name="ui_https_port" id="configUIHTTPSPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_HTTPS_Port">" />
+                <input name="ui_https_port" id="configUIHTTPSPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_HTTPS_Port" ESCAPE=HTML>" />
                 <br />
 
                 <br />
@@ -188,14 +188,14 @@ function serverMode(state) {
                     <TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:
                 </label>
                 <br />
-                <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
+                <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout" ESCAPE=HTML>" />
 
                 <br />
                 <label class="configurationLabel" for="configSessionTimeout">
                     <TMPL_VAR NAME="Localize_Configuration_SessionTimeoutSecs">:
                 </label>
                 <br />
-                <input name="session_timeout" type="text" id="configSessionTimeout" value="<TMPL_VAR NAME="Configuration_Session_Timeout">" />
+                <input name="session_timeout" type="text" id="configSessionTimeout" value="<TMPL_VAR NAME="Configuration_Session_Timeout" ESCAPE=HTML>" />
 
                 <br /><br />
                 <input type="submit" class="submit" name="update_modules" value="<TMPL_VAR NAME="Localize_Apply">" />

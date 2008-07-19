@@ -33,7 +33,7 @@
                 <label class="configurationLabel" for="configPageSize" title="<TMPL_VAR NAME="Localize_tip_Config_PageSize">">
                     <TMPL_VAR NAME="Localize_Configuration_History">:
                 </label>
-                <input name="page_size" id="configPageSize" type="text" size="4" maxlength="4" value="<TMPL_VAR NAME="Configuration_Page_Size">" />
+                <input name="page_size" id="configPageSize" type="text" size="4" maxlength="4" value="<TMPL_VAR NAME="Configuration_Page_Size" ESCAPE=HTML>" />
                 <input type="submit" class="submit" name="update_page_size" value="<TMPL_VAR NAME="Localize_Apply">" />
         </div>
         <div class="configBarOption">
@@ -41,7 +41,7 @@
                     <TMPL_VAR NAME="Localize_Configuration_Days">:
                 </label>
 
-                <input name="history_days" id="configHistoryDays" type="text" size="3" maxlength="3" value="<TMPL_VAR NAME="Configuration_History_Days">" />
+                <input name="history_days" id="configHistoryDays" type="text" size="3" maxlength="3" value="<TMPL_VAR NAME="Configuration_History_Days" ESCAPE=HTML>" />
 
                 <span class="checkLabel"><input type="checkbox" class="checkbox" name="purge_history" id="purge_history" value="<TMPL_VAR NAME="Localize_History_Purge">" />
                 <label for="purge_history" title="<TMPL_VAR NAME="Localize_tip_Config_Purge">"><TMPL_VAR NAME="Localize_History_Purge"></label></span>

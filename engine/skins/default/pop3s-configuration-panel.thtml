@@ -3,7 +3,7 @@
         <TMPL_VAR NAME="Localize_Configuration_POP3SPort">:
     </label>
     <br />
-    <input name="pop3s_port" type="text" id="configPop3sPort" value="<TMPL_VAR NAME="POP3S_Configuration_Port">" />
+    <input name="pop3s_port" type="text" id="configPop3sPort" value="<TMPL_VAR NAME="POP3S_Configuration_Port" ESCAPE=HTML>" />
     <br />
 
     <input name="pop3s_force_fork" id="pop3sforceFork" type="checkbox" value="1" <TMPL_IF NAME="POP3S_Configuration_If_Force_Fork">checked</TMPL_IF> />

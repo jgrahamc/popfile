@@ -706,9 +706,7 @@ sub validate_item
 
     if ( $name eq $me . "_socks_configuration" ) {
         if ( defined($$form{"$me" . "_socks_port"}) ) {
-            if ( ( $$form{"$me" . "_socks_port"} =~ /^\d+$/ ) && # PROFILE BLOCK START
-                 ( $$form{"$me" . "_socks_port"} >= 1 ) &&
-                 ( $$form{"$me" . "_socks_port"} < 65536 ) ) {   # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $$form{"$me" . "_socks_port"} ) ) {
                 if ( $self->config_( 'socks_port' ) ne $$form{"$me" . "_socks_port"} ) {
                     $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
                     $status = sprintf(                        # PROFILE BLOCK START

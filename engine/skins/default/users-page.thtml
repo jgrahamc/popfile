@@ -144,10 +144,10 @@
         </TMPL_IF>
 
         <td>
-        <TMPL_VAR NAME="Account"> 
+        <TMPL_VAR NAME="Account" ESCAPE=HTML> 
         </td>
         <td align="center">
-        <input type="checkbox" class="checkbox" name="remove_<TMPL_VAR NAME="Account">" />
+        <input type="checkbox" class="checkbox" name="remove_<TMPL_VAR NAME="Account" ESCAPE=HTML>" />
         <TMPL_VAR NAME="Localize_Remove">
          </td>
         </tr>
@@ -169,8 +169,8 @@
         <input type="text" value="" name="newaccount">
         <input type="submit" name="addaccount" value="<TMPL_VAR NAME="Localize_Add">">
 
-        <input type="hidden" name="editname" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
-        <input type="hidden" name="edituser" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
+        <input type="hidden" name="editname" value="<TMPL_VAR NAME="Users_Edit_User_Name" ESCAPE=HTML>" />
+        <input type="hidden" name="edituser" value="<TMPL_VAR NAME="Users_Edit_User_Name" ESCAPE=HTML>" />
         </form>
 
                 <hr />
@@ -205,15 +205,15 @@
                         </TMPL_IF>
                     </td>
                     <td>
-                        <input type="text" name="parameter_<TMPL_VAR NAME="Users_Parameter">" value="<TMPL_VAR NAME="Users_Value">">
+                        <input type="text" name="parameter_<TMPL_VAR NAME="Users_Parameter">" value="<TMPL_VAR NAME="Users_Value" ESCAPE=HTML>">
                     </td>
                 </tr>
 
                 </TMPL_LOOP>
                 </table>
                 <br />
-                    <input type="hidden" name="editname" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
-                    <input type="hidden" name="edituser" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
+                    <input type="hidden" name="editname" value="<TMPL_VAR NAME="Users_Edit_User_Name" ESCAPE=HTML>" />
+                    <input type="hidden" name="edituser" value="<TMPL_VAR NAME="Users_Edit_User_Name" ESCAPE=HTML>" />
                     <input type="submit" class="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params">
                 </form>
             </TMPL_IF>

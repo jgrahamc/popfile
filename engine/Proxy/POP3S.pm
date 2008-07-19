@@ -206,9 +206,7 @@ sub validate_item
 
     if ( $name eq 'pop3s_configuration' ) {
         if ( defined($$form{pop3s_port}) ) {
-            if ( ( $$form{pop3s_port} =~ /^\d+$/ ) &&      # PROFILE BLOCK START
-                 ( $$form{pop3s_port} >= 1 ) &&
-                 ( $$form{pop3s_port} < 65536 ) ) {        # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $$form{pop3s_port} ) ) {
                 if ( $self->config_( 'port') ne $$form{pop3s_port} ) {
                     $self->config_( 'port', $$form{pop3s_port} );
                     $status_message .= sprintf(                # PROFILE BLOCK START

@@ -3,14 +3,14 @@
         <TMPL_VAR NAME="Localize_Configuration_NNTPPort">:
     </label>
     <br />
-    <input name="nntp_port" type="text" id="configNNTPPort" value="<TMPL_VAR NAME="nntp_port">" />
+    <input name="nntp_port" type="text" id="configNNTPPort" value="<TMPL_VAR NAME="nntp_port" ESCAPE=HTML>" />
     <br />
 
     <label class="configurationLabel" for="configNntpSeparator">
         <TMPL_VAR NAME="Localize_Configuration_NNTPSeparator">:
     </label>
     <br />
-    <input name="nntp_separator" id="configNntpSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" maxlength="1" />
+    <input name="nntp_separator" id="configNntpSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator" ESCAPE=HTML>" maxlength="1" />
     <br />
 
     <input name="nntp_force_fork" id="nntpForceFork" type="checkbox" value="1" <TMPL_IF NAME="nntp_force_fork_on">checked</TMPL_IF> />

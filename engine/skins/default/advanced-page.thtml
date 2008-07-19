@@ -13,10 +13,10 @@
 
                 <tr>
                     <th scope="row" class="<TMPL_VAR NAME="Advanced_Row_Class">">
-                        <b><TMPL_VAR NAME="Advanced_Character"></b>
+                        <b><TMPL_VAR NAME="Advanced_Character" ESCAPE=HTML></b>
                     </th>
                     <td class="<TMPL_VAR NAME="Advanced_Word_Class">">
-                        <TMPL_VAR NAME="Advanced_Words">
+                        <TMPL_VAR NAME="Advanced_Words" ESCAPE=HTML>
                     </td>
                 </tr>
 
@@ -79,9 +79,9 @@
                         </td>
                         <td>
                             <TMPL_IF NAME="Advanced_If_Password">
-                            <input type="password" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">" id="<TMPL_VAR NAME="Advanced_Parameter">">
+                            <input type="password" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value" ESCAPE=HTML>" id="<TMPL_VAR NAME="Advanced_Parameter">">
                             <TMPL_ELSE>
-                            <input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">" id="<TMPL_VAR NAME="Advanced_Parameter">">
+                            <input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value" ESCAPE=HTML>" id="<TMPL_VAR NAME="Advanced_Parameter">">
                             </TMPL_IF>
                         </td>
                     </tr>

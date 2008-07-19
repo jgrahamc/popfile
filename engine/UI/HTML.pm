@@ -992,8 +992,7 @@ sub handle_history_bar__
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
     if ( defined($self->{form_}{page_size}) ) {
-        if ( ( $self->{form_}{page_size} >= 1 ) &&     # PROFILE BLOCK START
-             ( $self->{form_}{page_size} <= 1000 ) ) { # PROFILE BLOCK STOP
+        if ( $self->is_valid_number_( $self->{form_}{page_size}, 1, 1000) ) {
             $self->user_config_( $self->{sessions__}{$session}{user},      # PROFILE BLOCK START
                                  'page_size', $self->{form_}{page_size} ); # PROFILE BLOCK STOP
         } else {
@@ -1008,8 +1007,7 @@ sub handle_history_bar__
                                         'page_size' ) ); # PROFILE BLOCK STOP
 
     if ( defined($self->{form_}{history_days}) ) {
-        if ( ( $self->{form_}{history_days} >= 1 ) &&    # PROFILE BLOCK START
-             ( $self->{form_}{history_days} <= 366 ) ) { # PROFILE BLOCK STOP
+        if ( $self->is_valid_number_( $self->{form_}{history_days}, 1, 366) ) {
             $self->user_module_config_( $self->{sessions__}{$session}{user}, # PROFILE BLOCK START
                                         'history', 'history_days',
                                         $self->{form_}{history_days} );       # PROFILE BLOCK STOP
@@ -1333,20 +1331,22 @@ sub administration_page
     # Logger options
 
     elsif ( $self->{form_}->{submit_debug} ) {
-        my $logger_level = $self->{form_}->{level};
+        if ( ( defined($self->{form_}{level}) ) &&                      # PROFILE BLOCK START
+             $self->is_valid_number_( $self->{form_}{level}, 0, 2 ) ) {  # PROFILE BLOCK STOP
+            my $logger_level = $self->{form_}{level};
 
-        if ( $self->module_config_( 'logger', 'level' ) ne $logger_level ) {
-            $self->module_config_( 'logger', 'level', $logger_level );
-            $self->status_message__(  # PROFILE BLOCK START
-                    $templ,
-                    sprintf( $self->language($session)->{Configuration_Logger_LevelUpdate},
-                             $self->language($session)->{"Configuration_Logger_Level$logger_level"} )
-                                   ); # PROFILE BLOCK STOP
+            if ( $self->module_config_( 'logger', 'level' ) ne $logger_level ) {
+                $self->module_config_( 'logger', 'level', $logger_level );
+                $self->status_message__(  # PROFILE BLOCK START
+                        $templ,
+                        sprintf( $self->language($session)->{Configuration_Logger_LevelUpdate},
+                                 $self->language($session)->{"Configuration_Logger_Level$logger_level"} )
+                                       ); # PROFILE BLOCK STOP
+            }
         }
 
-        if ( ( defined($self->{form_}->{debug}) ) && # PROFILE BLOCK START
-           ( ( $self->{form_}{debug} >= 1 ) &&
-             ( $self->{form_}{debug} <= 4 ) ) ) {    # PROFILE BLOCK STOP
+        if ( ( defined($self->{form_}->{debug}) ) &&                    # PROFILE BLOCK START
+             $self->is_valid_number_( $self->{form_}{debug}, 1, 4 ) ) {  # PROFILE BLOCK STOP
             my $debug = $self->{form_}{debug} - 1;
             if ( $self->global_config_( 'debug' ) ne $debug ) {
                 my %debug_options = (                        # PROFILE BLOCK START
@@ -1369,9 +1369,7 @@ sub administration_page
 
     elsif ( $self->{form_}->{update_modules} ) {
         if ( defined($self->{form_}{ui_port}) ) {
-            if ( ( $self->{form_}{ui_port} =~ /^\d+$/ ) &&  # PROFILE BLOCK START
-                 ( $self->{form_}{ui_port} >= 1 ) &&
-                 ( $self->{form_}{ui_port} < 65536 ) ) {    # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $self->{form_}{ui_port} ) ) {
                 if ( $self->config_( 'port' ) ne $self->{form_}{ui_port} ) {
                     $self->config_( 'port', $self->{form_}{ui_port} );
                     $self->status_message__(                       # PROFILE BLOCK START
@@ -1386,9 +1384,7 @@ sub administration_page
         }
 
         if ( defined($self->{form_}{ui_https_port}) ) {
-            if ( ( $self->{form_}{ui_https_port} =~ /^\d+$/ ) && # PROFILE BLOCK START
-                 ( $self->{form_}{ui_https_port} >= 1 ) &&
-                 ( $self->{form_}{ui_https_port} < 65536 ) ) {   # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $self->{form_}{ui_https_port} ) ) {
                 if ( $self->config_( 'https_port' ) ne $self->{form_}{ui_https_port} ) {
                     $self->config_( 'https_port', $self->{form_}{ui_https_port} );
                     $self->status_message__(                             # PROFILE BLOCK START
@@ -1415,9 +1411,7 @@ sub administration_page
         }
 
         if ( defined($self->{form_}{timeout}) ) {
-            if ( ( $self->{form_}{timeout} =~ /^\d+$/ ) &&  # PROFILE BLOCK START
-                 ( $self->{form_}{timeout} >= 10 ) &&
-                 ( $self->{form_}{timeout} <= 1800 ) ) {     # PROFILE BLOCK STOP
+            if ( $self->is_valid_number_( $self->{form_}{timeout}, 10, 1800 ) ) {
                 if ( $self->global_config_( 'timeout' ) ne $self->{form_}{timeout} ) {
                     $self->global_config_( 'timeout', $self->{form_}{timeout} );
                     $self->status_message__(                                 # PROFILE BLOCK START
@@ -1434,9 +1428,7 @@ sub administration_page
         }
 
         if ( defined($self->{form_}{session_timeout}) ) {
-            if ( ( $self->{form_}{session_timeout} =~ /^\d+$/ ) &&  # PROFILE BLOCK START
-                 ( $self->{form_}{session_timeout} >= 300 ) &&
-                 ( $self->{form_}{session_timeout} <= 86400 ) ) {   # PROFILE BLOCK STOP
+            if ( $self->is_valid_number_( $self->{form_}{session_timeout}, 300, 86400) ) {
                 if ( $self->global_config_( 'session_timeout' ) ne $self->{form_}{session_timeout} ) {
                     $self->global_config_( 'session_timeout', $self->{form_}{session_timeout} );
                     $self->status_message__(                                 # PROFILE BLOCK START

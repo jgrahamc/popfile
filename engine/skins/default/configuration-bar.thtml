@@ -34,8 +34,8 @@
 
                             <TMPL_LOOP NAME="Configuration_Loop_General_Skins">
 
-                            <option value="<TMPL_VAR NAME="Configuration_General_Skin">" <TMPL_VAR NAME="Configuration_General_Selected">>
-                                <TMPL_VAR NAME="Configuration_General_Skin">
+                            <option value="<TMPL_VAR NAME="Configuration_General_Skin" ESCAPE=HTML>" <TMPL_VAR NAME="Configuration_General_Selected">>
+                                <TMPL_VAR NAME="Configuration_General_Skin" ESCAPE=HTML>
                             </option>
 
                             </TMPL_LOOP>
@@ -46,8 +46,8 @@
 
                             <TMPL_LOOP NAME="Configuration_Loop_Small_Skins">
 
-                            <option value="<TMPL_VAR NAME="Configuration_Small_Skin">" <TMPL_VAR NAME="Configuration_Small_Selected">>
-                                <TMPL_VAR NAME="Configuration_Small_Skin">
+                            <option value="<TMPL_VAR NAME="Configuration_Small_Skin" ESCAPE=HTML>" <TMPL_VAR NAME="Configuration_Small_Selected">>
+                                <TMPL_VAR NAME="Configuration_Small_Skin" ESCAPE=HTML>
                             </option>
 
                             </TMPL_LOOP>
@@ -57,8 +57,8 @@
 
                             <TMPL_LOOP NAME="Configuration_Loop_Tiny_Skins">
 
-                            <option value="<TMPL_VAR NAME="Configuration_Tiny_Skin">" <TMPL_VAR NAME="Configuration_Tiny_Selected">>
-                                <TMPL_VAR NAME="Configuration_Tiny_Skin">
+                            <option value="<TMPL_VAR NAME="Configuration_Tiny_Skin" ESCAPE=HTML>" <TMPL_VAR NAME="Configuration_Tiny_Selected">>
+                                <TMPL_VAR NAME="Configuration_Tiny_Skin" ESCAPE=HTML>
                             </option>
 
                             </TMPL_LOOP>
@@ -78,8 +78,8 @@
 
                         <TMPL_LOOP NAME="Configuration_Loop_Languages">
 
-                        <option value="<TMPL_VAR NAME="Configuration_Language">" <TMPL_VAR NAME="Configuration_Selected_Language">>
-                            <TMPL_VAR NAME="Configuration_Language">
+                        <option value="<TMPL_VAR NAME="Configuration_Language" ESCAPE=HTML>" <TMPL_VAR NAME="Configuration_Selected_Language">>
+                            <TMPL_VAR NAME="Configuration_Language" ESCAPE=HTML>
                         </option>
 
                         </TMPL_LOOP>

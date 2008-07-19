@@ -3,14 +3,14 @@
         <TMPL_VAR NAME="Localize_Security_SecureServer">:
     </label>
     <br />
-    <input type="text" name="server" id="securitySecurePOP3Server" value="<TMPL_VAR NAME="POP3_Chain_Secure_Server">" />
+    <input type="text" name="server" id="securitySecurePOP3Server" value="<TMPL_VAR NAME="POP3_Chain_Secure_Server" ESCAPE=HTML>" />
     <br />
 
     <label class="securityLabel" for="securitySecurePOP3Port">
         <TMPL_VAR NAME="Localize_Security_SecurePort">:
     </label>
     <br />
-    <input type="text" name="sport" id="securitySecurePOP3Port" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port">" />
+    <input type="text" name="sport" id="securitySecurePOP3Port" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port" ESCAPE=HTML>" />
     <br />
 
     <input type="checkbox" name="sssl" id="securitySecurePOP3SSL" value="1" <TMPL_IF NAME="POP3_Chain_Secure_SSL">checked</TMPL_IF> />

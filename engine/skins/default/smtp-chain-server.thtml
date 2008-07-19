@@ -3,14 +3,14 @@
         <TMPL_VAR NAME="Localize_Security_SMTPServer">:
     </label>
     <br />
-    <input type="text" name="smtp_chain_server" id="securitySecureSMTPServer" value="<TMPL_VAR NAME="smtp_chain_server">" />
+    <input type="text" name="smtp_chain_server" id="securitySecureSMTPServer" value="<TMPL_VAR NAME="smtp_chain_server" ESCAPE=HTML>" />
     <br />
 
     <label class="securityLabel" for="securitySecureSMTPPort">
         <TMPL_VAR NAME="Localize_Security_SMTPPort">:
     </label>
     <br />
-    <input type="text" name="smtp_chain_server_port" id="securitySecureSMTPPort" value="<TMPL_VAR NAME="smtp_chain_port">" />
+    <input type="text" name="smtp_chain_server_port" id="securitySecureSMTPPort" value="<TMPL_VAR NAME="smtp_chain_port" ESCAPE=HTML>" />
 
     <br /><br />
     <input type="submit" class="submit" name="update_smtp_server" value="<TMPL_VAR NAME="Localize_Apply">" />
