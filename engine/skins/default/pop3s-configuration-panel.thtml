@@ -1,0 +1,17 @@
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+    <label class="configurationLabel" for="configPop3sPort">
+        <TMPL_VAR NAME="Localize_Configuration_POP3SPort">:
+    </label>
+    <br />
+    <input name="pop3s_port" type="text" id="configPop3sPort" value="<TMPL_VAR NAME="POP3S_Configuration_Port">" />
+    <br />
+
+    <input name="pop3s_force_fork" id="pop3sforceFork" type="checkbox" value="1" <TMPL_IF NAME="POP3S_Configuration_If_Force_Fork">checked</TMPL_IF> />
+    <label class="configurationLabel" for="pop3sforceFork">
+        <TMPL_VAR NAME="Localize_Configuration_POP3SFork">
+    </label>
+
+    <br /><br />
+    <input type="submit" class="submit" name="update_pop3s_configuration" value="<TMPL_VAR NAME="Localize_Apply">" />
+</form>
+<br />
