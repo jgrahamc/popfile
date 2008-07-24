@@ -111,6 +111,7 @@ sub new
     $self->{forker__}       = '';
     $self->{reaper__}       = '';
     $self->{childexit__}    = '';
+    $self->{warning__}      = '';
 
     # POPFile's version number as individual numbers and as
     # string
@@ -154,6 +155,7 @@ sub CORE_loader_init
     $self->{forker__} = sub { $self->CORE_forker(@_) };
     $self->{reaper__} = sub { $self->CORE_reaper(@_) };
     $self->{childexit__} = sub { $self->CORE_childexit(@_) };
+    $self->{warning__} = sub { $self->CORE_warning(@_) };
 
     # See if there's a file named popfile_version that contains the
     # POPFile version number
@@ -374,6 +376,25 @@ sub CORE_forker
 
 #----------------------------------------------------------------------------
 #
+# CORE_warning
+#
+# Called when a warning occurs.
+# Output the warning to the log file and print it to STDERR.
+#
+#----------------------------------------------------------------------------
+sub CORE_warning
+{
+    my ( $self, @message ) = @_;
+
+    if ( $self->module_config( 'GLOBAL', 'debug' ) > 0 ) {
+        $self->{components__}{core}{logger}->debug( 0, 'Perl warning: ' .
+                                                       $message[0] );
+        warn $message[0];
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # CORE_load_directory_modules
 #
 # Called to load all the POPFile Loadable Modules (implemented as .pm
@@ -523,6 +544,10 @@ sub CORE_signals
     # Ignore broken pipes
 
     $SIG{PIPE}  = 'IGNORE';
+
+    # Better handling of the Perl warnings
+
+    $SIG{__WARN__} = $self->{warning__};
 
     return $SIG;
 }
