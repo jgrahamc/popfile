@@ -409,6 +409,45 @@ test_assert_equal( $m->get_root_path_( '/foo' ), undef );
 test_assert_equal( $m->get_root_path_( 'foo/' ), './foo/' );
 $c->{popfile_root__} = '../';
 
+# is_valid_number_
+
+test_assert(  $m->is_valid_number_(     1,    1, 100 ) );
+test_assert(  $m->is_valid_number_(   100,    1, 100 ) );
+test_assert( !$m->is_valid_number_(     0,    1, 100 ) );
+test_assert( !$m->is_valid_number_(    -1,    1, 100 ) );
+test_assert( !$m->is_valid_number_(   101,    1, 100 ) );
+test_assert( !$m->is_valid_number_( undef,    1, 100 ) );
+test_assert( !$m->is_valid_number_( 'a',      1, 100 ) );
+test_assert( !$m->is_valid_number_( '12a',    1, 100 ) );
+test_assert(  $m->is_valid_number_( '12',     1, 100 ) );
+test_assert(  $m->is_valid_number_(    -1,   -1, 100 ) );
+test_assert(  $m->is_valid_number_(   -90, -100, -10 ) );
+test_assert( !$m->is_valid_number_( 1.234,    1,   2 ) );
+
+test_assert(  $m->is_valid_number_(     1,     1 ) );
+test_assert(  $m->is_valid_number_( 10000,     1 ) );
+test_assert( !$m->is_valid_number_(     0,     1 ) );
+test_assert(  $m->is_valid_number_(   100, undef, 100 ) );
+test_assert(  $m->is_valid_number_( -1000, undef, 100 ) );
+test_assert( !$m->is_valid_number_( 10000, undef, 100 ) );
+test_assert(  $m->is_valid_number_(     1 ) );
+test_assert(  $m->is_valid_number_( 10000 ) );
+test_assert(  $m->is_valid_number_( -1000 ) );
+test_assert( !$m->is_valid_number_( 'abc' ) );
+test_assert( !$m->is_valid_number_( 1.234 ) );
+
+# is_valid_port_
+
+test_assert(  $m->is_valid_port_(     1 ) );
+test_assert(  $m->is_valid_port_( 65535 ) );
+test_assert( !$m->is_valid_port_(     0 ) );
+test_assert( !$m->is_valid_port_(    -1 ) );
+test_assert( !$m->is_valid_port_( 65536 ) );
+test_assert( !$m->is_valid_port_( 'abc' ) );
+test_assert( !$m->is_valid_port_( '12a' ) );
+test_assert(  $m->is_valid_port_( '123' ) );
+test_assert( !$m->is_valid_port_( 1.234 ) );
+
 $POPFile->CORE_stop();
 
 1;

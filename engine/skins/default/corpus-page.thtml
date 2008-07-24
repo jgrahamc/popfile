@@ -392,7 +392,7 @@
                                 <caption>
                                     <strong>
                                         <TMPL_VAR NAME="Localize_Bucket_LookupMessage2">
-                                        <TMPL_VAR NAME="Corpus_Word">
+                                        <TMPL_VAR NAME="Corpus_Word" ESCAPE=HTML>
                                         <br />
                                     </strong>
                                 </caption>
