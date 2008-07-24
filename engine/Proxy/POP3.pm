@@ -145,8 +145,10 @@ sub start
                                          'pop3-chain-panel.thtml',
                                          $self );                      # PROFILE BLOCK STOP
 
-    if ( $self->config_( 'welcome_string' ) =~ /^POP3 POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK START
-        $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );        # PROFILE BLOCK STOP
+    if ( $self->config_( 'welcome_string' ) =~                # PROFILE BLOCK START
+         /^POP3 POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK STOP
+        $self->config_( 'welcome_string',                                  # PROFILE BLOCK START
+                        "POP3 POPFile ($self->{version_}) server ready" ); # PROFILE BLOCK STOP
     }
 
     return $self->SUPER::start();
@@ -546,7 +548,8 @@ sub child__
                              $self->classifier_()->classify_and_modify(
                                  $session, $mail, $client, 0, '', 0, 0 ); # PROFILE BLOCK STOP
 
-                        $downloaded{$count} = $slot;
+                        $downloaded{$count}{slot}  = $slot;
+                        $downloaded{$count}{class} = $class;
 
                         # Note that the 1 here indicates that
                         # echo_response_ does not send the response to
@@ -637,8 +640,9 @@ sub child__
             my $file;
 
             if ( defined($downloaded{$count}) &&            # PROFILE BLOCK START
-                 ( $file = $self->history_()->get_slot_file( $downloaded{$count} ) ) &&
-                 (open RETRFILE, "<$file") ) {              # PROFILE BLOCK STOP
+                 ( $file = $self->history_()->get_slot_file(
+                        $downloaded{$count}{slot} ) ) &&
+                 ( open RETRFILE, "<$file" ) ) {            # PROFILE BLOCK STOP
 
                 # act like a network stream
 
@@ -652,28 +656,13 @@ sub child__
 
                 $self->tee_( $client, "+OK " . ( -s $file ) . " bytes from POPFile cache$eol" );
 
-                # Load the last classification
+                # echo file, inserting known classification,
+                # without saving
 
-                my ( $id, $from, $to, $cc, $subject,                                     # PROFILE BLOCK START
-                    $date, $hash, $inserted, $bucket, $reclassified ) =
-                    $self->history_()->get_slot_fields( $downloaded{$count}, $session ); # PROFILE BLOCK STOP
-
-                if ( $bucket ne 'unknown class' ) {
-
-                    # echo file, inserting known classification,
-                    # without saving
-
-                    ($class, undef) = $self->classifier_()->classify_and_modify( $session, \*RETRFILE, $client, 1, $bucket, $downloaded{$count} );
-                    print $client ".$eol";
-
-                } else {
-
-                    # If the class wasn't saved properly, classify
-                    # from disk normally
-
-                    ($class, undef) = $self->classifier_()->classify_and_modify( $session, \*RETRFILE, $client, 1, '', 0 );
-                    print $client ".$eol";
-                }
+                ( $class, undef ) = $self->classifier_()->classify_and_modify(  # PROFILE BLOCK START
+                    $session, \*RETRFILE, $client, 1,
+                    $downloaded{$count}{class}, $downloaded{$count}{slot} );    # PROFILE BLOCK STOP
+                print $client ".$eol";
 
                 close RETRFILE;
             } else {
@@ -690,12 +679,15 @@ sub child__
                 last if ( $response == 2 );
                 if ( $response == 0 ) {
                     my $slot;
-                    ( $class, $slot ) = $self->classifier_()->classify_and_modify( $session, $mail, $client, 0, '', 0 );
+                    ( $class, $slot ) =                             # PROFILE BLOCK START
+                        $self->classifier_()->classify_and_modify(
+                            $session, $mail, $client, 0, '', 0 );   # PROFILE BLOCK STOP
 
                     # Note locally that file has been retrieved if the
                     # full thing has been saved to disk
 
-                    $downloaded{$count} = $slot;
+                    $downloaded{$count}{slot}  = $slot;
+                    $downloaded{$count}{class} = $class;
                 }
             }
 

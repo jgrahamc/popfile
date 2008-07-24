@@ -36,9 +36,6 @@ my $lf = "\012";
 
 my $eol = "$cr$lf";
 
-use POSIX ":sys_wait_h";
-
-
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();

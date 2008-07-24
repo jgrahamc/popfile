@@ -2820,7 +2820,7 @@ sub classify_and_modify
 
     # Add LF if $msg_head_after ends with CR to avoid header concatination
 
-    $msg_head_after =~ s/\015\z/$eol/;
+    $msg_head_after =~ s/\015\z/$crlf/;
 
     # Add the XTC header
 
@@ -2848,7 +2848,8 @@ sub classify_and_modify
         }
     }
 
-    $msg_head_after .= $msg_head_q . "$crlf";
+    $msg_head_after .= $msg_head_q;
+    $msg_head_after .= $crlf if ( !$getting_headers );
 
     # Echo the text of the message to the client
 
@@ -4440,7 +4441,7 @@ sub set_user_parameter_from_id
 
     if ( ( $user == 1 ) &&                              # PROFILE BLOCK START
          ( $parameter eq 'GLOBAL_can_admin' ) &&
-         ( $value != 1 ) ) {                            # PROFILE BLOCK STOP
+         ( $value != '1' ) ) {                            # PROFILE BLOCK STOP
         return 0;
     }
 
