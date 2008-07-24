@@ -426,6 +426,10 @@ create trigger delete_bucket_template delete on bucket_template
 
 -- Default data
 
+-- This is schema version 8
+
+insert into popfile ( version ) values ( 8 );
+
 -- There's always a user called 'admin'
 
 insert into users ( id, name, password ) values ( 1, 'admin', 'e11f180f4a31d8caface8e62994abfaf' );
