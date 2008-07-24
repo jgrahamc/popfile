@@ -357,8 +357,11 @@ sub db_connect_helper__
     $self->log_( 0, "Attempting to connect to $dbconnect ($dbpresent)" );
 
     my $db = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
-                                  $self->config_( 'dbuser' ),
-                                  $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
+                           $self->config_( 'dbuser' ),
+                           $self->config_( 'dbauth' ),
+                           { RaiseError => 0,
+                             PrintError => 1,
+                             AutoCommit => 1 } );  # PROFILE BLOCK STOP
 
     if ( !defined( $db ) ) {
         $self->log_( 0, "Failed to connect to database and got error $DBI::errstr" );
@@ -652,6 +655,7 @@ sub validate_sql_prepare_and_execute {
         $sql = $self->check_for_nullbytes( $sql );
         $sth = $dbh->prepare( $sql );
     }
+    return undef if ( !defined( $sth ) );
 
     my $execute_result = undef;
 
