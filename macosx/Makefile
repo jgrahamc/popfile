@@ -118,7 +118,8 @@ installer: $(engine) ./Readme.txt
 		--title $(PACKAGE_TITLE) \
 		--version $(PACKAGE_VERSION) \
 		--filter CVS \
-		--filter .svn
+		--filter .svn \
+		--verbose
 
 	@echo "...done"
 

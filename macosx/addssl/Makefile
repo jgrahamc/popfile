@@ -78,7 +78,9 @@ ssl_installer: $(LIB_ROOT)/auto/Net/SSLeay/*.* $(LIB_ROOT)/IO/Socket/SSL.pm $(LI
 		--scripts $(RESOURCES) \
 		--title $(PACKAGE_TITLE) \
 		--version $(PACKAGE_VERSION) \
-		--filter CVS
+		--filter CVS \
+		--filter .svn \
+		--verbose
 
 	@echo "...done"
 
