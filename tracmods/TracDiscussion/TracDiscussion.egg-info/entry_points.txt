@@ -1,0 +1,9 @@
+[trac.plugins]
+TracDiscussion.core = tracdiscussion.core
+TracDiscussion.init = tracdiscussion.init
+TracDiscussion.search = tracdiscussion.search
+TracDiscussion.timeline = tracdiscussion.timeline
+TracDiscussion.wiki = tracdiscussion.wiki
+TracDiscussion.admin = tracdiscussion.admin
+TracDiscussion.notification = tracdiscussion.notification
+

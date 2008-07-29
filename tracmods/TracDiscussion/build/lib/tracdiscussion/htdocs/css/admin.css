@@ -1,0 +1,31 @@
+/*  General styles */
+.listing
+{
+  text-align: left;
+}
+
+.listing tr > td
+{
+  margin: 0em !important;
+  padding: 0em !important;
+  height: 100%;
+}
+
+.listing tr > td > a
+{
+  display: block;
+  height: 100%;
+  padding: 0.2em;
+  margin: 0em !important;
+  border: none;
+}
+
+.listing td.id, .listing td.moderators, .listing td.forum_group
+{
+  text-align: center;
+}
+
+.listing td.id
+{
+  width: 1%;
+}
