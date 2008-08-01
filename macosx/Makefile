@@ -106,7 +106,7 @@ installer: $(engine) ./Readme.txt
 
 	@echo "Building installer packages ..."
 
-	$(PACKAGE_MAKER) \
+	sudo $(PACKAGE_MAKER) \
 		--root $(PACKAGE_ROOT) \
 		--id $(PACKAGE_ID) \
 		--out $(PACKAGE) \
