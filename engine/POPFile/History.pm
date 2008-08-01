@@ -248,7 +248,8 @@ sub reserve_slot {
     my $insert_sth = $self->db_()->prepare(                            # PROFILE BLOCK START
             'insert into history ( userid, committed, inserted )
                          values  (      ?,         ?,        ? );' );  # PROFILE BLOCK STOP
-    my $is_sqlite2 = ( $self->db_()->{Driver}->{Name} =~ /SQLite2/ );
+    my $is_sqlite2 = ( $self->db_()->{Driver}->{Name} =~ /SQLite2?/ ) &&
+                     ( $self->db_()->{sqlite_version} =~ /^2\./ );
 
     my $slot;
 
