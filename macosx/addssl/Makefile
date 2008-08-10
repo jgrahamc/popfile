@@ -61,7 +61,7 @@ ssl_installer: $(LIB_ROOT)/auto/Net/SSLeay/*.* $(LIB_ROOT)/IO/Socket/SSL.pm $(LI
 
 	@echo "Applying recommended permissions..."
 
-	sudo chown -R root:admin $(PACKAGE_ROOT)/Library/POPFile
+	#sudo chown -R root:admin $(PACKAGE_ROOT)/Library/POPFile
 
 	@echo "...done"
 
