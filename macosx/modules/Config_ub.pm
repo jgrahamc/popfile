@@ -21,11 +21,14 @@ package Config_ub;
 require ExtUtils::FakeConfig;
 
 my $SDK = '/Developer/SDKs/MacOSX10.4u.sdk';
+my $MIN_VERSION = '-mmacosx-version-min=10.3';
+my $ARCH = '-arch i386 -arch ppc750';
 
 my %params = (
-    ccflags => "-Os -g -pipe -fno-common -DPERL_DARWIN -no-cpp-precomp -arch i686 -arch ppc750 -B$SDK/usr/include/gcc -B$SDK/usr/lib/gcc -isystem$SDK/usr/include -F$SDK/System/Library/Frameworks -fno-strict-aliasing -I/usr/local/include",
-    ldflags => "-arch i386 -arch ppc750 -Wl,-syslibroot,$SDK -L/usr/local/lib -mmacosx-version-min=10.3",
-    lddlflags => "-bundle -undefined dynamic_lookup -arch i386 -arch ppc750 -Wl,-syslibroot,$SDK -L/usr/local/lib -mmacosx-version-min=10.3"
+    ccflags => "-g -pipe -fno-common -DPERL_DARWIN $MIN_VERSION -no-cpp-precomp $ARCH -isysroot $SDK -fno-strict-aliasing",
+    ld => "cc $MIN_VERSION -isysroot $SDK",
+    ldflags => "$ARCH",
+    lddlflags => "-bundle -undefined dynamic_lookup $ARCH",
 );
 
 eval 'use ExtUtils::FakeConfig %params';

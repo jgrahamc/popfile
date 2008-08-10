@@ -1,0 +1,16 @@
+*** DBI-1.605/DBIXS.h	2008-05-28 22:01:29.000000000 +0900
+--- DBI-1.605-perl586/DBIXS.h	2008-08-10 14:27:49.000000000 +0900
+***************
+*** 19,24 ****
+--- 19,29 ----
+  #include <perl.h>
+  #include <XSUB.h>
+  
++ #undef SvPV_nolen
++ #define SvPV_nolen(sv) \
++     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
++      ? SvPVX(sv) : sv_2pv_nolen(sv))
++ 
+  #ifdef debug		/* causes problems with DBIS->debug	*/
+  #undef debug
+  #endif

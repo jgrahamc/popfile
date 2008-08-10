@@ -61,7 +61,7 @@ TIMEDATE_URL = http://search.cpan.org/CPAN/authors/id/G/GB/GBARR/$(TIMEDATE_ARCH
 
 SOAPLITE = SOAP-Lite-0.60
 SOAPLITE_ARCHIVE = $(SOAPLITE)a.tar.gz
-SOAPLITE_URL = http://search.cpan.org/CPAN/authors/id/M/MK/MKUTTER/$(SOAPLITE_ARCHIVE)
+SOAPLITE_URL = http://search.cpan.org/CPAN/authors/id/B/BY/BYRNE/SOAP/$(SOAPLITE_ARCHIVE)
 
 VERSION_MODULE = version-0.74
 VERSION_ARCHIVE = $(VERSION_MODULE).tar.gz
@@ -103,8 +103,10 @@ SSL_MODULES = $(NETSSLEAY) $(IOSOCKETSSL)
 all: build
 build: core_modules japanese_modules xmlrpc_modules ssl_modules kakasi_dictionary
 
-clean:
+all-clean: clean
 	rm -rf $(CORE_ARCHIVES) $(JAPANESESUPPORT_ARCHIVES) $(XMLRPC_ARCHIVES) $(SSL_ARCHIVES)
+
+clean:
 	rm -rf $(CORE_MODULES) $(JAPANESESUPPORT_MODULES) $(XMLRPC_MODULES) $(SSL_MODULES)
 	rm -rf $(LIB_ROOT)/*
 	rm -rf $(SSLLIB_ROOT)/*
@@ -160,19 +162,19 @@ ssl_modules: ssl_modules_build
 
 core_modules_build: $(CORE_ARCHIVES)
 core_modules_build: fakeconfig
-	if test ! -d $(DBI); then tar xzf $(DBI_ARCHIVE); fi
+	if test ! -d $(DBI); then tar xzf $(DBI_ARCHIVE); patch $(DBI)/DBIXS.h < ./DBIXS.h.patch; fi
 	cd $(DBI) ; \
 	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(SQLITE); then tar xzf $(SQLITE_ARCHIVE); fi
 	cd $(SQLITE) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL USE_LOCAL_SQLITE=1 ; fi ;\
+	if test ! -e Makefile; then perl -I.. -I../$(DBI) -I../$(DBI)/lib -I../$(DBI)/blib/arch -MConfig_ub Makefile.PL USE_LOCAL_SQLITE=1 ; fi ;\
 	make
 
 	if test ! -d $(SQLITE2); then tar xzf $(SQLITE2_ARCHIVE); fi
 	cd $(SQLITE2) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then perl -I.. -I../$(DBI) -I../$(DBI)/lib -I../$(DBI)/blib/arch -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(TAGSET); then tar xzf $(TAGSET_ARCHIVE); fi
