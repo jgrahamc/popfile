@@ -244,7 +244,6 @@ sub reserve_slot {
     my $userid = $self->classifier_()->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $r;
     my $insert_sth = $self->db_()->prepare(                            # PROFILE BLOCK START
             'insert into history ( userid, committed, inserted )
                          values  (      ?,         ?,        ? );' );  # PROFILE BLOCK STOP
@@ -254,7 +253,7 @@ sub reserve_slot {
     my $slot;
 
     while ( !defined($slot) || $slot == 0 ) {
-        $r = int(rand( 1000000000 )+2);
+        my $r = int(rand( 1000000000 )+2);
 
         $self->log_( 2, "reserve_slot selected random number $r" );
 

@@ -19,7 +19,7 @@
 <!-- a table for the message to be viewed -->
 <table class="openMessageTable" cellpadding="10%" cellspacing="0" width="100%" summary="<TMPL_VAR NAME="Localize_History_OpenMessageSummary">">
     <tr>
-        <td>
+        <td colspan="2">
             <form id="HistoryMainForm" action="/history" method="post">
                 <input type="hidden" name="search" value="<TMPL_VAR NAME="View_Field_Search">" />
                 <input type="hidden" name="sort" value="<TMPL_VAR NAME="View_Field_Sort">" />
@@ -201,13 +201,13 @@
         </td>
     </tr>
     <tr>
-        <td class="openMessageBody">
+        <td colspan="2" class="openMessageBody">
             <hr />
             <TMPL_VAR NAME="View_Message">
         </td>
     </tr>
     <tr>
-        <td class="top20" valign="top">
+        <td colspan="2" class="top20" valign="top">
 
             <!-- the following was inserted by view-quickmagnets-widget.thtml -->
             <TMPL_INCLUDE NAME="view-quickmagnets-widget.thtml">
@@ -226,6 +226,7 @@
             </TMPL_IF>
 
         </td>
+    </tr>
     <tr>
         <td>
             <a class="messageLink" href="/view?view=<TMPL_VAR NAME="View_This">&amp;text=1"><TMPL_VAR NAME="Localize_View_DownloadMessage"></a>
