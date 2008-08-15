@@ -33,7 +33,7 @@ FAKECONFIG = ExtUtils-FakeConfig-0.11
 FAKECONFIG_ARCHIVE = $(FAKECONFIG).zip
 FAKECONFIG_URL = http://search.cpan.org/CPAN/authors/id/M/MB/MBARBON/$(FAKECONFIG_ARCHIVE)
 
-DBI = DBI-1.605
+DBI = DBI-1.607
 DBI_ARCHIVE = $(DBI).tar.gz
 DBI_URL = http://search.cpan.org/CPAN/authors/id/T/TI/TIMB/$(DBI_ARCHIVE)
 
@@ -79,7 +79,7 @@ TEXTKAKASI_URL = http://search.cpan.org/CPAN/authors/id/D/DA/DANKOGAI/$(TEXTKAKA
 
 # SSL support
 
-NETSSLEAY = Net-SSLeay-1.32
+NETSSLEAY = Net-SSLeay-1.35
 NETSSLEAY_ARCHIVE = $(NETSSLEAY).tar.gz
 NETSSLEAY_URL = http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/$(NETSSLEAY_ARCHIVE)
 
