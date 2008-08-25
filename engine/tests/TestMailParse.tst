@@ -466,6 +466,57 @@ test_assert_equal( $subject[0], 'test' );
 test_assert_equal( $subject[1], 'various' );
 test_assert_equal( $subject[2], 'parts' );
 
+# test file_extension
+
+my ( $name, $ext ) = $cl->file_extension( 'test.txt' );
+test_assert_equal( $name, 'test' );
+test_assert_equal( $ext,  'txt'  );
+( $name, $ext ) = $cl->file_extension( 'test.test.txt' );
+test_assert_equal( $name, 'test.test' );
+test_assert_equal( $ext,  'txt'       );
+( $name, $ext ) = $cl->file_extension( '.txt' );
+test_assert_equal( $name, '' );
+test_assert_equal( $ext,  'txt'     );
+( $name, $ext ) = $cl->file_extension( 'test.' );
+test_assert_equal( $name, 'test' );
+test_assert_equal( $ext,  ''     );
+( $name, $ext ) = $cl->file_extension( 'testtxt' );
+test_assert_equal( $name, 'testtxt' );
+test_assert_equal( $ext,  ''        );
+( $name, $ext ) = $cl->file_extension( '' );
+test_assert_equal( $name, '' );
+test_assert_equal( $ext,  '' );
+( $name, $ext ) = $cl->file_extension( '.' );
+test_assert_equal( $name, '' );
+test_assert_equal( $ext,  '' );
+( $name, $ext ) = $cl->file_extension( '..' );
+test_assert_equal( $name, '.' );
+test_assert_equal( $ext,  '' );
+
+# test add_attchment_filename
+
+$cl->add_attachment_filename( 'test.txt' );
+test_assert_equal( $cl->{words__}{'mimename:test'},     1 );
+test_assert_equal( $cl->{words__}{'mimeextension:txt'}, 1 );
+$cl->add_attachment_filename( 'test2.tar.gz' );
+test_assert_equal( $cl->{words__}{'mimename:test2.tar'}, 1 );
+test_assert_equal( $cl->{words__}{'mimeextension:gz'},   1 );
+$cl->add_attachment_filename( 'test3.' );
+test_assert_equal( $cl->{words__}{'mimename:test3'}, 1 );
+test_assert( !exists $cl->{words__}{'mimeextension:'} );
+$cl->add_attachment_filename( '.bashrc' );
+test_assert( !exists $cl->{words__}{'mimename:'} );
+test_assert_equal( $cl->{words__}{'mimeextension:bashrc'}, 1 );
+$cl->add_attachment_filename( '.' );
+test_assert( !exists $cl->{words__}{'mimename:'} );
+test_assert( !exists $cl->{words__}{'mimeextension:'} );
+$cl->add_attachment_filename( '' );
+test_assert( !exists $cl->{words__}{'mimename:'} );
+test_assert( !exists $cl->{words__}{'mimeextension:'} );
+$cl->add_attachment_filename( undef );
+test_assert( !exists $cl->{words__}{'mimename:'} );
+test_assert( !exists $cl->{words__}{'mimeextension:'} );
+
 # test first20
 
 $cl->parse_file( 'TestMails/TestMailParse022.msg' );

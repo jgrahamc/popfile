@@ -2493,14 +2493,13 @@ sub file_extension
 {
     my ( $self, $filename ) = @_;
 
-    $filename =~ s/(.*)\.(.*)$//;
-
-    if ( length( $1 ) > 0 ) {
+    if ( $filename =~ m/(.*)\.(.*)$/ ) {
         return ( $1, $2 );
     } else {
-        return ( $filename, "" );
+        return ( $filename, '' );
     }
 }
+
 # ----------------------------------------------------------------------------
 #
 # add_attachment_filename - Adds a file name and extension as pseudo
@@ -2513,7 +2512,7 @@ sub add_attachment_filename
 {
     my ( $self, $filename ) = @_;
 
-    if ( length( $filename ) > 0) {
+    if ( defined( $filename ) && ( $filename ne '' ) ) {
         print "Add filename $filename\n" if $self->{debug__};
 
         # Decode the filename
@@ -2521,11 +2520,11 @@ sub add_attachment_filename
 
         my ( $name, $ext ) = $self->file_extension( $filename );
 
-        if ( length( $name ) > 0) {
+        if ( defined( $name ) && ( $name ne '' ) ) {
             $self->update_pseudoword( 'mimename', $name, 0, $name );
         }
 
-        if ( length( $ext ) > 0 ) {
+        if ( defined( $ext ) && ( $ext ne '' ) ) {
             $self->update_pseudoword( 'mimeextension', $ext, 0, $ext );
         }
     }
