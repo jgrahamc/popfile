@@ -22,18 +22,21 @@
 . /etc/rc.common
 
 POPFILEDIR="/Library/POPFile"
-KANWADICTPATH="$POPFILEDIR/kakasi/kanwadict"; export KANWADICTPATH
-ITAIJIDICTPATH="$POPFILEDIR/kakasi/itaijidict"; export ITAIJIDICTPATH
-MECABRC="$POPFILEDIR/mecab/etc/mecabrc"; export MECABRC
+
+export POPFILE_ROOT="$POPFILEDIR"
+export POPFILE_USER="$POPFILEDIR"
+
+export KANWADICTPATH="$POPFILEDIR/kakasi/kanwadict"
+export ITAIJIDICTPATH="$POPFILEDIR/kakasi/itaijidict"
+export MECABRC="$POPFILEDIR/mecab/etc/mecabrc"
 
 StartService ()
 {
     pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
     if ! [ $pid ]; then
       ConsoleMessage "Starting POPFile POP mail proxy"
-      rm -f "$POPFILEDIR"/popfile.pid
-      cd "$POPFILEDIR"
-      perl -Ilib ./popfile.pl > /dev/null 2>&1 &
+      rm -f "$POPFILE_USER"/popfile.pid
+      perl -I"$POPFILE_ROOT"/lib "$POPFILE_ROOT"/popfile.pl > "$POPFILE_USER"/console.log 2>&1 &
     else
       ConsoleMessage "POPFile is already running"
     fi
@@ -45,7 +48,7 @@ StopService ()
     if [ $pid ]; then
       ConsoleMessage "Stopping POPFile POP mail proxy"
       kill -6 $pid
-      rm -f "$POPFILEDIR"/popfile.pid
+      rm -f "$POPFILE_USER"/popfile.pid
     else
       ConsoleMessage "POPFile is not running."
     fi
@@ -54,11 +57,14 @@ StopService ()
 RestartService ()
 {
     pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
+    if [ $pid ]; then
       ConsoleMessage "Restarting POPFile POP mail proxy"
       kill -HUP $pid
-      rm -f "$POPFILEDIR"/popfile.pid
-      cd "$POPFILEDIR"
-      perl -Ilib ./popfile.pl > /dev/null 2>&1 &
+    else
+      ConsoleMessage "POPFile is not running. Starting POPFile POP mail proxy"
+    fi
+    rm -f "$POPFILE_USER"/popfile.pid
+    perl -I"$POPFILE_ROOT"/lib "$POPFILE_ROOT"/popfile.pl > "$POPFILE_USER"/console.log 2>&1 &
 }
 
 RunService "$1"

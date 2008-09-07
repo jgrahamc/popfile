@@ -24,7 +24,7 @@ POPFILE_ROOT=$(PACKAGE_ROOT)/Library/POPFile
 
 OSACOMPILE = osacompile
 
-SCRIPTS = start-popfile.applescript stop-popfile.applescript open-popfile-ui.applescript start-popfile-with-console.applescript
+SCRIPTS = start-popfile.applescript stop-popfile.applescript open-popfile-ui.applescript start-popfile-with-console.applescript custom-data-folder.applescript
 APPS = $(SCRIPTS:.applescript=.app)
 
 all: build
