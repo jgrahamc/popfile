@@ -295,23 +295,23 @@ sub start
 
     $self->db_prepare__();
 
-    # In Japanese or Korean mode, explicitly set LC_COLLATE to C.
+    # In Japanese or Korean or Chinese mode, explicitly set LC_COLLATE to C.
     #
     # This is to avoid Perl crash on Windows because default
     # LC_COLLATE of Japanese Win is Japanese_Japan.932(Shift_JIS),
     # which is different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
 
-    my $language = $self->global_config_( 'language' );
+    my $language = $self->global_config_( 'language' ) || '';
 
-    if ( defined( $language ) && ( $language =~ /^Nihongo|Korean$/ ) ) {
+    if ( $language =~ /^(Nihongo$|Korean$|Chinese)/ ) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
     }
 
     # Pass in the current interface language for language specific parsing
 
-    $self->{parser__}->{lang__}  = $language || '';
+    $self->{parser__}->{lang__}  = $language;
 
     $self->upgrade_predatabase_data__();
 
@@ -321,7 +321,7 @@ sub start
     # control of a Mutex to avoid a crash if we are running on
     # Windows and using the fork.
 
-    if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
+    if ( $language eq 'Nihongo' ) {
         # Setup Nihongo (Japanese) parser.
 
         my $nihongo_parser = $self->config_( 'nihongo_parser' );
@@ -3425,11 +3425,6 @@ sub get_bucket_word_prefixes
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
                matrix.bucketid = $bucketid;");        # PROFILE BLOCK STOP
-
-    # In Japanese mode, disable locale and use substr_euc, the substr
-    # function which supports EUC Japanese charset.  Sorting Japanese
-    # with "use locale" is memory and time consuming, and may cause
-    # perl crash.
 
     if ( $self->global_config_( 'language' ) eq 'Nihongo' ) {
         return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc__($_,0,1)} @{$result};
