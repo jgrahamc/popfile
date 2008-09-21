@@ -556,14 +556,15 @@ sub verify_connected_
 
     if ( $self->config_( 'socks_server' ) ne '' ) {
         require IO::Socket::Socks;
+        $self->log_( 0, "Attempting to connect to socks server at " # PROFILE BLOCK START
+                    . $self->config_( 'socks_server' ) . ":" 
+                    . ProxyPort => $self->config_( 'socks_port' ) ); # PROFILE BLOCK STOP
+
         $mail = IO::Socket::Socks->new( # PROFILE BLOCK START
                     ProxyAddr => $self->config_( 'socks_server' ),
                     ProxyPort => $self->config_( 'socks_port' ),
                     ConnectAddr  => $hostname,
                     ConnectPort  => $port ); # PROFILE BLOCK STOP
-        $self->log_( 0, "Attempting to connect to socks server at " # PROFILE BLOCK START
-                    . $self->config_( 'socks_server' ) . ":" 
-                    . ProxyPort => $self->config_( 'socks_port' ) ); # PROFILE BLOCK STOP
     } else {
         if ( $ssl ) {
             eval {
@@ -575,20 +576,27 @@ sub verify_connected_
                 $self->tee_( $client, "$self->{ssl_not_supported_error_}$eol" );
                 return undef;
             }
-            $mail = IO::Socket::SSL->new( # PROFILE BLOCK START
-                        Proto    => "tcp",
-                        PeerAddr => $hostname,
-                        PeerPort => $port ); # PROFILE BLOCK STOP
+
             $self->log_( 0, "Attempting to connect to SSL server at " # PROFILE BLOCK START
                         . "$hostname:$port" ); # PROFILE BLOCK STOP
 
+            $mail = IO::Socket::SSL->new( # PROFILE BLOCK START
+                        Proto    => "tcp",
+                        PeerAddr => $hostname,
+                        PeerPort => $port,
+                        Timeout  => $self->global_config_( 'timeout' ),
+            ); # PROFILE BLOCK STOP
+
         } else {
+            $self->log_( 0, "Attempting to connect to POP server at " # PROFILE BLOCK START
+                        . "$hostname:$port" ); # PROFILE BLOCK STOP
+
             $mail = IO::Socket::INET->new( # PROFILE BLOCK START
                         Proto    => "tcp",
                         PeerAddr => $hostname,
-                        PeerPort => $port ); # PROFILE BLOCK STOP
-            $self->log_( 0, "Attempting to connect to POP server at " # PROFILE BLOCK START
-                        . "$hostname:$port" ); # PROFILE BLOCK STOP
+                        PeerPort => $port,
+                        Timeout  => $self->global_config_( 'timeout' ),
+            ); # PROFILE BLOCK STOP
         }
     }
 
