@@ -209,17 +209,14 @@ class TicketSystem(Component):
         if intertrac:
             return intertrac
         try:
-            num = int(target)
-            if 0 < num <= 1L << 31:
-                cursor = formatter.db.cursor()
-                cursor.execute("SELECT summary,status FROM ticket WHERE id=%s",
-                               (str(num),))
-                row = cursor.fetchone()
-                if row:
-                    return html.A(label, class_='%s ticket' % row[1],
-                                  title=(shorten_line(row[0]) + \
-                                         ' (%s)' % row[1]),
-                                  href=formatter.href.ticket(target))
+            cursor = formatter.db.cursor()
+            cursor.execute("SELECT summary,status FROM ticket WHERE id=%s",
+                           (str(int(target)),))
+            row = cursor.fetchone()
+            if row:
+                return html.A(label, class_='%s ticket' % row[1],
+                              title=shorten_line(row[0]) + ' (%s)' % row[1],
+                              href=formatter.href.ticket(target))
         except ValueError:
             pass
         return html.A(label, class_='missing ticket', rel='nofollow',

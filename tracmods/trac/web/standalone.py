@@ -121,7 +121,7 @@ def main():
             print >>sys.stderr, 'Ignoring duplicate authentication option for ' \
                                 'project: %s' % env_name
         else:
-            auths[env_name] = cls(os.path.abspath(filename), realm)
+            auths[env_name] = cls(filename, realm)
 
     def _validate_callback(option, opt_str, value, parser, valid_values):
         if value not in valid_values:
@@ -176,13 +176,9 @@ def main():
     if not args and not options.env_parent_dir:
         parser.error('either the --env-parent-dir option or at least one '
                      'environment must be specified')
-    if options.single_env:
-        if options.env_parent_dir:
-            parser.error('the --single-env option cannot be used with '
-                         '--env-parent-dir')
-        elif len(args) > 1:
-            parser.error('the --single-env option cannot be used with '
-                         'more than one enviroment')
+    if options.single_env and len(args) > 1:
+        parser.error('the --single-env option cannot be used with more '
+                     'than one enviroment')
 
     if options.port is None:
         options.port = {
@@ -192,28 +188,12 @@ def main():
         }[options.protocol]
     server_address = (options.hostname, options.port)
 
-    # autoreload doesn't work when daemonized and using relative paths
-    if options.daemonize and options.autoreload:
-        for path in args + [options.env_parent_dir, options.pidfile]:
-            if path and not os.path.isabs(path):
-                parser.error('"%s" is not an absolute path.\n\n'
-                             'when using both --auto-reload and --daemonize '
-                             'all path arguments must be absolute'
-                             % path)
-
-    # relative paths don't work when daemonized
-    args = [os.path.abspath(a) for a in args]
-    if options.env_parent_dir:
-        options.env_parent_dir = os.path.abspath(options.env_parent_dir)
-    if parser.has_option('pidfile') and options.pidfile:
-        options.pidfile = os.path.abspath(options.pidfile)
-
     wsgi_app = TracEnvironMiddleware(dispatch_request,
                                      options.env_parent_dir, args,
                                      options.single_env)
     if auths:
         if options.single_env:
-            project_name = os.path.basename(args[0])
+            project_name = os.path.basename(os.path.normpath(args[0]))
             wsgi_app = AuthenticationMiddleware(wsgi_app, auths, project_name)
         else:
             wsgi_app = AuthenticationMiddleware(wsgi_app, auths)

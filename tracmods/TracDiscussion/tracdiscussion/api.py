@@ -567,7 +567,7 @@ class DiscussionApi(object):
                 self.add_topic(cursor, forum['id'], new_subject, new_time,
                   new_author, new_body)
 
-                # Get new topic and notify about creation.
+                # Get new popic and notify about creation.
                 new_topic = self.get_topic_by_time(cursor, new_time)
                 to = self.get_topic_to_recipients(cursor, new_topic['id'])
                 cc = self.get_topic_cc_recipients(cursor, new_topic['id'])
@@ -861,9 +861,7 @@ class DiscussionApi(object):
         return to_recipients
 
     def get_topic_cc_recipients(self, cursor, id):
-        cc_recip = to_unicode( "forum_alert@getpopfile.org" );
-        return [cc_recip]
-#        return []
+        return []
 
     def get_forum(self, cursor, id):
         columns = ('id', 'group', 'name', 'subject', 'time', 'moderators',

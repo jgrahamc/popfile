@@ -65,7 +65,7 @@ class WikiModule(Component):
         if not req.perm.has_permission('WIKI_VIEW'):
             return
         yield ('mainnav', 'wiki',
-               html.A('Wiki', href=req.href.wiki(), accesskey=1))
+               html.A('Home', href=req.href.wiki(), accesskey=1))
         yield ('metanav', 'help',
                html.A('Help/Guide', href=req.href.wiki('TracGuide'),
                       accesskey=6))

@@ -294,17 +294,6 @@ def dispatch_request(environ, start_response):
     @param environ: the WSGI environment dict
     @param start_response: the WSGI callback for starting the response
     """
-
-    # SCRIPT_URL is an Apache var containing the URL before URL rewriting
-    # has been applied, so we can use it to reconstruct logical SCRIPT_NAME
-    script_url = environ.get('SCRIPT_URL')
-    if script_url is not None:
-        path_info = environ.get('PATH_INFO')
-        if not path_info:
-            environ['SCRIPT_NAME'] = script_url
-        elif script_url.endswith(path_info):
-            environ['SCRIPT_NAME'] = script_url[:-len(path_info)]
-
     if 'mod_python.options' in environ:
         options = environ['mod_python.options']
         environ.setdefault('trac.env_path', options.get('TracEnv'))
@@ -385,21 +374,13 @@ def dispatch_request(environ, start_response):
                                'missing. Trac requires one of these options '
                                'to locate the Trac environment(s).')
     run_once = environ['wsgi.run_once']
+    env = _open_environment(env_path, run_once=run_once)
 
-    env = env_error = None
-    try:
-        env = _open_environment(env_path, run_once=run_once)
-        if env.base_url:
-            environ['trac.base_url'] = env.base_url
-    except TracError, e:
-        env_error = e
+    if env.base_url:
+        environ['trac.base_url'] = env.base_url
 
     req = Request(environ, start_response)
     try:
-        if not env and env_error:
-            from trac.config import default_dir            
-            req.hdf = HDFWrapper([default_dir('templates')])
-            raise HTTPInternalError(env_error.message)
         try:
             try:
                 dispatcher = RequestDispatcher(env)
@@ -412,8 +393,7 @@ def dispatch_request(environ, start_response):
                 env.shutdown(threading._get_ident())
 
     except HTTPException, e:
-        if env:
-            env.log.warn(e)
+        env.log.warn(e)
         if req.hdf:
             req.hdf['title'] = e.reason or 'Error'
             req.hdf['error'] = {

@@ -61,17 +61,6 @@ class TicketModuleBase(Component):
                                             'the %s field.' % (value, name))
                 elif not field.get('optional', False):
                     raise InvalidTicket('field %s must be set' % name)
-
-        try:
-            # comment index must be a number
-            int(req.args.get('cnum') or 0)
-            # replyto must be 'description' or a number
-            replyto = req.args.get('replyto')
-            if replyto != 'description':
-                int(replyto or 0)
-        except ValueError:
-            raise InvalidTicket('Invalid comment threading identifier')
-
         # Custom validation rules
         for manipulator in self.ticket_manipulators:
             for field, message in manipulator.validate_ticket(req, ticket):

@@ -596,8 +596,7 @@ class QueryModule(Component):
                     ticket['changed'] = True
             for field, value in ticket.items():
                 if field == query.group:
-                    hdf_key = '_' + value + '_'
-                    num_matches_group[hdf_key] = num_matches_group.get(hdf_key, 0)+1
+                    num_matches_group[value] = num_matches_group.get(value, 0)+1
                 if field == 'time':
                     ticket[field] = format_datetime(value)
                 elif field == 'description':

@@ -36,6 +36,7 @@ class CachedRepository(Repository):
         Repository.__init__(self, repos.name, authz, log)
         self.db = db
         self.repos = repos
+        self.sync()
 
     def close(self):
         self.repos.close()
@@ -56,15 +57,7 @@ class CachedRepository(Repository):
             except NoSuchChangeset:
                 pass # skip changesets currently being resync'ed
 
-    def sync_changeset(self, rev):
-        cset = self.repos.get_changeset(rev)
-        cursor = self.db.cursor()
-        cursor.execute("UPDATE revision SET time=%s, author=%s, message=%s "
-                       "WHERE rev=%s", (cset.date, cset.author, cset.message,
-                                        (str(cset.rev))))
-        self.db.commit()
-        
-    def sync(self, feedback=None):
+    def sync(self):
         cursor = self.db.cursor()
 
         cursor.execute("SELECT name, value FROM system WHERE name IN (%s)" %
@@ -77,35 +70,29 @@ class CachedRepository(Repository):
         repository_dir = metadata.get(CACHE_REPOSITORY_DIR)
         if repository_dir:
             if repository_dir != self.name:
-                self.log.info("'repository_dir' has changed from %r to %r"
-                              % (repository_dir, self.name))
                 raise TracError("The 'repository_dir' has changed, "
                                 "a 'trac-admin resync' operation is needed.")
-        elif repository_dir is None: # 
-            self.log.info('Storing initial "repository_dir": %s' % self.name)
+        elif repository_dir is None: # no 'repository_dir' stored yet
             cursor.execute("INSERT INTO system (name,value) VALUES (%s,%s)",
                            (CACHE_REPOSITORY_DIR, self.name,))
         else: # 'repository_dir' cleared by a resync
-            self.log.info('Resetting "repository_dir": %s' % self.name)
             cursor.execute("UPDATE system SET value=%s WHERE name=%s",
-                           (self.name, CACHE_REPOSITORY_DIR))
-
-        self.db.commit() # save metadata changes made up to now
+                           (self.name,CACHE_REPOSITORY_DIR))
 
         # -- retrieve the youngest revision cached so far
         if CACHE_YOUNGEST_REV not in metadata:
-            raise TracError('Missing "youngest_rev" in cache metadata')
-        
-        self.youngest = metadata[CACHE_YOUNGEST_REV]
+            # ''upgrade'' using the legacy `get_youngest_rev_in_cache` method
+            self.youngest = self.repos.get_youngest_rev_in_cache(self.db) or ''
+            cursor.execute("INSERT INTO system (name, value) VALUES (%s, %s)",
+                           (CACHE_YOUNGEST_REV, self.youngest))
+            self.log.info('Upgraded cache metadata (youngest_rev=%s)' %
+                          self.youngest_rev)
+        else:
+            self.youngest = metadata[CACHE_YOUNGEST_REV]
 
         if self.youngest:
             self.youngest = self.repos.normalize_rev(self.youngest)
-            if not self.youngest:
-                self.log.debug('normalize_rev failed (youngest_rev=%r)' %
-                               self.youngest_rev)
         else:
-            self.log.debug('cache metadata undefined (youngest_rev=%r)' %
-                           self.youngest_rev)
             self.youngest = None
 
         # -- retrieve the youngest revision in the repository
@@ -113,9 +100,9 @@ class CachedRepository(Repository):
         repos_youngest = self.repos.youngest_rev
 
         # -- compare them and try to resync if different
+        self.log.info("Check for sync [%s] vs. cached [%s]" %
+                      (self. youngest, repos_youngest))
         if self.youngest != repos_youngest:
-            self.log.info("repos rev [%s] != cached rev [%s]" %
-                          (repos_youngest, self.youngest))
             if self.youngest:
                 next_youngest = self.repos.next_rev(self.youngest)
             else:
@@ -124,7 +111,7 @@ class CachedRepository(Repository):
                     next_youngest = self.repos.oldest_rev
                     next_youngest = self.repos.normalize_rev(next_youngest)
                 except TracError:
-                    return # can't normalize oldest_rev: repository was empty
+                    pass
 
             if next_youngest is None: # nothing to cache yet
                 return
@@ -166,7 +153,6 @@ class CachedRepository(Repository):
                         # also potentially in progress, so keep ''previous''
                         # notion of 'youngest'
                         self.repos.clear(youngest_rev=self.youngest)
-                        self.db.rollback()
                         return
 
                     # 1.2. now *only* one process was able to get there
@@ -193,10 +179,6 @@ class CachedRepository(Repository):
                     cursor.execute("UPDATE system SET value=%s WHERE name=%s",
                                    (str(self.youngest), CACHE_YOUNGEST_REV))
                     self.db.commit()
-
-                    # 1.5. provide some feedback
-                    if feedback:
-                        feedback(self.youngest)
             finally:
                 # 3. restore permission checking (after 1.)
                 self.repos.authz = authz
@@ -204,15 +186,13 @@ class CachedRepository(Repository):
     def get_node(self, path, rev=None):
         return self.repos.get_node(path, rev)
 
-    def has_node(self, path, rev=None):
+    def has_node(self, path, rev):
         return self.repos.has_node(path, rev)
 
     def get_oldest_rev(self):
         return self.repos.oldest_rev
 
     def get_youngest_rev(self):
-        if not hasattr(self, 'youngest'):
-            self.sync()
         return self.youngest
 
     def previous_rev(self, rev):

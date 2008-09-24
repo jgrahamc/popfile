@@ -70,7 +70,7 @@ class RepositoryManager(Component):
     def pre_process_request(self, req, handler):
         from trac.web.chrome import Chrome        
         if handler is not Chrome(self.env):
-            self.get_repository(req.authname).sync()
+            self.get_repository(req.authname) # triggers a sync if applicable
         return handler
 
     def post_process_request(self, req, template, content_type):
@@ -88,12 +88,9 @@ class RepositoryManager(Component):
                         continue
                     heappush(candidates, (-prio, connector))
             if not candidates:
-                raise TracError('Unsupported version control system "%s". '
-                                'Check that the Python bindings for "%s" are '
-                                'correctly installed.' %
-                                ((self.repository_type,)*2))
+                raise TracError('Unsupported version control system "%s"'
+                                % self.repository_type)
             self._connector = heappop(candidates)[1]
-        db = self.env.get_db_cnx() # prevent possible deadlock, see #4465
         try:
             self._lock.acquire()
             tid = threading._get_ident()
@@ -145,20 +142,6 @@ class Repository(object):
         of the `youngest_rev` property (''will change in 0.12'').
         """
         pass
-
-    def sync(self, rev_callback=None):
-        """Perform a sync of the repository cache, if relevant.
-        
-        If given, `rev_callback` must be a callable taking a `rev` parameter.
-        The backend will call this function for each `rev` it decided to
-        synchronize, once the synchronization changes are committed to the 
-        cache.
-        """
-        pass
-
-    def sync_changeset(self, rev):
-        """Resync the repository cache for the given `rev`, if relevant."""
-        raise NotImplementedError
 
     def get_changeset(self, rev):
         """Retrieve a Changeset corresponding to the  given revision `rev`."""

@@ -221,7 +221,7 @@ class TicketNotifyEmail(NotifyEmail):
                 torecipients.append(row[2])
 
         # Harvest email addresses from the author field of ticket_change(s)
-        if notify_updater:
+        if notify_reporter:
             cursor.execute("SELECT DISTINCT author,ticket FROM ticket_change "
                            "WHERE ticket=%s", (tktid,))
             for author,ticket in cursor:

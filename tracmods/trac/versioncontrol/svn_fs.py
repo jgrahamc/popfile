@@ -72,6 +72,31 @@ _kindmap = {core.svn_node_dir: Node.DIRECTORY,
 
 
 application_pool = None
+    
+def _get_history(svn_path, authz, fs_ptr, pool, start, end, limit=None):
+    """`svn_path` is assumed to be a UTF-8 encoded string.
+    Returned history paths will be `unicode` objects though."""
+    history = []
+    if hasattr(repos, 'svn_repos_history2'):
+        # For Subversion >= 1.1
+        def authz_cb(root, path, pool):
+            if limit and len(history) >= limit:
+                return 0
+            return authz.has_permission(_from_svn(path)) and 1 or 0
+        def history2_cb(path, rev, pool):
+            history.append((_from_svn(path), rev))
+        repos.svn_repos_history2(fs_ptr, svn_path, history2_cb, authz_cb,
+                                 start, end, 1, pool())
+    else:
+        # For Subversion 1.0.x
+        def history_cb(path, rev, pool):
+            path = _from_svn(path)
+            if authz.has_permission(path):
+                history.append((path, rev))
+        repos.svn_repos_history(fs_ptr, svn_path, history_cb,
+                                start, end, 1, pool())
+    for item in history:
+        yield item
 
 def _to_svn(*args):
     """Expect a list of `unicode` path components.
@@ -268,7 +293,7 @@ class SubversionRepository(Repository):
         self.fs_ptr = repos.svn_repos_fs(self.repos)
         
         uuid = fs.get_uuid(self.fs_ptr, self.pool())
-        name = 'svn:%s:%s' % (uuid, _from_svn(path))
+        name = 'svn:%s:%s' % (uuid, path)
 
         Repository.__init__(self, name, authz, log)
 
@@ -290,10 +315,9 @@ class SubversionRepository(Repository):
     def __del__(self):
         self.close()
 
-    def has_node(self, path, rev=None, pool=None):
+    def has_node(self, path, rev, pool=None):
         if not pool:
             pool = self.pool
-        rev = self.normalize_rev(rev)
         rev_root = fs.revision_root(self.fs_ptr, rev, pool())
         node_type = fs.check_path(rev_root, _to_svn(self.scope, path), pool())
         return node_type in _kindmap
@@ -318,8 +342,7 @@ class SubversionRepository(Repository):
         self.pool = None
 
     def get_changeset(self, rev):
-        rev = self.normalize_rev(rev)
-        return SubversionChangeset(rev, self.authz, self.scope,
+        return SubversionChangeset(int(rev), self.authz, self.scope,
                                    self.fs_ptr, self.pool)
 
     def get_node(self, path, rev=None):
@@ -330,36 +353,18 @@ class SubversionRepository(Repository):
 
         rev = self.normalize_rev(rev)
 
-        return SubversionNode(path, rev, self, self.pool)
+        return SubversionNode(path, rev, self.authz, self.scope, self.fs_ptr,
+                              self.pool)
 
-    def _history(self, svn_path, start, end, pool):
-        """`svn_path` must be a full scope path, UTF-8 encoded string.
-
-        Generator yielding `(path, rev)` pairs, where `path` is an `unicode`
-        object.
-        Must start with `(path, created rev)`.
-        """
-        if start < end:
-            start, end = end, start
-        root = fs.revision_root(self.fs_ptr, start, pool())
-        history_ptr = fs.node_history(root, svn_path, pool())
-        cross_copies = 1
-        while history_ptr:
-            history_ptr = fs.history_prev(history_ptr, cross_copies, pool())
-            if history_ptr:
-                path, rev = fs.history_location(history_ptr, pool())
-                if rev < end:
-                    break
-                path = _from_svn(path)
-                if not self.authz.has_permission(path):
-                    break
-                yield path, rev
+    def _history(self, path, start, end, limit=None, pool=None):
+        return _get_history(_to_svn(self.scope, path), self.authz, self.fs_ptr,
+                            pool or self.pool, start, end, limit)
 
     def _previous_rev(self, rev, path='', pool=None):
         if rev > 1: # don't use oldest here, as it's too expensive
             try:
-                for _, prev in self._history(_to_svn(self.scope, path),
-                                             0, rev-1, pool or self.pool):
+                for _, prev in self._history(path, 0, rev-1, limit=1,
+                                             pool=pool):
                     return prev
             except (SystemError, # "null arg to internal routine" in 1.2.x
                     core.SubversionException): # in 1.3.x
@@ -378,10 +383,8 @@ class SubversionRepository(Repository):
         if not self.youngest:
             self.youngest = fs.youngest_rev(self.fs_ptr, self.pool())
             if self.scope != '/':
-                for path, rev in self._history(_to_svn(self.scope),
-                                               0, self.youngest, self.pool):
+                for path, rev in self._history('', 0, self.youngest, limit=1):
                     self.youngest = rev
-                    break
         return self.youngest
 
     def previous_rev(self, rev, path=''):
@@ -396,8 +399,8 @@ class SubversionRepository(Repository):
         while next <= youngest:
             subpool.clear()            
             try:
-                for _, next in self._history(_to_svn(self.scope, path),
-                                             rev+1, next, subpool):
+                for _, next in self._history(path, rev+1, next, limit=1,
+                                             pool=subpool):
                     return next
             except (SystemError, # "null arg to internal routine" in 1.2.x
                     core.SubversionException): # in 1.3.x
@@ -424,24 +427,21 @@ class SubversionRepository(Repository):
         rev = self.normalize_rev(rev)
         expect_deletion = False
         subpool = Pool(self.pool)
-        numrevs = 0
-        while rev and (not limit or numrevs < limit):
+        while rev:
             subpool.clear()
             if self.has_node(path, rev, subpool):
                 if expect_deletion:
                     # it was missing, now it's there again:
                     #  rev+1 must be a delete
-                    numrevs += 1
                     yield path, rev+1, Changeset.DELETE
                 newer = None # 'newer' is the previously seen history tuple
                 older = None # 'older' is the currently examined history tuple
-                for p, r in self._history(_to_svn(self.scope, path), 0, rev,
-                                          subpool):
+                for p, r in _get_history(_to_svn(self.scope, path), self.authz,
+                                         self.fs_ptr, subpool, 0, rev, limit):
                     older = (_path_within_scope(self.scope, p), r,
                              Changeset.ADD)
                     rev = self._previous_rev(r, pool=subpool)
                     if newer:
-                        numrevs += 1
                         if older[0] == path:
                             # still on the path: 'newer' was an edit
                             yield newer[0], newer[1], Changeset.EDIT
@@ -455,14 +455,13 @@ class SubversionRepository(Repository):
                     newer = older
                 if older:
                     # either a real ADD or the source of a COPY
-                    numrevs += 1
                     yield older
             else:
                 expect_deletion = True
                 rev = self._previous_rev(rev, pool=subpool)
 
     def get_changes(self, old_path, old_rev, new_path, new_rev,
-                    ignore_ancestry=0):
+                   ignore_ancestry=0):
         old_node = new_node = None
         old_rev = self.normalize_rev(old_rev)
         new_rev = self.normalize_rev(new_rev)
@@ -524,16 +523,15 @@ class SubversionRepository(Repository):
 
 class SubversionNode(Node):
 
-    def __init__(self, path, rev, repos, pool=None):
-        self.repos = repos
-        self.fs_ptr = repos.fs_ptr
-        self.authz = repos.authz
-        self.scope = repos.scope
-        self._scoped_svn_path = _to_svn(self.scope, path)
+    def __init__(self, path, rev, authz, scope, fs_ptr, pool=None):
+        self.authz = authz
+        self.scope = scope
+        self._scoped_svn_path = _to_svn(scope, path)
+        self.fs_ptr = fs_ptr
         self.pool = Pool(pool)
         self._requested_rev = rev
 
-        self.root = fs.revision_root(self.fs_ptr, rev, self.pool())
+        self.root = fs.revision_root(fs_ptr, rev, self.pool())
         node_type = fs.check_path(self.root, self._scoped_svn_path,
                                   self.pool())
         if not node_type in _kindmap:
@@ -575,30 +573,25 @@ class SubversionNode(Node):
             path = posixpath.join(self.path, _from_svn(item))
             if not self.authz.has_permission(path):
                 continue
-            yield SubversionNode(path, self._requested_rev, self.repos,
-                                 self.pool)
+            yield SubversionNode(path, self._requested_rev, self.authz,
+                                 self.scope, self.fs_ptr, self.pool)
 
-    def get_history(self, limit=None):
+    def get_history(self,limit=None):
         newer = None # 'newer' is the previously seen history tuple
         older = None # 'older' is the currently examined history tuple
         pool = Pool(self.pool)
-        numrevs = 0
-        for path, rev in self.repos._history(self._scoped_svn_path,
-                                             0, self._requested_rev, pool):
+        for path, rev in _get_history(self._scoped_svn_path, self.authz,
+                                      self.fs_ptr, pool,
+                                      0, self._requested_rev, limit):
             path = _path_within_scope(self.scope, path)
             if rev > 0 and path:
                 older = (path, rev, Changeset.ADD)
                 if newer:
-                    if newer[0] == older[0]: # stay on same path
-                        change = Changeset.EDIT
-                    else:
-                        change = Changeset.COPY
+                    change = newer[0] == older[0] and Changeset.EDIT or \
+                             Changeset.COPY
                     newer = (newer[0], newer[1], change)
-                    numrevs += 1
                     yield newer
                 newer = older
-            if limit and numrevs >= limit:
-                break
         if newer:
             yield newer
 
@@ -642,14 +635,8 @@ class SubversionChangeset(Changeset):
         self.scope = scope
         self.fs_ptr = fs_ptr
         self.pool = Pool(pool)
-        try:
-            message = self._get_prop(core.SVN_PROP_REVISION_LOG)
-        except core.SubversionException:
-            raise NoSuchChangeset(rev)
+        message = self._get_prop(core.SVN_PROP_REVISION_LOG)
         author = self._get_prop(core.SVN_PROP_REVISION_AUTHOR)
-        # we _hope_ it's UTF-8, but can't be 100% sure (#4321)
-        message = message and to_unicode(message, 'utf-8')
-        author = author and to_unicode(author, 'utf-8')
         date = self._get_prop(core.SVN_PROP_REVISION_DATE)
         if date:
             date = core.svn_time_from_cstring(date, self.pool()) / 1000000

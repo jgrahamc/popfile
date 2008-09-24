@@ -18,6 +18,7 @@
 
 import re
 from StringIO import StringIO
+import urllib
 
 from trac import util
 from trac.core import *
@@ -27,7 +28,6 @@ from trac.util import sorted
 from trac.util.datefmt import format_date, format_time, format_datetime, \
                                http_date
 from trac.util.html import html
-from trac.util.text import unicode_urlencode
 from trac.web import IRequestHandler
 from trac.web.chrome import add_link, add_stylesheet, INavigationContributor
 from trac.wiki import wiki_to_html, IWikiSyntaxProvider, Formatter
@@ -359,15 +359,10 @@ class ReportModule(Component):
         if format == 'rss':
             return 'report_rss.cs', 'application/rss+xml'
         elif format == 'csv':
-            filename = id and 'report_%s.csv' % id or 'report.csv'
-            self._render_csv(req, cols, rows, mimetype='text/csv',
-                             filename=filename)
+            self._render_csv(req, cols, rows)
             return None
         elif format == 'tab':
-            filename = id and 'report_%s.tsv' % id or 'report.tsv'
-            self._render_csv(req, cols, rows, '\t',
-                             mimetype='text/tab-separated-values',
-                             filename=filename)
+            self._render_csv(req, cols, rows, '\t')
             return None
 
         return 'report.cs', None
@@ -380,7 +375,7 @@ class ReportModule(Component):
             params['asc'] = req.args['asc']
         href = ''
         if params:
-            href = '&' + unicode_urlencode(params)
+            href = '&' + urllib.urlencode(params)
         add_link(req, 'alternate', '?format=rss' + href, 'RSS Feed',
                  'application/rss+xml', 'rss')
         add_link(req, 'alternate', '?format=csv' + href,
@@ -458,42 +453,31 @@ class ReportModule(Component):
             req.hdf['report.var.' + aname] = arg
             values.append(arg)
 
-        var_re = re.compile("[$]([A-Z]+)")
-
         # simple parameter substitution outside literal
         def repl(match):
             add_value(match.group(1))
             return '%s'
 
         # inside a literal break it and concatenate with the parameter
-        def repl_literal(expr):
-            parts = var_re.split(expr[1:-1])
-            if len(parts) == 1:
-                return expr
-            params = parts[1::2]
-            parts = ["'%s'" % p for p in parts]
-            parts[1::2] = ['%s'] * len(params)
-            for param in params:
-                add_value(param)
-            return db.concat(*parts)
+        def repl_literal(match):
+            add_value(match.group(1))
+            return db.concat("'", "%s", "'")
 
+        var_re = re.compile("[$]([A-Z]+)")
         sql_io = StringIO()
 
         # break SQL into literals and non-literals to handle replacing
         # variables within them with query parameters
         for expr in re.split("('(?:[^']|(?:''))*')", sql):
             if expr.startswith("'"):
-                sql_io.write(repl_literal(expr))
+                sql_io.write(var_re.sub(repl_literal, expr))
             else:
                 sql_io.write(var_re.sub(repl, expr))
         return sql_io.getvalue(), values
 
-    def _render_csv(self, req, cols, rows, sep=',', mimetype='text/plain',
-                    filename=None):
+    def _render_csv(self, req, cols, rows, sep=','):
         req.send_response(200)
-        req.send_header('Content-Type', mimetype + ';charset=utf-8')
-        if filename:
-            req.send_header('Content-Disposition', 'filename=' + filename)
+        req.send_header('Content-Type', 'text/plain;charset=utf-8')
         req.end_headers()
 
         req.write(sep.join(cols) + '\r\n')
@@ -506,9 +490,6 @@ class ReportModule(Component):
         req.perm.assert_permission('REPORT_SQL_VIEW')
         req.send_response(200)
         req.send_header('Content-Type', 'text/plain;charset=utf-8')
-        if id:
-            req.send_header('Content-Disposition',
-                            'filename=report_%s.sql' % id)
         req.end_headers()
 
         req.write('-- ## %s: %s ## --\n\n' % (id, title))

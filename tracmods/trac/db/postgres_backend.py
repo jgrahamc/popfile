@@ -95,8 +95,6 @@ class PostgreSQLConnection(ConnectionWrapper):
             except ImportError:
                 from pyPgSQL import PgSQL
                 from pyPgSQL.libpq import OperationalError as PGSchemaError
-        if 'host' in params:
-            host = params['host']
         if psycopg:
             dsn = []
             if path:
@@ -112,10 +110,6 @@ class PostgreSQLConnection(ConnectionWrapper):
             cnx = psycopg.connect(' '.join(dsn))
             cnx.set_client_encoding('UNICODE')
         else:
-            # Don't use chatty, inefficient server-side cursors.
-            # http://pypgsql.sourceforge.net/pypgsql-faq.html#id2787367
-            PgSQL.fetchReturnsList = 1
-            PgSQL.noPostgresCursor = 1
             cnx = PgSQL.connect('', user, password, host, path, port, 
                                 client_encoding='utf-8', unicode_results=True)
         try:

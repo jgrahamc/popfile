@@ -177,10 +177,11 @@ class TimelineModule(Component):
 
                 if author:
                     # For RSS, author must be an email address
-                    if author.find('@') != -1:
-                        event['author.email'] = author
-                    elif email_map.has_key(author):
-                        event['author.email'] = email_map[author]
+                    event['author.email'] = 'bounces@getpopfile.org'
+#                    if author.find('@') != -1:
+#                        event['author.email'] = author
+#                    elif email_map.has_key(author):
+#                        event['author.email'] = email_map[author]
                 event['date'] = http_date(date)
 
             req.hdf['timeline.events.%s' % idx] = event

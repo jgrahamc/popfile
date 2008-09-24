@@ -628,7 +628,7 @@ class TracAdmin(cmd.Cmd):
                     repos = self.__env.get_repository()
                     if repos:
                         print ' Indexing repository'
-                        self._resync(repos)
+                        repos.sync()
                 except TracError, e:
                     print>>sys.stderr, "\nWarning:\n"
                     if repository_type == "svn":
@@ -669,30 +669,14 @@ Congratulations!
            project_dir=os.path.basename(self.envname),
            config_path=os.path.join(self.envname, 'conf', 'trac.ini'))
 
-    _help_resync = [('resync', 'Re-synchronize trac with the repository'),
-                    ('resync <rev>', 'Re-synchronize only the given <rev>')]
+    _help_resync = [('resync', 'Re-synchronize trac with the repository')]
 
-    def _resync(self, repos):
-        if hasattr(repos, 'sync'): # introduced "officially" in 0.10.4
-            if repos.sync.func_code.co_argcount == 2:
-                def _feedback(rev):
-                    print ' [%s]\r' % rev,
-                repos.sync(_feedback)
-            else: # cope with plugins already implementing the old interface
-                repos.sync() 
-        
     ## Resync
     def do_resync(self, line):
-        env = self.env_open()
-        argv = self.arg_tokenize(line)
-        if argv:
-            rev = argv[0]
-            if rev:
-                env.get_repository().sync_changeset(rev)
-                print '%s resynced.' % rev
-                return
         from trac.versioncontrol.cache import CACHE_METADATA_KEYS
         print 'Resyncing repository history... '
+        print '(this will take a time proportional to the number of your ' \
+              'changesets)'
         cnx = self.db_open()
         cursor = cnx.cursor()
         cursor.execute("DELETE FROM revision")
@@ -701,8 +685,7 @@ Congratulations!
                            [(k,) for k in CACHE_METADATA_KEYS])
         cursor.executemany("INSERT INTO system (name, value) VALUES (%s, %s)",
                            [(k, '') for k in CACHE_METADATA_KEYS])
-        cnx.commit()
-        repos = self._resync(env.get_repository())
+        repos = self.__env.get_repository() # this will do the sync()
         cursor.execute("SELECT count(rev) FROM revision")
         for cnt, in cursor:
             print cnt, 'revisions cached.',

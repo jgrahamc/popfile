@@ -58,21 +58,14 @@ class MySQLConnector(Component):
         a max of 255 bytes per column.
         """
         cols = []
-        limit = 333 / len(columns)
+        limit = 500 / len(columns)
         if limit > 255:
             limit = 255
         for c in columns:
             name = '`%s`' % c
             table_col = filter((lambda x: x.name == c), table.columns)
             if len(table_col) == 1 and table_col[0].type.lower() == 'text':
-                if name == '`rev`':
-                    name += '(20)'
-                elif name == '`path`':
-                    name += '(255)'
-                elif name == '`change_type`':
-                    name += '(2)'
-                else:
-                    name += '(%s)' % limit
+                name += '(%s)' % limit
             # For non-text columns, we simply throw away the extra bytes.
             # That could certainly be optimized better, but for now let's KISS.
             cols.append(name)
@@ -150,7 +143,6 @@ class MySQLConnection(ConnectionWrapper):
                                   host=host, port=port, use_unicode=True)
             self._set_character_set(cnx, 'utf8')
         ConnectionWrapper.__init__(self, cnx)
-        self._is_closed = False
 
     def cast(self, column, type):
         if type == 'int':
@@ -170,13 +162,5 @@ class MySQLConnection(ConnectionWrapper):
         return self.cnx.insert_id()
 
     def rollback(self):
-        if self.cnx.ping():
-            self._set_character_set(self.cnx, 'utf8')
-            self.cnx.rollback()
-        else:
-            self._is_closed = True
-
-    def close(self):
-        if not self._is_closed:
-            self.cnx.close()
-            self._is_closed = True
+        self.cnx.rollback()
+        self.cnx.ping()

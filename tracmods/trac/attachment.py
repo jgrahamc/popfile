@@ -298,7 +298,7 @@ class AttachmentModule(Component):
         which allows a malicious user to attach a file containing cross-site
         scripting attacks.
 
-        For public sites where anonymous users can create attachments it is
+        For public sites where anonymous users can create attachments, it is
         recommended to leave this option disabled (which is the default).""")
 
     # IEnvironmentSetupParticipant methods
@@ -447,9 +447,7 @@ class AttachmentModule(Component):
         if hasattr(upload.file, 'fileno'):
             size = os.fstat(upload.file.fileno())[6]
         else:
-            upload.file.seek(0, 2) # seek to end of file
-            size = upload.file.tell()
-            upload.file.seek(0)
+            size = upload.file.len
         if size == 0:
             raise TracError("Can't upload empty file")
 

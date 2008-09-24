@@ -102,7 +102,7 @@ class DiscussionNotifyEmail(NotifyEmail):
         if message_id < 0:
             message_id = 0
 
-        # Construct Message-ID according to RFC 2822.
+        # Construct Message-ID according to RFC 2822.
         id = '%s.%s.%s' % (forum_id, topic_id, message_id)
         host = self.from_email[self.from_email.find('@') + 1:]
         return '<%s@%s>' % (id, host)
@@ -132,7 +132,7 @@ class DiscussionNotifyEmail(NotifyEmail):
               self.topic['id'], 0)
             header['X-Trac-Topic-ID'] = to_unicode(self.topic['id'])
             header['X-Trac-Discussion-URL'] = self.topic['link']
-        header = {}
+
         print torcpts, ccrcpts, header
 
         # Send e-mail.
