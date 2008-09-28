@@ -36,7 +36,7 @@ StartService ()
     if ! [ $pid ]; then
       ConsoleMessage "Starting POPFile POP mail proxy"
       rm -f "$POPFILE_USER"/popfile.pid
-      perl -I"$POPFILE_ROOT"/lib "$POPFILE_ROOT"/popfile.pl > "$POPFILE_USER"/console.log 2>&1 &
+      /usr/bin/perl -I"$POPFILE_ROOT"/lib "$POPFILE_ROOT"/popfile.pl > "$POPFILE_USER"/console.log 2>&1 &
     else
       ConsoleMessage "POPFile is already running"
     fi
@@ -64,7 +64,7 @@ RestartService ()
       ConsoleMessage "POPFile is not running. Starting POPFile POP mail proxy"
     fi
     rm -f "$POPFILE_USER"/popfile.pid
-    perl -I"$POPFILE_ROOT"/lib "$POPFILE_ROOT"/popfile.pl > "$POPFILE_USER"/console.log 2>&1 &
+    /usr/bin/perl -I"$POPFILE_ROOT"/lib "$POPFILE_ROOT"/popfile.pl > "$POPFILE_USER"/console.log 2>&1 &
 }
 
 RunService "$1"
