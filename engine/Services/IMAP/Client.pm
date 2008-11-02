@@ -235,7 +235,7 @@ sub noop {
 #          information.
 #
 # IN:  $folder - name of the mailbox to be STATUSed
-# OUT: hasref with the keys UIDNEXT and UIDVALIDITY
+# OUT: hashref with the keys UIDNEXT and UIDVALIDITY
 # ----------------------------------------------------------------------------
 
 sub status {
