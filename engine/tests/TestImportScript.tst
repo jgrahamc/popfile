@@ -24,6 +24,12 @@
 # global to store STDOUT when doing backticks
 
 my @stdout;
+
+use_base_environment();
+rmtree( 'import' );
+mkdir( 'import' );
+test_assert( rec_cp( 'corpus.base', 'import/corpus' ) );
+
 my $import = 'perl -I ../ ../import.pl';
 
 # One or no command line arguments
@@ -47,7 +53,7 @@ open my $old_stderr, ">&STDERR";
 # Bad user name
 
 open STDERR, ">temp.tmp";
-system("$import ./import none");
+@stdout = `$import ./import none`;
 close STDERR;
 $code = ($? >> 8);
 test_assert( $code != 0 );
@@ -55,6 +61,7 @@ open TEMP, "<temp.tmp";
 $line = <TEMP>;
 close TEMP;
 test_assert_regexp( $line, 'Error : User \'none\' does not exist, import aborted' );
+test_assert_regexp( shift @stdout, 'Import from database \'./import/popfile.db\'' );
 
 # Bad new user name
 
