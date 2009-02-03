@@ -3,7 +3,7 @@
 #
 # color.pl --- Used to view a colorized email message
 #
-# Copyright (c) 2001-2006 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 # ----------------------------------------------------------------------------
 

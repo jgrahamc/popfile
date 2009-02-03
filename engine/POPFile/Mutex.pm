@@ -5,7 +5,7 @@ package POPFile::Mutex;
 # This is a mutex object that uses mkdir() to provide exclusive access
 # to a region on a per thread or per process basis.
 #
-# Copyright (c) 2001-2006 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

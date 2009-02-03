@@ -3,7 +3,7 @@
 # This package contains an HTTP server used as a base class for other
 # modules that service requests over HTTP (e.g. the UI)
 #
-# Copyright (c) 2001-2006 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

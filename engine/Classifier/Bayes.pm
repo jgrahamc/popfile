@@ -8,7 +8,7 @@ use POPFile::Module;
 #
 # Bayes.pm --- Naive Bayes text classifier
 #
-# Copyright (c) 2001-2006 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

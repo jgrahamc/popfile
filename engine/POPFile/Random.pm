@@ -5,7 +5,7 @@ package POPFile::Random;
 # This is a module to generate random strings using the Crypt::Random or
 # the Crypt::OpenSSL::Random Perl modules.
 #
-# Copyright (c) 2001-2008 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

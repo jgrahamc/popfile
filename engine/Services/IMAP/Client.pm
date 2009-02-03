@@ -2,7 +2,7 @@
 #
 # Services::IMAP::Client--- Helper module for the POPFile IMAP module
 #
-# Copyright (c) 2001-2008 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   $Revision$
 #

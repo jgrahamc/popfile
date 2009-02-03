@@ -8,7 +8,7 @@ use POPFile::Module;
 #
 # This module handles POPFile specifics on Windows
 #
-# Copyright (c) 2001-2006 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
