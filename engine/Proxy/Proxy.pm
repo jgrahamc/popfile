@@ -585,6 +585,7 @@ sub verify_connected_
                         PeerAddr => $hostname,
                         PeerPort => $port,
                         Timeout  => $self->global_config_( 'timeout' ),
+                        Domain   => AF_INET,
             ); # PROFILE BLOCK STOP
 
         } else {
