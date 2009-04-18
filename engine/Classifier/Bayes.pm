@@ -2655,6 +2655,11 @@ sub classify_and_modify
 
     my $getting_headers = 1;
 
+    # The maximum size of message to parse, or 0 for unlimited
+
+    my $max_size = $self->global_config_( 'message_cutoff' );
+    $max_size = 0 if ( !defined( $max_size ) || ( $max_size =~ /\D/ ) );
+
     my $msg_file;
 
     # User's id of the current session
@@ -2781,7 +2786,9 @@ sub classify_and_modify
             $last_timeout = time;
         }
 
-        last if ( ( $message_size > $self->global_config_( 'message_cutoff' ) ) && ( $getting_headers == 0 ) );
+        last if ( ( $max_size > 0 ) &&               # PROFILE BLOCK START
+                  ( $message_size > $max_size ) &&
+                  ( !$getting_headers ) );           # PROFILE BLOCK STOP
     }
 
     close MSG unless $nosave;
@@ -4503,7 +4510,7 @@ sub get_html_colored_message
     $self->{parser__}->{bayes__} = bless $self;
 
     my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START
-           $self->global_config_( 'message_cutoff' ) );  # PROFILE BLOCK STOP
+            $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
 
     $self->{parser__}->{color__} = '';
 
@@ -4735,8 +4742,8 @@ sub remove_message_from_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{parser__}->parse_file( $file,               # PROFILE BLOCK START
-         $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
+    $self->{parser__}->parse_file( $file,             # PROFILE BLOCK START
+         $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
     $self->add_words_to_bucket__( $session, $bucket, -1 );
 
     $self->db_update_cache__( $session );

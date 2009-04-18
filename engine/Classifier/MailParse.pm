@@ -1688,7 +1688,7 @@ sub parse_file
     my ( $self, $file, $max_size, $reset ) = @_;
 
     $reset    = 1 if ( !defined( $reset    ) );
-    $max_size = 0 if ( !defined( $max_size ) );
+    $max_size = 0 if ( !defined( $max_size ) || ( $max_size =~ /\D/ ) ); 
 
     $self->start_parse( $reset );
 
