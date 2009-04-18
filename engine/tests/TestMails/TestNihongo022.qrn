@@ -1,0 +1,50 @@
+From: "=?ISO-2022-JP?B?GyRCJTklUSVgQkBPOhsoQg==?=" <waru@spam.co.jp>
+To: <dareka@dokoka.co.jp>
+Date: Sat, 25 Oct 2003 00:37:10 -0700
+Subject: [gomi]
+X-Text-Classification: gomi
+X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=34
+MIME-Version: 1.0
+Content-Type: multipart/report; boundary="34"
+
+--34
+Content-Type: text/plain; charset=iso-2022-jp
+
+POPFile has quarantined a message.  It is attached to this email.
+
+Quarantined Message Detail
+
+Original From: "スパム太郎" <waru@spam.co.jp>
+Original To: <dareka@dokoka.co.jp>
+Original Subject: 
+To examine the email open the attachment. To change this mail's classification go to http://127.0.0.1:8080/jump_to_message?view=34
+
+The first 20 words found in the email are:
+
+ これは スパム です
+--34
+Content-Type: message/rfc822
+
+Return-Path: <waru@spam.co.jp>
+Delivered-To: dareka@dokoka.co.jp
+Received: (qmail 1771 invoked by alias); 25 Oct 2003 16:37:11 +0900
+Received: (qmail 1752 invoked from network); 25 Oct 2003 16:37:11 +0900
+Received: from unknown (HELO DOKOKANOHOST) (12.235.202.19)
+  by dokoka.co.jp with SMTP; 25 Oct 2003 16:37:11 +0900
+Message-ID: <001501c39aca$cd4183c0$2102a8c0@DOKOKANOHOST>
+From: "=?iso-2022-jp?B?GyRCJTklUSVgQkBPOhsoQg==?=" <waru@spam.co.jp>
+To: <dareka@dokoka.co.jp>
+Date: Sat, 25 Oct 2003 00:37:10 -0700
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="iso-2022-jp"
+Content-Transfer-Encoding: 7bit
+X-Priority: 3
+X-MSMail-Priority: Normal
+X-Mailer: Microsoft Outlook Express 6.00.2800.1158
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2800.1165
+
+これはスパムです。
+
+--34--
+.

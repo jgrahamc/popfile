@@ -2806,7 +2806,9 @@ sub classify_and_modify
     # Add the Subject line modification or the original line back again
     # Don't add the classification unless it is not present
 
-    if ( ( $subject_modification ) && ( !$quarantine ) ) {
+    my $original_msg_subject = $msg_subject;
+
+    if ( $subject_modification ) {
         if ( !defined( $msg_subject ) ) {   # PROFILE BLOCK START
             $msg_subject = " $modification";
         } elsif ( $msg_subject !~ /\Q$modification\E/ ) {
@@ -2818,8 +2820,14 @@ sub classify_and_modify
         }                                   # PROFILE BLOCK STOP
     }
 
-    if ( defined( $msg_subject ) ) {
-        $msg_head_before .= "Subject:$msg_subject$crlf";
+    if ( $quarantine ) {
+        if ( defined( $original_msg_subject ) ) {
+            $msg_head_before .= "Subject:$original_msg_subject$crlf";
+        }
+    } else {
+        if ( defined( $msg_subject ) ) {
+            $msg_head_before .= "Subject:$msg_subject$crlf";
+        }
     }
 
     # Add LF if $msg_head_after ends with CR to avoid header concatination
@@ -2882,12 +2890,7 @@ sub classify_and_modify
            print $client "From: $encoded_from$crlf";
            print $client "To: $encoded_to$crlf";
            print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$crlf";
-           # Don't add the classification unless it is not present
-           if ( ( defined( $msg_subject ) && ( $msg_subject !~ /\[\Q$classification\E\]/ ) ) && # PROFILE BLOCK START
-                 ( $subject_modification == 1 ) ) {                                             # PROFILE BLOCK STOP
-               $msg_subject = " $modification$msg_subject";
-           }
-           print $client "Subject:$msg_subject$crlf";
+           print $client "Subject:$msg_subject$crlf" if ( defined( $msg_subject ) );
            print $client "X-Text-Classification: $classification$crlf" if ( $xtc_insertion );
            print $client "X-POPFile-Link: $xpl$crlf" if ( $xpl_insertion );
            print $client "MIME-Version: 1.0$crlf";

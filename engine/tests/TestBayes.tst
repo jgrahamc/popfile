@@ -1423,26 +1423,30 @@ if ( $have_text_kakasi ) {
 
     $b->set_bucket_parameter( $session, 'gomi', 'quarantine', 1 );
 
-    open CLIENT, ">temp.tmp";
-    open MAIL, "<TestMails/TestNihongo021.msg";
-    my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0, 1 );
-    close CLIENT;
-    close MAIL;
+    foreach my $test_message ( 'TestMails/TestNihongo021.msg', 'TestMails/TestNihongo022.msg' ) {
+        open CLIENT, ">temp.tmp";
+        open MAIL, "<$test_message";
+        my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0, 1 );
+        close CLIENT;
+        close MAIL;
 
-    test_assert_equal( $class, 'gomi' );
-    test_assert( -e $h->get_slot_file( $slot ) );
+        test_assert_equal( $class, 'gomi' );
+        test_assert( -e $h->get_slot_file( $slot ) );
 
-    open TEMP, "<temp.tmp";
-    open MAIL, "<TestMails/TestNihongo021.qrn";
-    while ( !eof( MAIL ) && !eof( TEMP ) ) {
-        my $temp = <TEMP>;
-        $temp =~ s/[\r\n]//g;
-        my $mail = <MAIL>;
-        $mail =~ s/[\r\n]//g;
-        test_assert_equal( $temp, $mail );
+        open TEMP, "<temp.tmp";
+        my $quarantined_message = $test_message;
+        $quarantined_message =~ s/\.msg$/.qrn/;
+        open MAIL, "<$quarantined_message";
+        while ( !eof( MAIL ) && !eof( TEMP ) ) {
+            my $temp = <TEMP>;
+            $temp =~ s/[\r\n]//g;
+            my $mail = <MAIL>;
+            $mail =~ s/[\r\n]//g;
+            test_assert_equal( $temp, $mail );
+        }
+        close MAIL;
+        close TEMP;
     }
-    close MAIL;
-    close TEMP;
 
     # remove_message_from_bucket
 
