@@ -419,6 +419,7 @@ Bucket_LookupMessage                    Lookup word in buckets
 Bucket_LookupMessage2                   Lookup result for
 Bucket_LookupMostLikely                 <b>%s</b> is most likely to appear in <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> does not appear in any of the buckets
+Bucket_InIgnoredWords                   <b>%s</b> is in Ignored Words. POPFile ignores this word
 Bucket_DisabledGlobally                 Disabled globally
 Bucket_To                               to
 Bucket_Quarantine                       Quarantine<br>Message

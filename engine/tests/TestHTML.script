@@ -2062,6 +2062,8 @@ MATCH 0.0005602241
 MATCH 0.6873803233
 MATCH 1.8945518529
 MATCH Frequency
+SETSUBMIT word address
+MATCH <b>address</b> is in Ignored Words. POPFile ignores this word
 
 # Check operation of Subject Modification
 

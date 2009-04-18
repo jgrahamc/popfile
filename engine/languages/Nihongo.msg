@@ -421,6 +421,7 @@ Bucket_LookupMessage                    バケツ内で単語を検査
 Bucket_LookupMessage2                   検査結果 : 
 Bucket_LookupMostLikely                 「<b>%s</b>」 は 「<font color="%s">%s</font>」 内にある可能性が大きいです。
 Bucket_DoesNotAppear                    <p>「<b>%s</b>」 はどのバケツの中にもありません。
+Bucket_InIgnoredWords                   <b>%s</b> は無視する単語に含まれています。POPFile はこの単語を無視します。
 Bucket_DisabledGlobally                 全て OFF
 Bucket_To                               を
 Bucket_Quarantine                       隔離
