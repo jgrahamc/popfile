@@ -484,6 +484,7 @@ insert into user_template ( id, name, def, form ) values ( 3, 'GLOBAL_can_admin'
 -- The characters that appear before and after a subject modification
 insert into user_template ( name, def, form ) values ( 'bayes_subject_mod_left', '[', '%s' );
 insert into user_template ( name, def, form ) values ( 'bayes_subject_mod_right', ']', '%s' );
+insert into user_template ( name, def, form ) values ( 'bayes_subject_mod_pos', 1, '%d' );
 
 -- No default unclassified weight is the number of times more sure
 -- POPFile must be of the top class vs the second class, default is

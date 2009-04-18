@@ -2810,7 +2810,11 @@ sub classify_and_modify
         if ( !defined( $msg_subject ) ) {   # PROFILE BLOCK START
             $msg_subject = " $modification";
         } elsif ( $msg_subject !~ /\Q$modification\E/ ) {
-            $msg_subject = " $modification$msg_subject";
+            if ( $self->user_config_( $userid, 'subject_mod_pos' ) > 0 ) {
+                $msg_subject = " $modification$msg_subject";
+            } else {
+                $msg_subject = "$msg_subject $modification";
+            }
         }                                   # PROFILE BLOCK STOP
     }
 
