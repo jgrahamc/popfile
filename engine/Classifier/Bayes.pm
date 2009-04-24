@@ -4614,7 +4614,9 @@ sub delete_bucket
              buckets.name = ? and
              buckets.pseudo = 0;',
          $userid, $bucket )->finish;                       # PROFILE BLOCK STOP
+
     $self->db_update_cache__( $session );
+    $self->history_()->force_requery();
 
     return 1;
 }
@@ -4661,6 +4663,8 @@ sub rename_bucket
         return 0;
     } else {
         $self->db_update_cache__( $session );
+        $self->history_()->force_requery();
+
         return 1;
     }
 }
@@ -4862,6 +4866,14 @@ sub clear_magnets
         $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
                 'delete from magnets where magnets.bucketid = ?;',
                 $bucketid )->finish;                           # PROFILE BLOCK STOP
+
+        # Change status of the magnetized message in this bucket
+
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+                'update history set magnetid = 0
+                        where bucketid = ? and
+                              userid   = ?;',
+                $bucketid, $userid );                          # PROFILE BLOCK STOP
     }
 }
 
@@ -4971,7 +4983,7 @@ sub get_magnet_types
 #
 # delete_magnet
 #
-# Remove a new magnet
+# Remove a magnet
 #
 # $session         A valid session key returned by a call to get_session_key
 # $bucket          The bucket the magnet belongs in
@@ -4987,20 +4999,33 @@ sub delete_magnet
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-            'select magnet_types.id from magnet_types
-                 where magnet_types.mtype = ?;', $type );          # PROFILE BLOCK STOP
-    my $result = $h->fetchrow_arrayref;
-    $h->finish;
 
-    my $mtid = $result->[0];
+    my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'select magnets.id from magnets, magnet_types
+                    where magnets.mtid       = magnet_types.id and
+                          magnets.bucketid   = ? and
+                          magnets.val        = ? and
+                          magnet_types.mtype = ?;',
+            $bucketid, $text, $type )->fetchrow_arrayref;               # PROFILE BLOCK STOP
+
+    return if ( !defined( $result ) );
+
+    my $magnetid = $result->[0];
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
             'delete from magnets
-                    where magnets.bucketid = ? and
-                          magnets.mtid = ? and
-                          magnets.val  = ?;',
-            $bucketid, $mtid, $text )->finish;             # PROFILE BLOCK STOP
+                    where id = ?;',
+            $magnetid );                                   # PROFILE BLOCK STOP
+
+    # Change status of the magnetized message by this magnet
+
+    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            'update history set magnetid = 0
+                    where magnetid = ? and
+                          userid   = ?;',
+            $magnetid, $userid );                          # PROFILE BLOCK STOP
+
+    $self->history_()->force_requery();
 }
 
 #----------------------------------------------------------------------------
