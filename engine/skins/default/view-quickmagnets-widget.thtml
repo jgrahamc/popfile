@@ -5,7 +5,9 @@
     <input type="hidden" name="count" value="<TMPL_VAR NAME="View_QuickMagnets_Count">" />
     <hr />
     <h4 class="viewHeadings">
-        <TMPL_VAR NAME="Localize_QuickMagnets">
+        <a name="quick_magnets">
+            <TMPL_VAR NAME="Localize_QuickMagnets">
+        </a>
     </h4>
 
     <table summary="">

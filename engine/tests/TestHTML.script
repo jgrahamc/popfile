@@ -1115,6 +1115,12 @@ From:foo
 </font>
 ENDMATCH
 
+MATCH <a class="messageLink" href="#message_header">Message Header</a>
+NOTMATCH | <a class="messageLink" href="#message_body">Message Body</a>
+NOTMATCH | <a class="messageLink" href="#quick_magnet">QuickMagnet</a>
+NOTMATCH | <a class="messageLink" href="#scores">Scores</a>
+MATCH <a name="message_header" />
+
 # Check search
 
 GET /history
@@ -1316,6 +1322,26 @@ personal
 </font>
 </td>
 ENDMATCH
+
+MATCH
+<a class="messageLink" href="#message_header">Message Header</a>
+| <a class="messageLink" href="#message_body">Message Body</a>
+| <a class="messageLink" href="#quick_magnets">QuickMagnets</a>
+| <a class="messageLink" href="#scores">Scores</a>
+ENDMATCH
+MATCH <a name="message_header" />
+MATCH <a name="message_body" />
+MATCH
+<a name="quick_magnets">
+QuickMagnets
+</a>
+ENDMATCH
+MATCH
+<a name="scores">
+Scores
+</a>
+ENDMATCH
+
 MATCH Scores
 MATCH 0.769209
 MATCH 0.230763

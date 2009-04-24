@@ -1962,6 +1962,7 @@ sub parse_line
                     $self->{argument__} = '';
 
                     $self->{ut__} .= $self->splitline( "\015\012", 0 );
+                    $self->{ut__} .= "<a name=\"message_body\" />";
 
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug__};

@@ -448,6 +448,8 @@ View_WordFrequencies                    頻度
 View_WordScores                         得点
 View_Chart                              分類決定図
 View_DownloadMessage                    メッセージをダウンロード
+View_MessageHeader                      メッセージヘッダー
+View_MessageBody                        メッセージ本文
 
 Windows_TrayIcon                        POPFile のアイコンを Windows システムトレイに表示する
 Windows_Console                         POPFile のメッセージをコンソールウィンドウに出力する

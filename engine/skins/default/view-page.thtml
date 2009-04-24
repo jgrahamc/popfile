@@ -19,6 +19,25 @@
 <!-- a table for the message to be viewed -->
 <table class="openMessageTable" cellpadding="10%" cellspacing="0" width="100%" summary="<TMPL_VAR NAME="Localize_History_OpenMessageSummary">">
     <tr>
+        <td class="openMessageCloser" colspan="2">
+            <a class="messageLink" href="#message_header"><TMPL_VAR NAME="Localize_View_MessageHeader"></a>
+
+            <TMPL_IF NAME="View_If_Magnetized">
+            <TMPL_ELSE>
+            | <a class="messageLink" href="#message_body"><TMPL_VAR NAME="Localize_View_MessageBody"></a>
+            </TMPL_IF>
+
+            <TMPL_IF NAME="View_QuickMagnets_If">
+            | <a class="messageLink" href="#quick_magnets"><TMPL_VAR NAME="Localize_QuickMagnets"></a>
+            </TMPL_IF>
+
+            <TMPL_IF NAME="View_If_Magnetized">
+            <TMPL_ELSE>
+            | <a class="messageLink" href="#scores"><TMPL_VAR NAME="Localize_Scores"></a>
+            </TMPL_IF>
+        </td>
+    </tr>
+    <tr>
         <td colspan="2">
             <form id="HistoryMainForm" action="/history" method="post">
                 <input type="hidden" name="search" value="<TMPL_VAR NAME="View_Field_Search">" />
@@ -203,6 +222,7 @@
     <tr>
         <td colspan="2" class="openMessageBody">
             <hr />
+            <a name="message_header" />
             <TMPL_VAR NAME="View_Message">
         </td>
     </tr>

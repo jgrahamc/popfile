@@ -446,6 +446,8 @@ View_WordFrequencies                    showing word frequencies
 View_WordScores                         showing word scores
 View_Chart                              Decision Chart
 View_DownloadMessage                    Download Message
+View_MessageHeader                      Message Header
+View_MessageBody                        Message Body
 
 Windows_TrayIcon                        Show POPFile icon in Windows system tray?
 Windows_Console                         Run POPFile in a console window?
