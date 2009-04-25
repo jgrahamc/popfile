@@ -39,12 +39,11 @@ use Win32::GUI();
 # POPFile is actually loaded by the POPFile::Loader object which does all
 # the work
 
-our $POPFile = POPFile::Loader->new();
+my $POPFile = POPFile::Loader->new();
 
 # Indicate that we should create output on STDOUT (the POPFile
 # load sequence) and initialize with the version
 
-$POPFile->debug(1);
 $POPFile->CORE_loader_init();
 
 # Redefine POPFile's signals
@@ -58,7 +57,6 @@ $POPFile->CORE_signals();
 # modules running
 
 $POPFile->CORE_load();
-$POPFile->CORE_link_components();
 $POPFile->CORE_initialize();
 $POPFile->CORE_config();
 
@@ -66,11 +64,13 @@ $POPFile->CORE_config();
 
 my $h = $POPFile->get_module( 'UI::HTML' );
 my $b = $POPFile->get_module( 'Classifier::Bayes' );
-my $w = $POPFile->get_module( 'core::windows' );
+my $w = $POPFile->get_module( 'platform::windows' );
 my $port = $h->config_( 'port' );
 my $host = $b->config_( 'localhostname' ) || 'localhost';
 
 my $ui_url = "http://$host:$port/";
+my $popfile_official_site = 'http://getpopfile.org/';
+my $popfile_download_page = $popfile_official_site . 'download';
 
 # Start POPFile
 
@@ -95,12 +95,17 @@ exit 0;
 #
 # NI_Click
 #
-# Called by Win32::GUI when the user click the Tray icon
+# Called by Win32::GUI when the user click on the Tray icon
 #
 # ----------------------------------------------------------------------------
 
 sub NI_Click {
-    # Do nothing
+
+    # Show Download dialog if a new version of POPFile is available.
+
+    if ( $w->{updated__} ) {
+        $w->update_check_result( 1, 1 );
+    }
 
     return 1;
 }
@@ -109,7 +114,7 @@ sub NI_Click {
 #
 # NI_DblClick
 #
-# Called by Win32::GUI when the user double click the Tray icon
+# Called by Win32::GUI when the user double click on the Tray icon
 #
 # ----------------------------------------------------------------------------
 
@@ -130,9 +135,7 @@ sub NI_DblClick {
 sub NI_RightClick {
     # Track popup menu
 
-    $w->{trayicon_window}->TrackPopupMenu(
-            $w->{trayicon_menu}->{POPFile},
-            Win32::GUI::GetCursorPos() );
+    $w->track_popup_menu();
     return 1;
 }
 
@@ -149,6 +152,13 @@ sub Poll_Timer {
 
     return $POPFile->CORE_service(1) ? 1 : -1;
 }
+
+# ----------------------------------------------------------------------------
+#
+# Event handler for Popup menu items
+#
+# ----------------------------------------------------------------------------
+
 
 # ----------------------------------------------------------------------------
 #
@@ -179,3 +189,90 @@ sub Menu_Quit_Click {
     return -1;
 }
 
+# ----------------------------------------------------------------------------
+#
+# Menu_Open_PFHP_Click
+#
+# Called by Win32::GUI when the user click 'POPFile Official Web' on the popup
+# menu
+#
+# ----------------------------------------------------------------------------
+
+sub Menu_Open_PFHP_Click {
+    # Open POPFile Official webpage url using Win32::GUI::ShellExecute
+
+    Win32::GUI::ShellExecute( 0, '', $popfile_official_site, '', '', 1 );
+    return 1;
+}
+
+# ----------------------------------------------------------------------------
+#
+# Menu_Update_Check_Click
+#
+# Called by Win32::GUI when the user click 'Update Check' on the popup menu
+#
+# ----------------------------------------------------------------------------
+
+sub Menu_Update_Check_Click {
+    # Check update
+
+    my $updated = $w->{updated__} || $w->update_check();
+    $w->update_check_result( $updated, 1 );
+
+    return 1;
+}
+
+# ----------------------------------------------------------------------------
+#
+# Menu_Download_Page_Click
+#
+# Called by Win32::GUI when the user click 'POPFile Download Page' on the
+# popup menu
+#
+# ----------------------------------------------------------------------------
+
+sub Menu_Download_Page_Click {
+    # Open POPFile Download page url using Win32::GUI::ShellExecute
+
+    Win32::GUI::ShellExecute( 0, '', $popfile_download_page, '', '', 1 );
+    return 1;
+}
+
+
+# ----------------------------------------------------------------------------
+#
+# Event handler for Dialog buttons
+#
+# ----------------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------------
+#
+# Open_Download_Page_Click
+#
+# Called by Win32::GUI when the user click 'Open' button in the update check
+# result dialog
+#
+# ----------------------------------------------------------------------------
+
+sub Open_Download_Page_Click {
+    # Open POPFile Download page url using Win32::GUI::ShellExecute
+
+    Win32::GUI::ShellExecute( 0, '', $popfile_download_page, '', '', 1 );
+    return -1;
+}
+
+# ----------------------------------------------------------------------------
+#
+# Cancel_Click
+#
+# Called by Win32::GUI when the user click 'Cancel' button in the update check
+# result dialog
+#
+# ----------------------------------------------------------------------------
+
+sub Cancel_Click {
+    return -1;
+}
+
+1;
