@@ -1257,6 +1257,28 @@ CLICK change
 MATCH Changed to <font color="blue">spam</font>
 MATCH Reclassified
 
+# Check reclassified filter
+
+GET /history
+SETINPUT filter __filter__reclassified
+CLICK setfilter
+MATCH <option value="__filter__reclassified" selected>
+MATCH Testing Refresh
+MATCH <span class="reclassifyText">Reclassified</span>
+NOTMATCH Magnetic Attraction
+
+SETINPUTN negate 2 on
+CLICK setfilter
+MATCH <option value="__filter__reclassified" selected>
+MATCH Magnetic Attraction
+NOTMATCH <span class="reclassifyText">Reclassified</span>
+NOTMATCH Testing Refresh
+
+CLICK reset_filter_search
+MATCH <option value="__filter__reclassified" >
+MATCH Testing Refresh
+MATCH Magnetic Attraction
+
 # Check undo
 
 CLICK undo_31

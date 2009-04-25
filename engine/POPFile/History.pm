@@ -1013,10 +1013,17 @@ sub set_query
             $self->{queries__}{$id}{base} .=      # PROFILE BLOCK START
                 " and history.magnetid $equal 0"; # PROFILE BLOCK STOP
         } else {
-            my $bucketid = $self->classifier_()->get_bucket_id(             # PROFILE BLOCK START
-                               $self->{queries__}{$id}{session}, $filter ); # PROFILE BLOCK STOP
-            $self->{queries__}{$id}{base} .=                                              # PROFILE BLOCK START
-                " and history.bucketid $not_equal $bucketid" if ( defined( $bucketid ) ); # PROFILE BLOCK STOP
+            if ( $filter eq '__filter__reclassified' ) {
+                $self->{queries__}{$id}{base} .=
+                    " and history.usedtobe $equal 0";
+            } else {
+                my $bucketid = $self->classifier_()->get_bucket_id(  # PROFILE BLOCK START
+                    $self->{queries__}{$id}{session}, $filter );     # PROFILE BLOCK STOP
+                if ( defined( $bucketid ) ) {
+                    $self->{queries__}{$id}{base} .=                  # PROFILE BLOCK START
+                        " and history.bucketid $not_equal $bucketid"; # PROFILE BLOCK STOP
+                }
+            }
         }
     }
 

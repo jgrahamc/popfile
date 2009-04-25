@@ -33,6 +33,9 @@
         <option value="unclassified" <TMPL_VAR NAME="History_Filter_Unclassified">>
             &lt;unclassified&gt;
         </option>
+        <option value="__filter__reclassified" <TMPL_VAR NAME="History_Filter_Reclassified">>
+            &lt;reclassified&gt;
+        </option>
     </select>
     <input type="submit" class="submit" name="setfilter" value="<TMPL_VAR NAME="Localize_Find">" title="<TMPL_VAR NAME="Localize_tip_History_SearchSubmit">" />
     <input type="submit" class="submit" name="reset_filter_search" value="<TMPL_VAR NAME="Localize_History_ResetSearch">" title="<TMPL_VAR NAME="Localize_tip_History_SearchReset">" />

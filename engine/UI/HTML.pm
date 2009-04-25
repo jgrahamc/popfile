@@ -3421,6 +3421,7 @@ sub history_page
 
     $templ->param( 'History_Filter_Magnet' => ($self->{form_}{filter} eq '__filter__magnet')?'selected':'' );
     $templ->param( 'History_Filter_Unclassified' => ($self->{form_}{filter} eq 'unclassified')?'selected':'' );
+    $templ->param( 'History_Filter_Reclassified' => ($self->{form_}{filter} eq '__filter__reclassified')?'selected':'' );
     $templ->param( 'History_Field_Not' => ($self->{form_}{negate} ne '')?'checked':'' );
 
     my $c = $self->history_()->get_query_size( $q );
