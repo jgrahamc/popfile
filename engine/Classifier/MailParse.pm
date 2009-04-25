@@ -361,9 +361,10 @@ sub compute_rgb_distance
 {
     my ( $self, $left, $right ) = @_;
 
-    # TODO: store front/back colors in a RGB hash/array converting to
-    # a hh hh hh format and back is a waste as is repeatedly decoding
-    # from hh hh hh format
+    # TODO: store front/back colors in a RGB hash/array
+    #       converting to a hh hh hh format and back
+    #       is a waste as is repeatedly decoding
+    #       from hh hh hh format
 
     # Figure out where the left color is and then subtract the right
     # color (point from it) to get the vector
@@ -396,9 +397,10 @@ sub compute_html_color_distance
 {
     my ( $self ) = @_;
 
-    # TODO: store front/back colors in a RGB hash/array converting to
-    # a hh hh hh format and back is a waste as is repeatedly decoding
-    # from hh hh hh format
+    # TODO: store front/back colors in a RGB hash/array
+    #       converting to a hh hh hh format and back
+    #       is a waste as is repeatedly decoding
+    #       from hh hh hh format
 
     if ( $self->{htmlfontcolor__} ne '' && $self->{htmlbackcolor__} ne '' ) {
         $self->{htmlcolordistance__} = $self->compute_rgb_distance( # PROFILE BLOCK START
@@ -431,9 +433,8 @@ sub map_color
         return $self->{color_map__}{$color};
     } else {
 
-        # Do this after checking the color map, as there is no "#blue"
-        # color TODO: The #, however, is optional in IE.. Do we
-        # pseudo-word this?
+        # Do this after checking the color map, as there is no "#blue" color
+        # TODO: The #, however, is optional in IE.. Do we pseudo-word this?
 
         $color =~ s/^#//;
 
@@ -572,6 +573,7 @@ sub update_pseudoword
 # $prefix       A string to prefix any words with in the corpus, used for the
 #               special
 #               identification of values found in for example the subject line
+#
 # ----------------------------------------------------------------------------
 sub update_word
 {
@@ -652,12 +654,11 @@ sub add_line
         while ( $p < length( $bigline ) ) {
             my $line = substr( $bigline, $p, 1024 );
 
-            # mangle up html character entities these are just the low
-            # ISO-Latin1 entities see:
-            # http://www.w3.org/TR/REC-html32#latin1 TODO: find a way
-            # to make this (and other similar stuff) highlight without
-            # using the encoded content printer or modifying
-            # $self->{ut__}
+            # mangle up html character entities
+            # these are just the low ISO-Latin1 entities
+            # see: http://www.w3.org/TR/REC-html32#latin1
+            # TODO: find a way to make this (and other similar stuff) highlight
+            #       without using the encoded content printer or modifying $self->{ut__}
 
             while ( $line =~ m/(&(\w{3,6});)/g ) {
                 my $from = $1;
@@ -891,8 +892,8 @@ sub update_tag
     my ( $self, $tag, $arg, $end_tag, $encoded ) = @_;
 
     # TODO: Make sure $tag only ever gets alphanumeric input (in some
-    # cases it has been demonstrated that things like ()| etc can end
-    # up in $tag
+    #       cases it has been demonstrated that things like ()| etc can
+    #       end up in $tag
 
     $tag =~ s/[\r\n]//g;
     $arg =~ s/[\r\n]//g;
@@ -950,9 +951,10 @@ sub update_tag
     my $quote;
     my $end_quote;
 
-    # Strip the first attribute while there are any attributes Match
-    # the closing attribute character, if there is none (this allows
-    # nested single/double quotes), match a space or > or EOL
+    # Strip the first attribute while there are any attributes
+    # Match the closing attribute character, if there is none
+    # (this allows nested single/double quotes),
+    # match a space or > or EOL
 
     my $original;
 
@@ -978,9 +980,9 @@ sub update_tag
             print "   attribute(s) $1 with no value\n" if $self->{debug__};
         }
 
-        # Toggle for parsing script URI's.  Should be left off (0)
-        # until more is known about how different html rendering
-        # clients behave.
+        # Toggle for parsing script URI's.
+        # Should be left off (0) until more is known about how different
+        # html rendering clients behave.
 
         my $parse_script_uri = 0;
 
@@ -1001,8 +1003,7 @@ sub update_tag
                 $self->update_pseudoword( 'html', 'cidsrc',      # PROFILE BLOCK START
                                           $encoded, $original ); # PROFILE BLOCK STOP
 
-                # TODO: I've seen virus messages try to use a CID:
-                # href
+                # TODO: I've seen virus messages try to use a CID: href
 
 
             } else {
@@ -1122,7 +1123,7 @@ sub update_tag
         if ( ( $attribute =~ /^size$/i ) && ( $tag =~ /^font$/i ) ) {
 
             # TODO: unify font size scaling to use the same scale
-            # across size specifiers
+            #       across size specifiers
 
             $self->update_pseudoword( 'html', "fontsize$value",  # PROFILE BLOCK START
                                       $encoded, $original );     # PROFILE BLOCK STOP
@@ -1177,7 +1178,7 @@ sub update_tag
                 my $size = $style->{'font-size'};
 
                 # TODO: unify font size scaling to use the same scale
-                # across size specifiers approximate font sizes here:
+                #       across size specifiers approximate font sizes here:
                 # http://www.dejeu.com/web/tools/tech/css/variablefontsizes.asp
 
                 if ( $size =~ /(((\+|\-)?\d?\.?\d+)  # PROFILE BLOCK START
@@ -1403,9 +1404,9 @@ sub add_url
     } else {
         if ( $url =~ /(([^:\/])+)/ ) {
 
-            # Some other hostname format found, maybe Read here for
-            # reference: http://www.pc-help.org/obscure.htm Go here
-            # for comparison: http://www.samspade.org/t/url
+            # Some other hostname format found, maybe
+            # Read here for reference: http://www.pc-help.org/obscure.htm
+            # Go here for comparison: http://www.samspade.org/t/url
 
             # save the possible hostname
 
@@ -1434,8 +1435,9 @@ sub add_url
 
                 if ( defined $hex ) {
 
-                    # hex number trim arbitrary octets that are
-                    # greater than most significant bit
+                    # hex number
+                    # trim arbitrary octets that are greater than most
+                    # significant bit
 
                     $quad_candidate =~ s/.*(([0-9A-F][0-9A-F]){4})$/$1/i;
                     $number = hex( $quad_candidate );
@@ -1447,9 +1449,9 @@ sub add_url
                         $number = oct( $1 );
                     } else {
 
-                        # assume decimal number deviates from the
-                        # obscure.htm document here, no current
-                        # browsers overflow
+                        # assume decimal number
+                        # deviates from the obscure.htm document here,
+                        # no current browsers overflow
 
                         $number = int( $quad_candidate );
                     }
@@ -1688,7 +1690,7 @@ sub parse_file
     my ( $self, $file, $max_size, $reset ) = @_;
 
     $reset    = 1 if ( !defined( $reset    ) );
-    $max_size = 0 if ( !defined( $max_size ) || ( $max_size =~ /\D/ ) ); 
+    $max_size = 0 if ( !defined( $max_size ) || ( $max_size =~ /\D/ ) );
 
     $self->start_parse( $reset );
 
@@ -2151,7 +2153,6 @@ sub clear_out_base64
 # ----------------------------------------------------------------------------
 sub decode_string
 {
-
     # I choose not to use "$mystring = MIME::Base64::decode( $1 );"
     # because some spam mails have subjects like: "Subject: adjpwpekm
     # =?ISO-8859-1?Q?=B2=E1=A4=D1=AB=C7?= dopdalnfjpw".  Therefore we
@@ -2177,7 +2178,7 @@ sub decode_string
                                     && ( $pre =~ /^[\t ]+$/ ) );      # PROFILE BLOCK STOP( Per RFC 2047 section 6.2 )
 
         if ( defined( $atom ) ) {
-            if ( $encoding =~ /^b$/i ) {
+            if ( $encoding =~ /^[bB]$/ ) {
                 $value = decode_base64( $value );
 
                 # for Japanese header
@@ -2188,7 +2189,7 @@ sub decode_string
                         @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
                 }
                 $last_is_encoded = 1;
-            } elsif ( $encoding =~ /^q$/i ) {
+            } elsif ( $encoding =~ /^[qQ]$/ ) {
                 $value =~ s/\_/=20/g;
                 $value = decode_qp( $value );
                 $value =~ s/\x00/NUL/g;
@@ -2706,7 +2707,7 @@ sub file_extension
 # ----------------------------------------------------------------------------
 #
 # add_attachment_filename - Adds a file name and extension as pseudo
-# words attchment_name and attachment_ext
+#                           words attchment_name and attachment_ext
 #
 # $filename     The filename to add to the list of words
 #
@@ -2735,9 +2736,9 @@ sub add_attachment_filename
 
 # ----------------------------------------------------------------------------
 #
-# handle_disposition - Parses Content-Disposition header to extract
-# filename.  If filename found, at the file name and extension to the
-# word list
+# handle_disposition - Parses Content-Disposition header to extract filename.
+#                      If filename found, at the file name and extension to
+#                      the word list
 #
 # $params     The parameters of the Content-Disposition header
 #
@@ -2756,7 +2757,7 @@ sub handle_disposition
 # ----------------------------------------------------------------------------
 #
 # splitline - Escapes characters so a line will print as plain-text
-# within a HTML document.
+#             within a HTML document.
 #
 # $line         The line to escape
 # $encoding     The value of any current encoding scheme
@@ -2943,7 +2944,6 @@ sub parse_line_with_internal_parser
 # ----------------------------------------------------------------------------
 sub init_kakasi
 {
-
     # Initialize Kakasi with Wakachigaki mode(-w is passed to
     # Kakasi as argument). Both input and ouput encoding are
     # EUC-JP.
