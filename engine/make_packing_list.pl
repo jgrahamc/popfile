@@ -40,6 +40,7 @@ my $japanese = 'Japanese Language Support';
 my %explain = ( 'Encode' => $japanese,
                 'Encode::Guess' => $japanese,
                 'BerkeleyDB' => 'Upgrades from v0.20.x',
+                'DBD::SQLite' => 'SQLite3 backend',
                 'IO::Socket::SSL' => 'SSL Connection Support',
                 'IO::Socket::Socks' => 'Socks Proxy Support',
                 'MeCab' => $japanese,

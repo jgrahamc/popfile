@@ -53,14 +53,12 @@ sub cleanup {
     unlink 'popfile.cfg';
     unlink 'stopwords';
     rmtree 'messages';
-
 }
 
 
 sub rec_cp
 {
     my ( $from, $to ) = @_;
-
     my $ok = 1;
 
     my $subref =
@@ -68,7 +66,7 @@ sub rec_cp
             my $f = $_;
             my $t = $f;
             $t =~ s/^$from/$to/;
-            if ( $t !~ /CVS/ ) {
+            if ( $t !~ /.svn/ ) {
                 if ( -d $f ) {
                     mkdir $t;
                 } else {
@@ -77,7 +75,7 @@ sub rec_cp
             }
         };
     my %optref = ( wanted => $subref, no_chdir => 1 );
-    find( \%optref , $from );
+    find ( \%optref , $from );
 
     return $ok;
 }
@@ -280,7 +278,7 @@ my @patterns= ( '.*' );
 @patterns = split( /,/, $ARGV[0] ) if ( $#ARGV == 0 );
 
 my $code = 0;
-my %tests = ();
+my %test_results = ();
 
 foreach my $test (@tests) {
 
@@ -337,7 +335,7 @@ foreach my $test (@tests) {
         } else {
             print STDERR "ok (" . ( $test_count - $current_test_count ) . " ok)";
         }
-        $tests{$test} = { FAIL => ( $test_failures - $current_error_count ), OK => ( $test_count - $current_test_count ) };
+        $test_results{$test} = { FAIL => ( $test_failures - $current_error_count ), OK => ( $test_count - $current_test_count ) };
         cleanup();
     }
 
@@ -352,13 +350,13 @@ open REPORT, ">$test_report";
 print REPORT "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";
 
 # Display a summary of the results if more than 1 test was run:
-if ( scalar keys %tests > 1 ) {
-    foreach ( sort keys %tests ) {
-        if ( $tests{$_}->{FAIL} == 0 ) {
+if ( scalar keys %test_results > 1 ) {
+    foreach ( sort keys %test_results ) {
+        if ( $test_results{$_}->{FAIL} == 0 ) {
             printf REPORT "   %-25s    PASS\n", $_;
         }
         else {
-            printf REPORT "   %-25s %4d failed %4d OK\n", $_, $tests{$_}->{FAIL}, $tests{$_}->{OK};
+            printf REPORT "   %-25s %4d failed %4d OK\n", $_, $test_results{$_}->{FAIL}, $test_results{$_}->{OK};
         }
     }
     print REPORT "\n";
