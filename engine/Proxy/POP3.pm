@@ -661,7 +661,8 @@ sub child__
 
                 ( $class, undef ) = $self->classifier_()->classify_and_modify(  # PROFILE BLOCK START
                     $session, \*RETRFILE, $client, 1,
-                    $downloaded{$count}{class}, $downloaded{$count}{slot} );    # PROFILE BLOCK STOP
+                    $downloaded{$count}{class},
+                    $downloaded{$count}{slot} );                                # PROFILE BLOCK STOP
                 print $client ".$eol";
 
                 close RETRFILE;

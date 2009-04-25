@@ -532,8 +532,8 @@ sub child__
             if ( $command =~                                 # PROFILE BLOCK START
                 /^[ ]*(LIST|HEAD|NEWGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|
                      XOVER|XPAT|XROVER|XTHREAD)/ix ) {       # PROFILE BLOCK STOP
-                my ( $response, $ok ) = $self->get_response_( $news, $client, # PROFILE BLOCK START
-                                                              $command);      # PROFILE BLOCK STOP
+                ( $response, $ok ) =                                  # PROFILE BLOCK START
+                    $self->get_response_( $news, $client, $command ); # PROFILE BLOCK STOP
 
                 # 2xx (200) series response indicates multi-line text
                 # follows to .crlf
@@ -547,8 +547,8 @@ sub child__
             # Exceptions to 200 code above
 
             if ( $ command =~ /^ *(HELP)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client, # PROFILE BLOCK START
-                                                              $command);      # PROFILE BLOCK STOP
+                ( $response, $ok ) =                                  # PROFILE BLOCK START
+                    $self->get_response_( $news, $client, $command ); # PROFILE BLOCK STOP
                 if ( $response =~ /^1\d\d/ ) {
                     $self->echo_to_dot_( $news, $client, 0 );
                 }
@@ -566,8 +566,8 @@ sub child__
             # Commands followed by multi-line client response
 
             if ( $command =~ /^ *(IHAVE|POST|XRELPIC)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client, # PROFILE BLOCK START
-                                                              $command);      # PROFILE BLOCK STOP
+                ( $response, $ok ) =                                  # PROFILE BLOCK START
+                    $self->get_response_( $news, $client, $command ); # PROFILE BLOCK STOP
 
                 # 3xx (300) series response indicates multi-line text
                 # should be sent, up to .crlf
@@ -582,6 +582,8 @@ sub child__
                     # somehow, we add another CRLF
 
                     $self->get_response_( $news, $client, "$eol" );
+                } else {
+                    $self->tee_( $client, $response );
                 }
                 next;
             }
@@ -645,7 +647,7 @@ sub configure_item
         return $self->config_( 'local' );
     }
 
-    $self->SUPER::configure_item( $name, $templ, $language);
+    $self->SUPER::configure_item( $name, $templ, $language );
 }
 
 # ----------------------------------------------------------------------------

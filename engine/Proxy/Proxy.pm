@@ -276,7 +276,7 @@ sub service
                         $self->{child_}( $self, $client,        # PROFILE BLOCK START
                             $self->{api_session__} );           # PROFILE BLOCK STOP
                         if ( defined( $pid ) ) {
-                            &{$self->{childexit_}}(0)
+                            &{$self->{childexit_}}( 0 );
                         }
                     }
                 } else {
@@ -614,11 +614,13 @@ sub verify_connected_
                 binmode( $mail );
             }
 
-            # Wait 10 seconds for a response from the remote server and if
-            # there isn't one then give up trying to connect
+            if ( !$ssl || ( $mail->pending() == 0 ) ) {
+                # Wait 'timeout' seconds for a response from the remote server and
+                # if there isn't one then give up trying to connect
 
-            my $selector = new IO::Select( $mail );
-            last unless () = $selector->can_read($self->global_config_( 'timeout' ));
+                my $selector = new IO::Select( $mail );
+                last unless $selector->can_read($self->global_config_( 'timeout' ));
+            }
 
             # Read the response from the real server and say OK
 
