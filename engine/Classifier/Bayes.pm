@@ -2111,6 +2111,12 @@ sub classify
 
     return "unclassified" if ( $#buckets == -1 );
 
+    # If all of the user's buckets have no words then we escape here
+    # return unclassified
+
+    my $wc = $self->get_word_count( $session ) || 0;
+    return "unclassified" if ( $wc == 0 );
+
     # Check to see if this email should be classified based on a magnet
 
     for my $bucket ($self->get_buckets_with_magnets( $session ))  {
