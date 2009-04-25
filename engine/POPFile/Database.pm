@@ -374,7 +374,7 @@ sub db_connect_helper__
         if ( $need_convert ) {
             $self->log_( 0, 'Convert SQLite2 database to SQLite3 database' );
 
-            $self->db_upgrade__( $old_dbh );
+            $self->db_upgrade__( $db, $old_dbh );
             $old_dbh->disconnect;
 
             $self->log_( 0, 'Database convert completed' );
@@ -605,6 +605,7 @@ sub db_upgrade__
     $db_to->begin_work;
     open INSERT, '<' . $ins_file;
     $i = 0;
+    my $sql = '';
     while ( <INSERT> ) {
         if ( ( ++$i % 100 ) == 0 ) {
            print "[$i]";
@@ -615,7 +616,12 @@ sub db_upgrade__
             flush STDOUT;
         }
         s/[\r\n]//g;
-        $db_to->do( $_ );
+        if ( /;$/ ) {
+            $db_to->do( $sql . $_ );
+            $sql = '';
+        } else {
+            $sql .= $_;
+        }
     }
     close INSERT;
     $db_to->commit;

@@ -484,7 +484,6 @@ insert into user_template ( id, name, def, form ) values ( 3, 'GLOBAL_can_admin'
 -- The characters that appear before and after a subject modification
 insert into user_template ( name, def, form ) values ( 'bayes_subject_mod_left', '[', '%s' );
 insert into user_template ( name, def, form ) values ( 'bayes_subject_mod_right', ']', '%s' );
-insert into user_template ( name, def, form ) values ( 'bayes_subject_mod_pos', 1, '%d' );
 
 -- No default unclassified weight is the number of times more sure
 -- POPFile must be of the top class vs the second class, default is
@@ -571,6 +570,11 @@ insert into user_template ( name, def, form ) values ( 'imap_watched_folders', '
 
 -- Show the config bar at the bottom of each page defaults to on
 insert into user_template ( name, def, form ) values ( 'html_show_configbars', 1, '%d' );
+
+-- The position to insert a subject modification
+--  1 : Beginning of the subject (default)
+-- -1 : End of the subject
+insert into user_template ( name, def, form ) values ( 'bayes_subject_mod_pos', 1, '%d' );
 
 -- The adminisrator (user 1) can_admin
 
