@@ -989,7 +989,7 @@ for my $modify_file (@modify_tests) {
         open OUTPUT, "<temp.out";
         while ( <OUTPUT> ) {
             my $output_line = $_;
-            next if ( $output_line =~ /^X-POPFile-TimeoutPrevension:/ );
+            next if ( $output_line =~ /^X-POPFile-TimeoutPrevention:/ );
             my $cam_line    = <CAM> || '';
             $output_line =~ s/[\r\n]//g;
             $cam_line =~ s/[\r\n]//g;
