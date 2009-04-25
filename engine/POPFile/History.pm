@@ -9,7 +9,7 @@ use POPFile::Module;
 # This module handles POPFile's history.  It manages entries in the POPFile
 # database and on disk that store messages previously classified by POPFile.
 #
-# Copyright (c) 2004-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -187,7 +187,6 @@ sub deliver
 
     if ( $type eq 'COMIT' ) {
         push ( @{$self->{commit_list__}}, \@message );
-#        $self->commit_history();
     }
 }
 
@@ -300,7 +299,6 @@ sub release_slot
 
     my $h = $self->db_()->prepare( $delete );
     $self->database_()->validate_sql_prepare_and_execute( $h, $slot );
-    $h->finish;
 
     my $file = $self->get_slot_file( $slot );
 
@@ -374,8 +372,8 @@ sub change_slot_classification
     # then retrieve the current classification for this slot
     # and update the database
 
-    my $bucketid = $self->classifier_()->get_bucket_id( # PROFILE BLOCK START
-                           $session, $class );          # PROFILE BLOCK STOP
+    my $bucketid = $self->classifier_()->get_bucket_id(  # PROFILE BLOCK START
+                           $session, $class );           # PROFILE BLOCK STOP
 
     my $oldbucketid = 0;
     if ( !$undo ) {
@@ -384,10 +382,10 @@ sub change_slot_classification
     }
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-            'update history set bucketid = ?,
-                                usedtobe = ?
-                            where id = ?;',
-            $bucketid, $oldbucketid, $slot )->finish;      # PROFILE BLOCK STOP
+        'update history set bucketid = ?,
+                            usedtobe = ?
+                where id = ?;',
+            $bucketid, $oldbucketid, $slot );              # PROFILE BLOCK STOP
     $self->force_requery();
 }
 
@@ -410,9 +408,9 @@ sub revert_slot_classification
     my $oldbucketid = $fields[9];
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-            'update history set bucketid = ?,
-                                usedtobe = ?
-                            where id = ?;',
+        'update history set bucketid = ?,
+                            usedtobe = ?
+                where id = ?;',
             $oldbucketid, 0, $slot )->finish;              # PROFILE BLOCK STOP
     $self->force_requery();
 }
@@ -431,6 +429,8 @@ sub get_slot_fields
 {
     my ( $self, $slot, $session ) = @_;
 
+    return undef if ( !defined( $slot ) || $slot !~ /^\d+$/ );
+
     my $userid = $self->classifier_()->valid_session_key__( $session );
     return undef if ( !defined($userid) );
 
@@ -439,9 +439,10 @@ sub get_slot_fields
              where history.id     = ? and
                    history.userid = ? and
                    buckets.id     = history.bucketid and
-                   magnets.id     = magnetid;", $slot, $userid );  # PROFILE BLOCK STOP
+                   magnets.id     = magnetid and
+                   history.committed = 1;",
+        $slot, $userid );  # PROFILE BLOCK STOP
     my @result = $h->fetchrow_array;
-    $h->finish;
     return @result;
 }
 
@@ -459,15 +460,17 @@ sub is_valid_slot
 {
     my ( $self, $slot, $session ) = @_;
 
+    return undef if ( !defined( $slot ) || $slot !~ /^\d+$/ );
+
     my $userid = $self->classifier_()->valid_session_key__( $session );
     return 0 if ( !defined($userid) );
 
     my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select id from history
              where history.id     = ? and
-                   history.userid = ?;', $slot, $userid );         # PROFILE BLOCK STOP
+                   history.userid = ?;',
+        $slot, $userid );                                          # PROFILE BLOCK STOP
     my @row = $h->fetchrow_array;
-    $h->finish;
 
     return ( ( @row ) && ( $row[0] == $slot ) );
 }
@@ -551,7 +554,7 @@ sub commit_history
                                             ${$header{'subject'}}[0],
                                             ${$header{'received'}}[0] );
 
-        # For sorting purposes the From, To, CC, Subject headers have
+        # For sorting purposes the From, To, CC and  Subject headers have
         # special cleaned up versions of themselves in the database.
         # The idea is that case and certain characters should be
         # ignored when sorting these fields
@@ -645,7 +648,7 @@ sub commit_history
                     $hash,                  # hash
                     $msg_size,              # size
                     $slot                   # id
-                         );                                                     # PROFILE BLOCK STOP
+            );                                                                  # PROFILE BLOCK STOP
         } else {
             $self->log_( 0, "Couldn't find bucket ID for bucket $bucket when committing $slot" );
             $self->release_slot( $slot );
@@ -864,7 +867,6 @@ sub get_slot_from_hash
     my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select id from history where hash = ? limit 1;', $hash ); # PROFILE BLOCK STOP
     my $result = $h->fetchrow_arrayref;
-    $h->finish;
 
     return defined( $result )?$result->[0]:'';
 }
@@ -988,7 +990,9 @@ sub set_query
 
     my $userid = $self->{queries__}{$id}{userid};
 
-    $self->{queries__}{$id}{base} = "select XXX from history, buckets, magnets where history.userid = $userid and committed = 1";
+    $self->{queries__}{$id}{base} =
+        "select XXX from history, buckets, magnets
+                where history.userid = $userid and committed = 1";
 
     $self->{queries__}{$id}{base} .= ' and history.bucketid = buckets.id';
     $self->{queries__}{$id}{base} .= ' and magnets.id = magnetid';

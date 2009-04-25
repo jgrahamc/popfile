@@ -19,14 +19,14 @@ package POPFile::Loader;
 #   under the terms of version 2 of the GNU General Public License as
 #   published by the Free Software Foundation.
 #
-#   POPFile is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#   General Public License for more details.
+#   POPFile is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with POPFile; if not, write to the Free Software Foundation,
-#   Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#   along with POPFile; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #   Created by     Sam Schinke (sschinke@users.sourceforge.net)
 #
@@ -171,7 +171,8 @@ sub CORE_loader_init
         $self->CORE_version( $major, $minor, $rev );
     }
 
-    # Parse just the --verbose command-line option
+    # Parse the command-line options --verbose, --shutdown and --quiet are
+    # supported
 
     GetOptions( "verbose!" => \$self->{debug__},          # PROFILE BLOCK START
                 "shutdown" => \$self->{shutdown__},

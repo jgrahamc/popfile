@@ -203,7 +203,6 @@ sub time {
     return time;
 }
 
-
 # ---------------------------------------------------------------------------
 #
 # calculate_today
@@ -216,7 +215,7 @@ sub calculate_today__
     my ( $self ) = @_;
 
     # Create the name of the debug file for the debug() function
-    $self->{today__} = int( $self->time / $seconds_per_day ) * $seconds_per_day; #/ sorry. Again: the Eclipse parser needs this
+    $self->{today__} = int( $self->time / $seconds_per_day ) * $seconds_per_day;  # just to make this work in Eclipse: /
 
     # Note that 0 parameter than allows the logdir to be outside the user
     # sandbox

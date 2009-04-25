@@ -263,6 +263,7 @@ sub postfork
     my ( $self, $pid, $reader ) = @_;
 
     $self->{children__}{"$pid"} = $reader;
+    $self->log_( 2, "Parent: postfork() called for pid $pid, reader $reader" );
 }
 
 #----------------------------------------------------------------------------
@@ -370,11 +371,13 @@ sub flush_child_data_
     my $stats_changed = 0;
     my $message;
 
-    while ( ($message = $self->read_pipe_( $handle )) && defined($message) )
+    while ( defined ( $message = $self->read_pipe_( $handle ) ) )
     {
         if ( $message =~ /([^:]+):([^\r\n]*)/ ) {
             my @parameters = split( ':', $2 || '' );
             $self->post( $1, @parameters );
+        } else {
+            $self->log_( 2, "Recieved invalid message from child: $message" );
         }
     }
 }

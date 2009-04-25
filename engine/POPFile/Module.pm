@@ -297,6 +297,7 @@ sub prefork
 #         the child
 #
 # There is no return value from this method
+#
 # ----------------------------------------------------------------------------
 sub forked
 {
@@ -700,6 +701,7 @@ sub flush_slurp_data__
 # Returns the length of data currently buffered for the passed in handle
 #
 # ----------------------------------------------------------------------------
+
 sub slurp_data_size__
 {
     my ( $self, $handle ) = @_;
@@ -719,6 +721,7 @@ sub slurp_data_size__
 # will return undef
 #
 # ----------------------------------------------------------------------------
+
 sub slurp_buffer_
 {
     my ( $self, $handle, $length ) = @_;
@@ -815,6 +818,7 @@ sub slurp_
 # clean up temporary buffer space used by slurp_
 #
 # ----------------------------------------------------------------------------
+
 sub done_slurp_
 {
     my ( $self, $handle ) = @_;
