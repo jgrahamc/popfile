@@ -2,7 +2,7 @@
 #
 # Tests for pipe.pl
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -56,6 +56,7 @@ while ( <TEMP> ) {
     $cam_line =~ s/[\r\n]+/\n/g; # This tests that the network EOL has been removed
     next if ( $output_line =~ /X\-POPFile\-TimeoutPrevention/ );
     $output_line =~ s/view=\d+/view=popfile0=0.msg/;
+    $output_line =~ s/[\r\n]+/\n/g if ( $^O eq 'MSWin32' );
     test_assert_equal( $output_line, $cam_line, $modify_file );
 }
 

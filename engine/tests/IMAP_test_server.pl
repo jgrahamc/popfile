@@ -1,8 +1,8 @@
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
 # Tests for IMAP.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -21,7 +21,7 @@
 #
 #   Originally created by Manni Heumann (mannih2001@users.sourceforge.net)
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 # This test module is supposed to test the POPFile IMAP module.
 # To this end, it will fork off a server part. This "server" is

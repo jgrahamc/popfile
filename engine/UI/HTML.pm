@@ -749,20 +749,20 @@ sub url_handler__
     # handle them and the related template
 
     my %page_table = (                      # PROFILE BLOCK START
-        'administration' => [ \&administration_page,
-            'administration-page.thtml' ],
-        'buckets'        => [ \&corpus_page,
-            'corpus-page.thtml'        ],
-        'magnets'        => [ \&magnet_page,
-            'magnet-page.thtml'        ],
-        'advanced'       => [ \&advanced_page,
-            'advanced-page.thtml'      ],
-        'users'          => [ \&users_page,
-            'users-page.thtml'         ],
-        'history'        => [ \&history_page,
-            'history-page.thtml'       ],
-        'view'           => [ \&view_page,
-            'view-page.thtml'          ] ); # PROFILE BLOCK STOP
+        'administration' =>
+            [ \&administration_page, 'administration-page.thtml' ],
+        'buckets'        =>
+            [ \&corpus_page,         'corpus-page.thtml'         ],
+        'magnets'        =>
+            [ \&magnet_page,         'magnet-page.thtml'         ],
+        'advanced'       =>
+            [ \&advanced_page,       'advanced-page.thtml'       ],
+        'users'          =>
+            [ \&users_page,          'users-page.thtml'          ],
+        'history'        =>
+            [ \&history_page,        'history-page.thtml'        ],
+        'view'           =>
+            [ \&view_page,           'view-page.thtml'           ] ); # PROFILE BLOCK STOP
 
     my %url_table = ( '/administration' => 'administration', # PROFILE BLOCK START
                       '/buckets'        => 'buckets',
@@ -991,9 +991,11 @@ sub handle_history_bar__
 {
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
+    my $userid = $self->{sessions__}{$session}{user};
+
     if ( defined($self->{form_}{page_size}) ) {
         if ( $self->is_valid_number_( $self->{form_}{page_size}, 1, 1000) ) {
-            $self->user_config_( $self->{sessions__}{$session}{user},      # PROFILE BLOCK START
+            $self->user_config_( $userid,                                  # PROFILE BLOCK START
                                  'page_size', $self->{form_}{page_size} ); # PROFILE BLOCK STOP
         } else {
             $self->error_message__( $templ,                          # PROFILE BLOCK START
@@ -1003,14 +1005,14 @@ sub handle_history_bar__
     }
 
     $templ->param( 'Configuration_Page_Size' =>          # PROFILE BLOCK START
-                   $self->user_config_( $self->{sessions__}{$session}{user},
+                   $self->user_config_( $userid,
                                         'page_size' ) ); # PROFILE BLOCK STOP
 
     if ( defined($self->{form_}{history_days}) ) {
         if ( $self->is_valid_number_( $self->{form_}{history_days}, 1, 366) ) {
-            $self->user_module_config_( $self->{sessions__}{$session}{user}, # PROFILE BLOCK START
+            $self->user_module_config_( $userid,                        # PROFILE BLOCK START
                                         'history', 'history_days',
-                                        $self->{form_}{history_days} );       # PROFILE BLOCK STOP
+                                        $self->{form_}{history_days} ); # PROFILE BLOCK STOP
         } else {
             $self->error_message__( $templ,                          # PROFILE BLOCK START
                 $self->language($session)->{Configuration_Error5} ); # PROFILE BLOCK STOP
@@ -1024,14 +1026,14 @@ sub handle_history_bar__
     }
 
     if ( defined( $self->{form_}{removecolumn} ) ) {
-        my $columns = $self->user_config_( $self->{sessions__}{$session}{user}, 'columns' );
+        my $columns = $self->user_config_( $userid, 'columns' );
         $columns =~ s/\+$self->{form_}{removecolumn}/-$self->{form_}{removecolumn}/;
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'columns', $columns );
+        $self->user_config_( $userid, 'columns', $columns );
     }
 
-    $templ->param( 'Configuration_History_Days' => $self->user_module_config_( $self->{sessions__}{$session}{user}, 'history', 'history_days' ) );
+    $templ->param( 'Configuration_History_Days' => $self->user_module_config_( $userid, 'history', 'history_days' ) );
     if ( defined( $self->{form_}{update_fields} ) ) {
-        my @columns = split(',', $self->user_config_( $self->{sessions__}{$session}{user}, 'columns' ));
+        my @columns = split(',', $self->user_config_( $userid, 'columns' ));
         my $new_columns = '';
         foreach my $column (@columns) {
             $column =~ s/^(\+|\-)//;
@@ -1043,10 +1045,10 @@ sub handle_history_bar__
             $new_columns .= $column;
             $new_columns .= ',';
         }
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'columns', $new_columns );
+        $self->user_config_( $userid, 'columns', $new_columns );
     }
 
-    my @columns = split(',', $self->user_config_( $self->{sessions__}{$session}{user}, 'columns' ));
+    my @columns = split(',', $self->user_config_( $userid, 'columns' ));
     my @column_data;
     foreach my $column (@columns) {
         my %row;
@@ -1066,7 +1068,7 @@ sub handle_history_bar__
 
     if ( defined( $self->{form_}{moveleft} ) ) {
         my $col = '+' . $self->{form_}{moveleft};
-        my @cols = split( ',', $self->user_config_( $self->{sessions__}{$session}{user}, 'columns' ) );
+        my @cols = split( ',', $self->user_config_( $userid, 'columns' ) );
 
         for my $i (1..$#cols) {
             if ( $cols[$i] eq $col ) {
@@ -1076,11 +1078,11 @@ sub handle_history_bar__
                 last;
             }
         }
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'columns', join( ',', @cols ) );
+        $self->user_config_( $userid, 'columns', join( ',', @cols ) );
     }
     if ( defined( $self->{form_}{moveright} ) ) {
         my $col = '+' . $self->{form_}{moveright};
-        my @cols = split( ',', $self->user_config_( $self->{sessions__}{$session}{user}, 'columns' ) );
+        my @cols = split( ',', $self->user_config_( $userid, 'columns' ) );
 
         for my $i (0..$#cols-1) {
             if ( $cols[$i] eq $col ) {
@@ -1090,7 +1092,7 @@ sub handle_history_bar__
                 last;
             }
         }
-        $self->user_config_( $self->{sessions__}{$session}{user}, 'columns', join( ',', @cols ) );
+        $self->user_config_( $userid, 'columns', join( ',', @cols ) );
     }
 }
 
@@ -2770,8 +2772,8 @@ sub corpus_page
 
     if ( ( defined($self->{form_}{newname}) ) &&           # PROFILE BLOCK START
          ( $self->{form_}{oname} ne '' ) ) {               # PROFILE BLOCK STOP
-        if ( ( $self->{form_}{newname} eq '' ) ||                        # PROFILE BLOCK START
-             ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) )  { # PROFILE BLOCK STOP
+        if ( ( $self->{form_}{newname} eq '' ) ||                       # PROFILE BLOCK START
+             ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ ) ) { # PROFILE BLOCK STOP
             $self->error_message__( $templ, $self->language($session)->{Bucket_Error1} );
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
@@ -3035,9 +3037,12 @@ sub set_history_navigator__
 
     $templ->param( 'History_Navigator_Fields' => $self->print_form_fields_(0,1,( 'filter','search','sort','negate' ) ) );
 
+    my $page_size  = $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+    my $query_size = $self->history_()->get_query_size( $self->{sessions__}{$session}{q} );
+
     if ( $start_message != 0 )  {
         $templ->param( 'History_Navigator_If_Previous' => 1 );
-        $templ->param( 'History_Navigator_Previous'    => $start_message - $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) );
+        $templ->param( 'History_Navigator_Previous'    => $start_message - $page_size );
     }
 
     # Only show two pages either side of the current page, the first
@@ -3049,13 +3054,12 @@ sub set_history_navigator__
     my $p = 1;
     my $dots = 0;
     my @nav_data;
-    my $q = $self->{sessions__}{$session}{q};
-    while ( $i < $self->history_()->get_query_size( $q ) ) {
+    while ( $i < $query_size ) {
         my %row_data;
-        if ( ( $i == 0 ) ||                                                                                                                       # PROFILE BLOCK START
-             ( ( $i + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $self->history_()->get_query_size( $q ) ) ||
-             ( ( ( $i - 2 * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) <= $start_message ) &&
-               ( ( $i + 2 * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) >= $start_message ) ) ) {                   # PROFILE BLOCK STOP
+        if ( ( $i == 0 ) ||                                        # PROFILE BLOCK START
+             ( ( $i + $page_size ) >= $query_size ) ||
+             ( ( ( $i - 2 * $page_size ) <= $start_message ) &&
+               ( ( $i + 2 * $page_size ) >= $start_message ) ) ) { # PROFILE BLOCK STOP
             $row_data{History_Navigator_Page} = $p;
             $row_data{History_Navigator_I} = $i;
             if ( $i == $start_message ) {
@@ -3073,15 +3077,15 @@ sub set_history_navigator__
             $dots = 0;
         }
 
-        $i += $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+        $i += $page_size;
         $p++;
         push ( @nav_data, \%row_data );
     }
     $templ->param( 'History_Navigator_Loop' => \@nav_data );
 
-    if ( $start_message < ( $self->history_()->get_query_size( $q ) - $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) )  {
+    if ( $start_message < ( $query_size - $page_size ) )  {
         $templ->param( 'History_Navigator_If_Next' => 1 );
-        $templ->param( 'History_Navigator_Next'    => $start_message + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) );
+        $templ->param( 'History_Navigator_Next'    => $start_message + $page_size );
     }
 }
 
@@ -3102,9 +3106,11 @@ sub set_magnet_navigator__
 {
     my ( $self, $templ, $start_magnet, $stop_magnet, $magnet_count, $session ) = @_;
 
+    my $page_size = $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+
     if ( $start_magnet != 0 )  {
         $templ->param( 'Magnet_Navigator_If_Previous' => 1 );
-        $templ->param( 'Magnet_Navigator_Previous'    => $start_magnet - $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) );
+        $templ->param( 'Magnet_Navigator_Previous'    => $start_magnet - $page_size );
     }
 
     my $i = 0;
@@ -3122,14 +3128,14 @@ sub set_magnet_navigator__
             $row_data{Magnet_Navigator_Start_Magnet} = $i;
         }
 
-        $i += $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+        $i += $page_size;
         push ( @page_loop, \%row_data );
     }
     $templ->param( 'Magnet_Navigator_Loop_Pages' => \@page_loop );
 
-    if ( $start_magnet < ( $magnet_count - $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) )  {
+    if ( $start_magnet < ( $magnet_count - $page_size ) )  {
         $templ->param( 'Magnet_Navigator_If_Next' => 1 );
-        $templ->param( 'Magnet_Navigator_Next'    => $start_magnet + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) );
+        $templ->param( 'Magnet_Navigator_Next'    => $start_magnet + $page_size );
     }
 }
 
@@ -3396,12 +3402,15 @@ sub history_page
         return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','negate') ), $session );
     }
 
+    my $page_size  = $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+    my $query_size = $self->history_()->get_query_size( $q );
+
     $templ->param( 'History_Field_Search'  => $self->{form_}{search} );
     $templ->param( 'History_Field_Not'     => $self->{form_}{negate} );
     $templ->param( 'History_If_Search'     => defined( $self->{form_}{search} ) );
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
-    $templ->param( 'History_If_MultiPage'  => $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) <= $self->history_()->get_query_size( $q ) );
+    $templ->param( 'History_If_MultiPage'  => $page_size <= $query_size );
 
     my @buckets = $self->classifier_()->get_buckets( $session );
 
@@ -3409,9 +3418,10 @@ sub history_page
     foreach my $bucket (@buckets) {
         my %row_data;
         $row_data{History_Bucket} = $bucket;
-        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $session, # PROFILE BLOCK START
-                                                                      $bucket,
-                                                                      'color' );                 # PROFILE BLOCK STOP
+        $row_data{History_Bucket_Color} =                          # PROFILE BLOCK START
+            $self->classifier_()->get_bucket_parameter( $session,
+                                                        $bucket,
+                                                        'color' ); # PROFILE BLOCK STOP
         push ( @bucket_data, \%row_data );
     }
 
@@ -3420,9 +3430,10 @@ sub history_page
         my %row_data;
         $row_data{History_Bucket} = $bucket;
         $row_data{History_Selected} = ( defined( $self->{form_}{filter} ) && ( $self->{form_}{filter} eq $bucket ) )?'selected':'';
-        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $session, # PROFILE BLOCK START
-                                                                      $bucket,
-                                                                      'color' );                 # PROFILE BLOCK STOP
+        $row_data{History_Bucket_Color} =                          # PROFILE BLOCK START
+            $self->classifier_()->get_bucket_parameter( $session,
+                                                        $bucket,
+                                                        'color' ); # PROFILE BLOCK STOP
         push ( @sf_bucket_data, \%row_data );
     }
     $templ->param( 'History_Loop_SF_Buckets' => \@sf_bucket_data );
@@ -3432,15 +3443,14 @@ sub history_page
     $templ->param( 'History_Filter_Reclassified' => ($self->{form_}{filter} eq '__filter__reclassified')?'selected':'' );
     $templ->param( 'History_Field_Not' => ($self->{form_}{negate} ne '')?'checked':'' );
 
-    my $c = $self->history_()->get_query_size( $q );
-    if ( $c > 0 ) {
+    if ( $query_size > 0 ) {
         $templ->param( 'History_If_Some_Messages' => 1 );
-        $templ->param( 'History_Count' => $self->pretty_number( $c, $session ) );
+        $templ->param( 'History_Count' => $self->pretty_number( $query_size, $session ) );
 
         my $start_message = 0;
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
-        if ( $start_message >= $c ) {
-            $start_message -= $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+        if ( $start_message >= $query_size ) {
+            $start_message -= $page_size;
         }
         if ( $start_message < 0 ) {
             $start_message = 0;
@@ -3448,8 +3458,8 @@ sub history_page
         $self->{form_}{start_message} = $start_message;
         $templ->param( 'History_Start_Message' => $start_message );
 
-        my $stop_message  = $start_message + $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) - 1;
-        $stop_message = $c - 1 if ( $stop_message >= $c );
+        my $stop_message  = $start_message + $page_size - 1;
+        $stop_message = $query_size - 1 if ( $stop_message >= $query_size );
 
         $self->set_history_navigator__( $templ, $start_message, $stop_message, $session );
 
@@ -3566,7 +3576,7 @@ sub history_page
                      next;
                  }
 
-                 if ($header eq 'subject') {
+                 if ( $header eq 'subject' ) {
                      $col_data{History_If_Subject_Column} = 1;
 
                      if ( $language_for_user eq 'Nihongo' ) {
@@ -3592,16 +3602,18 @@ sub history_page
                      next;
                  }
 
-                 if ($header eq 'size') {
+                 if ( $header eq 'size' ) {
                      my $size = $$row[12];
                      my $v = '?';
                      if ( defined $size ) {
                          if ( $size >= 1024 * 1024 ) {
                              $v = sprintf $self->language($session)->{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
-                         } elsif ( $size >= 1024 ) {
+                         }
+                         elsif ( $size >= 1024 ) {
                              $v = sprintf $self->language($session)->{History_Size_KiloBytes}, $size / 1024;
-                         } else {
-                             $v =sprintf $self->language($session)->{History_Size_Bytes}, $size;
+                         }
+                         else {
+                             $v = sprintf $self->language($session)->{History_Size_Bytes}, $size;
                          }
                      }
 
@@ -3619,7 +3631,7 @@ sub history_page
                      next;
                  }
 
-                 if ($header eq 'bucket') {
+                 if ( $header eq 'bucket' ) {
                      $col_data{History_If_Bucket_Column} = 1;
                      my $bucket = $col_data{History_Bucket} = $$row[8];
                      if ( $$row[11] ne '' ) {
@@ -3655,8 +3667,8 @@ sub history_page
             if ( ( $last != -1 ) &&                                                                     # PROFILE BLOCK START
                  ( $self->{form_}{sort} =~ /inserted/ ) &&
                  ( $self->user_config_( $self->{sessions__}{$session}{user}, 'session_dividers' ) ) ) { # PROFILE BLOCK STOP
-                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > # PROFILE BLOCK START
-                                                  300 );                    # PROFILE BLOCK STOP
+                $row_data{History_If_Session} =        # PROFILE BLOCK START
+                    ( abs( $$row[7] - $last ) > 300 ); # PROFILE BLOCK STOP
             }
             # we set this here so feedback lines will also
             # get the correct colspan:
@@ -3679,7 +3691,7 @@ sub shorten__
 {
     my ( $self, $string, $length, $language ) = @_;
 
-    if ( length($string)>$length) {
+    if ( length($string) > $length ) {
         $string =~ /(.{$length})/;
         $1 =~ /((?:$euc_jp)*)/o if ( $language eq 'Nihongo' );
         $string = "$1...";
@@ -3786,7 +3798,7 @@ sub view_page
 
     $templ->param( 'View_Index'            => $index );
     $templ->param( 'View_This'             => $index );
-    $templ->param( 'View_This_Page'        => (( $index ) >= $start_message )?$start_message:($start_message - $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ))); # TODO
+    $templ->param( 'View_This_Page'        => (( $index ) >= $start_message )?$start_message:($start_message - $page_size)); # TODO
 
     $templ->param( 'View_If_Reclassified'  => $reclassified );
     if ( $reclassified ) {
@@ -4259,8 +4271,6 @@ sub cache_language_for_user
 # Fill the language hash with the language strings that are from the
 # named language file
 #
-#
-#
 # $lang          - The language to load (no .msg extension)
 # $session       - A valid session key
 # $test_language - If 1, language file test mode
@@ -4556,4 +4566,3 @@ sub shutdown_page__
 }
 
 1;
-

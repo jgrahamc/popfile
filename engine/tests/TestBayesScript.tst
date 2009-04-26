@@ -2,7 +2,7 @@
 #
 # Tests for bayes.pl
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -48,6 +48,8 @@ test_assert( $code != 0 );
 open TEMP, "<temp.tmp";
 $line = <TEMP>;
 close TEMP;
+unlink 'temp.tmp';
+
 test_assert_regexp( $line, 'Error: File `doesnotexist\' does not exist, classification aborted' );
 
 # Restore STDERR
@@ -67,9 +69,11 @@ while ( <WORDS> ) {
 close WORDS;
 
 @stdout = `$bayes TestMails/TestMailParse021.msg`;# 2> temp.tmp 1> temp2.tmp" );
+unlink 'temp.tmp';
+unlink 'temp2.tmp';
 
 $code = ($? >> 8);
-test_assert( $code == 0 );
+test_assert_equal( $code, 0 );
 $line = shift @stdout;
 test_assert_regexp( $line, '`TestMails/TestMailParse021.msg\' is `spam\'' );
 
@@ -88,7 +92,6 @@ foreach my $word (keys %output) {
     test_assert_equal( $words{$word}, $output{$word}, $word );
 }
 
-unlink 'temp.tmp';
-unlink 'temp2.tmp';
-rmtree( 'bayes.pl.' );
+rmtree( 'bayes.pl' );
+
 1;

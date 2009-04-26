@@ -231,6 +231,8 @@ foreach my $word (keys %words) {
 $b->release_session_key( $user_session );
 $POPFile->CORE_stop();
 
+rmtree( 'insert.pl' );
+
 
 1;
 
