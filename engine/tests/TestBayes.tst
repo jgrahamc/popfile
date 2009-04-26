@@ -2,7 +2,7 @@
 #
 # Tests for Bayes.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -507,6 +507,8 @@ test_assert( !$b->is_pseudo_bucket( $session, 'personal'     ) );
 test_assert(  $b->is_pseudo_bucket( $session, 'unclassified' ) );
 test_assert( !$b->is_pseudo_bucket( $session, 'impersonal2'  ) );
 
+test_assert( !$b->is_bucket( $session, 'impersonal2' ) );
+
 # get_buckets
 
 my @buckets = sort $b->get_buckets( $session );
@@ -970,10 +972,11 @@ for my $class_test (@class_tests) {
 
 $b->module_config_( 'html', 'port',  8080 );
 $b->module_config_( 'html', 'local',    1 );
-$b->module_config_( 1, 'pop3', 'local', 1 );
+$b->module_config_( 'pop3', 'local', 1 );
 $b->set_bucket_parameter( $session, 'spam', 'subject', 1 );
 $b->set_bucket_parameter( $session, 'spam', 'xtc',     1 );
 $b->set_bucket_parameter( $session, 'spam', 'xpl',     1 );
+$b->set_bucket_parameter( $session, 'spam', 'quarantine', 0 );
 
 my @modify_tests = sort glob 'TestMails/TestMailParse*.msg';
 
@@ -985,6 +988,7 @@ for my $modify_file (@modify_tests) {
 
         my $output_file = $modify_file;
         $output_file    =~ s/msg/cam/;
+
         open CAM, "<$output_file";
         open OUTPUT, "<temp.out";
         while ( <OUTPUT> ) {
@@ -1419,7 +1423,7 @@ if ( $have_text_kakasi ) {
     test_assert_equal( $words[19], chr(0xa4) . chr(0xc7) );
     test_assert_equal( $words[20], chr(0xa5) . chr(0xb9) );
 
-    # qurantine test
+    # quarantine test
 
     $b->set_bucket_parameter( $session, 'gomi', 'quarantine', 1 );
 
@@ -1438,10 +1442,11 @@ if ( $have_text_kakasi ) {
         $quarantined_message =~ s/\.msg$/.qrn/;
         open MAIL, "<$quarantined_message";
         while ( !eof( MAIL ) && !eof( TEMP ) ) {
+            my $mail = <MAIL>;
+            next if ( $mail =~ /X-POPFile-TimeoutPrevention/ );
+            $mail =~ s/[\r\n]//g;
             my $temp = <TEMP>;
             $temp =~ s/[\r\n]//g;
-            my $mail = <MAIL>;
-            $mail =~ s/[\r\n]//g;
             test_assert_equal( $temp, $mail );
         }
         close MAIL;

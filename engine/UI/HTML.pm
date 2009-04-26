@@ -1370,12 +1370,16 @@ sub administration_page
     elsif ( $self->{form_}->{update_modules} ) {
         if ( defined($self->{form_}{ui_port}) ) {
             if ( $self->is_valid_port_( $self->{form_}{ui_port} ) ) {
-                if ( $self->config_( 'port' ) ne $self->{form_}{ui_port} ) {
-                    $self->config_( 'port', $self->{form_}{ui_port} );
-                    $self->status_message__(                       # PROFILE BLOCK START
-                            $templ,
-                            sprintf( $self->language($session)->{Configuration_UIUpdate},
-                                     $self->config_( 'port' ) ) ); # PROFILE BLOCK STOP
+                if ( $self->module_config_( 'pop3', 'port' ) eq $self->{form_}{ui_port} ) {
+                    $self->error_message__( $templ, $self->language($session)->{Configuration_Error9} );
+                } else {
+                    if ( $self->config_( 'port' ) ne $self->{form_}{ui_port} ) {
+                        $self->config_( 'port', $self->{form_}{ui_port} );
+                        $self->status_message__(                       # PROFILE BLOCK START
+                                $templ,
+                                sprintf( $self->language($session)->{Configuration_UIUpdate},
+                                         $self->config_( 'port' ) ) ); # PROFILE BLOCK STOP
+                    }
                 }
             } else {
                 $self->error_message__( $templ, $self->language($session)->{Configuration_Error2} );
@@ -1385,12 +1389,16 @@ sub administration_page
 
         if ( defined($self->{form_}{ui_https_port}) ) {
             if ( $self->is_valid_port_( $self->{form_}{ui_https_port} ) ) {
-                if ( $self->config_( 'https_port' ) ne $self->{form_}{ui_https_port} ) {
-                    $self->config_( 'https_port', $self->{form_}{ui_https_port} );
-                    $self->status_message__(                             # PROFILE BLOCK START
-                            $templ,
-                            sprintf( $self->language($session)->{Configuration_UIHTTPSPortUpdate},
-                                     $self->config_( 'https_port' ) ) ); # PROFILE BLOCK STOP
+                if ( $self->module_config_( 'pop3', 'port' ) eq $self->{form_}{ui_https_port} ) {
+                    $self->error_message__( $templ, $self->language($session)->{Configuration_Error9} );
+                } else {
+                    if ( $self->config_( 'https_port' ) ne $self->{form_}{ui_https_port} ) {
+                        $self->config_( 'https_port', $self->{form_}{ui_https_port} );
+                        $self->status_message__(                             # PROFILE BLOCK START
+                                $templ,
+                                sprintf( $self->language($session)->{Configuration_UIHTTPSPortUpdate},
+                                         $self->config_( 'https_port' ) ) ); # PROFILE BLOCK STOP
+                    }
                 }
             } else {
                 $self->error_message__( $templ, $self->language($session)->{Configuration_Error2} );
@@ -1439,7 +1447,7 @@ sub administration_page
                 }
             }
             else {
-                $self->error_message__( $templ, $self->language($session)->{Configuration_Error9} );
+                $self->error_message__( $templ, $self->language($session)->{Configuration_Error11} );
                 delete $self->{form_}{session_timeout};
             }
         }

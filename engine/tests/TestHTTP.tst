@@ -2,7 +2,7 @@
 #
 # Tests for HTTP.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -265,7 +265,7 @@ if ( $pid == 0 ) {
     test_assert( $client->connected );
 
     print $client "GET / HTTP/1.0$eol" . "Header: Mine$eol" . "~~~~~~: ~~~~~~~$eol$eol";
-    select( undef, undef, undef, 0 );
+    select( undef, undef, undef, 0.1 );
     $line = <$client>;
     test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
@@ -283,7 +283,7 @@ if ( $pid == 0 ) {
     test_assert( $client->connected );
 
     print $client "GET / HTTP/2.0$eol$eol";
-    select( undef, undef, undef, 0 );
+    select( undef, undef, undef, 0.1 );
     $line = <$client>;
     test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
@@ -301,7 +301,7 @@ if ( $pid == 0 ) {
     test_assert( $client->connected );
 
     print $client "POST /body HTTP/1.0$eol" . "Content-Length: 12$eol$eol" . "1234567890$eol$eol";
-    select( undef, undef, undef, 0 );
+    select( undef, undef, undef, 0.1 );
     $line = <$client>;
     test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
@@ -326,7 +326,8 @@ if ( $pid == 0 ) {
     test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
 
-    while ( waitpid( $pid, &WNOHANG ) != $pid ) {
+    while ( waitpid( -1, &WNOHANG ) > 0 ) {
+        sleep 1;
     }
 
     $h->stop();

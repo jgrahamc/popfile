@@ -2,7 +2,7 @@
 #
 # Tests for MQ.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

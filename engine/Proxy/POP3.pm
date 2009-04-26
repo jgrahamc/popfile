@@ -795,11 +795,15 @@ sub validate_item
     if ( $name eq 'pop3_configuration' ) {
         if ( defined($$form{pop3_port}) ) {
             if ( $self->is_valid_port_( $$form{pop3_port} ) ) {
-                if ( $self->config_( 'port' ) ne $$form{pop3_port} ) {
-                    $self->config_( 'port', $$form{pop3_port} );
-                    $status_message .= sprintf(                # PROFILE BLOCK START
-                            $$language{Configuration_POP3Update},
-                            $self->config_( 'port' ) ) . "\n"; # PROFILE BLOCK STOP
+                if ( $self->module_config_( 'html', 'port' ) eq $$form{pop3_port} ) {
+                    $error_message .= $$language{Configuration_Error10} . "\n";
+                } else {
+                    if ( $self->config_( 'port' ) ne $$form{pop3_port} ) {
+                        $self->config_( 'port', $$form{pop3_port} );
+                        $status_message .= sprintf(                # PROFILE BLOCK START
+                                $$language{Configuration_POP3Update},
+                                $self->config_( 'port' ) ) . "\n"; # PROFILE BLOCK STOP
+                    }
                 }
             } else {
                 $error_message .= $$language{Configuration_Error3} . "\n";

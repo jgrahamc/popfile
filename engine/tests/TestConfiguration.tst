@@ -2,7 +2,7 @@
 #
 # Tests for Configuration.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -61,8 +61,7 @@ test_assert_equal( $c->global_config_( 'msgdir' ), 'messages/' );
 
 # Save STDERR
 
-my $old_stderr;
-open $old_stderr, ">&STDERR";
+open my $old_stderr, ">&STDERR";
 
 # Check that the PID file gets created and then deleted and
 # contains the correct process ID
@@ -117,6 +116,7 @@ if ($process != 0) {
 
 close STDERR;
 $c->stop();
+
 # Check that the popfile.cfg was written
 
 my @expected_config = (
@@ -260,6 +260,7 @@ test_assert_regexp( $line, 'Expected a command line option and got baz' );
 # Restore STDERR
 
 open STDERR, ">&", $old_stderr;
+
 # path_join__
 
 test_assert_equal( $c->path_join( 'foo', '/root', 0 ), '/root' );

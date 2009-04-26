@@ -1,8 +1,8 @@
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
 # Test script for the HTML interface, loaded by TestHTML.tst
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -19,7 +19,7 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 # To simplify testing the POPFile HTML UI this file contains a script
 # that is read by TestHTML.tst and executed.  The script consists of instructions
@@ -91,7 +91,18 @@ NOTMATCH Users</a>
 
 # Common BOTTOM parts
 
-MATCH <a class="bottomLink" href="http://getpopfile.org/">
+MATCH
+<a class="bottomLink" href="http://getpopfile.org/" title="Visit the POPFile home page">
+POPFile Home Page</a>
+ENDMATCH
+MATCH
+<a class="bottomLink" href="http://getpopfile.org/docs/FAQ" title="POPFile Frequently Asked Questions">
+FAQ</a>
+ENDMATCH
+MATCH
+<a class="bottomLink" href="http://getpopfile.org/docs/index.php" title="POPFile's documentation wiki">
+Documentation</a>
+ENDMATCH
 
 # Verify that each of the pages highlights the correct item on
 # the tab bar and hence the simplest level of page serving is working
@@ -1170,6 +1181,7 @@ Jump to page:
 [<a href="/history?start_message=20&amp;filter=spam&amp;sort=-inserted">2</a>]
 [<a href="/history?start_message=20&amp;filter=spam&amp;sort=-inserted">Next &gt;</a>]
 ENDMATCH
+
 GET /history?start_message=20&amp;filter=spam
 NOTMATCH Testing Refresh
 SETINPUT filter other
@@ -1528,11 +1540,8 @@ MATCH Luke Perry
 MATCH serafina venter
 
 # Check delete all messages
-# TODO : need to fix
 
-GET /history
 CLICK clearall
-#GET /history
 MATCH No messages.
 
 # Magnets Page
@@ -1753,6 +1762,21 @@ MATCH Updated POP3 port to 111; this change will not take affect until you resta
 SETSUBMIT pop3_port 0
 MATCH The POP3/POP3S listen port must be a number between 1 and 65535
 INPUTIS   pop3_port 111
+SETSUBMIT pop3_port $port
+MATCH The POP3 listen port cannot be the same value as the user interface port
+INPUTIS   pop3_port 111
+
+# Check change separator
+
+INPUTIS   pop3_separator :
+CONFIGIS  pop3_separator :
+SETSUBMIT pop3_separator ;
+INPUTIS   pop3_separator ;
+CONFIGIS  pop3_separator ;
+MATCH Updated POP3 separator to ;
+SETSUBMIT pop3_separator gg
+MATCH The separator character must be a single character
+INPUTIS   pop3_separator ;
 
 # Check fork for POP3
 
@@ -1777,6 +1801,9 @@ CONFIGIS  html_port 8082
 MATCH Updated user interface web port to 8082; this change will not take affect until you restart POPFile
 SETSUBMIT ui_port 0
 MATCH The user interface port must be a number between 1 and 65535
+INPUTIS   ui_port 8082
+SETSUBMIT ui_port 111
+MATCH The user interface port cannot be the same value as the POP3 listen port
 INPUTIS   ui_port 8082
 
 # Check POP3 stealth
@@ -2290,7 +2317,7 @@ GET /manual/temp.html
 MATCH 10 GOTO 10
 
 CODE
-rmtree('../manual');
+rmtree( '../manual' );
 ENDCODE
 
 GET /skins/default/style.css

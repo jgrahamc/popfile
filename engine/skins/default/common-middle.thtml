@@ -80,14 +80,14 @@
 
                 <TMPL_IF NAME="Common_Middle_If_UpdateCheck">
 
-                    <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">
-                        <img border="0" alt="" src="http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=<TMPL_VAR NAME="Common_Middle_Major_Version">&amp;mi=<TMPL_VAR NAME="Common_Middle_Minor_Version">&amp;bu=<TMPL_VAR NAME="Common_Middle_Build_Version">" />
+                    <a href="http://getpopfile.org/download/">
+                        <img border="0" alt="" src="http://getpopfile.org/cgi-bin/popfile_update.pl?ma=<TMPL_VAR NAME="Common_Middle_Major_Version">&amp;mi=<TMPL_VAR NAME="Common_Middle_Minor_Version">&amp;bu=<TMPL_VAR NAME="Common_Middle_Build_Version">" />
                     </a>
 
                 </TMPL_IF>
 
                 <TMPL_IF NAME="Common_Middle_If_SendStats">
 
-                <img border="0" alt="" src="http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=<TMPL_VAR NAME="Common_Middle_Buckets">&amp;mc==<TMPL_VAR NAME="Common_Middle_Messages">&amp;ec==<TMPL_VAR NAME="Common_Middle_Errors">" />
+                <img border="0" alt="" src="http://getpopfile.org/cgi-bin/popfile_stats.pl?bc=<TMPL_VAR NAME="Common_Middle_Buckets">&amp;mc=<TMPL_VAR NAME="Common_Middle_Messages">&amp;ec=<TMPL_VAR NAME="Common_Middle_Errors">" />
 
                 </TMPL_IF>

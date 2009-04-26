@@ -2,7 +2,7 @@
 #
 # Tests for MailParse.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -153,14 +153,14 @@ test_assert_equal( $cl->parse_html( '<!DOCTYPE >' ), 0 );
 # test_assert_equal( $cl->{words__}{'html:comment'}, 3 );
 
 # Check invisible ink detection
-$cl->{htmlfontcolor__} = '';
+$cl->{htmlfontcolor__} = '000000';
 $cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 test_assert_equal( $cl->parse_html( '<body bgcolor="#ffffff">hello <font color=white>invisible</font>visible</body>  ' ), 0 );
 test_assert_equal( $cl->{words__}{hello},     1 );
 test_assert_equal( $cl->{words__}{visible},   1 );
 test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
-$cl->{htmlfontcolor__} = '';
+$cl->{htmlfontcolor__} = '000000';
 $cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 test_assert_equal( $cl->parse_html( '   <body bgcolor="#ffffff">  hello<font color=white>' ), 0 );
@@ -169,7 +169,7 @@ test_assert_equal( $cl->parse_html( 'visible</body>'                            
 test_assert_equal( $cl->{words__}{hello},     1 );
 test_assert_equal( $cl->{words__}{visible},   1 );
 test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
-$cl->{htmlfontcolor__} = '';
+$cl->{htmlfontcolor__} = '000000';
 $cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 test_assert_equal( $cl->parse_html( '<body bgcolor="#ffffff">hello  <font' ), 1 );
@@ -180,7 +180,7 @@ test_assert_equal( $cl->{words__}{visible},   1 );
 test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
 
 # CSS tests
-$cl->{htmlfontcolor__} = '';
+$cl->{htmlfontcolor__} = '000000';
 $cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 
@@ -346,7 +346,7 @@ for my $parse_test (@parse_tests) {
     while ( <WORDS> ) {
         if ( /^(.+) (\d+)/ ) {
             my ( $word, $value ) = ( $1, $2 );
-            test_assert_equal( $cl->{words__}{$word}, $value, "$words $word $value" );
+            test_assert_equal( $cl->{words__}{$word}, $value, "$words: $cl->{words__}{$word} $word $value" );
             delete $cl->{words__}{$word};
         }
     }
@@ -559,7 +559,6 @@ foreach my $prefix (@INC) {
 
 if ( $have_text_kakasi ) {
     $b->global_config_( 'language', 'Nihongo' );
-#    $b->{parser__}->mangle( $w );
     $b->initialize();
     test_assert( $b->start() );
     $cl->{lang__} = 'Nihongo';
@@ -597,7 +596,7 @@ if ( $have_text_kakasi ) {
 
     $cl->{nihongo_parser__}{close}($cl);
 
-    # Test for parsing Japanese e-mails.
+    # Tests for parsing Japanese e-mails.
 
     require POPFile::Mutex;
     $cl->{kakasi_mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );

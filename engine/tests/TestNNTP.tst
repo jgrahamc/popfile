@@ -101,7 +101,7 @@ $POPFile->CORE_start();
 $mq->service();
 my @messages = $rmq->read();
 
-#shift @messages if ( $^O eq 'MSWin32' );
+shift @messages if ( $^O eq 'MSWin32' );
 
 test_assert_equal( $#messages, 2 );
 

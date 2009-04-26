@@ -6,7 +6,7 @@ function OnLoadHandler() {    // redefine default OnLoadHandler
 }
 
 function toggleChecks(x) {
-    d = document.forms;
+    var d = document.forms;
     for (var i=0; i < d.length; i++) {
          for (var j=0; j < d[i].elements.length; j++)
               if (d[i].elements[j].name.substr(0,7) == "remove_")

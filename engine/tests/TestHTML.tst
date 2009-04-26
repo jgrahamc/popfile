@@ -1,8 +1,8 @@
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
 # Tests for HTML.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -19,7 +19,7 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 use strict;
 use warnings;
@@ -43,7 +43,6 @@ my @err_html_list = glob 'testhtml_match*.html';
 foreach my $err_html (@err_html_list) {
     unlink $err_html;
 }
-
 
 my @forms;
 my $hidden = 0;
@@ -266,7 +265,6 @@ EOM
     close $dreader;
     close $uwriter;
     $dwriter->autoflush(1);
-
 
     my $ua = new LWP::UserAgent;
     my $line_number = 0;
@@ -692,7 +690,6 @@ sub pipeready
         return ( $ready > 0 );
     }
 }
-
 
 sub unit_tests {
     my $h = new UI::HTML;

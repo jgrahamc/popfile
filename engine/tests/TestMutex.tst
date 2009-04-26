@@ -2,7 +2,7 @@
 #
 # Tests for Mutex.pm
 #
-# Copyright (c) 2003-2009 John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -55,7 +55,8 @@ if ( $pid == 0 ) {
     test_assert( $m2->acquire() );
     select( undef,undef,undef,1);
     $m2->release();
-    while ( waitpid( $pid, &WNOHANG ) != $pid ) {
+    while ( waitpid( -1, &WNOHANG ) > 0 ) {
+        sleep 1;
     }
 }
 
