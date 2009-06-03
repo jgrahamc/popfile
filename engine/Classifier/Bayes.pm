@@ -2852,22 +2852,17 @@ sub classify_and_modify
 
     # Add the XPL header
 
-    my $xpl;
+    my $host = $self->module_config_( 'html', 'local' ) ?   # PROFILE BLOCK START
+            $self->config_( 'localhostname' ) || '127.0.0.1' :
+            $self->config_( 'hostname' );                   # PROFILE BLOCK STOP
+    my $port = $self->module_config_( 'html', 'port' );
 
-    if ( $xpl_insertion ) {
+    my $xpl = "http://$host:$port/jump_to_message?view=$slot";
 
-        my $host = $self->module_config_( 'html', 'local' ) ?   # PROFILE BLOCK START
-                $self->config_( 'localhostname' ) || '127.0.0.1' :
-                $self->config_( 'hostname' );                   # PROFILE BLOCK STOP
-        my $port = $self->module_config_( 'html', 'port' );
+    $xpl = "<$xpl>" if ( $self->config_( 'xpl_angle' ) );
 
-        $xpl = "http://$host:$port/jump_to_message?view=$slot";
-
-        $xpl = "<$xpl>" if ( $self->config_( 'xpl_angle' ) );
-
-        if ( !$quarantine ) {
-            $msg_head_after .= "X-POPFile-Link: $xpl$crlf";
-        }
+    if ( ( $xpl_insertion ) && ( !$quarantine ) ) {
+        $msg_head_after .= "X-POPFile-Link: $xpl$crlf";
     }
 
     $msg_head_after .= $msg_head_q;
@@ -2881,7 +2876,7 @@ sub classify_and_modify
         # by changing the message header to contain information from
         # POPFile and wrapping the original message in a MIME encoding
 
-       if ( $quarantine == 1 ) {
+       if ( $quarantine ) {
            my ( $orig_from, $orig_to, $orig_subject ) = ( $self->{parser__}->get_header('from'), $self->{parser__}->get_header('to'), $self->{parser__}->get_header('subject') );
            my ( $encoded_from, $encoded_to ) = ( $orig_from, $orig_to );
            if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
