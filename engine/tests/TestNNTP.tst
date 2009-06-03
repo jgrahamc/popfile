@@ -21,12 +21,16 @@
 #
 # ----------------------------------------------------------------------------
 
+use strict;
+use warnings;
+no warnings qw(redefine);
+
 use IO::Handle;
 use IO::Socket;
 use Digest::MD5;
-use POSIX ":sys_wait_h";
-use strict;
 
+
+use POSIX ":sys_wait_h";
 
 my $cr = "\015";
 my $lf = "\012";
@@ -313,6 +317,7 @@ delete $form->{serveropt_nntp};
 $n->config_( 'local', 1 );
 
 # some tests require this directory to be present
+
 mkdir( 'messages' );
 
 # This pipe is used to send signals to the child running
@@ -355,13 +360,13 @@ if ( $pid == 0 ) {
         if ( pipeready( $dserverreader ) ) {
             my $command = <$dserverreader>;
         }
-        sleep 1;
+        select undef, undef, undef, 0.01;
     }
 
     close $server;
     $b->stop();
     $db->stop();
-    exit(0);
+    exit 0;
 } else {
 
     # This pipe is used to send signals to the child running
@@ -395,19 +400,19 @@ if ( $pid == 0 ) {
                 my $command = <$dreader>;
 
                 if ( $command =~ /__QUIT/ ) {
-                    print $uwriter "OK\n";
+                    print $uwriter "OK$eol";
                     last;
                 }
 
                 if ( $command =~ /__HEADTOO/ ) {
                     $n->config_( 'headtoo', 1 );
-                    print $uwriter "OK\n";
+                    print $uwriter "OK$eol";
                     next;
                 }
 
                 if ( $command =~ /__SEPCHANGE (.)/ ) {
                     $n->config_( 'separator', $1 );
-                    print $uwriter "OK\n";
+                    print $uwriter "OK$eol";
                     next;
                 }
             }
@@ -417,7 +422,7 @@ if ( $pid == 0 ) {
         close $uwriter;
         $b->stop();
         $db->stop();
-        exit(0);
+        exit 0;
     } else {
 
         # PARENT THAT WILL SEND COMMAND TO THE PROXY
@@ -432,7 +437,7 @@ if ( $pid == 0 ) {
 
         my $session = $b->get_administrator_session_key();
 
-        select( undef, undef, undef, 5 );
+        sleep 5;
 
         my $client = connect_proxy();
 
@@ -455,8 +460,7 @@ if ( $pid == 0 ) {
             "500 can't connect to 127.0.0.1:8111$eol" );
 
         close $client;
-
-        select( undef, undef, undef, 5 );
+        sleep 5;
 
         $client = connect_proxy();
 
@@ -467,7 +471,7 @@ if ( $pid == 0 ) {
 
         # Make sure that POPFile sends an appropriate banner
 
-        my $result = <$client>;
+        $result = <$client>;
         test_assert_equal( $result,
             "201 NNTP POPFile (test suite) server ready$eol" );
 
@@ -521,7 +525,7 @@ if ( $pid == 0 ) {
         my $count = 0;
         my $size  = 0;
         my @messages = sort glob 'TestMails/TestMailParse*.msg';
-        for my $i (0..$#messages) {
+        for my $i ( 0..$#messages ) {
             if ( $messages[$i] ne '' ) {
                 $count += 1;
                 $size  += ( -s $messages[$i] );
@@ -716,7 +720,7 @@ if ( $pid == 0 ) {
         binmode FILE;
         test_assert( open HIST, "<$slot_file" );
         binmode HIST;
-        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+        while ( defined( my $fl = <FILE> ) && defined( my $ml = <HIST> ) ) {
             $fl =~ s/[$cr$lf]+//g;
             $ml =~ s/[$cr$lf]+//g;
             test_assert_equal( $fl, $ml );
@@ -728,10 +732,10 @@ if ( $pid == 0 ) {
 
         my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
             $h->get_slot_fields( $history_count, $session );
-        test_assert_equal( $usedtobe, 0 );
-        test_assert_equal( $bucket, 'spam' );
+        test_assert_equal( $usedtobe, 0       );
+        test_assert_equal( $bucket,   'spam'  );
         test_assert_equal( $hdr_from, 'blank' );
-        test_assert_equal( $magnet, '' );
+        test_assert_equal( $magnet,   ''      );
 
         print $client "ARTICLE <nntp27\@not.exist.goup>$eol";
         $result = <$client>;
@@ -767,7 +771,7 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        my $slot_file = $h->get_slot_file( $history_count );
+        $slot_file = $h->get_slot_file( $history_count );
         wait_proxy();
 
         test_assert( -e $slot_file );
@@ -776,7 +780,7 @@ if ( $pid == 0 ) {
         binmode FILE;
         test_assert( open HIST, "<$slot_file" );
         binmode HIST;
-        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+        while ( defined( my $fl = <FILE> ) && defined( my $ml = <HIST> ) ) {
             $fl =~ s/[$cr$lf]+//g;
             $ml =~ s/[$cr$lf]+//g;
             test_assert_equal( $fl, $ml );
@@ -788,7 +792,7 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
+        ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
             $h->get_slot_fields( $history_count, $session );
         test_assert_equal( $bucket, 'spam' );
         test_assert_equal( $usedtobe, 0 );
@@ -820,6 +824,12 @@ if ( $pid == 0 ) {
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
+
+        # Check what happens when BODY fails
+
+        print $client "BODY $notexist$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "423 No such message $notexist$eol" );
 
         # Check the BODY command
 
@@ -853,7 +863,7 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        my $slot_file = $h->get_slot_file( $history_count );
+        $slot_file = $h->get_slot_file( $history_count );
         wait_proxy();
 
         test_assert( -e $slot_file );
@@ -862,7 +872,7 @@ if ( $pid == 0 ) {
         binmode FILE;
         test_assert( open HIST, "<$slot_file" );
         binmode HIST;
-        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+        while ( defined( my $fl = <FILE> ) && defined( my $ml = <HIST> ) ) {
             $fl =~ s/[$cr$lf]+//g;
             $ml =~ s/[$cr$lf]+//g;
             test_assert_equal( $fl, $ml );
@@ -874,7 +884,7 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
+        ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
             $h->get_slot_fields( $history_count, $session );
         test_assert_equal( $bucket, 'spam' );
         test_assert_equal( $usedtobe, 0 );
@@ -908,7 +918,7 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "240 Article received OK$eol" );
 
-         # Check that we echo the remote servers QUIT response
+        # Check that we echo the remote servers QUIT response
 
         print $client "QUIT$eol";
         $result = <$client>;
@@ -918,11 +928,11 @@ if ( $pid == 0 ) {
 
         close $client;
 
-        # Test basic TOP capability with toptoo gets classification
+        # Test basic HEAD capability with headtoo gets classification
 
-        print $dwriter "__HEADTOO\n";
+        print $dwriter "__HEADTOO$eol";
         my $line = <$ureader>;
-        test_assert_equal( $line, "OK\n" );
+        test_assert_equal( $line, "OK$eol" );
 
         $client = connect_proxy();
 
@@ -984,7 +994,7 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
-        my $slot_file = $h->get_slot_file( $history_count );
+        $slot_file = $h->get_slot_file( $history_count );
         wait_proxy();
 
         test_assert( -e $slot_file );
@@ -993,7 +1003,7 @@ if ( $pid == 0 ) {
         binmode FILE;
         test_assert( open HIST, "<$slot_file" );
         binmode HIST;
-        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+        while ( defined( my $fl = <FILE> ) && defined( my $ml = <HIST> ) ) {
             $fl =~ s/[$cr$lf]+//g;
             $ml =~ s/[$cr$lf]+//g;
             test_assert_equal( $fl, $ml );
@@ -1003,7 +1013,7 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
+        ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
             $h->get_slot_fields( $history_count, $session );
         test_assert_equal( $bucket, 'spam' );
         test_assert_equal( $usedtobe, 0 );
@@ -1182,7 +1192,7 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        my $slot_file = $h->get_slot_file( $history_count );
+        $slot_file = $h->get_slot_file( $history_count );
         wait_proxy();
 
         test_assert( -e $slot_file );
@@ -1191,7 +1201,7 @@ if ( $pid == 0 ) {
         binmode FILE;
         test_assert( open HIST, "<$slot_file" );
         binmode HIST;
-        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+        while ( defined( my $fl = <FILE> ) && defined( my $ml = <HIST> ) ) {
             $fl =~ s/[$cr$lf]+//g;
             $ml =~ s/[$cr$lf]+//g;
             test_assert_equal( $fl, $ml );
@@ -1201,7 +1211,7 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
+        ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
             $h->get_slot_fields( $history_count, $session );
         test_assert_equal( $bucket, 'spam' );
         test_assert_equal( $usedtobe, 0 );
@@ -1292,7 +1302,7 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
-        my $slot_file = $h->get_slot_file( $history_count );
+        $slot_file = $h->get_slot_file( $history_count );
         wait_proxy();
 
         test_assert( -e $slot_file );
@@ -1301,7 +1311,7 @@ if ( $pid == 0 ) {
         binmode FILE;
         test_assert( open HIST, "<$slot_file" );
         binmode HIST;
-        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+        while ( defined( my $fl = <FILE> ) && defined( my $ml = <HIST> ) ) {
             $fl =~ s/[$cr$lf]+//g;
             $ml =~ s/[$cr$lf]+//g;
             test_assert_equal( $fl, $ml );
@@ -1310,7 +1320,7 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
+        ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) =
             $h->get_slot_fields( $history_count, $session );
         test_assert_equal( $bucket, 'spam' );
         test_assert_equal( $usedtobe, 0 );
@@ -1386,7 +1396,7 @@ if ( $pid == 0 ) {
         print $client "ARTICLE <nntp0\@test2.group>$eol";
         $history_count++;
         $result = <$client>;
-        test_assert_equal( $result, "220 1 <nntp0\@test2.group>$eol" );
+        test_assert_equal( $result, "220 0 <nntp0\@test2.group>$eol" );
         $cam = $messages[0];
         $cam =~ s/msg$/cam/;
 
@@ -1449,7 +1459,7 @@ if ( $pid == 0 ) {
         print $client "ARTICLE <nntp0\@test2.group>$eol";
         $history_count++;
         $result = <$client>;
-        test_assert_equal( $result, "220 1 <nntp0\@test2.group>$eol" );
+        test_assert_equal( $result, "220 0 <nntp0\@test2.group>$eol" );
         $cam = $messages[0];
         $cam =~ s/msg$/cam/;
 
@@ -1517,9 +1527,9 @@ if ( $pid == 0 ) {
         # Make sure that changing the separator doesn't break
         # anything
 
-        print $dwriter "__SEPCHANGE Q\n";
-        my $line = <$ureader>;
-        test_assert_equal( $line, "OK\n" );
+        print $dwriter "__SEPCHANGE Q$eol";
+        $line = <$ureader>;
+        test_assert_equal( $line, "OK$eol" );
 
         $client = connect_proxy();
 
@@ -1542,9 +1552,9 @@ if ( $pid == 0 ) {
 
         close $client;
 
-        print $dwriter "__SEPCHANGE \$\n";
-        my $line = <$ureader>;
-        test_assert_equal( $line, "OK\n" );
+        print $dwriter "__SEPCHANGE \$$eol";
+        $line = <$ureader>;
+        test_assert_equal( $line, "OK$eol" );
 
         $client = connect_proxy();
 
@@ -1568,9 +1578,9 @@ if ( $pid == 0 ) {
         close $client;
 
         # Send the remote server a special message that makes it die
-        print $dwriter "__SEPCHANGE :\n";
-        my $line = <$ureader>;
-        test_assert_equal( $line, "OK\n" );
+        print $dwriter "__SEPCHANGE :$eol";
+        $line = <$ureader>;
+        test_assert_equal( $line, "OK$eol" );
 
         $client = connect_proxy();
 
@@ -1599,9 +1609,9 @@ if ( $pid == 0 ) {
 
         # Tell the proxy to die
 
-        print $dwriter "__QUIT\n";
+        print $dwriter "__QUIT$eol";
         $line = <$ureader>;
-        test_assert_equal( $line, "OK\n" );
+        test_assert_equal( $line, "OK$eol" );
         close $dwriter;
         close $ureader;
 
@@ -1610,9 +1620,7 @@ if ( $pid == 0 ) {
         $n->stop();
         $POPFile->CORE_stop();
 
-        while ( waitpid( -1, &WNOHANG ) > 0 ) {
-            sleep 1;
-        }
+        while ( waitpid( -1, 0 ) != -1 ) { }
 
         $mq->reaper();
     }
@@ -1637,7 +1645,6 @@ sub wait_proxy
         $h->service();
     }
 }
-
 
 sub pipeready
 {
@@ -1686,13 +1693,16 @@ sub server
         $command =~ s/($cr|$lf)//g;
 
         if ( $command =~ /^AUTHINFO USER (.*)/i ) {
-            if ( $1 =~ /(gooduser|goslow|hang|slowlf)/ ) {
-                 print $client "381 Welcome $1. Password required$eol";
-                 $goslow = ( $1 =~ /goslow/ );
-                 $hang   = ( $1 =~ /hang/   );
-                 $slowlf = ( $1 =~ /slowlf/ );
+            my $user = $1;
+            if ( $user =~ /(gooduser|goslow|hang|slowlf)/ ) {
+                print $client "381 Welcome $user. Password required$eol";
+                $goslow = ( $user =~ /goslow/ );
+                $hang   = ( $user =~ /hang/   );
+                $slowlf = ( $user =~ /slowlf/ );
+            } elsif ( $user =~ /nopassword/ ) {
+                print $client "281 authentication accepted$eol";
             } else {
-                 print $client "481 Unknown user $1$eol";
+                print $client "481 Unknown user $user$eol";
             }
             next;
         }
@@ -1800,16 +1810,21 @@ sub server
 
             if ( ( $groups{$g} >= $index ) &&
                  defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
-                 print $client "220 " . ( $index + 1 ) . " <nntp$index\@$g>$eol";
+                if ( $g eq $group ) {
+                    print $client "220 " . ( $index + 1 ) . " <nntp$index\@$g>$eol";
+                    $current_message = $index;
+                } else {
+                    print $client "220 0 <nntp$index\@$g>$eol";
+                }
 
-                 my $slowlftemp = $slowlf;
+                my $slowlftemp = $slowlf;
 
-                 open FILE, "<$messages[$index]";
-                 binmode FILE;
-                 while ( <FILE> ) {
-                     s/[$cr$lf]+//g;
+                open FILE, "<$messages[$index]";
+                binmode FILE;
+                while ( <FILE> ) {
+                    s/[$cr$lf]+//g;
 
-                     if ($slowlftemp) {
+                    if ($slowlftemp) {
                         print $client "$_$cr";
                         flush $client;
                         select(undef,undef,undef, 1);
@@ -1843,19 +1858,24 @@ sub server
                 next;
             }
 
-            if ( ( $groups{$g} >= $index ) && ( $messages[$index] ne '' ) ) {
-                 print $client "221 " . ( $index + 1 ) . " <nntp$index\@$g>$eol";
+            if ( ( $groups{$g} > $index ) && defined( $messages[$index] ) ) {
+                if ( $g eq $group ) {
+                    print $client "221 " . ( $index + 1 ) . " <nntp$index\@$g>$eol";
+                    $current_message = $index;
+                } else {
+                    print $client "221 0 <nntp$index\@$g>$eol";
+                }
 
-                 open FILE, "<$messages[$index]";
-                 binmode FILE;
-                 while ( <FILE> ) {
-                     last if ( /^[$cr$lf]+$/ );
-                     s/[$cr$lf]+//g;
-                     print $client "$_$eol";
-                 }
-                 close FILE;
+                open FILE, "<$messages[$index]";
+                binmode FILE;
+                while ( <FILE> ) {
+                    last if ( /^[$cr$lf]+$/ );
+                    s/[$cr$lf]+//g;
+                    print $client "$_$eol";
+                }
+                close FILE;
 
-                 print $client ".$eol";
+                print $client ".$eol";
 
             } else {
                 print $client "423 No such message $1$eol";
@@ -1870,24 +1890,29 @@ sub server
                 next;
             }
 
-            if ( ( $groups{$g} >= $index ) && ( $messages[$index] ne '' ) ) {
-                 print $client "222 " . ( $index + 1 ) . " <nntp$index\@$g>$eol";
+            if ( ( $groups{$g} > $index ) && defined( $messages[$index] ) ) {
+                if ( $g eq $group ) {
+                    print $client "222 " . ( $index + 1 ) . " <nntp$index\@$g>$eol";
+                    $current_message = $index;
+                } else {
+                    print $client "222 0 <nntp$index\@$g>$eol";
+                }
 
-                 open FILE, "<$messages[$index]";
-                 binmode FILE;
-                 # skip message header
-                 while ( <FILE> ) {
-                     last if ( /^[$cr$lf]+$/ );
-                 }
-                 # return message body
-                 while ( <FILE> ) {
-                     my $line = $_;
-                     $line =~ s/[$cr$lf]+//g;
-                     print $client "$line$eol";
-                 }
-                 close FILE;
+                open FILE, "<$messages[$index]";
+                binmode FILE;
+                # skip message header
+                while ( <FILE> ) {
+                    last if ( /^[$cr$lf]+$/ );
+                }
+                # return message body
+                while ( <FILE> ) {
+                    my $line = $_;
+                    $line =~ s/[$cr$lf]+//g;
+                    print $client "$line$eol";
+                }
+                close FILE;
 
-                 print $client ".$eol";
+                print $client ".$eol";
 
             } else {
                 print $client "423 No such message $1$eol";
