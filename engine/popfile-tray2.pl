@@ -34,8 +34,6 @@ use locale;
 use lib defined( $ENV{POPFILE_ROOT} ) ? $ENV{POPFILE_ROOT} : '.';
 use POPFile::Loader;
 
-use Win32::GUI();
-
 # POPFile is actually loaded by the POPFile::Loader object which does all
 # the work
 
@@ -69,8 +67,6 @@ my $port = $h->config_( 'port' );
 my $host = $b->config_( 'localhostname' ) || 'localhost';
 
 my $ui_url = "http://$host:$port/";
-my $popfile_official_site = 'http://getpopfile.org/';
-my $popfile_download_page = $popfile_official_site . 'download';
 
 # Start POPFile
 
@@ -171,7 +167,7 @@ sub Poll_Timer {
 sub Menu_Open_UI_Click {
     # Open POPFile UI url using Win32::GUI::ShellExecute
 
-    Win32::GUI::ShellExecute( 0, '', $ui_url, '', '', 1 );
+    $w->open_url( $ui_url );
     return 1;
 }
 
@@ -201,7 +197,7 @@ sub Menu_Quit_Click {
 sub Menu_Open_PFHP_Click {
     # Open POPFile Official webpage url using Win32::GUI::ShellExecute
 
-    Win32::GUI::ShellExecute( 0, '', $popfile_official_site, '', '', 1 );
+    $w->open_url( $w->{popfile_official_site__} );
     return 1;
 }
 
@@ -234,45 +230,8 @@ sub Menu_Update_Check_Click {
 sub Menu_Download_Page_Click {
     # Open POPFile Download page url using Win32::GUI::ShellExecute
 
-    Win32::GUI::ShellExecute( 0, '', $popfile_download_page, '', '', 1 );
+    $w->open_url( $w->{popfile_download_page__} );
     return 1;
-}
-
-
-# ----------------------------------------------------------------------------
-#
-# Event handler for Dialog buttons
-#
-# ----------------------------------------------------------------------------
-
-
-# ----------------------------------------------------------------------------
-#
-# Open_Download_Page_Click
-#
-# Called by Win32::GUI when the user click 'Open' button in the update check
-# result dialog
-#
-# ----------------------------------------------------------------------------
-
-sub Open_Download_Page_Click {
-    # Open POPFile Download page url using Win32::GUI::ShellExecute
-
-    Win32::GUI::ShellExecute( 0, '', $popfile_download_page, '', '', 1 );
-    return -1;
-}
-
-# ----------------------------------------------------------------------------
-#
-# Cancel_Click
-#
-# Called by Win32::GUI when the user click 'Cancel' button in the update check
-# result dialog
-#
-# ----------------------------------------------------------------------------
-
-sub Cancel_Click {
-    return -1;
 }
 
 1;

@@ -31,34 +31,34 @@
 
 use strict;
 use locale;
+use lib defined( $ENV{POPFILE_ROOT} ) ? $ENV{POPFILE_ROOT} : '.';
+use POPFile::Loader;
 
-use POPFile::Configuration;
-use POPFile::MQ;
-use Platform::MSWin32;
-use POPFile::Logger;
+# POPFile is actually loaded by the POPFile::Loader object which does all
+# the work
+
+my $POPFile = POPFile::Loader->new();
 
 # Load the minimal amount of POPFile to get reliable access to the
 # configuration options and then figure out which popfileXX.exe to run
 
-my $c = new POPFile::Configuration;
-my $w = new Platform::MSWin32;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
+$POPFile->CORE_loader_init();
 
-$w->mq( $mq );
-$w->configuration( $c );
-$c->configuration( $c );
-$l->configuration( $c );
-$l->mq( $mq );
-$w->logger( $l );
-$mq->logger( $l );
-$c->logger( $l );
-$c->mq( $mq );
+# Redefine POPFile's signals
 
-$c->initialize();
-$w->initialize();
-$l->initialize();
-$c->load_configuration();
+$POPFile->CORE_signals();
+
+# Create the main objects that form the core of POPFile.  Consists of the
+# configuration modules, the classifier, the UI (currently HTML based),
+# platform specific code, and the POP3 proxy.  The link the components
+# together, intialize them all, load the configuration from disk, start the
+# modules running
+
+$POPFile->CORE_load();
+$POPFile->CORE_initialize();
+$POPFile->CORE_config();
+
+my $w = $POPFile->get_module( 'platform::windows' );
 
 my $i = $w->config_( 'trayicon' )?'i':'';
 my $f = $w->config_( 'console' )?'f':'b';

@@ -31,6 +31,14 @@ use strict;
 use warnings;
 use locale;
 
+use Win32::GUI qw(MB_OKCANCEL MB_OK MB_ICONASTERISK IDOK);
+
+# Make Win32::GUI thread-safe
+
+sub Win32::GUI::CLONE_SKIP {1};
+sub Win32::GUI::Timer::CLONE_SKIP {1};
+sub Win32::GUI::NotifyIcon::CLONE_SKIP {1};
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -69,14 +77,17 @@ sub new
 
     # Constants
 
+    $self->{popfile_official_site__} = 'http://getpopfile.org/';
+    $self->{popfile_download_page__} = 'http://getpopfile.org/download';
     $self->{update_check_url__} = 'http://getpopfile.org/downloads/current_release.txt';
+
     $self->{trayicon_filename__} = 'trayicon.ico';
     $self->{trayicon_updated_filename__} = 'trayicon_up.ico';
 
     $self->{update_check_dialog_title__} = 'POPFile Update Check';
     $self->{new_version_available_text__} = 'A new version of POPFile is available.';
     $self->{open_download_page_text__} = 'Open download page?';
-    $self->{up_to_date_text__} = 'POPFile is up to date.';
+    $self->{popfile_is_up_to_date_text__} = 'POPFile is up to date.';
 
     return $self;
 }
@@ -141,54 +152,6 @@ sub start
     }
 
     return $self->SUPER::start();
-}
-
-# ----------------------------------------------------------------------------
-#
-# prefork
-#
-# This is called when this module is about to fork POPFile
-#
-# There is no return value from this method
-#
-# ----------------------------------------------------------------------------
-sub prefork
-{
-    my ( $self ) = @_;
-
-    # If the trayicon is on, temporarily disable trayicon to avoid crash
-
-    if ( $self->{use_tray_icon__} ) {
-        $self->dispose_trayicon();
-    }
-}
-
-# ----------------------------------------------------------------------------
-#
-# postfork
-#
-# This is called when this module has just forked POPFile.  It is
-# called in the parent process.
-#
-# $pid The process ID of the new child process $reader The reading end
-#      of a pipe that can be used to read messages from the child
-#
-# There is no return value from this method
-#
-# ----------------------------------------------------------------------------
-sub postfork
-{
-    my ( $self, $pid, $reader ) = @_;
-
-    # If the trayicon is on, recreate the trayicon
-
-    # When the forked (pseudo-)child process exits, the Win32::GUI objects
-    # (Windows, Menus, etc.) seem to be purged. So we have to recreate the
-    # trayicon.
-
-    if ( $self->{use_tray_icon__} ) {
-        $self->prepare_trayicon();
-    }
 }
 
 #----------------------------------------------------------------------------
@@ -386,88 +349,30 @@ sub update_check_result
     $self->{updated__} = $updated;
 
     if ( $show_dialog ) {
-        my $db = new Win32::GUI::DialogBox(
-            -name        => "update_check",
-            -text        => $self->{update_check_dialog_title__},
-            -size        => [250,100],
-            -menu        => 0,
-            -maximizebox => 0,
-            -minimizebox => 0,
-            -helpbox     => 0,
-            -resizable   => 0,
-        );
-
-        my $icon = Win32::GUI::Icon->new(
-            $self->get_root_path_( $self->{trayicon_filename__} ) );
-        $db->SetIcon( $icon, 0 );
-
         if ( $updated ) {
-            $db->AddLabel(
-                -text => $self->{new_version_available_text__},
-                -left => 10,
-                -top  => 10,
-            );
-            $db->AddLabel(
-                -text => $self->{open_download_page_text__},
-                -left => 10,
-                -top  => 25,
-            );
-            $db->AddButton(
-                -name    => 'Open_Download_Page',
-                -text    => 'Open',
-                -default => 1,    # Default
-                -ok      => 1,    # Press 'Return' to click this button
-                -width   => 60,
-                -height  => 20,
-                -left    => $db->ScaleWidth() - 140,
-                -top     => $db->ScaleHeight() - 30,
+
+            my $result = Win32::GUI::MessageBox(
+                $self->{trayicon_window},
+                $self->{new_version_available_text__} . "\n" .
+                    $self->{open_download_page_text__},
+                $self->{update_check_dialog_title__},
+                Win32::GUI::Constants::MB_OKCANCEL |
+                    Win32::GUI::Constants::MB_ICONASTERISK
             );
 
-            $db->AddButton(
-                -name   => 'Cancel',
-                -text   => 'Cancel',
-                -cancel => 1,    # Press 'Esc' to click this button
-                -width  => 60,
-                -height => 20,
-                -left   => $db->ScaleWidth() - 70,
-                -top    => $db->ScaleHeight() - 30,
-            );
+            if ( $result eq Win32::GUI::Constants::IDOK ) {
+                $self->open_url( $self->{popfile_download_page__} );
+            }
         } else {
-            $db->Resize( 200, 80 );
-            $db->AddLabel(
-                -text => $self->{up_to_date_text__},
-                -left => 10,
-                -top  => 10,
-            );
-            $db->AddButton(
-                -name   => 'Cancel',
-                -text   => 'OK',
-                -default => 1,    # Default
-                -ok      => 1,    # Press 'Return' to click this button
-                -width  => 60,
-                -height => 20,
-                -left   => $db->ScaleWidth() - 70,
-                -top    => $db->ScaleHeight() - 30,
+
+            Win32::GUI::MessageBox(
+                $self->{trayicon_window},
+                $self->{popfile_is_up_to_date_text__},
+                $self->{update_check_dialog_title__},
+                Win32::GUI::Constants::MB_OK |
+                    Win32::GUI::Constants::MB_ICONASTERISK
             );
         }
-
-        # Get the desktop window and its size:
-
-        my $desk = Win32::GUI::GetDesktopWindow();
-        my $dw = Win32::GUI::Width($desk);
-        my $dh = Win32::GUI::Height($desk);
-
-        # Calculate the top left corner position needed
-        # for our dialog to be centered on the screen
-
-        my $x = ($dw - 200) / 2;
-        my $y = ($dh - 90) / 2;
-
-        # And move the dialog to the center of the screen
-
-        $db->Move($x, $y);
-        $db->Show();
-        Win32::GUI::Dialog();
     }
 
     if ( $updated ) {
@@ -477,7 +382,7 @@ sub update_check_result
             $self->get_root_path_( $self->{trayicon_updated_filename__} ) );
 
             $self->{trayicon}->Change(
-                -balloon_tip     => 'A new version of POPFile is available.',
+                -balloon_tip     => $self->{new_version_available_text__},
                 -balloon_timeout => 100,
                 -balloon_icon    => 'none',
                 -icon            => $updated_icon,
@@ -489,6 +394,23 @@ sub update_check_result
             $self->{trayicon}->ShowBalloon(1);
         }
     }
+}
+
+# ----------------------------------------------------------------------------
+#
+# open_url
+#
+# Open specified URL with the default browser
+#
+#    $url             URL to open
+#
+# ----------------------------------------------------------------------------
+
+sub open_url
+{
+    my ( $self, $url ) = @_;
+
+    Win32::GUI::ShellExecute( 0, '', $url, '', '', 1 );
 }
 
 # ----------------------------------------------------------------------------
