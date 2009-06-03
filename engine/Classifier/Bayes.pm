@@ -2105,9 +2105,10 @@ sub classify
 
     # If all of the user's buckets have no words then we escape here
     # return unclassified
+    # $self->{not_likely__}{$userid} is 0 if word count is 0.
+    # See: update_constants__()
 
-    my $wc = $self->get_word_count( $session ) || 0;
-    return "unclassified" if ( $wc == 0 );
+    return "unclassified" if ( $self->{not_likely__}{$userid} == 0 );
 
     # Check to see if this email should be classified based on a magnet
 
