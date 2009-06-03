@@ -23,6 +23,7 @@
 
 use strict;
 use warnings;
+no warnings qw(redefine);
 
 use POSIX qw(locale_h);
 use POSIX ":sys_wait_h";
