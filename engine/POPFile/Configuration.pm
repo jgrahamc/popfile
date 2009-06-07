@@ -566,6 +566,7 @@ sub upgrade_parameter__
                   'bayes_dbauth',             'database_dbauth',
                   'bayes_dbconnect',          'database_dbconnect',
                   'bayes_dbuser',             'database_dbuser',
+                  'bayes_sqlite_journal_mode','database_sqlite_journal_mode',
                   'bayes_sqlite_tweaks',      'database_sqlite_tweaks'
 
     ); # PROFILE BLOCK STOP
