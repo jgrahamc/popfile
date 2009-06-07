@@ -405,13 +405,13 @@ sub db_connect_helper__
             $db->do( 'pragma case_sensitive_like=1;' );
         }
 
-        if ( $self->{db__}{sqlite_version} ge '3.6.0' ) {
+        if ( $db->{sqlite_version} ge '3.6.0' ) {
             # Configure journal mode
 
             my $journal_mode = $self->config_( 'sqlite_journal_mode' );
 
             if ( $journal_mode =~ /^(delete|truncate|persist|memory|off)$/i ) {
-                $self->{db__}->do( "pragma journal_mode=$journal_mode;" );
+                $db->do( "pragma journal_mode=$journal_mode;" );
             }
         }
     }
