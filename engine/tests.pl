@@ -99,15 +99,13 @@ sub spin
 
     my @symbols = ('-','/','|','\\');
 
-    for my $i (1..length($last_spin)) {
-        print "\b";
-    }
+    print "\b" x length( $last_spin );
 
-    print $symbols[$last_symbol % 4] . " " . $msg;
+    print $symbols[$last_symbol % 4] . " $msg";
 
     $last_symbol++;
 
-    $last_spin = "  " . $msg;
+    $last_spin = "  $msg";
 }
 
 # ----------------------------------------------------------------------------
@@ -305,6 +303,8 @@ foreach my $test (@tests) {
         print "\nRunning $test... at line: ";
         flush STDOUT;
         $fail_messages = '';
+        $last_spin = '';
+
         my $suite;
         my $ln   = 0;
         open SUITE, "<$test";
@@ -321,7 +321,8 @@ foreach my $test (@tests) {
 
         my $ran = eval( $suite );
 
-        print "\b";
+        print "\b" x length( $last_spin );
+        flush STDOUT;
 
         if ( !defined( $ran ) ) {
             print STDERR "Error in $test: $@";
