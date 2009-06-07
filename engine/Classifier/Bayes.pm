@@ -295,18 +295,24 @@ sub start
 
     $self->db_prepare__();
 
-    # In Japanese or Korean or Chinese mode, explicitly set LC_COLLATE to C.
+    # In Japanese or Korean or Chinese mode, explicitly set LC_COLLATE and
+    # LC_CTYPE to C.
     #
     # This is to avoid Perl crash on Windows because default
     # LC_COLLATE of Japanese Win is Japanese_Japan.932(Shift_JIS),
     # which is different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
+    #
+    # And on some configuration (e.g. Japanese Mac OS X), LC_CTYPE is set to
+    # UTF-8 but POPFile uses EUC-JP encoding for Japanese. In this situation
+    # lc() does not work correctly.
 
     my $language = $self->global_config_( 'language' ) || '';
 
     if ( $language =~ /^(Nihongo$|Korean$|Chinese)/ ) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
+        setlocale( LC_CTYPE,   'C' );
     }
 
     # Pass in the current interface language for language specific parsing
