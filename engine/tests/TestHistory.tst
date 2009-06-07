@@ -45,10 +45,6 @@ my $l = $POPFile->get_module( 'POPFile/Logger' );
 $l->global_config_( 'debug', 1 );
 $l->config_( 'level', 2 );
 
-# Check the behaviour of reserve_slot.  It should return a valid
-# number and create the associated path (but not the file), check
-# that get_slot_file returns the same file as reserve_slot
-
 my $h = $POPFile->get_module( 'POPFile/History' );
 my $session = $h->classifier_()->get_administrator_session_key();
 
@@ -84,8 +80,6 @@ $h->classifier_()->release_session_key( $session );
 
 $POPFile->CORE_stop();
 
-1;
-
 sub history_test
 {
     my ( $session ) = @_;
@@ -98,6 +92,10 @@ sub history_test
     $bucketids{personal} = $h->classifier_()->get_bucket_id( $session, 'personal' );
 
     my $insert_time = time - 100;
+
+    # Check the behaviour of reserve_slot.  It should return a valid
+    # number and create the associated path (but not the file), check
+    # that get_slot_file returns the same file as reserve_slot
 
     my ( $slot, $file ) = $h->reserve_slot( $session, $insert_time++ );
 
@@ -157,7 +155,7 @@ EOF
 
     ( $slot1, $file ) = $h->reserve_slot( $session, $insert_time++ );
     open FILE, ">$file";
-print FILE <<EOF;
+    print FILE <<EOF;
 From: Evil Spammer <nospam\@jgc.org>
 To: Someone Else <nospam-everyone\@jgc.org>
 Subject: Hot Teen Mortgage Enlargers
@@ -512,7 +510,7 @@ EOF
     $file = $h->get_slot_file( $slot1 );
     test_assert( ( -e $file ) );
     $h->start_deleting();
-    $h->delete_slot( 2, 0, $session, 0 );
+    $h->delete_slot( $slot1, 0, $session, 0 );
     $h->stop_deleting();
     test_assert( !( -e $file ) );
 
@@ -547,3 +545,4 @@ EOF
     test_assert( !defined( $h->{queries__}{$q} ) );
 }
 
+1;

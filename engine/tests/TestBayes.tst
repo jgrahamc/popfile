@@ -919,7 +919,7 @@ test_assert_equal( $#mags, -1 );
 
 # delete_bucket
 
-test_assert(  $b->delete_bucket( $session, 'zeotrope'  ) );
+test_assert( $b->delete_bucket( $session, 'zeotrope' ) );
 
 @buckets = $b->get_buckets( $session );
 test_assert_equal( $#buckets, 2 );
@@ -973,9 +973,9 @@ for my $class_test (@class_tests) {
 $b->module_config_( 'html', 'port',  8080 );
 $b->module_config_( 'html', 'local',    1 );
 $b->module_config_( 'pop3', 'local', 1 );
-$b->set_bucket_parameter( $session, 'spam', 'subject', 1 );
-$b->set_bucket_parameter( $session, 'spam', 'xtc',     1 );
-$b->set_bucket_parameter( $session, 'spam', 'xpl',     1 );
+$b->set_bucket_parameter( $session, 'spam', 'subject',    1 );
+$b->set_bucket_parameter( $session, 'spam', 'xtc',        1 );
+$b->set_bucket_parameter( $session, 'spam', 'xpl',        1 );
 $b->set_bucket_parameter( $session, 'spam', 'quarantine', 0 );
 
 my @modify_tests = sort glob 'TestMails/TestMailParse*.msg';
