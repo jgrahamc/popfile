@@ -88,10 +88,6 @@ open STDERR, ">temp.tmp";
 $code = ($? >> 8);
 close STDERR;
 
-# Restore STDERR
-
-open STDERR, ">&", $old_stderr;
-
 test_assert_equal( $code, 0 );
 
 $line = shift @stdout;
@@ -230,6 +226,10 @@ foreach my $word (keys %words) {
 
 $b->release_session_key( $user_session );
 $POPFile->CORE_stop();
+
+# Restore STDERR
+
+open STDERR, ">&", $old_stderr;
 
 rmtree( 'insert.pl' );
 
