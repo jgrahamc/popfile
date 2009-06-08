@@ -325,16 +325,16 @@ foreach my $test (@tests) {
         flush STDOUT;
 
         if ( !defined( $ran ) ) {
-            print STDERR "Error in $test: $@";
+            print "Error in $test: $@";
             $code = 1;
         }
 
         if ( $test_failures > $current_error_count ) {
-            print STDERR "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
-            print STDERR $fail_messages . "\n";
+            print "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
+            print $fail_messages . "\n";
             $code = 1;
         } else {
-            print STDERR "ok (" . ( $test_count - $current_test_count ) . " ok)";
+            print "ok (" . ( $test_count - $current_test_count ) . " ok)";
         }
         $test_results{$test} = { FAIL => ( $test_failures - $current_error_count ), OK => ( $test_count - $current_test_count ) };
         cleanup();
@@ -398,10 +398,10 @@ print REPORT "\n";
 
 close REPORT;
 
-# Output report to STDERR
+# Output report to STDOUT
 open REPORT, "<$test_report";
 while ( <REPORT> ) {
-    print STDERR;
+    print;
 }
 close REPORT;
 

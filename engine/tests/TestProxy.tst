@@ -39,7 +39,9 @@ $POPFile->CORE_config( 1 );
 $POPFile->CORE_start();
 
 my $mq = $POPFile->get_module('POPFile::MQ');
-my $l = $POPFile->get_module('POPFile::Logger');
+my $l  = $POPFile->get_module('POPFile::Logger');
+my $b  = $POPFile->get_module( 'Classifier::Bayes' );
+my $db = $POPFile->get_module( 'POPFile::Database' );
 
 sub forker
 {
@@ -58,12 +60,16 @@ sub forker
         use IO::Handle;
         $writer->autoflush(1);
 
+        $db->forked( $writer );
+        $b->forked( $writer );
         $mq->forked( $writer );
 
         return (0, $writer);
     }
 
+    $b->postfork( $pid, $reader );
     $mq->postfork( $pid, $reader );
+    $db->postfork( $pid, $reader );
     close $writer;
     return ($pid, $reader);
 }
