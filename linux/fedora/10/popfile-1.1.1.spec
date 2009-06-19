@@ -23,7 +23,6 @@
 #   data definition
 # ------------------------------
 
-
 %define name popfile
 %define version 1.1.1
 %define release RC1
@@ -35,29 +34,12 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 
-Source0: http://getpopfile.org/downloads/%{name}-%{version}-%{release}.zip
-Source1: popfile
-# Patch0: popfile-1.1.1.patch
-License: GPL
 Group: Applications/Internet
+
+Vendor: POPFile Core Team
 URL: http://getpopfile.org/
-
-Requires: perl
-#Requires: perl-Digest-MD5 perl-MIME-Base64 perl-MIME-QuotedPrint
-Requires: perl-DBI perl-DBD-SQLite
-#Requires: perl-DBD-SQLite2
-Requires: perl-TimeDate perl-HTML-Template perl-HTML-Tagset
-Requires: perl-IO-Socket-SSL perl-Net-SSLeay
-Requires: perl-SOAP-Lite
-Requires: kakasi kakasi-dict perl-Text-Kakasi
-
-# BuildRequires:
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildArch: noarch
-
 Packager: naoki iimura <naoki@getpopfile.org>
-Vendor: naoki iimura <naoki@getpopfile.org>
-Distribution: Fedora 10
+License: GPLv2
 
 %description
 POPFile is an automatic mail classification tool. Once properly set up
@@ -66,12 +48,33 @@ based on your training. You can give it a simple job, like separating
 out junk e-mail, or a complicated one-like filing mail into a dozen
 folders. Think of it as a personal assistant for your inbox.
 
+Exclusiveos: linux
+
+# BuildRequires:
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildArch: noarch
+
+Source0: http://getpopfile.org/downloads/%{name}-%{version}-%{release}.zip
+Source1: popfile
+# Patch0: popfile-1.1.1.patch
+
+Requires: perl >= 5.8.1
+#Requires: perl-Digest-MD5 perl-MIME-Base64 perl-MIME-QuotedPrint
+Requires: perl-DBI perl-DBD-SQLite
+#Requires: perl-DBD-SQLite2
+Requires: perl-TimeDate perl-HTML-Template perl-HTML-Tagset
+Requires: perl-IO-Socket-SSL perl-Net-SSLeay
+Requires: perl-SOAP-Lite
+Requires: kakasi kakasi-dict perl-Text-Kakasi
+
+
 # ------------------------------
 #   scripts
 # ------------------------------
 
 %prep
 
+%setup -c %name-%version -T
 %{__unzip} -qoa %{_sourcedir}/%name-%version-%release.zip
 cp %{_sourcedir}/popfile .
 
@@ -195,7 +198,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %pre
 
-if [ -e %{_initrddir}/popfile ]; then
+if [ "$1" ge 2 ]; then
     %{_initrddir}/popfile stop
 fi
 exit 0
@@ -277,8 +280,8 @@ exit 0;
 
 %dir %{_localstatedir}/lib/%name
 #%config(missingok) %{_localstatedir}/lib/%name/popfile.cfg
-#%config %{_localstatedir}/lib/%name/popfile.db
-%config %{_localstatedir}/lib/%name/stopwords
+#%config(missingok) %{_localstatedir}/lib/%name/popfile.db
+%config(noreplace) %{_localstatedir}/lib/%name/stopwords
 
 # popfile log files
 
