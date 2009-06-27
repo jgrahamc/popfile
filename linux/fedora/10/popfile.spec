@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------
 #
-# Copyright (c) John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -25,8 +25,7 @@
 
 %define name popfile
 %define version 1.1.1
-%define release RC1
-# %%define prefix /usr/local^
+%define release 0.2.rc2
 
 Summary: POPFile - Automatic Email Classification
 
@@ -41,31 +40,31 @@ URL: http://getpopfile.org/
 Packager: naoki iimura <naoki@getpopfile.org>
 License: GPLv2
 
-%description
-POPFile is an automatic mail classification tool. Once properly set up
-and trained, it will scan all email as it arrives and classify it
-based on your training. You can give it a simple job, like separating
-out junk e-mail, or a complicated one-like filing mail into a dozen
-folders. Think of it as a personal assistant for your inbox.
-
 Exclusiveos: linux
 
 # BuildRequires:
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
-Source0: http://getpopfile.org/downloads/%{name}-%{version}-%{release}.zip
+Source0: http://getpopfile.org/downloads/%{name}-%{version}-RC2.zip
 Source1: popfile
-# Patch0: popfile-1.1.1.patch
+# Patch0: no patch
 
 Requires: perl >= 5.8.1
 #Requires: perl-Digest-MD5 perl-MIME-Base64 perl-MIME-QuotedPrint
 Requires: perl-DBI perl-DBD-SQLite
 #Requires: perl-DBD-SQLite2
 Requires: perl-TimeDate perl-HTML-Template perl-HTML-Tagset
-Requires: perl-IO-Socket-SSL perl-Net-SSLeay
+Requires: perl-IO-Socket-SSL
 Requires: perl-SOAP-Lite
 Requires: kakasi kakasi-dict perl-Text-Kakasi
+
+%description
+POPFile is an automatic mail classification tool. Once properly set up
+and trained, it will scan all email as it arrives and classify it
+based on your training. You can give it a simple job, like separating
+out junk e-mail, or a complicated one-like filing mail into a dozen
+folders. Think of it as a personal assistant for your inbox.
 
 
 # ------------------------------
@@ -75,8 +74,8 @@ Requires: kakasi kakasi-dict perl-Text-Kakasi
 %prep
 
 %setup -c %name-%version -T
-%{__unzip} -qoa %{_sourcedir}/%name-%version-%release.zip
-cp %{_sourcedir}/popfile .
+%{__unzip} -qoa %{_sourcedir}/%name-%version-RC2.zip
+%{__cp} %{_sourcedir}/popfile .
 
 
 %build
@@ -84,155 +83,150 @@ cp %{_sourcedir}/popfile .
 
 %install
 
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
 
 # popfile program
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name
 
-install -m644 license $RPM_BUILD_ROOT%{_datadir}/%name
-install -m644 stopwords $RPM_BUILD_ROOT%{_datadir}/%name
-install -m644 popfile.pck $RPM_BUILD_ROOT%{_datadir}/%name
-install -m644 v%version.change $RPM_BUILD_ROOT%{_datadir}/%name
-install -m644 v%version.change.nihongo $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 license $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 stopwords $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 popfile.pck $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 v%version.change $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 v%version.change.nihongo $RPM_BUILD_ROOT%{_datadir}/%name
 
-install -m755 *.pl $RPM_BUILD_ROOT%{_datadir}/%name
-install -m644 *.gif $RPM_BUILD_ROOT%{_datadir}/%name
-install -m644 *.png $RPM_BUILD_ROOT%{_datadir}/%name
-install -m644 *.ico $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m755 *.pl $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 *.gif $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 *.png $RPM_BUILD_ROOT%{_datadir}/%name
+%{__install} -m644 *.ico $RPM_BUILD_ROOT%{_datadir}/%name
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Classifier
-install -m644 Classifier/* $RPM_BUILD_ROOT%{_datadir}/%name/Classifier
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Classifier
+%{__install} -m644 Classifier/* $RPM_BUILD_ROOT%{_datadir}/%name/Classifier
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/POPFile
-install -m644 POPFile/* $RPM_BUILD_ROOT%{_datadir}/%name/POPFile
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/POPFile
+%{__install} -m644 POPFile/* $RPM_BUILD_ROOT%{_datadir}/%name/POPFile
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Proxy
-install -m644 Proxy/* $RPM_BUILD_ROOT%{_datadir}/%name/Proxy
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Proxy
+%{__install} -m644 Proxy/* $RPM_BUILD_ROOT%{_datadir}/%name/Proxy
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/UI
-install -m644 UI/* $RPM_BUILD_ROOT%{_datadir}/%name/UI
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/UI
+%{__install} -m644 UI/* $RPM_BUILD_ROOT%{_datadir}/%name/UI
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Services
-install -m644 Services/*.pm $RPM_BUILD_ROOT%{_datadir}/%name/Services
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Services
+%{__install} -m644 Services/*.pm $RPM_BUILD_ROOT%{_datadir}/%name/Services
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Services/IMAP
-install -m644 Services/IMAP/* $RPM_BUILD_ROOT%{_datadir}/%name/Services/IMAP
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/Services/IMAP
+%{__install} -m644 Services/IMAP/* $RPM_BUILD_ROOT%{_datadir}/%name/Services/IMAP
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/languages
-install -m644 languages/* $RPM_BUILD_ROOT%{_datadir}/%name/languages
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/languages
+%{__install} -m644 languages/* $RPM_BUILD_ROOT%{_datadir}/%name/languages
 
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/blue
-install -m644 skins/blue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/blue
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolblue
-install -m644 skins/coolblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolblue
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolbrown
-install -m644 skins/coolbrown/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolbrown
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolmint
-install -m644 skins/coolmint/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolmint
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolorange
-install -m644 skins/coolorange/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolorange
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolyellow
-install -m644 skins/coolyellow/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolyellow
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/default
-install -m644 skins/default/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/default
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/glassblue
-install -m644 skins/glassblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/glassblue
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/green
-install -m644 skins/green/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/green
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/lavish
-install -m644 skins/lavish/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/lavish
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/ocean
-install -m644 skins/ocean/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/ocean
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/oceanblue
-install -m644 skins/oceanblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/oceanblue
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/orange
-install -m644 skins/orange/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/orange
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/orangecream
-install -m644 skins/orangecream/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/orangecream
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/osx
-install -m644 skins/osx/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/osx
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/outlook
-install -m644 skins/outlook/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/outlook
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/simplyblue
-install -m644 skins/simplyblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/simplyblue
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet
-install -m644 skins/sleet/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet-rtl
-install -m644 skins/sleet-rtl/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet-rtl
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/smalldefault
-install -m644 skins/smalldefault/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/smalldefault
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/smallgrey
-install -m644 skins/smallgrey/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/smallgrey
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/strawberryrose
-install -m644 skins/strawberryrose/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/strawberryrose
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/tinygrey
-install -m644 skins/tinygrey/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/tinygrey
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/white
-install -m644 skins/white/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/white
-install -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/windows
-install -m644 skins/windows/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/windows
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/blue
+%{__install} -m644 skins/blue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/blue
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolblue
+%{__install} -m644 skins/coolblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolblue
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolbrown
+%{__install} -m644 skins/coolbrown/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolbrown
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolmint
+%{__install} -m644 skins/coolmint/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolmint
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolorange
+%{__install} -m644 skins/coolorange/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolorange
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolyellow
+%{__install} -m644 skins/coolyellow/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/coolyellow
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/default
+%{__install} -m644 skins/default/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/default
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/glassblue
+%{__install} -m644 skins/glassblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/glassblue
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/green
+%{__install} -m644 skins/green/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/green
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/lavish
+%{__install} -m644 skins/lavish/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/lavish
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/ocean
+%{__install} -m644 skins/ocean/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/ocean
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/oceanblue
+%{__install} -m644 skins/oceanblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/oceanblue
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/orange
+%{__install} -m644 skins/orange/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/orange
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/orangecream
+%{__install} -m644 skins/orangecream/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/orangecream
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/osx
+%{__install} -m644 skins/osx/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/osx
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/outlook
+%{__install} -m644 skins/outlook/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/outlook
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/simplyblue
+%{__install} -m644 skins/simplyblue/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/simplyblue
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet
+%{__install} -m644 skins/sleet/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet-rtl
+%{__install} -m644 skins/sleet-rtl/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/sleet-rtl
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/smalldefault
+%{__install} -m644 skins/smalldefault/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/smalldefault
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/smallgrey
+%{__install} -m644 skins/smallgrey/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/smallgrey
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/strawberryrose
+%{__install} -m644 skins/strawberryrose/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/strawberryrose
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/tinygrey
+%{__install} -m644 skins/tinygrey/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/tinygrey
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/white
+%{__install} -m644 skins/white/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/white
+%{__install} -m755 -d $RPM_BUILD_ROOT%{_datadir}/%name/skins/windows
+%{__install} -m644 skins/windows/* $RPM_BUILD_ROOT%{_datadir}/%name/skins/windows
 
 # popfile data files
 
-install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%name
-install -m 644 stopwords $RPM_BUILD_ROOT%{_localstatedir}/lib/%name
+%{__install} -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%name
+%{__install} -m 644 stopwords $RPM_BUILD_ROOT%{_localstatedir}/lib/%name
 
 # popfile log files
 
-install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/log/%name
+%{__install} -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/log/%name
 
 # start up script
 
-install -m 755 -d $RPM_BUILD_ROOT%{_initrddir}
-install -m 755 popfile $RPM_BUILD_ROOT%{_initrddir}/popfile
+%{__install} -m 755 -d $RPM_BUILD_ROOT%{_initrddir}
+%{__install} -m 755 popfile $RPM_BUILD_ROOT%{_initrddir}/popfile
 
 
 %clean
 
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
 
-
-# pre install script
 
 %pre
 
-if [ "$1" ge 2 ]; then
-    %{_initrddir}/popfile stop
+if [ "$1" -ge 2 ]; then
+    %{_initrddir}/popfile stop >/dev/null 2>&1
 fi
 exit 0
 
-# post install script
 
 %post
 
+cd %{_localstatedir}/lib/%name
+tar --ignore-failed-read -czf popfile.backup.tgz messages popfile.db popfile.cfg stopwords >/dev/null 2>&1
+cd
+
 /sbin/chkconfig --add popfile
 /sbin/chkconfig popfile on
-%{_initrddir}/popfile start
+%{_initrddir}/popfile start >/dev/null 2>&1
 exit 0
 
-# pre uninstall script
 
 %preun
 
 if [ "$1" = 0 ]; then
-    %{_initrddir}/popfile stop
+    %{_initrddir}/popfile stop >/dev/null 2>&1
     /sbin/chkconfig popfile off
     /sbin/chkconfig --del popfile
 fi
 exit 0
 
-# post uninstall script
 
 %postun
 
-exit 0;
+exit 0
 
-
-# ------------------------------
-#   file list
-# ------------------------------
 
 %files
 %defattr(-,root,root)
@@ -252,8 +246,8 @@ exit 0;
 %{_datadir}/%name/popfile.pck
 %{_datadir}/%name/popfile.pl
 %{_datadir}/%name/stopwords
-%doc %{_datadir}/%name/v1.1.1.change
-%doc %{_datadir}/%name/v1.1.1.change.nihongo
+%doc %{_datadir}/%name/v%version.change
+%doc %{_datadir}/%name/v%version.change.nihongo
 
 %dir %{_datadir}/%name/Classifier
 %{_datadir}/%name/Classifier/*
@@ -297,7 +291,10 @@ exit 0;
 # ------------------------------
 
 %changelog
-* Sat Jun 20 2009 naoki iimura <naoki@getpopfile.org>
--  release 1 for version 1.1.1-rc1
+* Sat Jun 22 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-0.2.rc2
+-  new upstream version
+
+* Sat Jun 20 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-0.1.rc1
+-  release 1 for version 1.1.1-RC1
 
 # end of file

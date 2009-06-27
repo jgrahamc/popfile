@@ -2,7 +2,7 @@
 #
 # ---------------------------------------------------------------------------
 #
-# Copyright (c) John Graham-Cumming
+# Copyright (c) 2001-2009 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -49,8 +49,8 @@
 # Provides: popfile
 # Required-Start: $network
 # Required-Stop: $network
-# Default-Start: 345 3 4 5
-# Default-Stop: 345 3 4 5
+# Default-Start: 2345 2 3 4 5
+# Default-Stop: 016 0 1 6
 # Description: POPFile - Automatic Email Classification
 ### END INIT INFO
 ##
@@ -65,12 +65,22 @@ cwd=`pwd`
 popfile_pid="${popfile_piddir}popfile.pid"
 pid=`cat ${popfile_pid} 2> /dev/null` 
 
+RUNNING=0
+if [ "${pid}" != "" ] ; then
+    if kill -0 "${pid}" >/dev/null 2>&1 ; then
+        RUNNING=1
+    else
+        rm -f ${popfile_pid}
+    fi
+fi
+
 start() {
     echo -n "Starting POPFile as background process: "
-    if [ "${pid}" = "" ] ; then
+    if [ "${RUNNING}" = "0" ]; then
         export POPFILE_ROOT=${popfile_root}
         export POPFILE_USER=${popfile_data}
-        ${popfile} --set config_piddir=${popfile_piddir} --set logger_logdir=${popfile_logdir} &> ${popfile_logdir}popfile &
+        umask 0027
+        ${popfile} --set config_piddir=${popfile_piddir} --set logger_logdir=${popfile_logdir} &> ${popfile_logdir}console.log &
         echo " done"
     else
         echo " POPFile already running"
@@ -80,17 +90,16 @@ start() {
 stop() {
     echo -n "Stopping POPFile: "
  
-    if [ "${pid}" = "" ] ; then
+    if [ "${RUNNING}" = "0" ] ; then
         echo "POPFile not running"
     else
-        kill -9 $pid
-        rm -f "${popfile_pid}"
+        kill -s TERM $pid
         echo " done"
     fi
 }
  
 status() {
-    if [ "${pid}" = "" ] ; then
+    if [ "${RUNNING}" = "0" ] ; then
         echo "down"
     else
         echo "up"
