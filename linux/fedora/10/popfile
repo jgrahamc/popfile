@@ -33,8 +33,13 @@
 ##
 # RedHat comment block...
 #
-# chkconfig: 345 80 20
-# description: popfile is a POP3 proxy and mail filter
+# chkconfig: 2345 80 20
+# description: POPFile is an automatic mail classification tool. Once \
+#              properly set up and trained, it will scan all email as it \
+#              arrives and classify it based on your training. You can give \
+#              it a simple job, like separating out junk e-mail, or a \
+#              complicated one-like filing mail into a dozen folders. Think \
+#              of it as a personal assistant for your inbox.
 # pidfile: /var/run/popfile.pid
 # processname: popfile
 ##
@@ -51,80 +56,96 @@
 # Required-Stop: $network
 # Default-Start: 2345 2 3 4 5
 # Default-Stop: 016 0 1 6
-# Description: POPFile - Automatic Email Classification
+# Short-Description: Start and stop POPFile
+# Description: POPFile is an automatic mail classification tool. Once properly
+#              set up and trained, it will scan all email as it arrives and
+#              classify it based on your training. You can give it a simple
+#              job, like separating out junk e-mail, or a complicated one-like
+#              filing mail into a dozen folders. Think of it as a personal
+#              assistant for your inbox.
 ### END INIT INFO
 ##
- 
+
+. /etc/rc.d/init.d/functions
+
 popfile_root=/usr/share/popfile/
 popfile_data=/var/lib/popfile/
 popfile_piddir=/var/run/
 popfile_logdir=/var/log/popfile/
 
-popfile="${popfile_root}popfile.pl" 
-cwd=`pwd`
+popfile="${popfile_root}start_popfile.sh"
 popfile_pid="${popfile_piddir}popfile.pid"
-pid=`cat ${popfile_pid} 2> /dev/null` 
-
-RUNNING=0
-if [ "${pid}" != "" ] ; then
-    if kill -0 "${pid}" >/dev/null 2>&1 ; then
-        RUNNING=1
-    else
-        rm -f ${popfile_pid}
-    fi
-fi
+prog="popfile"
 
 start() {
-    echo -n "Starting POPFile as background process: "
-    if [ "${RUNNING}" = "0" ]; then
-        export POPFILE_ROOT=${popfile_root}
-        export POPFILE_USER=${popfile_data}
-        umask 0027
-        ${popfile} --set config_piddir=${popfile_piddir} --set logger_logdir=${popfile_logdir} &> ${popfile_logdir}console.log &
-        echo " done"
-    else
-        echo " POPFile already running"
-    fi
+    [ -x $popfile ] || exit 5
+    echo -n "Starting $prog as background process: "
+    daemon --pidfile=${popfile_pid} ${popfile}
+    retval=$?
+    echo
+    return $retval
 }
  
 stop() {
-    echo -n "Stopping POPFile: "
+    echo -n "Stopping $prog: "
  
-    if [ "${RUNNING}" = "0" ] ; then
-        echo "POPFile not running"
-    else
-        kill -s TERM $pid
-        echo " done"
-    fi
+    killproc -p ${popfile_pid} $prog
+    retval=$?
+    echo
+    return $retval
 }
  
-status() {
-    if [ "${RUNNING}" = "0" ] ; then
-        echo "down"
-    else
-        echo "up"
-    fi
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    status -p ${popfile_pid} ${prog}
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
 }
  
 case "$1" in
     start)
-        start
+        rh_status_q && exit 0
+        $1
         ;;
     stop)
-        stop
+        rh_status_q || exit 0
+        $1
         ;;
     restart)
-        stop
-        start
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
         ;;
     status)
-        status
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
         ;;
     *)
-        echo $"Usage: $0 {start|stop|restart|status}"
-        exit 1
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
         ;;
 esac
- 
-cd $cwd
-exit 0
+
+exit $?

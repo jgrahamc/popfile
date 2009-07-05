@@ -19,13 +19,9 @@
 #
 # ---------------------------------------------------------------------------
 
-# ------------------------------
-#   data definition
-# ------------------------------
-
 %define name popfile
 %define version 1.1.1
-%define release 0.2.rc2
+%define release 0.3.rc3%{?dist}
 
 Summary: POPFile - Automatic Email Classification
 
@@ -46,8 +42,9 @@ Exclusiveos: linux
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
-Source0: http://getpopfile.org/downloads/%{name}-%{version}-RC2.zip
+Source0: http://getpopfile.org/downloads/%{name}-%{version}-RC3.zip
 Source1: popfile
+Source2: start_popfile.sh
 # Patch0: no patch
 
 Requires: perl >= 5.8.1
@@ -67,15 +64,12 @@ out junk e-mail, or a complicated one-like filing mail into a dozen
 folders. Think of it as a personal assistant for your inbox.
 
 
-# ------------------------------
-#   scripts
-# ------------------------------
-
 %prep
 
 %setup -c %name-%version -T
-%{__unzip} -qoa %{_sourcedir}/%name-%version-RC2.zip
+%{__unzip} -qoa %{_sourcedir}/%name-%version-RC3.zip
 %{__cp} %{_sourcedir}/popfile .
+%{__cp} %{_sourcedir}/start_popfile.sh .
 
 
 %build
@@ -187,6 +181,8 @@ folders. Think of it as a personal assistant for your inbox.
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{_initrddir}
 %{__install} -m 755 popfile $RPM_BUILD_ROOT%{_initrddir}/popfile
 
+%{__install} -m 755 start_popfile.sh $RPM_BUILD_ROOT%{_datadir}/%name/
+
 
 %clean
 
@@ -196,7 +192,7 @@ folders. Think of it as a personal assistant for your inbox.
 %pre
 
 if [ "$1" -ge 2 ]; then
-    %{_initrddir}/popfile stop >/dev/null 2>&1
+    /sbin/service popfile stop >/dev/null 2>&1
 fi
 exit 0
 
@@ -204,12 +200,12 @@ exit 0
 %post
 
 cd %{_localstatedir}/lib/%name
-tar --ignore-failed-read -czf popfile.backup.tgz messages popfile.db popfile.cfg stopwords >/dev/null 2>&1
+%{__tar} --ignore-failed-read -czf popfile.backup.tgz messages popfile.db popfile.cfg stopwords >/dev/null 2>&1
 cd
 
 /sbin/chkconfig --add popfile
-/sbin/chkconfig popfile on
-%{_initrddir}/popfile start >/dev/null 2>&1
+#/sbin/chkconfig popfile on
+#/sbin/service start >/dev/null 2>&1
 exit 0
 
 
@@ -217,7 +213,7 @@ exit 0
 
 if [ "$1" = 0 ]; then
     %{_initrddir}/popfile stop >/dev/null 2>&1
-    /sbin/chkconfig popfile off
+    #/sbin/chkconfig popfile off
     /sbin/chkconfig --del popfile
 fi
 exit 0
@@ -284,17 +280,16 @@ exit 0
 # start up script
 
 %{_initrddir}/popfile
+%{_datadir}/%name/start_popfile.sh
 
-
-# ------------------------------
-#   change log
-# ------------------------------
 
 %changelog
-* Sat Jun 22 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-0.2.rc2
+* Sun Jul 5 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-0.3.rc3
+-  new upstream version
+
+* Mon Jun 22 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-0.2.rc2
 -  new upstream version
 
 * Sat Jun 20 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-0.1.rc1
 -  release 1 for version 1.1.1-RC1
 
-# end of file
