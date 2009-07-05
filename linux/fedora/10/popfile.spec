@@ -19,15 +19,11 @@
 #
 # ---------------------------------------------------------------------------
 
-%define name popfile
-%define version 1.1.1
-%define release 0.3.rc3%{?dist}
+Summary: Automatic Email Classification
 
-Summary: POPFile - Automatic Email Classification
-
-Name: %{name}
-Version: %{version}
-Release: %{release}
+Name: popfile
+Version: 1.1.1
+Release: 0.3.rc3
 
 Group: Applications/Internet
 
@@ -197,10 +193,6 @@ exit 0
 
 
 %post
-
-cd %{_localstatedir}/lib/%name
-%{__tar} --ignore-failed-read -czf popfile.backup.tgz messages popfile.db popfile.cfg stopwords >/dev/null 2>&1
-cd
 
 /sbin/chkconfig --add popfile
 #/sbin/chkconfig popfile on

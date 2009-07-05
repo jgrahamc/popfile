@@ -77,12 +77,15 @@ popfile="${popfile_root}start_popfile.sh"
 popfile_pid="${popfile_piddir}popfile.pid"
 prog="popfile"
 
+lockfile=/var/lock/subsys/$prog
+
 start() {
     [ -x $popfile ] || exit 5
     echo -n "Starting $prog as background process: "
     daemon --pidfile=${popfile_pid} ${popfile}
     retval=$?
     echo
+    [ $retval -eq 0 ] && touch $lockfile
     return $retval
 }
  
@@ -92,6 +95,7 @@ stop() {
     killproc -p ${popfile_pid} $prog
     retval=$?
     echo
+    [ $retval -eq 0 ] && rm -f $lockfile
     return $retval
 }
  
