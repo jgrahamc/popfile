@@ -33,7 +33,6 @@ Group: Applications/Internet
 
 Vendor: POPFile Core Team
 URL: http://getpopfile.org/
-Packager: naoki iimura <naoki@getpopfile.org>
 License: GPLv2
 
 Exclusiveos: linux
@@ -67,9 +66,9 @@ folders. Think of it as a personal assistant for your inbox.
 %prep
 
 %setup -c %name-%version -T
-%{__unzip} -qoa %{_sourcedir}/%name-%version-RC3.zip
-%{__cp} %{_sourcedir}/popfile .
-%{__cp} %{_sourcedir}/start_popfile.sh .
+%{__unzip} -qoa %{SOURCE0}
+%{__cp} %{SOURCE1} .
+%{__cp} %{SOURCE2} .
 
 
 %build
