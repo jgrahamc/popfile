@@ -1,0 +1,155 @@
+#!/bin/sh
+#
+# ---------------------------------------------------------------------------
+#
+# Copyright (c) 2001-2009 John Graham-Cumming
+#
+#   This file is part of POPFile
+#
+# POPFile is free software; you can redistribute it and/or modify it
+# under the terms of verion 2 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# POPFile is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# ---------------------------------------------------------------------------
+
+# ===
+#
+# popfile
+#
+# A shell script designed to start and stop POPFile from within
+# /etc/init.d on *nix systems.
+#
+# usage: popfile { start | stop | restart | status }
+ 
+##
+# RedHat comment block...
+#
+# chkconfig: 2345 80 20
+# description: POPFile is an automatic mail classification tool. Once \
+#              properly set up and trained, it will scan all email as it \
+#              arrives and classify it based on your training. You can give \
+#              it a simple job, like separating out junk e-mail, or a \
+#              complicated one-like filing mail into a dozen folders. Think \
+#              of it as a personal assistant for your inbox.
+# pidfile: /var/run/popfile.pid
+# processname: popfile
+##
+ 
+##
+# LSB comment block...
+#
+# The bogus 345 run-levels are a workround for a buggy RedHat chkconfig which
+# reads the LSB comment block (incorrectly) as an undocumented 'feature'.
+#
+### BEGIN INIT INFO
+# Provides: popfile
+# Required-Start: $network
+# Required-Stop: $network
+# Default-Start: 2345 2 3 4 5
+# Default-Stop: 016 0 1 6
+# Short-Description: Start and stop POPFile
+# Description: POPFile is an automatic mail classification tool. Once properly
+#              set up and trained, it will scan all email as it arrives and
+#              classify it based on your training. You can give it a simple
+#              job, like separating out junk e-mail, or a complicated one-like
+#              filing mail into a dozen folders. Think of it as a personal
+#              assistant for your inbox.
+### END INIT INFO
+##
+
+. /etc/rc.d/init.d/functions
+
+popfile_root=/usr/share/popfile/
+popfile_data=/var/lib/popfile/
+popfile_piddir=/var/run/
+popfile_logdir=/var/log/popfile/
+
+popfile="${popfile_root}start_popfile.sh"
+popfile_pid="${popfile_piddir}popfile.pid"
+prog="popfile"
+
+lockfile=/var/lock/subsys/$prog
+
+start() {
+    [ -x $popfile ] || exit 5
+    echo -n "Starting $prog as background process: "
+    daemon --pidfile=${popfile_pid} ${popfile}
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+ 
+stop() {
+    echo -n "Stopping $prog: "
+ 
+    killproc -p ${popfile_pid} $prog
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+ 
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    status -p ${popfile_pid} ${prog}
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+ 
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+        ;;
+esac
+
+exit $?
