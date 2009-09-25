@@ -23,7 +23,7 @@ Summary: Automatic Email Classification
 
 Name: popfile
 Version: 1.1.1
-Release: 0.3.rc3
+Release: 1.1
 
 Group: Applications/Internet
 
@@ -37,7 +37,7 @@ Exclusiveos: linux
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
-Source0: http://getpopfile.org/downloads/%{name}-%{version}-RC3.zip
+Source0: http://getpopfile.org/downloads/%{name}-%{version}.zip
 Source1: popfile
 Source2: start_popfile.sh
 # Patch0: no patch
@@ -275,6 +275,9 @@ exit 0
 
 
 %changelog
+* Sat Sep 26 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-1.1
+-  new upstream version
+
 * Sun Jul 5 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-0.3.rc3
 -  new upstream version
 
