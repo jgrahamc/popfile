@@ -130,13 +130,13 @@ exit 0
 %doc %{_datadir}/%{name}/v%{version}.change
 %doc %{_datadir}/%{name}/v%{version}.change.nihongo
 
-%dir %{_datadir}/%{name}/Classifier/
-%dir %{_datadir}/%{name}/POPFile/
-%dir %{_datadir}/popfile/Proxy/
-%dir %{_datadir}/%{name}/UI/
-%dir %{_datadir}/%{name}/Services/
-%dir %{_datadir}/%{name}/languages/
-%dir %{_datadir}/%{name}/skins/
+%{_datadir}/%{name}/Classifier/
+%{_datadir}/%{name}/POPFile/
+%{_datadir}/popfile/Proxy/
+%{_datadir}/%{name}/UI/
+%{_datadir}/%{name}/Services/
+%{_datadir}/%{name}/languages/
+%{_datadir}/%{name}/skins/
 
 # popfile data files
 
