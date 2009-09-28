@@ -33,7 +33,7 @@
 ##
 # RedHat comment block...
 #
-# chkconfig: 2345 80 20
+# chkconfig: - 80 20
 # description: POPFile is an automatic mail classification tool. Once \
 #              properly set up and trained, it will scan all email as it \
 #              arrives and classify it based on your training. You can give \
@@ -54,8 +54,6 @@
 # Provides: popfile
 # Required-Start: $network
 # Required-Stop: $network
-# Default-Start: 2345 2 3 4 5
-# Default-Stop: 016 0 1 6
 # Short-Description: Start and stop POPFile
 # Description: POPFile is an automatic mail classification tool. Once properly
 #              set up and trained, it will scan all email as it arrives and
@@ -77,26 +75,26 @@ popfile="${popfile_root}start_popfile.sh"
 popfile_pid="${popfile_piddir}popfile.pid"
 prog="popfile"
 
-lockfile=/var/lock/subsys/$prog
+lockfile=/var/lock/subsys/${prog}
 
 start() {
-    [ -x $popfile ] || exit 5
-    echo -n "Starting $prog as background process: "
+    [ -x ${popfile} ] || exit 5
+    echo -n "Starting ${prog} as background process: "
     daemon --pidfile=${popfile_pid} ${popfile}
     retval=$?
     echo
-    [ $retval -eq 0 ] && touch $lockfile
-    return $retval
+    [ "${retval}" -eq 0 ] && touch ${lockfile}
+    return ${retval}
 }
  
 stop() {
-    echo -n "Stopping $prog: "
+    echo -n "Stopping ${prog}: "
  
-    killproc -p ${popfile_pid} $prog
+    killproc -p ${popfile_pid} ${prog}
     retval=$?
     echo
-    [ $retval -eq 0 ] && rm -f $lockfile
-    return $retval
+    [ "${retval}" -eq 0 ] && rm -f ${lockfile}
+    return ${retval}
 }
  
 restart() {
