@@ -2,7 +2,7 @@ Summary: Automatic Email Classification
 
 Name: popfile
 Version: 1.1.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 Group: Applications/Internet
 
@@ -10,7 +10,7 @@ URL: http://getpopfile.org/
 License: GPLv2
 
 # BuildRequires:
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
 Source0: http://getpopfile.org/downloads/%{name}-%{version}.zip
@@ -60,30 +60,25 @@ find . -type f | xargs chmod 0644
 %{__cp} -p -r * $RPM_BUILD_ROOT%{_datadir}/%{name}/
 %{__install} -p -m 755 *.pl $RPM_BUILD_ROOT%{_datadir}/%{name}/
 %{__rm} -f $RPM_BUILD_ROOT%{_datadir}/%{name}/popfile
+%{__rm} -f $RPM_BUILD_ROOT%{_datadir}/%{name}/license
+%{__rm} -f $RPM_BUILD_ROOT%{_datadir}/%{name}/v%{version}.change*
 
 # popfile data files
 %{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}
-%{__install} -p -m 644 stopwords $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}
+%{__cp} -p stopwords $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}/
 
-# popfile log files
+# popfile log directory
 %{__mkdir_p} $RPM_BUILD_ROOT%{_localstatedir}/log/%{name}
 
 # start up script
 %{__mkdir_p} $RPM_BUILD_ROOT%{_initddir}
-%{__install} -p -m 755 popfile $RPM_BUILD_ROOT%{_initddir}/popfile
+%{__install} -p -m 755 popfile $RPM_BUILD_ROOT%{_initddir}/
 
 %{__install} -p -m 755 start_popfile.sh $RPM_BUILD_ROOT%{_datadir}/%{name}/
 
 %clean
 
 %{__rm} -rf $RPM_BUILD_ROOT
-
-%pre
-
-#if [ "$1" = 2 ]; then
-    #/sbin/service %{name} stop >/dev/null 2>&1
-#fi
-exit 0
 
 %post
 
@@ -106,56 +101,38 @@ exit 0
 if [ "$1" -ge "1" ] ; then
     /sbin/service %{name} condrestart >/dev/null 2>&1 || :
 fi
-
 exit 0
 
 %files
 %defattr(-,root,root,-)
 
 # popfile program
+%{_datadir}/%{name}/
 
-%dir %{_datadir}/%{name}
-%{_datadir}/%{name}/bayes.pl
-%{_datadir}/%{name}/black.gif
-%{_datadir}/%{name}/favicon.ico
-%{_datadir}/%{name}/insert.pl
-%doc %{_datadir}/%{name}/license
-%{_datadir}/%{name}/otto.gif
-%{_datadir}/%{name}/otto.png
-%{_datadir}/%{name}/pipe.pl
-%{_datadir}/%{name}/pix.gif
-%{_datadir}/%{name}/popfile.pck
-%{_datadir}/%{name}/popfile.pl
-%{_datadir}/%{name}/stopwords
-%doc %{_datadir}/%{name}/v%{version}.change
-%doc %{_datadir}/%{name}/v%{version}.change.nihongo
-
-%{_datadir}/%{name}/Classifier/
-%{_datadir}/%{name}/POPFile/
-%{_datadir}/popfile/Proxy/
-%{_datadir}/%{name}/UI/
-%{_datadir}/%{name}/Services/
-%{_datadir}/%{name}/languages/
-%{_datadir}/%{name}/skins/
+# popfile document files
+%doc license
+%doc v%{version}.change
+%doc v%{version}.change.nihongo
 
 # popfile data files
-
 %dir %{_localstatedir}/lib/%{name}
 #%config(missingok) %{_localstatedir}/lib/%{name}/popfile.cfg
 #%config(missingok) %{_localstatedir}/lib/%{name}/popfile.db
 %config(noreplace) %{_localstatedir}/lib/%{name}/stopwords
 
-# popfile log files
-
+# popfile log directory
 %dir %{_localstatedir}/log/%{name}
 
 # start up script
-
 %{_initddir}/popfile
-%{_datadir}/%{name}/start_popfile.sh
 
 
 %changelog
+* Tue Sep 29 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-3
+-  moved document files to the appropriate directory
+-  removed unnecessary %%pre script
+-  simplified the %%files section some more
+
 * Mon Sep 28 2009 naoki iimura <naoki@getpopfile.org> 1.1.1-2
 -  removed the license statement
 -  updated the release number to "<release number>%%{?dist}" style
