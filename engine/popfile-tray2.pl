@@ -100,7 +100,7 @@ sub NI_Click {
     # Show Download dialog if a new version of POPFile is available.
 
     if ( $w->{updated__} ) {
-        $w->update_check_result( 1, 1 );
+        $w->update_check_result( 1, 1, 0 );
     }
 
     return 1;
@@ -213,7 +213,7 @@ sub Menu_Update_Check_Click {
     # Check update
 
     my $updated = $w->{updated__} || $w->update_check( 10 );
-    $w->update_check_result( $updated, 1 );
+    $w->update_check_result( $updated, 1, 0 );
 
     return 1;
 }
