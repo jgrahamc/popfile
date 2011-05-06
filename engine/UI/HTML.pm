@@ -453,7 +453,7 @@ sub set_cookie__
         $http_header   .= 'path=/; ';
 #        $http_header   .= 'expires=' . $self->zulu_offset_( 14, 0 );
         $http_header   .= 'secure' if ( $client =~ /ssl/i );
-        $http_header   .= "\r\n";
+        $http_header   .= $eol;
 
         $self->log_( 2, "Sending cookie header: $http_header" );
 
@@ -706,21 +706,13 @@ sub url_handler__
 
     if ( ( $url eq '/shutdown' ) &&                                  # PROFILE BLOCK START
          ( $self->classifier_()->is_admin_session( $session ) ) )  { # PROFILE BLOCK STOP
-        my $http_header = "HTTP/1.1 200 OK\r\n";
-        $http_header .= "Connection: close\r\n";
-        $http_header .= "Pragma: no-cache\r\n";
-        $http_header .= "Expires: 0\r\n";
-        $http_header .= "Cache-Control: no-cache\r\n";
-        $http_header .= $self->set_cookie__( $session, $client );
-        $http_header .= "Content-Type: text/html";
-        my $charset = $self->language($session)->{LanguageCharset};
-        $http_header .= "; charset=$charset\r\n";
-        $http_header .= "Content-Length: ";
 
+        my $charset = $self->language($session)->{LanguageCharset};
         my $text = $self->shutdown_page__( $session );
 
-        $http_header .= length($text);
-        $http_header .= "$eol$eol";
+        my $http_header = $self->build_http_header_(       # PROFILE BLOCK START
+            200, "text/html; charset=$charset", 0,
+            "Set-Cookie: popfile=$eol", length( $text ) ); # PROFILE BLOCK STOP
 
         if ( $client->connected ) {
             print $client $http_header . $text;
@@ -846,15 +838,8 @@ sub bmp_file__
         for my $i (0..length($bmp)/2-1) {
             $file .= chr(hex(substr($bmp,$i*2,2)));
         }
-        my $http_header = "HTTP/1.1 200 OK\r\n";
-        $http_header .= "Connection: close\r\n";
-        $http_header .= "Pragma: no-cache\r\n";
-        $http_header .= "Expires: 0\r\n";
-        $http_header .= "Cache-Control: no-cache\r\n";
-        $http_header .= "Content-Type: image/bmp\r\n";
-        $http_header .= "Content-Length: ";
-        $http_header .= length($file);
-        $http_header .= "$eol$eol";
+        my $http_header = $self->build_http_header_(    # PROFILE BLOCK START
+            200, "image/bmp", 0, '', length( $file ) ); # PROFILE BLOCK STOP
 
         if ( $client->connected ) {
             print $client $http_header . $file;
@@ -941,25 +926,16 @@ sub http_ok
 
     # Build an HTTP header for standard HTML
 
-    my $http_header = "HTTP/1.1 200 OK\r\n";
-    $http_header .= "Connection: close\r\n";
-    $http_header .= "Pragma: no-cache\r\n";
-    $http_header .= "Expires: 0\r\n";
-    $http_header .= "Cache-Control: no-cache\r\n";
+    my $charset = $self->language($session)->{LanguageCharset};
+    my $text = $templ->output;
 
     # Make the cookie to be returned for this session, if there's no
     # session then clear the cookie
 
-    $http_header .= $self->set_cookie__( $session, $client );
-    $http_header .= "Content-Type: text/html";
-    my $charset = $self->language($session)->{LanguageCharset};
-    $http_header .= "; charset=$charset\r\n";
-    $http_header .= "Content-Length: ";
+    my $cookie = $self->set_cookie__( $session, $client );
 
-    my $text = $templ->output;
-
-    $http_header .= length($text);
-    $http_header .= "$eol$eol";
+    my $http_header = $self->build_http_header_(                           # PROFILE BLOCK START
+        200, "text/html; charset=$charset", 0, $cookie, length( $text ) ); # PROFILE BLOCK STOP
 
     if ( $client->connected ) {
         my $data = $http_header . $text;
@@ -3737,10 +3713,10 @@ sub http_redirect_
 {
     my ( $self, $client, $url, $session ) = @_;
 
-    my $header = "HTTP/1.0 302 Found\r\n";
-    $header .= "Location: $url\r\n";
+    my $header = "HTTP/1.0 302 Found$eol";
+    $header .= "Location: $url$eol";
     $header .= $self->set_cookie__( $session, $client );
-    $header .= "\r\n";
+    $header .= $eol;
 
     print $client $header;
 }

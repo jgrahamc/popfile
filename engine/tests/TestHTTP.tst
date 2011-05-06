@@ -39,6 +39,7 @@ sub my_handler
 
 use IO::Handle;
 use POSIX ":sys_wait_h";
+use Date::Format qw(time2str);
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
@@ -177,16 +178,14 @@ binmode FILE;
 my $line = <FILE>;
 test_assert_equal( $line, "HTTP/1.0 200 OK$eol" );
 $line = <FILE>;
+test_assert_equal( $line, "Connection close$eol" );
+$line = <FILE>;
 test_assert_equal( $line, "Content-Type: text/plain$eol" );
 
-my @day   = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
-my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' );
-my $zulu = time;
-$zulu += 60 * 60; # 1 hour
-my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime( $zulu );
-my $expires = sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",
-                       $day[$wday], $mday, $month[$mon], $year+1900,
-                       $hour, 59, 0);
+my $date = time2str( "%a, %d %h %Y %X %Z", time, 'GMT' );
+$line = <FILE>;
+test_assert_equal( $line, "Date: $date$eol" );
+my $expires = time2str( "%a, %d %h %Y %X %Z", time + 60 * 60, 'GMT' );
 $line = <FILE>;
 test_assert_equal( $line, "Expires: $expires$eol" );
 $line = <FILE>;
