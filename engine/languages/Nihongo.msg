@@ -30,6 +30,7 @@ WikiLink                                JP
 FAQLink                                 JP:FAQ
 RequestFeatureLink                      JP:RequestFeature
 MailingListLink                         JP:mailing_lists
+DonateLink                              JP:Donate
 
 # Common words that are used on their own all over the interface
 Account                                 POP3 アカウント

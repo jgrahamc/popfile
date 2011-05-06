@@ -49,7 +49,7 @@
                 <TMPL_VAR NAME="Localize_Footer_MailingList"></a>
         </li>
         <li class="footerBody">
-            <a class="bottomLink" href="http://sourceforge.net/forum/forum.php?forum_id=213876" title="<TMPL_VAR NAME="Localize_tip_Footer_FeedMe">">
+            <a class="bottomLink" href="http://getpopfile.org/docs/<TMPL_VAR NAME="Localize_DonateLink">" title="<TMPL_VAR NAME="Localize_tip_Footer_FeedMe">">
                 <TMPL_VAR NAME="Localize_Footer_FeedMe"></a>
         </li>
     </ul>

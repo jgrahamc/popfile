@@ -29,6 +29,7 @@ WikiLink                                index.php
 FAQLink                                 FAQ
 RequestFeatureLink                      RequestFeature
 MailingListLink                         mailing_lists
+DonateLink                              Donate
 
 # Common words that are used on their own all over the interface
 Account                                 POP3 Account
