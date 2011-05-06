@@ -227,7 +227,7 @@ sub service
 
                     $self->{server__}->SOAP::Transport::HTTP::Server::handle();
                     $client->send_response( $self->{server__}->response );
-     		    }
+                }
                 $client->close();
             }
         }
@@ -284,9 +284,7 @@ sub validate_item
 
     if ( $name eq 'xmlrpc_port' ) {
         if ( defined($$form{xmlrpc_port}) ) {
-            if ( ( $$form{xmlrpc_port} =~ /^\d+$/ ) &&     # PROFILE BLOCK START
-                 ( $$form{xmlrpc_port} >= 1 ) &&
-                 ( $$form{xmlrpc_port} < 65536 ) ) {       # PROFILE BLOCK STOP
+            if ( $self->is_valid_port_( $$form{xmlrpc_port} ) ) {
                 if ( $self->config_( 'port' ) ne $$form{xmlrpc_port} ) {
                     $self->config_( 'port', $$form{xmlrpc_port} );
                     $status = sprintf(                     # PROFILE BLOCK START
