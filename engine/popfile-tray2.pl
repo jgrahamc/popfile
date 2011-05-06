@@ -212,7 +212,7 @@ sub Menu_Open_PFHP_Click {
 sub Menu_Update_Check_Click {
     # Check update
 
-    my $updated = $w->{updated__} || $w->update_check();
+    my $updated = $w->{updated__} || $w->update_check( 10 );
     $w->update_check_result( $updated, 1 );
 
     return 1;

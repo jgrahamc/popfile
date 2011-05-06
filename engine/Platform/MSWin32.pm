@@ -31,7 +31,7 @@ use strict;
 use warnings;
 use locale;
 
-use Win32::GUI qw(MB_OKCANCEL MB_OK MB_ICONASTERISK IDOK);
+use Win32::GUI qw(MB_OKCANCEL MB_OK MB_ICONASTERISK MB_ICONSTOP IDOK);
 
 # Make Win32::GUI thread-safe
 
@@ -84,10 +84,11 @@ sub new
     $self->{trayicon_filename__} = 'trayicon.ico';
     $self->{trayicon_updated_filename__} = 'trayicon_up.ico';
 
-    $self->{update_check_dialog_title__} = 'POPFile Update Check';
+    $self->{update_check_dialog_title__}  = 'POPFile Update Check';
     $self->{new_version_available_text__} = 'A new version of POPFile is available.';
-    $self->{open_download_page_text__} = 'Open download page?';
+    $self->{open_download_page_text__}    = 'Open download page?';
     $self->{popfile_is_up_to_date_text__} = 'POPFile is up to date.';
+    $self->{failed_to_check_text__}       = 'Failed to check updates.';
 
     return $self;
 }
@@ -171,8 +172,8 @@ sub service
         $self->{next_update_check__} = time + $self->{update_check_interval__};
         $self->user_module_config_( 1, 'html', 'last_update_check', time );
 
-        if ( $self->{updated__} || $self->update_check() ) {
-            $self->update_check_result( 1, 0, 1 );
+        if ( my $updated = ( $self->{updated__} || $self->update_check( 1 ) ) ) {
+            $self->update_check_result( $updated, 0, 1 );
         }
     }
 
@@ -298,20 +299,34 @@ sub track_popup_menu
 #
 # Check if new version of POPFile is available
 #
+#    $timeout        Seconds to timeout for checking updates.
+#
 # ----------------------------------------------------------------------------
 sub update_check
 {
     my ( $self ) = shift;
+    my ( $timeout ) = shift || 10;
 
-    use LWP::Simple;
+    use LWP::UserAgent;
 
     my ( $major_version, $minor_version, $build_version ) =
         $self->version() =~ /^v(\d+)\.(\d+)\.(\d+)$/;
 
-    my $latest_release = get( $self->{update_check_url__} );
+    my $ua = LWP::UserAgent->new;
+    $ua->timeout( $timeout );
+    $ua->env_proxy;
+    $ua->agent( 'POPFile/' . $self->version() );
 
-    if ( defined( $latest_release ) &&
+    my $response = $ua->get( $self->{update_check_url__} );
+    my $latest_release;
+
+    $self->{next_update_check__} = time + $self->{update_check_interval__};
+    $self->user_module_config_( 1, 'html', 'last_update_check' , time );
+
+    if ( $response->is_success &&
+         ( $latest_release = $response->content ) &&
          ( $latest_release =~ /^(\d+)[.](\d+)[.](\d+)$/m ) ) {
+
         my ( $latest_ma, $latest_mi, $latest_bu ) = ( $1, $2, $3 );
 
         my $cmp;
@@ -322,13 +337,13 @@ sub update_check
         my $updated = ( $cmp > 0 );
 
         $self->{updated__} = $updated;
-        $self->{next_update_check__} = time + $self->{update_check_interval__};
-        $self->user_module_config_( 1, 'html', 'last_update_check' , time );
 
         return $updated;
-    }
+    } else {
+        $self->log_( 0, "Failed to check updates: " . $response->status_line );
 
-    return 0;
+        return -1;
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -338,6 +353,8 @@ sub update_check
 # Show result of checking updates
 #
 #    $updated        1 : New version of POPFile is available
+#                    0 : POPFile is up to date
+#                   -1 : Failed to check updates
 #    $show_dialog    1 : Show update check result dialog
 #    $show_balloon   1 : Show balloon tips
 #
@@ -346,10 +363,11 @@ sub update_check_result
 {
     my ( $self, $updated, $show_dialog, $show_balloon ) = @_;
 
-    $self->{updated__} = $updated;
+    $self->{updated__} = ( $updated == 1 );
 
     if ( $show_dialog ) {
-        if ( $updated ) {
+        if ( $self->{updated__} ) {
+            # Found updates.
 
             my $result = Win32::GUI::MessageBox(
                 $self->{trayicon_window},
@@ -364,18 +382,31 @@ sub update_check_result
                 $self->open_url( $self->{popfile_download_page__} );
             }
         } else {
+            if ( $updated == 0 ) {
+                # POPFile is up to date.
 
-            Win32::GUI::MessageBox(
-                $self->{trayicon_window},
-                $self->{popfile_is_up_to_date_text__},
-                $self->{update_check_dialog_title__},
-                Win32::GUI::Constants::MB_OK |
-                    Win32::GUI::Constants::MB_ICONASTERISK
-            );
+                Win32::GUI::MessageBox(
+                    $self->{trayicon_window},
+                    $self->{popfile_is_up_to_date_text__},
+                    $self->{update_check_dialog_title__},
+                    Win32::GUI::Constants::MB_OK |
+                        Win32::GUI::Constants::MB_ICONASTERISK
+                );
+            } else {
+                # Failed to check updates.
+
+                Win32::GUI::MessageBox(
+                    $self->{trayicon_window},
+                    $self->{failed_to_check_text__},
+                    $self->{update_check_dialog_title__},
+                    Win32::GUI::Constants::MB_OK |
+                        Win32::GUI::Constants::MB_ICONSTOP
+                );
+            }
         }
     }
 
-    if ( $updated ) {
+    if ( $self->{updated__} ) {
         # Change icon
 
         my $updated_icon = Win32::GUI::Icon->new(
