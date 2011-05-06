@@ -2032,6 +2032,8 @@ sub users_page
 #----------------------------------------------------------------------------
 sub advanced_page
 {
+    use Cwd 'abs_path';
+
     my ( $self, $client, $templ, $template, $page, $session ) = @_;
 
     $templ = $self->handle_configuration_bar__( $client, $templ, $template, # PROFILE BLOCK START
@@ -2152,12 +2154,31 @@ sub advanced_page
         }
     }
 
-    # POPFile global parameters
-
     $templ->param( 'Advanced_Loop_Word' => \@word_loop );
 
-    $templ->param( 'Advanced_POPFILE_CFG' =>      # PROFILE BLOCK START
-        $self->get_user_path_( 'popfile.cfg' ) ); # PROFILE BLOCK STOP
+    # Configuration file path
+
+    my $config_file = $self->get_user_path_( 'popfile.cfg' );
+    if ( -e $config_file ) {
+        $config_file = abs_path( $config_file );
+    }
+
+    if ( ( $^O eq 'MSWin32' ) &&                                     # PROFILE BLOCK START
+         ( $self->global_config_( 'language' ) =~ /^Nihongo$/ ) ) {  # PROFILE BLOCK STOP
+
+        # Converts configuration file path to LanguageCharset
+
+        require Encode;
+        require File::Glob::Windows;
+
+        Encode::from_to( $config_file,                                   # PROFILE BLOCK START
+                         File::Glob::Windows::getCodePage(),
+                         $self->language($session)->{LanguageCharset} ); # PROFILE BLOCK STOP
+    }
+
+    $templ->param( 'Advanced_POPFILE_CFG' => $config_file );
+
+    # POPFile global parameters
 
     my $last_module = '';
 
@@ -2888,10 +2909,10 @@ sub corpus_page
     my $number = $self->pretty_number( $self->classifier_()->get_unique_word_count( $session ), $session );
     $templ->param( 'Corpus_Total_Unique' => $number );
 
-    my $pmcount = $self->pretty_number(  $self->mcount__( $session ), $session );
+    my $pmcount = $self->pretty_number( $self->mcount__( $session ), $session );
     $templ->param( 'Corpus_Message_Count' => $pmcount );
 
-    my $pecount = $self->pretty_number(  $self->ecount__( $session ), $session );
+    my $pecount = $self->pretty_number( $self->ecount__( $session ), $session );
     $templ->param( 'Corpus_Error_Count' => $pecount );
 
     my $accuracy = $self->language($session)->{Bucket_NotEnoughData};
