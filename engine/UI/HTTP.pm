@@ -32,6 +32,7 @@ use locale;
 
 use IO::Socket::INET qw(:DEFAULT :crlf);
 use IO::Select;
+use Date::Format qw(time2str);
 
 # We use crypto to secure the contents of POPFile's cookies
 
@@ -529,25 +530,51 @@ sub http_file_
         # plus 1 hour to give the browser cache 1 hour to keep things
         # like graphics and style sheets in cache.
 
-        my $expires = $self->zulu_offset_( 0, 1 );
-        my $header = "HTTP/1.0 200 OK$eol";
-        $header .= "Content-Type: $type$eol";
-        if ( $file =~ /\.log$/ || $file =~ /\.msg$/ ) {
-            # The log/message files should not been cached
+        my $expires = ( $file =~ /\.log$/ || $file =~ /\.msg$/ ) ?  # PROFILE BLOCK START
+                      '0' : $self->zulu_offset_( 0, 1 );            # PROFILE BLOCK STOP
 
-            $header .= "Pragma: no-cache$eol";
-            $header .= "Cache-Control: no-cache$eol";
-            $header .= "Expires: 0$eol";
-        } else {
-            $header .= "Expires: $expires$eol";
-        }
-        $header .= "Content-Length: ";
-        $header .= length($contents);
-        $header .= "$eol$eol";
+        my $header = $self->build_http_header_(              # PROFILE BLOCK START
+            200, $type, $expires, '', length( $contents ) ); # PROFILE BLOCK STOP
+
         print $client $header . $contents;
     } else {
         $self->http_error_( $client, 404 );
     }
+}
+
+# ----------------------------------------------------------------------------
+#
+# build_http_header_ - Build HTTP header
+#
+# $status     The status code
+# $type       The type of the content
+# $expires    The datetime the page cache expires
+#             If '0', the page cache will expire instantly
+# $cookie     The cookie header to set
+# $length     The length of the content
+#
+# Returns the header
+#
+# ----------------------------------------------------------------------------
+sub build_http_header_
+{
+    my ( $self, $status, $type, $expires, $cookie, $length ) = @_;
+
+    my $date = time2str( "%a, %d %h %Y %X %Z", time, 'GMT' );
+
+    my $header = "HTTP/1.0 $status OK$eol" .  # PROFILE BLOCK START
+                 "Connection close$eol" .
+                 "Content-Type: $type$eol" .
+                 "Date: $date$eol" .
+                 "Expires: $expires$eol" .
+                 ( $expires eq '0' ?
+                   "Pragma: no-cache$eol" .
+                   "Cache-control: no-cache$eol" : '' ) .
+                 $cookie .
+                 "Content-Length: $length$eol" .
+                 $eol;                        # PROFILE BLOCK STOP
+
+    return $header;
 }
 
 # ----------------------------------------------------------------------------
@@ -565,17 +592,13 @@ sub zulu_offset_
 {
     my ( $self, $days, $hours ) = @_;
 
-    my @day   = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
-    my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', # PROFILE BLOCK START
-                  'Sep', 'Oct', 'Nov', 'Dec' );                           # PROFILE BLOCK STOP
     my $zulu = time;
     $zulu += 60 * 60 * $hours;
     $zulu += 24 * 60 * 60 * $days;
-    my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime( $zulu );
 
-    return sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",# PROFILE BLOCK START
-               $day[$wday], $mday, $month[$mon], $year+1900,
-               $hour, 59, 0);                             # PROFILE BLOCK STOP
+    my $date = time2str( "%a, %d %h %Y %X %Z", $zulu, 'GMT' );
+
+    return $date;
 }
 
 sub history
