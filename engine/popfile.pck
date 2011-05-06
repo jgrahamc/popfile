@@ -3,6 +3,7 @@ REQUIRED	0.0.0	Carp
 REQUIRED	0.0.0	Crypt::CBC
 OPTIONAL-Cryptgraphic Random support	0.0.0	Crypt::OpenSSL::Random
 OPTIONAL-Cryptgraphic Random support	0.0.0	Crypt::Random
+REQUIRED	0.0.0	Cwd
 OPTIONAL-SQLite3 backend	0.0.0	DBD::SQLite
 REQUIRED	0.0.0	DBI
 REQUIRED	0.0.0	Date::Format
