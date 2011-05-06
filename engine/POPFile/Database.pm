@@ -334,7 +334,7 @@ sub db_connect_helper__
                 $ver = $DBD::SQLite::VERSION;
             };
 
-            if ( $ver >= 1.00 ) {
+            if ( $ver ge '1.00' ) {
                 $self->log_( 0, "DBD::SQLite $ver found" );
 
                 # Backup SQLite2 database
@@ -374,6 +374,32 @@ sub db_connect_helper__
     }
 
     $self->log_( 0, "Attempting to connect to $dbconnect ($dbpresent)" );
+
+    if ( $sqlite && ( $^O eq 'MSWin32' ) &&                       # PROFILE BLOCK START
+         ( $self->global_config_( 'language' ) eq 'Nihongo' ) &&
+         ( $dbconnect =~ /SQLite:/ ) ) {                          # PROFILE BLOCK STOP
+
+        require DBD::SQLite;
+
+        if ( ( $DBD::SQLite::VERSION ge '1.10' ) ||           # PROFILE BLOCK START
+             ( $DBD::SQLite::sqlite_version ge '3.2.6' ) ) {  # PROFILE BLOCK STOP
+
+            # SQLite 3.2.6 or later uses the unicode API in Windows.
+            # http://www.sqlite.org/changes.html#version_3_2_6
+
+            # We need to convert database path to UTF-8 if we are using
+            # SQLite 3.2.6 or later.
+
+            require File::Glob::Windows;
+            require Encode;
+
+            my $code_page = File::Glob::Windows::getCodePage();
+
+            $self->log_( 1, "Converting database connection string from $code_page to utf-8." );
+
+            Encode::from_to( $dbconnect, $code_page, 'utf-8' );
+        }
+    }
 
     my $db = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
                            $self->config_( 'dbuser' ),

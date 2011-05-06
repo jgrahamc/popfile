@@ -3,6 +3,7 @@ REQUIRED	0.0.0	Carp
 REQUIRED	0.0.0	Crypt::CBC
 OPTIONAL-Cryptgraphic Random support	0.0.0	Crypt::OpenSSL::Random
 OPTIONAL-Cryptgraphic Random support	0.0.0	Crypt::Random
+OPTIONAL-SQLite3 backend	0.0.0	DBD::SQLite
 REQUIRED	0.0.0	DBI
 REQUIRED	0.0.0	Date::Format
 REQUIRED	0.0.0	Date::Parse
@@ -12,6 +13,7 @@ OPTIONAL-Japanese Language Support	0.0.0	Encode
 OPTIONAL-Japanese Language Support	0.0.0	Encode::Guess
 REQUIRED	0.0.0	Fcntl
 REQUIRED	0.0.0	File::Copy
+OPTIONAL-Japanese Language Support (Windows only)	0.0.0	File::Glob::Windows
 REQUIRED	0.0.0	File::Path
 REQUIRED	0.0.0	Getopt::Long
 REQUIRED	0.0.0	HTML::Tagset
