@@ -87,9 +87,9 @@ sub new
     $self->{db_get_wordid__} = 0;
     $self->{db_get_word_count__} = 0;
     $self->{db_put_word_count__} = 0;
-    $self->{db_get_bucket_unique_counts__} = 0;
     $self->{db_get_unique_word_count__} = 0;
     $self->{db_get_bucket_word_counts__} = 0;
+    $self->{db_get_bucket_word_count__} = 0;
     $self->{db_get_full_total__} = 0;
     $self->{db_get_bucket_parameter__} = 0;
     $self->{db_set_bucket_parameter__} = 0;
@@ -666,15 +666,15 @@ sub update_constants__
 {
     my ( $self, $session ) = @_;
 
-    my $wc = $self->get_word_count( $session ) || 0;
-
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
+
+    my $wc = $self->get_word_count( $session ) || 0;
 
     if ( $wc > 0 )  {
         $self->{not_likely__}{$userid} = -log( 10 * $wc );
 
-        foreach my $bucket ($self->get_buckets( $session )) {
+        foreach my $bucket ( $self->get_buckets( $session ) ) {
             my $total = $self->get_bucket_word_count( $session, $bucket );
 
             if ( $total != 0 ) {
@@ -728,27 +728,27 @@ sub db_prepare__
     $self->{db_put_word_count__} = $self->db_()->prepare(                              # PROFILE BLOCK START
            'replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );     # PROFILE BLOCK STOP
 
-    $self->{db_get_bucket_unique_counts__} = $self->db_()->prepare(                    # PROFILE BLOCK START
-             'select count(matrix.wordid), buckets.name from matrix, buckets
-                  where buckets.userid = ?
-                    and matrix.bucketid = buckets.id
-                  group by buckets.name;' );                                            # PROFILE BLOCK STOP
-
     $self->{db_get_bucket_word_counts__} = $self->db_()->prepare(                      # PROFILE BLOCK START
-             'select sum(matrix.times), buckets.name from matrix, buckets
+             'select sum(matrix.times), count(matrix.id), buckets.name from matrix, buckets
                   where matrix.bucketid = buckets.id
                     and buckets.userid = ?
                     group by buckets.name;' );                                          # PROFILE BLOCK STOP
 
+    $self->{db_get_bucket_word_count__} = $self->db_()->prepare(                       # PROFILE BLOCK START
+            'select sum(times), count(*) from matrix
+                  where bucketid = ?' );                                                # PROFILE BLOCK STOP
+
     $self->{db_get_unique_word_count__} = $self->db_()->prepare(                       # PROFILE BLOCK START
-             'select count(matrix.wordid) from matrix, buckets
-                  where matrix.bucketid = buckets.id and
-                        buckets.userid = ?;' );                                         # PROFILE BLOCK STOP
+             'select count(*) from matrix
+                  where matrix.bucketid in (
+                        select buckets.id from buckets
+                            where buckets.userid = ? );' );                             # PROFILE BLOCK STOP
 
     $self->{db_get_full_total__} = $self->db_()->prepare(                              # PROFILE BLOCK START
-             'select sum(matrix.times) from matrix, buckets
-                  where buckets.userid = ? and
-                        matrix.bucketid = buckets.id;' );                               # PROFILE BLOCK STOP
+             'select sum(matrix.times) from matrix
+                  where matrix.bucketid in (
+                        select buckets.id from buckets
+                            where buckets.userid = ? );' );                             # PROFILE BLOCK STOP
 
     $self->{db_get_bucket_parameter__} = $self->db_()->prepare(                        # PROFILE BLOCK START
              'select bucket_params.val from bucket_params
@@ -832,8 +832,8 @@ sub db_cleanup__
     $self->{db_get_userid__}->finish;
     $self->{db_get_word_count__}->finish;
     $self->{db_put_word_count__}->finish;
-    $self->{db_get_bucket_unique_counts__}->finish;
     $self->{db_get_bucket_word_counts__}->finish;
+    $self->{db_get_bucket_word_count__}->finish;
     $self->{db_get_unique_word_count__}->finish;
     $self->{db_get_full_total__}->finish;
     $self->{db_get_bucket_parameter__}->finish;
@@ -855,8 +855,8 @@ sub db_cleanup__
     undef $self->{db_get_userid__};
     undef $self->{db_get_word_count__};
     undef $self->{db_put_word_count__};
-    undef $self->{db_get_bucket_unique_counts__};
     undef $self->{db_get_bucket_word_counts__};
+    undef $self->{db_get_bucket_word_count__};
     undef $self->{db_get_unique_word_count__};
     undef $self->{db_get_full_total__};
     undef $self->{db_get_bucket_parameter__};
@@ -879,11 +879,14 @@ sub db_cleanup__
 # Updates our local cache of user and bucket ids.
 #
 # $session           Must be a valid session
+# $updated_bucket    Bucket to update cache
+# $deleted_bucket    Bucket to delete cache
+#                    If none of them is specified, update whole cache.
 #
 #----------------------------------------------------------------------------
 sub db_update_cache__
 {
-    my ( $self, $session ) = @_;
+    my ( $self, $session, $updated_bucket, $deleted_bucket ) = @_;
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
@@ -897,29 +900,58 @@ sub db_update_cache__
     while ( $self->{db_get_buckets__}->fetchrow_arrayref ) {
         $self->{db_bucketid__}{$userid}{$bucketname}{id} = $bucketid;
         $self->{db_bucketid__}{$userid}{$bucketname}{pseudo} = $pseudo;
-        $self->{db_bucketcount__}{$userid}{$bucketname} = 0;
     }
 
-    $self->database_()->validate_sql_prepare_and_execute(    # PROFILE BLOCK START
-            $self->{db_get_bucket_word_counts__}, $userid ); # PROFILE BLOCK STOP
+    my $updated = 0;
 
-    for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
-        $self->{db_bucketcount__}{$userid}{$b} = 0;
-        $self->{db_bucketunique__}{$userid}{$b} = 0;
+    if ( defined( $updated_bucket ) &&                                    # PROFILE BLOCK START
+         defined( $self->{db_bucketid__}{$userid}{$updated_bucket} ) ) {  # PROFILE BLOCK STOP
+
+        # Update cache for specified bucket.
+
+        my $bucketid = $self->{db_bucketid__}{$userid}{$updated_bucket}{id};
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_bucket_word_count__}, $bucketid );  # PROFILE BLOCK STOP
+        my ( $count, $unique );
+        $self->{db_get_bucket_word_count__}->bind_columns( \$count, \$unique );
+        $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
+
+        $self->{db_bucketcount__}{$userid}{$updated_bucket} =  # PROFILE BLOCK START
+            ( defined( $count ) ? $count : 0 );                # PROFILE BLOCK STOP
+        $self->{db_bucketqunique__}{$userid}{$updated_bucket} = $unique;
+
+        $updated = 1;
     }
 
-    my $count;
-    $self->{db_get_bucket_word_counts__}->bind_columns( \$count, \$bucketname );
-    while ( $self->{db_get_bucket_word_counts__}->fetchrow_arrayref ) {
-        $self->{db_bucketcount__}{$userid}{$bucketname} = $count;
+    if ( defined( $deleted_bucket ) &&                                     # PROFILE BLOCK START
+         !defined( $self->{db_bucketid__}{$userid}{$deleted_bucket} ) ) {  # PROFILE BLOCK STOP
+
+        # Delete cache for specified bucket.
+
+        delete $self->{db_bucketcount__}{$userid}{$deleted_bucket};
+        delete $self->{db_bucketunique__}{$userid}{$deleted_bucket};
+
+        $updated = 1;
     }
 
-    $self->database_()->validate_sql_prepare_and_execute(      # PROFILE BLOCK START
-            $self->{db_get_bucket_unique_counts__}, $userid ); # PROFILE BLOCK STOP
+    if ( !$updated ) {
+        delete $self->{db_bucketcount__}{$userid};
+        delete $self->{db_bucketunique__}{$userid};
 
-    $self->{db_get_bucket_unique_counts__}->bind_columns( \$count, \$bucketname );
-    while ( $self->{db_get_bucket_unique_counts__}->fetchrow_arrayref ) {
-        $self->{db_bucketunique__}{$userid}{$bucketname} = $count;
+        $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
+            $self->{db_get_bucket_word_counts__}, $userid );   # PROFILE BLOCK STOP
+
+        for my $b ( sort keys %{$self->{db_bucketid__}{$userid}} ) {
+            $self->{db_bucketcount__}{$userid}{$b} = 0;
+            $self->{db_bucketunique__}{$userid}{$b} = 0;
+        }
+
+        my ( $count, $unique, $bucketname );
+        $self->{db_get_bucket_word_counts__}->bind_columns( \$count, \$unique, \$bucketname );
+        while ( $self->{db_get_bucket_word_counts__}->fetchrow_arrayref ) {
+            $self->{db_bucketcount__}{$userid}{$bucketname} = $count;
+            $self->{db_bucketunique__}{$userid}{$bucketname} = $unique;
+        }
     }
 
     $self->update_constants__( $session );
@@ -3471,9 +3503,12 @@ sub get_word_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
-            $self->{db_get_full_total__}, $userid );       # PROFILE BLOCK STOP
-    return $self->{db_get_full_total__}->fetchrow_arrayref->[0] || 0;
+    my $word_count = 0;
+    foreach my $bucket ( keys %{$self->{db_bucketid__}{$userid}} ) {
+        $word_count += $self->{db_bucketcount__}{$userid}{$bucket};
+    }
+
+    return $word_count;
 }
 
 #----------------------------------------------------------------------------
@@ -3536,9 +3571,12 @@ sub get_unique_word_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->database_()->validate_sql_prepare_and_execute(   # PROFILE BLOCK START
-            $self->{db_get_unique_word_count__}, $userid ); # PROFILE BLOCK STOP
-    return $self->{db_get_unique_word_count__}->fetchrow_arrayref->[0];
+    my $unique_word_count = 0;
+    foreach my $bucket ( keys %{$self->{db_bucketid__}{$userid}} ) {
+        $unique_word_count += $self->{db_bucketunique__}{$userid}{$bucket};
+    }
+
+    return $unique_word_count;
 }
 
 #----------------------------------------------------------------------------
@@ -4581,7 +4619,7 @@ sub create_bucket
         'insert into buckets ( name, pseudo, userid )
                       values (    ?,      0,      ? );',
         $bucket, $userid );                                # PROFILE BLOCK STOP
-    $self->db_update_cache__( $session );
+    $self->db_update_cache__( $session, $bucket );
 
     return 1;
 }
@@ -4616,7 +4654,7 @@ sub delete_bucket
                       buckets.pseudo = 0;',
         $userid, $bucket );                                # PROFILE BLOCK STOP
 
-    $self->db_update_cache__( $session );
+    $self->db_update_cache__( $session, undef, $bucket );
     $self->history_()->force_requery();
 
     return 1;
@@ -4663,7 +4701,7 @@ sub rename_bucket
     if ( !defined( $result ) || ( $result == -1 ) ) {
         return 0;
     } else {
-        $self->db_update_cache__( $session );
+        $self->db_update_cache__( $session, $new_bucket, $old_bucket );
         $self->history_()->force_requery();
 
         return 1;
@@ -4705,7 +4743,7 @@ sub add_messages_to_bucket
     }
 
     $self->add_words_to_bucket__( $session, $bucket, 1 );
-    $self->db_update_cache__( $session );
+    $self->db_update_cache__( $session, $bucket );
 
     return 1;
 }
@@ -4753,7 +4791,7 @@ sub remove_message_from_bucket
         $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
     $self->add_words_to_bucket__( $session, $bucket, -1 );
 
-    $self->db_update_cache__( $session );
+    $self->db_update_cache__( $session, $bucket );
 
     return 1;
 }
@@ -4844,7 +4882,7 @@ sub clear_bucket
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'delete from matrix where matrix.bucketid = ?;',
         $bucketid );                                       # PROFILE BLOCK STOP
-    $self->db_update_cache__( $session );
+    $self->db_update_cache__( $session, $bucket );
 }
 
 #----------------------------------------------------------------------------
