@@ -372,7 +372,7 @@ sub validate_item
 
     if ( $name eq 'smtp_fork_and_port' ) {
 
-        if ( defined($$form{update_smtp_configuration}) ) {
+        if ( defined($$form{smtp_force_fork}) ) {
             if ( $$form{smtp_force_fork} ) {
                 if ( $self->config_( 'force_fork' ) ne 1 ) {
                     $self->config_( 'force_fork', 1 );

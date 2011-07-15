@@ -1888,6 +1888,12 @@ sub get_administrator_session_key
     $self->{api_sessions__}{$session}{notexpired} = 1; # does not be expired
     $self->db_update_cache__( $session );
     $self->log_( 1, "get_administrator_session_key returning key $session" );
+
+    # Send the session to the parent so that it is recorded and can
+    # be correctly shutdown
+
+    $self->mq_post_( 'CREAT', $session, 1 );
+
     return $session;
 }
 
