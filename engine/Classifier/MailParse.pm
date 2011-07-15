@@ -759,7 +759,9 @@ sub add_line
 
             # Grab IP addresses
 
-            while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// ) {
+            while ( $line =~ s/(?<![[:alpha:]\d.])      # PROFILE BLOCK START
+                               (([12]?\d{1,2}\.){3}[12]?\d{1,2})
+                               (?![[:alpha:]\d])//x ) { # PROFILE BLOCK STOP
                 $self->update_word( $1, $encoded, '', '', $prefix );
             }
 
