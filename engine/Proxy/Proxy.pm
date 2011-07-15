@@ -666,7 +666,7 @@ sub verify_connected_
         }
     }
 
-    $self->log_( 0, "IO::Socket::INET or IO::Socket::SSL gets an error: $!" );
+    $self->log_( 0, "IO::Socket::INET or IO::Socket::SSL gets an error: $@" );
 
     # Tell the client we failed
     $self->tee_(  $client, "$self->{connection_failed_error_} $hostname:$port$eol" );
