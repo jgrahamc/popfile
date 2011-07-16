@@ -473,7 +473,19 @@ personal
 EOF
         close CLS;
 
+        # Save STDOUT
+
+        open my $old_stdout, ">&STDOUT";
+        open STDOUT, ">stdout.tmp";
+
         $h->upgrade_history_files__();
+
+        close STDOUT;
+        unlink 'stdout.tmp';
+
+        # Restore STDOUT
+
+        open STDOUT, ">&", $old_stdout;
 
         test_assert( !(-e $h->get_user_path_( $h->global_config_( 'msgdir' ) . 'popfile1=1.cls' ) ) );
         test_assert( !(-e $h->get_user_path_( $h->global_config_( 'msgdir' ) . 'popfile1=1.msg' ) ) );

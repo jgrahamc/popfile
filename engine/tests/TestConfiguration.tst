@@ -320,8 +320,6 @@ $c->{popfile_root__} = '../';
 
 $POPFile->CORE_stop();
 
-#unlink 'stdout.tmp';
-
-print "\nfinished\n";
+unlink 'stdout.tmp';
 
 1;
