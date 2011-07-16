@@ -48,11 +48,11 @@ sub use_base_environment {
 }
 
 sub cleanup {
-    unlink 'popfile.db';
+#    unlink 'popfile.db';
     unlink 'popfile.pid';
     unlink 'popfile.cfg';
     unlink 'stopwords';
-    rmtree 'messages';
+#    rmtree 'messages';
 }
 
 
@@ -406,6 +406,6 @@ while ( <REPORT> ) {
 close REPORT;
 
 if ( $test_failures == 0 ) {
-    unlink <popfile*.log>;
+#    unlink <popfile*.log>;
 }
 exit $code;

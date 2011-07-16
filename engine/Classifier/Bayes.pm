@@ -3675,16 +3675,15 @@ sub get_bucket_parameter
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    # Make sure that the bucket passed in actually exists
+
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
+    return undef if ( !defined( $bucketid ) );
+
     # See if there's a cached value
 
     if ( defined( $self->{db_parameters__}{$userid}{$bucket}{$parameter} ) ) {
         return $self->{db_parameters__}{$userid}{$bucket}{$parameter};
-    }
-
-    # Make sure that the bucket passed in actually exists
-
-    if ( !$self->is_bucket( $session, $bucket ) ) {
-        return undef;
     }
 
     # Make sure that the parameter is valid
@@ -3697,7 +3696,7 @@ sub get_bucket_parameter
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
             $self->{db_get_bucket_parameter__},
-            $self->get_bucket_id( $session, $bucket ),
+            $bucketid,
             $self->{db_parameterid__}{$parameter} );       # PROFILE BLOCK STOP
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
