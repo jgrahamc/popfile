@@ -584,7 +584,7 @@ sub db_upgrade__
 
     foreach my $table (@tables) {
         next if ( $table =~ /\.?popfile$/ );
-        if ( $from_sqlite && ( $table =~ /^sqlite_/ ) ) {
+        if ( $from_sqlite && ( $table =~ /^(main\.)?sqlite_/ ) ) {
             next;
         }
         if ( $i > 99 ) {
@@ -685,7 +685,7 @@ sub db_upgrade__
     close INSERT;
     $db_to->commit;
 
-    unlink $ins_file;
+#    unlink $ins_file;
 }
 
 #----------------------------------------------------------------------------

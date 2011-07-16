@@ -423,6 +423,11 @@ $db->config_( 'sqlite_tweaks', 1 );
 $db->tweak_sqlite( 1, 1, $db->{db__} );
 $db->tweak_sqlite( 1, 0, $db->{db__} );
 
+# Save STDOUT
+
+open my $old_stdout, ">&STDOUT";
+open STDOUT, ">stdout.tmp";
+
 # Test for database conversion
 
 use DBI;
@@ -453,5 +458,12 @@ $db->start();
 
 $db->stop();
 $POPFile->CORE_stop();
+
+close STDOUT;
+unlink 'stdout.tmp';
+
+# Restore STDOUT
+
+open STDOUT, ">&", $old_stdout;
 
 1;
