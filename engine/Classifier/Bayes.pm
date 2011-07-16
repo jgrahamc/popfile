@@ -891,6 +891,8 @@ sub db_update_cache__
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    # Rebuild bucketid list.
+
     delete $self->{db_bucketid__}{$userid};
 
     my ( $bucketname, $bucketid, $pseudo );
@@ -918,7 +920,7 @@ sub db_update_cache__
 
         $self->{db_bucketcount__}{$userid}{$updated_bucket} =  # PROFILE BLOCK START
             ( defined( $count ) ? $count : 0 );                # PROFILE BLOCK STOP
-        $self->{db_bucketqunique__}{$userid}{$updated_bucket} = $unique;
+        $self->{db_bucketunique__}{$userid}{$updated_bucket} = $unique;
 
         $updated = 1;
     }
@@ -1809,6 +1811,11 @@ sub get_session_key
     $self->db_update_cache__( $session );
 
     $self->log_( 1, "get_session_key returning key $session for user $self->{api_sessions__}{$session}{userid}" );
+
+    # Send the session to the parent so that it is recorded and can
+    # be correctly shutdown
+
+    $self->mq_post_( 'CREAT', $session, 1 );
 
     return $session;
 }
@@ -3065,7 +3072,7 @@ sub classify_and_modify
             $self->history_()->commit_slot( $session, $slot, $classification, $self->{magnet_detail__} );
         }
     }
-    $self->log_( 1, "classify_and_modify done. Classification is $classification" );
+    $self->log_( 1, "classify_and_modify done. Classification is $classification ($slot)" );
 
     return ( $classification, $slot, $self->{magnet_used__} );
 }
@@ -3080,42 +3087,65 @@ sub classify_and_modify
 # session            Valid API session
 # messages           hash mapping message slots to new buckets
 #
-# Returns 0 if succesful, undef if there was an error
+# Returns 1 if succesful, undef if there was an error
 #
 #----------------------------------------------------------------------------
 sub reclassify
 {
-
-    my ($self, $session, %messages ) = @_;
+    my ($self, $session, @messages ) = @_;
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->log_( 0, "Performing some reclassification. " . scalar %messages );
+    return undef if ( scalar @messages == 0 || ( scalar @messages ) % 2 == 1 );
+
+    $self->log_( 0, "Performing some reclassification. " . (join '/', @messages) );
+
+    my %messages = @messages;
 
     my %work;
     while ( my ( $slot, $newbucket ) = each %messages ) {
-        $self->log_(2, "Message $slot will be reclassified to $newbucket" );
-        push @{$work{$newbucket}},                         # PROFILE BLOCK START
-                $self->history_()->get_slot_file( $slot ); # PROFILE BLOCK STOP
+        if ( !$self->is_bucket( $session, $newbucket ) ) {
+            $self->log_( 0, "Invalid bucket $newbucket is specified to reclassify to." );
+            next;
+        }
+
+        my $history_file = $self->history_()->get_slot_file( $slot );
+        if ( !-e $history_file ) {
+            $self->log_( 0, "Invalid history slot $slot is specified to reclassify." );
+        }
+
         my @fields = $self->history_()->get_slot_fields( $slot, $session );
+        next if ( scalar @fields == 0 );
+
         my $bucket = $fields[8];
+        next if ( !defined( $bucket ) || $bucket eq '' );
+        next if ( $bucket eq $newbucket );
+
+        $self->log_(2, "Message $slot will be reclassified to $newbucket" );
+
         $self->classifier_()->reclassified(             # PROFILE BLOCK START
                 $session, $bucket, $newbucket, 0 );     # PROFILE BLOCK STOP
         $self->history_()->change_slot_classification(  # PROFILE BLOCK START
-                $slot, $newbucket, $session, 0);        # PROFILE BLOCK STOP
+                $slot, $newbucket, $session, 0 );       # PROFILE BLOCK STOP
+
+        push @{$work{$newbucket}}, $history_file;
     }
 
     # At this point the work hash maps the buckets to lists of
     # files to reclassify, so run through them doing bulk updates
 
+    my $reclassified_count = 0;
+
     foreach my $newbucket (keys %work) {
         $self->classifier_()->add_messages_to_bucket(
             $session, $newbucket, @{$work{$newbucket}} );
 
-        $self->log_( 1, "Reclassified " . $#{$work{$newbucket}} . " messages to $newbucket" );
+        $self->log_( 2, "Reclassified " . ( scalar @{$work{$newbucket}} ) . " messages to $newbucket" );
+        $reclassified_count += scalar @{$work{$newbucket}};
     }
-    return 0;
+
+    return ( $reclassified_count > 0 ? 1 : 0 );
 }
 
 #----------------------------------------------------------------------------
@@ -3442,7 +3472,10 @@ sub get_bucket_word_list
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    return undef if ( !exists( $self->{db_bucketid__}{$userid}{$bucket} ) );
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+
+    $prefix = '' if ( !defined( $prefix ) );
     $prefix =~ s/\0//g;
     $prefix = $self->db_()->quote( "$prefix%" );
 
@@ -4883,12 +4916,18 @@ sub clear_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
+        return undef;
+    }
+
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'delete from matrix where matrix.bucketid = ?;',
         $bucketid );                                       # PROFILE BLOCK STOP
     $self->db_update_cache__( $session, $bucket );
+
+    return 1;
 }
 
 #----------------------------------------------------------------------------
@@ -4921,6 +4960,8 @@ sub clear_magnets
                           userid   = ?;',
             $bucketid, $userid );                              # PROFILE BLOCK STOP
     }
+
+    return 1;
 }
 
 #----------------------------------------------------------------------------
@@ -4980,6 +5021,10 @@ sub create_magnet
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
+        return 0;
+    }
+
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select magnet_types.id from magnet_types
@@ -4987,11 +5032,14 @@ sub create_magnet
         $type )->fetchrow_arrayref;                                     # PROFILE BLOCK STOP
 
     my $mtid = $result->[0];
+    return 0 if ( !defined( $mtid ) );
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'insert into magnets ( bucketid, mtid, val )
                       values (        ?,    ?,   ? );',
         $bucketid, $mtid, $text );                         # PROFILE BLOCK STOP
+
+    return 1;
 }
 
 #----------------------------------------------------------------------------
@@ -5043,6 +5091,10 @@ sub delete_magnet
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
+        return 0;
+    }
+
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
     my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
@@ -5053,9 +5105,11 @@ sub delete_magnet
                       magnet_types.mtype = ?;',
         $bucketid, $text, $type )->fetchrow_arrayref;                   # PROFILE BLOCK STOP
 
-    return if ( !defined( $result ) );
+    return 0 if ( !defined( $result ) );
 
     my $magnetid = $result->[0];
+
+    return 0 if ( !defined( $magnetid ) );
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'delete from magnets where id = ?;',
@@ -5070,6 +5124,8 @@ sub delete_magnet
         $magnetid, $userid );                          # PROFILE BLOCK STOP
 
     $self->history_()->force_requery();
+
+    return 1;
 }
 
 #----------------------------------------------------------------------------
