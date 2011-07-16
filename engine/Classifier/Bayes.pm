@@ -621,7 +621,7 @@ sub set_value_
         # entry
 
         my $userid = $self->valid_session_key__( $session );
-        my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+        my $bucketid = $self->get_bucket_id( $session, $bucket );
         $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
                 $self->{db_delete_zero_words__}, $bucketid );  # PROFILE BLOCK STOP
 
@@ -907,11 +907,11 @@ sub db_update_cache__
     my $updated = 0;
 
     if ( defined( $updated_bucket ) &&                                    # PROFILE BLOCK START
-         defined( $self->{db_bucketid__}{$userid}{$updated_bucket} ) ) {  # PROFILE BLOCK STOP
+         ( my $bucketid =
+                 $self->get_bucket_id( $session, $updated_bucket ) ) ) {  # PROFILE BLOCK STOP
 
         # Update cache for specified bucket.
 
-        my $bucketid = $self->{db_bucketid__}{$userid}{$updated_bucket}{id};
         $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
             $self->{db_get_bucket_word_count__}, $bucketid );  # PROFILE BLOCK STOP
         my ( $count, $unique );
@@ -926,7 +926,7 @@ sub db_update_cache__
     }
 
     if ( defined( $deleted_bucket ) &&                                     # PROFILE BLOCK START
-         !defined( $self->{db_bucketid__}{$userid}{$deleted_bucket} ) ) {  # PROFILE BLOCK STOP
+         $self->is_bucket( $session, $deleted_bucket ) ) {  # PROFILE BLOCK STOP
 
         # Delete cache for specified bucket.
 
@@ -989,7 +989,7 @@ sub db_get_word_count__
 
     $self->database_()->validate_sql_prepare_and_execute(            # PROFILE BLOCK START
             $self->{db_get_word_count__},
-            $self->{db_bucketid__}{$userid}{$bucket}{id}, $wordid ); # PROFILE BLOCK STOP
+            $self->get_bucket_id( $session, $bucket ), $wordid ); # PROFILE BLOCK STOP
     $result = $self->{db_get_word_count__}->fetchrow_arrayref;
     if ( defined( $result ) ) {
          return $result->[0];
@@ -1033,7 +1033,7 @@ sub db_put_word_count__
     }
 
     my $wordid = $result->[0];
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
 
     $self->database_()->validate_sql_prepare_and_execute(               # PROFILE BLOCK START
             $self->{db_put_word_count__}, $bucketid, $wordid, $count ); # PROFILE BLOCK STOP
@@ -1356,7 +1356,7 @@ sub magnet_match_helper__
 
     my @magnets;
 
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
     my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select magnets.val, magnets.id from magnets, users, buckets, magnet_types
                 where buckets.id         = ? and
@@ -1483,7 +1483,7 @@ sub add_words_to_bucket__
             "select matrix.times, matrix.wordid from matrix
                     where matrix.wordid in ( $ids ) and
                           matrix.bucketid = ?;",
-            $self->{db_bucketid__}{$userid}{$bucket}{id} );                         # PROFILE BLOCK STOP
+            $self->get_bucket_id( $session, $bucket ) );                            # PROFILE BLOCK STOP
 
     my %counts;
     my $count;
@@ -1508,7 +1508,7 @@ sub add_words_to_bucket__
         if ( defined( $wordmap{$word} ) && defined( $counts{$wordmap{$word}} ) ) {
             $self->database_()->validate_sql_prepare_and_execute(      # PROFILE BLOCK START
                 $self->{db_put_word_count__},
-                $self->{db_bucketid__}{$userid}{$bucket}{id},
+                $self->get_bucket_id( $session, $bucket ),
                 $wordmap{$word},
                 $counts{$wordmap{$word}} +
                     $subtract * $self->{parser__}->{words__}{$word} ); # PROFILE BLOCK STOP
@@ -1531,7 +1531,7 @@ sub add_words_to_bucket__
     if ( $subtract == -1 ) {
         $self->database_()->validate_sql_prepare_and_execute(   # PROFILE BLOCK START
             $self->{db_delete_zero_words__},
-            $self->{db_bucketid__}{$userid}{$bucket}{id} );     # PROFILE BLOCK STOP
+            $self->get_bucket_id( $session, $bucket ) );     # PROFILE BLOCK STOP
     }
 
     $self->db_()->commit;
@@ -1810,12 +1810,12 @@ sub get_session_key
 
     $self->db_update_cache__( $session );
 
-    $self->log_( 1, "get_session_key returning key $session for user $self->{api_sessions__}{$session}{userid}" );
+    $self->log_( 1, "get_session_key returning key $session for $self->{api_sessions__}{$session}{userid}" );
 
     # Send the session to the parent so that it is recorded and can
     # be correctly shutdown
 
-    $self->mq_post_( 'CREAT', $session, 1 );
+    $self->mq_post_( 'CREAT', $session, $result->[0] );
 
     return $session;
 }
@@ -3472,8 +3472,8 @@ sub get_bucket_word_list
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    return undef if ( !exists( $self->{db_bucketid__}{$userid}{$bucket} ) );
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
+    return undef if ( !defined($bucketid) );
 
     $prefix = '' if ( !defined( $prefix ) );
     $prefix =~ s/\0//g;
@@ -3507,7 +3507,7 @@ sub get_bucket_word_prefixes
 
     my $prev = '';
 
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
     return undef if ( !defined( $bucketid ) );
 
     my $result = $self->db_()->selectcol_arrayref(   # PROFILE BLOCK START
@@ -3683,7 +3683,7 @@ sub get_bucket_parameter
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
+    if ( !$self->is_bucket( $session, $bucket ) ) {
         return undef;
     }
 
@@ -3697,7 +3697,7 @@ sub get_bucket_parameter
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
             $self->{db_get_bucket_parameter__},
-            $self->{db_bucketid__}{$userid}{$bucket}{id},
+            $self->get_bucket_id( $session, $bucket ),
             $self->{db_parameterid__}{$parameter} );       # PROFILE BLOCK STOP
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
@@ -4492,12 +4492,11 @@ sub set_bucket_parameter
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
-        return undef;
-    }
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
+    return undef if ( !defined( $bucketid ) );
 
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $btid     = $self->{db_parameterid__}{$parameter};
+    return undef if ( !defined( $btid ) );
 
     # Exactly one row should be affected by this statement
 
@@ -4536,6 +4535,7 @@ sub set_user_parameter_from_id
     }
 
     my $utid = $self->{db_user_parameterid__}{$parameter};
+    return 0 if ( !defined( $utid ) );
 
     # Check to see if the parameter is being set to the default value
     # if it is then remove the entry because it is a waste of space
@@ -4646,13 +4646,15 @@ sub create_bucket
 {
     my ( $self, $session, $bucket ) = @_;
 
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
     if ( $self->is_bucket( $session, $bucket ) ||           # PROFILE BLOCK START
          $self->is_pseudo_bucket( $session, $bucket ) ) {   # PROFILE BLOCK STOP
         return 0;
     }
 
-    my $userid = $self->valid_session_key__( $session );
-    return undef if ( !defined( $userid ) );
+    return 0 if ( $bucket =~ /[^[:lower:]\-_0-9]/ );
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'insert into buckets ( name, pseudo, userid )
@@ -4682,9 +4684,7 @@ sub delete_bucket
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
-        return 0;
-    }
+    return 0 if ( !$self->is_bucket( $session, $bucket ) );
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'delete from buckets
@@ -4719,17 +4719,20 @@ sub rename_bucket
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$old_bucket} ) ) {
+    if ( !$self->is_bucket( $session, $old_bucket ) ) {
         $self->log_( 0, "Bad bucket name $old_bucket to rename_bucket" );
         return 0;
     }
 
-    if (  defined( $self->{db_bucketid__}{$userid}{$new_bucket} ) ) {
+    if ( $self->is_bucket( $session, $new_bucket ) ||         # PROFILE BLOCK START
+         $self->is_pseudo_bucket( $session, $new_bucket ) ) { # PROFILE BLOCK STOP
         $self->log_( 0, "Bucket named $new_bucket already exists" );
         return 0;
     }
 
-    my $id = $self->{db_bucketid__}{$userid}{$old_bucket}{id};
+    return 0 if ( $new_bucket =~ /[^[:lower:]\-_0-9]/ );
+
+    my $id = $self->get_bucket_id( $session, $old_bucket );
 
     $self->log_( 1, "Rename bucket $old_bucket to $new_bucket" );
 
@@ -4765,7 +4768,7 @@ sub add_messages_to_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket}{id} ) ) {
+    if ( !$self->is_bucket( $session, $bucket ) ) {
         return 0;
     }
 
@@ -4805,6 +4808,10 @@ sub add_message_to_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    if ( !$self->is_bucket( $session, $bucket ) ) {
+        return 0;
+    }
+
     return $self->add_messages_to_bucket( $session, $bucket, $file );
 }
 
@@ -4825,6 +4832,10 @@ sub remove_message_from_bucket
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
+
+    if ( !$self->is_bucket( $session, $bucket ) ) {
+        return 0;
+    }
 
     $self->{parser__}->parse_file( $file,            # PROFILE BLOCK START
         $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
@@ -4879,9 +4890,13 @@ sub get_magnet_types_in_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    if ( !$self->is_bucket( $session, $bucket ) ) {
+        return undef;
+    }
+
     my @result;
 
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
     my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select magnet_types.mtype from magnet_types, magnets, buckets
                 where magnet_types.id  = magnets.mtid and
@@ -4916,11 +4931,8 @@ sub clear_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
-        return undef;
-    }
-
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
+    return undef if ( !defined( $bucketid ) );
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'delete from matrix where matrix.bucketid = ?;',
@@ -4982,9 +4994,13 @@ sub get_magnets
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
+    return 0 if ( !defined( $bucketid ) );
+
+    return 0 if ( !defined( $type ) );
+
     my @result;
 
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $h = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select magnets.val from magnets, magnet_types
                 where magnets.bucketid   = ? and
@@ -5021,11 +5037,9 @@ sub create_magnet
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
-        return 0;
-    }
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
+    return 0 if ( !defined( $bucketid ) );
 
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select magnet_types.id from magnet_types
                 where magnet_types.mtype = ?;',
@@ -5091,11 +5105,8 @@ sub delete_magnet
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
-        return 0;
-    }
-
-    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
+    my $bucketid = $self->get_bucket_id( $session, $bucket );
+    return 0 if ( !defined( $bucketid ) );
 
     my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'select magnets.id from magnets, magnet_types
