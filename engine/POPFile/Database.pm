@@ -685,7 +685,7 @@ sub db_upgrade__
     close INSERT;
     $db_to->commit;
 
-#    unlink $ins_file;
+    unlink $ins_file;
 }
 
 #----------------------------------------------------------------------------
