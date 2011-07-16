@@ -910,6 +910,10 @@ test_assert_equal( $b->classify( $session, 'TestMails/TestMailParse021.msg' ), '
 test_assert_equal( $b->{magnet_detail__}, 8 );
 test_assert( $b->{magnet_used__} );
 
+# try to classify message does not exist
+
+test_assert( !defined( $b->classify( $session, 'TestMails/NotExist.msg' ) ) );
+
 # clear_magnets
 
 $b->clear_magnets( $session );

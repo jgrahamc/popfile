@@ -147,7 +147,7 @@ sub handle_message
 {
     my ( $self, $session, $in, $out ) = @_;
 
-    return undef unless ( -f $in );
+    return undef if ( !-e $in );
 
     # Examine the session key is valid
 
