@@ -98,15 +98,13 @@ sub remove_stopword            { shift->{c}->remove_stopword( @_ ); }
 sub get_html_colored_message   { shift->{c}->get_html_colored_message( @_ ); }
 
 sub remove_user                { shift->{c}->remove_user( @_ ); }
+sub get_session_key_from_token { shift->{c}->get_session_key_from_token( @_ ); }
 sub get_user_id                { shift->{c}->get_user_id( @_ ); }
 sub get_user_id_from_session   { shift->{c}->get_user_id_from_session( @_ ); }
 sub get_user_name_from_session { shift->{c}->get_user_name_from_session( @_ ); }
 sub add_account                { shift->{c}->add_account( @_ ); }
 sub remove_account             { shift->{c}->remove_account( @_ ); }
 sub get_user_parameter         { shift->{c}->get_user_parameter( @_ ); }
-sub get_user_parameter_from_id { shift->{c}->get_user_parameter_from_id( @_ ); }
-sub set_user_parameter_from_id { shift->{c}->get_user_parameter_from_id( @_ ); }
-sub get_user_name_from_id      { shift->{c}->get_user_name_from_id( @_ ); }
 
 sub change_users_password      { shift->{c}->change_users_password( @_ ); }
 sub set_password               { shift->{c}->set_password( @_ ); }
@@ -124,6 +122,8 @@ sub get_magnet_types           { [ shift->{c}->get_magnet_types( @_ ) ]; }
 sub get_stopword_list          { [ shift->{c}->get_stopword_list( @_ ) ]; }
 sub get_bucket_word_list       { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
 sub get_bucket_word_prefixes   { [ shift->{c}->get_bucket_word_prefixes( @_ ) ]; }
+sub get_accounts               { [ shift->{c}->get_accounts( @_ ) ]; }
+sub get_user_list              { shift->{c}->get_user_list( @_ ) }
 sub get_user_parameter_list    { [ shift->{c}->get_user_parameter_list( @_ ) ]; }
 sub get_current_sessions       { shift->{c}->get_current_sessions( @_ ); }
 

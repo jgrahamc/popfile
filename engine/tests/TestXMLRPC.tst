@@ -212,6 +212,10 @@ if ( $pid == 0 ) {
 
     $userverwriter->autoflush( 1 );
 
+    # Quick hack to make POPFile think it is running as parent process
+
+    $mq->{pid__} = $$;
+
     my $count = 5000;
     while ( $POPFile->CORE_service( 1 ) ) {
         select( undef, undef, undef, 0.05 );
@@ -231,7 +235,9 @@ if ( $pid == 0 ) {
     close $dserverreader;
     close $userverwriter;
 
-    sleep 2;
+    $POPFile->CORE_stop();
+
+#    sleep 2;
     exit(0);
 } else {
     # PARENT -- test the XMLRPC server
@@ -266,8 +272,6 @@ if ( $pid == 0 ) {
 
     test_assert( $session ne '' );
     goto EXIT if !$session;
-
-    wait_proxy();
 
     # API.classify
 
@@ -313,8 +317,6 @@ if ( $pid == 0 ) {
     close OUTPUT;
 
     unlink "temp.out";
-
-    wait_proxy();
 
     # TODO: Test whether the message is correctly stored in history
 
@@ -968,6 +970,18 @@ if ( $pid == 0 ) {
     test_assert_equal( $rename_user->[0], 1 ); # Already exists
     test_assert_equal( $rename_user->[1], '' );
 
+    # API.get_user_list (ADMIN ONLY)
+
+    my $user_list = $xml
+        -> call ( 'POPFile/API.get_user_list', $session )
+        -> result;
+
+    test_assert( $user_list );
+    test_assert_equal( scalar keys %{$user_list}, 3 );
+    test_assert_equal( ${$user_list}{1}, 'admin' );
+    test_assert_equal( ${$user_list}{2}, 'newuser' );
+    test_assert_equal( ${$user_list}{3}, 'copyuser2' );
+
     # API.remove_user (ADMIN ONLY)
 
     my $remove_user = $xml
@@ -991,7 +1005,6 @@ if ( $pid == 0 ) {
     test_assert_equal( $set_password_for_user, 1 ); # Success
 
     $xml->call ( 'POPFile/API.release_session_key', $session2 );
-    wait_proxy();
 
     # try to login using new password
 
@@ -1002,7 +1015,6 @@ if ( $pid == 0 ) {
     test_assert( $session2 ne '' );
 
     $xml->call ( 'POPFile/API.release_session_key', $session2 );
-    wait_proxy();
 
     # API.change_users_password (ADMIN ONLY)
 
@@ -1027,7 +1039,6 @@ if ( $pid == 0 ) {
     test_assert( $session2 ne '' );
 
     $xml->call ( 'POPFile/API.release_session_key', $session2 );
-    wait_proxy();
 
     # API.initialize_users_password (ADMIN ONLY)
 
@@ -1048,8 +1059,6 @@ if ( $pid == 0 ) {
         -> result;
 
     test_assert( $session2 ne '' );
-
-#    $xml->call ( 'POPFile/API.release_session_key', $session2 );
 
     # API.get_user_id (ADMIN ONLY)
 
@@ -1120,6 +1129,170 @@ if ( $pid == 0 ) {
         test_assert_equal( $param, shift @params );
     }
 
+    # API.get_user_parameter
+
+    my $user_parameter = $xml
+        -> call ( 'POPFile/API.get_user_parameter', $session, 'GLOBAL_can_admin' )
+        -> result;
+
+    test_assert_equal( $user_parameter, 1 );
+
+    $user_parameter = $xml
+        -> call ( 'POPFile/API.get_user_parameter', $session2, 'history_history_days' )
+        -> result;
+
+    test_assert_equal( $user_parameter, 2 );
+
+    $user_parameter = $xml
+        -> call ( 'POPFile/API.get_user_parameter', $session, 'bad_parameter' )
+        -> result;
+
+    test_assert_equal( $user_parameter, '' );
+
+    # API.get_current_sessions (ADMIN ONLY)
+
+    my $current_sessions = $xml
+        -> call ( 'POPFile/API.get_current_sessions', $session )
+        -> result;
+
+    test_assert_equal( scalar @{$current_sessions}, 2 );
+    foreach my $current_session ( @{$current_sessions} ) {
+        if ( $current_session->{userid} == 1 ) {
+            test_assert_equal( $current_session->{session}, $session );
+        } elsif ( $current_session->{userid} == 2 ) {
+            test_assert_equal( $current_session->{session}, $session2 );
+        }
+    }
+#    use Data::Dumper;
+#    print Dumper( $current_sessions );
+
+    # API.add_account (ADMIN ONLY)
+
+    my $add_account = $xml
+        -> call ( 'POPFile/API.add_account', $session, 2, 'pop3', 'account' )
+        -> result;
+
+    test_assert_equal( $add_account, 1 ); # Success
+
+    # API.get_session_key_from_token (ADMIN ONLY)
+
+    my $session3 = $xml
+        -> call ( 'POPFile/API.get_session_key_from_token', $session, 'pop3', 'account' )
+        -> result;
+
+    test_assert( $session3 ne '' );
+
+    # check the username
+
+    $user_name = $xml
+        -> call ( 'POPFile/API.get_user_name_from_session', $session3 )
+        -> result;
+
+    test_assert( $user_name, 'newuser' );
+
+    $xml -> call ( 'POPFile/API.release_session_key', $session3 );
+
+    # API.add_account with bad parameter
+
+    $add_account = $xml
+        -> call ( 'POPFile/API.add_account', $session, 3, 'pop3', 'account2' )
+        -> result;
+
+    test_assert_equal( $add_account, -2 ); # User does not exist
+
+    $add_account = $xml
+        -> call ( 'POPFile/API.add_account', $session, 1, 'pop3', 'account' )
+        -> result;
+
+    test_assert_equal( $add_account, -1 ); # Account already used by another user
+
+    # API.get_accounts (ADMIN ONLY)
+
+    my $accounts = $xml
+        -> call ( 'POPFile/API.get_accounts', $session, 2 )
+        -> result;
+
+    test_assert_equal( scalar @{$accounts}, 1 );
+    test_assert_equal( @{$accounts}[0], 'pop3:account' );
+
+    # API.remove_account (ADMIN ONLY)
+
+    my $remove_account = $xml
+        -> call ( 'POPFile/API.remove_account', $session, 'pop3', 'account' )
+        -> result;
+
+    test_assert_equal( $remove_account, 1 ); # Success
+
+    # Test ADMIN ONLY APIs with non-admin user
+
+    my $result = $xml
+        -> call ( 'POPFile/API.create_user', $session2, 'anotheruser' )
+        -> result;
+    test_assert( $result );
+    test_assert_equal( $result->[0], '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.rename_user', $session2, 'newuser', 'newuser2' )
+        -> result;
+    test_assert( $result );
+    test_assert_equal( $result->[0], '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.remove_user', $session2, 'newuser' )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.get_user_list', $session2, 'newuser' )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.change_users_password', $session2, 'admin', 'password' )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.initialize_users_password', $session2, 'admin' )
+        -> result;
+    test_assert( $result );
+    test_assert_equal( $result->[0], '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.get_user_id', $session2, 'newuser' )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.get_user_parameter_list', $session2 )
+        -> result;
+    test_assert( $result );
+    test_assert_equal( $result->[0], '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.get_current_sessions', $session2 )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/API.add_account', $session2, 2, 'pop3', 'anotheraccount' )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/get_session_key_from_token', $session2, 'pop3', 'account' )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/get_accounts', $session2, 2 )
+        -> result;
+    test_assert_equal( $result, '' );
+
+    $result = $xml
+        -> call ( 'POPFile/remove_account', $session2, 'pop3', 'account' )
+        -> result;
+    test_assert_equal( $result, '' );
 
     # API.release_session_key
 
@@ -1142,15 +1315,6 @@ EXIT:
 
     while ( waitpid( -1, &WNOHANG ) > 0 ) {
         sleep 1;
-    }
-}
-
-sub wait_proxy
-{
-    my $cd = 10;
-    while ( $cd-- ) {
-        select( undef, undef, undef, 0.05 );
-        $POPFile->CORE_service( 1 );
     }
 }
 

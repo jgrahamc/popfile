@@ -3197,7 +3197,8 @@ sub get_accounts
 # $account   The account to add
 #
 # Returns 1 if the account was added successfully, or 0 for an error,
-# -1 if another user already has that account associated with it
+# -1 if another user already has that account associated with it,
+# -2 if user id does not exist
 #
 # ----------------------------------------------------------------------------
 sub add_account
@@ -3207,8 +3208,13 @@ sub add_account
     # Check that this user is an administrator
 
     if ( !$self->is_admin_session( $session ) ) {
-        return 0;
+        return undef;
     }
+
+    # Check if the user id is valid
+
+    my $username = $self->get_user_name_from_id( $session, $id );
+    return -2 if ( !defined( $username ) );
 
     # User is admin so try to insert the new account after checking to see
     # if someone already has this account
@@ -3218,7 +3224,8 @@ sub add_account
     if ( !defined( $result ) ) {
         return 0;
     }
-    if ( defined( $self->{db_get_user_from_account__}->fetchrow_arrayref ) ) {
+    if ( defined( $result->fetchrow_arrayref ) ) {
+        $result->finish;
         return -1;
     }
 
