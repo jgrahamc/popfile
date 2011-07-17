@@ -44,10 +44,6 @@ my %valid = ( 'POPFile/Database'      => 1,
               'UI/HTML'               => 1,
               'UI/XMLRPC'             => 1, );
 
-#use UI::XMLRPC;
-#my $x = new UI::XMLRPC;
-#$x->loader( $POPFile );
-
 $POPFile->CORE_load( 0, \%valid );
 $POPFile->CORE_initialize();
 $POPFile->CORE_config( 1 );
@@ -66,12 +62,135 @@ $b->module_config_( 'html', 'port', $http_port );
 $b->global_config_( 'language', 'English' );
 $b->config_( 'hostname', '127.0.0.1' );
 
-#$x->initialize();
+# To Test XMLRPC's use of MQ, we need to receive messages
+
+use Test::MQReceiver;
+
+my $rmq = new Test::MQReceiver;
+
+$mq->register( 'UIREG', $rmq );
+
 $x->config_( 'enabled', 1 );
 test_assert( $x->config_( 'enabled' ), 1 );
 my $xport = 12000 + int( rand( 2000 ) );
 $x->config_( 'port', $xport );
 $POPFile->CORE_start();
+
+# Test dynamic UI
+
+$mq->service();
+my @messages = $rmq->read();
+
+shift @messages if ( $^O eq 'MSWin32' );
+
+test_assert_equal( scalar @messages, 2 );
+
+test_assert_equal( $messages[0][0], 'UIREG' );
+test_assert_equal( $#{$messages[0][1]}, 3 );
+test_assert_equal( $messages[0][1][0], 'configuration' );
+test_assert_equal( $messages[0][1][1], 'xmlrpc_port' );
+test_assert_equal( $messages[0][1][2], 'xmlrpc-port.thtml' );
+test_assert_equal( ref $messages[0][1][3], 'UI::XMLRPC' );
+
+test_assert_equal( $messages[1][0], 'UIREG' );
+test_assert_equal( $#{$messages[1][1]}, 3 );
+test_assert_equal( $messages[1][1][0], 'security' );
+test_assert_equal( $messages[1][1][1], 'xmlrpc_local' );
+test_assert_equal( $messages[1][1][2], 'xmlrpc-local.thtml' );
+test_assert_equal( ref $messages[1][1][3], 'UI::XMLRPC' );
+
+# Test configure_item
+
+use Test::SimpleTemplate;
+
+my $templ = new Test::SimpleTemplate;
+
+# nothing happens for unknown configuration item names
+
+$x->configure_item( 'foo', $templ );
+my $params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 0 );
+
+# the right things have to happen for known configuration item names
+
+$x->configure_item( 'xmlrpc_port', $templ );
+$params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 1 );
+test_assert_equal( $templ->param( 'XMLRPC_Port' ), $x->config_( 'port' ) );
+
+delete $templ->{params__};
+
+$x->configure_item( 'xmlrpc_local', $templ );
+$params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 1 );
+test_assert_equal( $templ->param( 'XMLRPC_local_on' ), ( $x->config_( 'local' ) == 1 ) );
+
+delete $templ->{params__};
+
+# test changing/validating of configuration values
+
+my $form = {};
+my $language= {};
+
+my ($status, $error);
+
+# xmlrpc_port
+
+test_assert_equal( $x->config_( 'port' ), $xport );
+
+$form->{xmlrpc_port} = 18081;
+$language->{Configuration_XMLRPCUpdate} = "xmlrpc port update %s";
+
+($status, $error) = $x->validate_item( 'xmlrpc_port', $templ, $language, $form );
+
+test_assert_equal( $status, "xmlrpc port update 18081" );
+test_assert( !defined( $error ) );
+test_assert_equal( $x->config_( 'port' ), 18081 );
+
+$form->{xmlrpc_port} = 'aaa';
+$language->{Configuration_Error7} = "configuration error 7";
+
+($status, $error) = $x->validate_item( 'xmlrpc_port', $templ, $language, $form );
+
+test_assert( !defined( $status ) );
+test_assert_equal( $error, "configuration error 7" );
+test_assert_equal( $x->config_( 'port' ), 18081 );
+
+$form->{xmlrpc_port} = 0;
+
+($status, $error) = $x->validate_item( 'xmlrpc_port', $templ, $language, $form );
+
+test_assert( !defined( $status ) );
+test_assert_equal( $error, "configuration error 7" );
+test_assert_equal( $x->config_( 'port' ), 18081 );
+
+$x->config_( 'port', $xport );
+
+delete $form->{xmlrpc_port};
+
+# xmlrpc_local
+
+test_assert_equal( $x->config_( 'local' ), 1 );
+
+$form->{serveropt_xmlrpc} = 1;
+$language->{Security_ServerModeUpdateXMLRPC} = "xmlrpc is in server mode";
+
+($status, $error) = $x->validate_item( 'xmlrpc_local', $templ, $language, $form );
+
+test_assert_equal( $status, "xmlrpc is in server mode" );
+test_assert( !defined( $error ) );
+test_assert_equal( $x->config_( 'local' ), 0 );
+
+$form->{serveropt_xmlrpc} = 0;
+$language->{Security_StealthModeUpdateXMLRPC} = "xmlrpc is in stealth mode";
+
+($status, $error) = $x->validate_item( 'xmlrpc_local', $templ, $language, $form );
+
+test_assert_equal( $status, "xmlrpc is in stealth mode" );
+test_assert( !defined( $error ) );
+test_assert_equal( $x->config_( 'local' ), 1 );
+
+delete $form->{serveropt_xmlrpc};
 
 # This pipe is used to send signals to the child running
 # the server to change its state, the following commands can
@@ -759,7 +878,7 @@ if ( $pid == 0 ) {
 
     test_assert_equal( scalar @{$stopwords}, 193 );
 
-    # TODO : test v2 APIs
+    # Tests for v2 APIs
 
     # API.reclassify
 
@@ -770,7 +889,7 @@ if ( $pid == 0 ) {
 
     test_assert_equal( $reclassify, 1 );
 
-    # Check if the bucket unique count numbers up.
+    # check if the bucket unique count numbers up.
 
     my $uc2 = $xml
         -> call ( 'POPFile/API.get_bucket_unique_count', $session, 'personal' )
