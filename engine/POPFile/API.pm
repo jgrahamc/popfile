@@ -109,7 +109,7 @@ sub set_user_parameter_from_id { shift->{c}->get_user_parameter_from_id( @_ ); }
 sub get_user_name_from_id      { shift->{c}->get_user_name_from_id( @_ ); }
 
 sub change_users_password      { shift->{c}->change_users_password( @_ ); }
-sub set_password_for_user      { shift->{c}->set_password_for_user( @_ ); }
+sub set_password               { shift->{c}->set_password( @_ ); }
 
 # These APIs return lists and need to be altered to arrays before returning
 # them through XMLRPC otherwise you get the wrong result.
@@ -124,8 +124,8 @@ sub get_magnet_types           { [ shift->{c}->get_magnet_types( @_ ) ]; }
 sub get_stopword_list          { [ shift->{c}->get_stopword_list( @_ ) ]; }
 sub get_bucket_word_list       { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
 sub get_bucket_word_prefixes   { [ shift->{c}->get_bucket_word_prefixes( @_ ) ]; }
-sub get_user_parameter_list    { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
-sub get_current_sessions       { [ shift->{c}->get_current_sessions( @_ ) ]; }
+sub get_user_parameter_list    { [ shift->{c}->get_user_parameter_list( @_ ) ]; }
+sub get_current_sessions       { shift->{c}->get_current_sessions( @_ ); }
 
 sub create_user                { [ shift->{c}->create_user( @_ ) ]; }
 sub rename_user                { [ shift->{c}->rename_user( @_ ) ]; }

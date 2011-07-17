@@ -921,7 +921,7 @@ if ( $pid == 0 ) {
 
     # TODO: Multi-user mode tests
 
-    # API.create_user
+    # API.create_user (ADMIN ONLY)
 
     my $create_user = $xml
         -> call ( 'POPFile/API.create_user', $session, 'newuser' )
@@ -944,7 +944,15 @@ if ( $pid == 0 ) {
 
     test_assert_equal( $create_user->[0], 0 ); # Success
 
-    # API.rename_user
+    # test login as a new user
+
+    my $session2 = $xml
+        -> call ( 'POPFile/API.get_session_key', 'newuser', $password )
+        -> result;
+
+    test_assert( $session2 );
+
+    # API.rename_user (ADMIN ONLY)
 
     my $rename_user = $xml
         -> call ( 'POPFile/API.rename_user', $session, 'copyuser', 'copyuser2' )
@@ -960,7 +968,7 @@ if ( $pid == 0 ) {
     test_assert_equal( $rename_user->[0], 1 ); # Already exists
     test_assert_equal( $rename_user->[1], '' );
 
-    # API.remove_user
+    # API.remove_user (ADMIN ONLY)
 
     my $remove_user = $xml
         -> call ( 'POPFile/API.remove_user', $session, 'copyuser2' )
@@ -974,12 +982,152 @@ if ( $pid == 0 ) {
 
     test_assert_equal( $remove_user, 1 ); # Does not exist
 
+    # API.set_password
+
+    my $set_password_for_user = $xml
+        -> call ( 'POPFile/API.set_password', $session2, 'password' )
+        -> result;
+
+    test_assert_equal( $set_password_for_user, 1 ); # Success
+
+    $xml->call ( 'POPFile/API.release_session_key', $session2 );
+    wait_proxy();
+
+    # try to login using new password
+
+    $session2 = $xml
+        -> call ( 'POPFile/API.get_session_key', 'newuser', 'password' )
+        -> result;
+
+    test_assert( $session2 ne '' );
+
+    $xml->call ( 'POPFile/API.release_session_key', $session2 );
+    wait_proxy();
+
+    # API.change_users_password (ADMIN ONLY)
+
+    my $change_users_password = $xml
+        -> call ( 'POPFile/API.change_users_password', $session, 'newuser', 'password2' )
+        -> result;
+
+    test_assert_equal( $change_users_password, 0 ); # Success
+
+    $change_users_password = $xml
+        -> call ( 'POPFile/API.change_users_password', $session, 'baduser', 'password' )
+        -> result;
+
+    test_assert_equal( $change_users_password, 1 ); # No such user
+
+    # try to login using new password
+
+    $session2 = $xml
+        -> call ( 'POPFile/API.get_session_key', 'newuser', 'password2' )
+        -> result;
+
+    test_assert( $session2 ne '' );
+
+    $xml->call ( 'POPFile/API.release_session_key', $session2 );
+    wait_proxy();
+
+    # API.initialize_users_password (ADMIN ONLY)
+
+    my $initialize_users_password = $xml
+        -> call ( 'POPFile/API.initialize_users_password', $session, 'newuser' )
+        -> result;
+
+    test_assert( $initialize_users_password );
+    test_assert_equal( $initialize_users_password->[0], 0 );
+    test_assert( $initialize_users_password->[1] );
+
+    $password = $initialize_users_password->[1];
+
+    # try to login using new password
+
+    $session2 = $xml
+        -> call ( 'POPFile/API.get_session_key', 'newuser', $password )
+        -> result;
+
+    test_assert( $session2 ne '' );
+
+#    $xml->call ( 'POPFile/API.release_session_key', $session2 );
+
+    # API.get_user_id (ADMIN ONLY)
+
+    my $user_id = $xml
+        -> call ( 'POPFile/API.get_user_id', $session, 'newuser' )
+        -> result;
+
+    test_assert( $user_id ne '' );
+
+    $user_id = $xml
+        -> call ( 'POPFile/API.get_user_id', $session, 'baduser' )
+        -> result;
+
+    test_assert( $user_id eq '' );
+
+    # API.get_user_id_from_session
+
+    $user_id = $xml
+        -> call ( 'POPFile/API.get_user_id_from_session', $session )
+        -> result;
+
+    test_assert( $user_id ne '' );
+    test_assert_equal( $user_id, 1 );
+
+    $user_id = $xml
+        -> call ( 'POPFile/API.get_user_id_from_session', $session2 )
+        -> result;
+
+    test_assert( $user_id ne '' );
+    test_assert_equal( $user_id, 2 );
+
+    # API.get_user_name_from_session
+
+    my $user_name = $xml
+        -> call ( 'POPFile/API.get_user_name_from_session', $session )
+        -> result;
+
+    test_assert_equal( $user_name, 'admin' );
+
+    $user_name = $xml
+        -> call ( 'POPFile/API.get_user_name_from_session', $session2 )
+        -> result;
+
+    test_assert_equal( $user_name, 'newuser' );
+
+    # API.get_user_parameter_list (ADMIN ONLY)
+
+    my $user_parameter_list = $xml
+        -> call ( 'POPFile/API.get_user_parameter_list', $session )
+        -> result;
+
+    test_assert_equal( scalar @{$user_parameter_list}, 37 );
+    my @params = ( 'GLOBAL_can_admin', 'GLOBAL_private_key', 'GLOBAL_public_key',
+                   'bayes_subject_mod_left', 'bayes_subject_mod_pos',
+                   'bayes_subject_mod_right', 'bayes_unclassified_weight',
+                   'bayes_xpl_angle', 'history_history_days',
+                   'html_column_characters', 'html_columns', 'html_date_format',
+                   'html_language', 'html_last_reset', 'html_last_update_check',
+                   'html_page_size', 'html_send_stats', 'html_session_dividers',
+                   'html_show_bucket_help', 'html_show_configbars',
+                   'html_show_training_help', 'html_skin', 'html_test_language',
+                   'html_update_check', 'html_wordtable_format',
+                   'imap_bucket_folder_mappings', 'imap_expunge', 'imap_hostname',
+                   'imap_login', 'imap_password', 'imap_port',
+                   'imap_training_mode', 'imap_uidnexts', 'imap_uidvalidities',
+                   'imap_update_interval', 'imap_use_ssl', 'imap_watched_folders', );
+    foreach my $param ( sort @{$user_parameter_list} ) {
+        test_assert_equal( $param, shift @params );
+    }
+
 
     # API.release_session_key
 
     $xml
-        -> call('POPFile/API.release_session_key', $session );
+        -> call ( 'POPFile/API.release_session_key', $session );
 
+    $xml
+        -> call ( 'POPFile/API.release_session_key', $session2 );
 
 EXIT:
     # Tell the POPFile to die
@@ -1001,7 +1149,7 @@ sub wait_proxy
 {
     my $cd = 10;
     while ( $cd-- ) {
-        select( undef, undef, undef, 0.1 );
+        select( undef, undef, undef, 0.05 );
         $POPFile->CORE_service( 1 );
     }
 }

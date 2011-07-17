@@ -267,6 +267,7 @@ sub deliver
         $self->history_()->commit_history() if ( defined($self->history_()) );
 
         $self->release_session_key_private__( $message[0] );
+        $self->log_( 1, "RELSE message on $message[0]" );
     }
 
     if ( $type eq 'CREAT' ) {
@@ -1682,7 +1683,7 @@ sub release_session_key_private__
     my ( $self, $session ) = @_;
 
     if ( defined( $self->{api_sessions__}{$session} ) ) {
-        $self->log_( 1, "release_session_key releasing key $session for user $self->{api_sessions__}{$session}{userid}" );
+        $self->log_( 1, "release_session_key releasing key $session for $self->{api_sessions__}{$session}{userid}" );
         delete $self->{api_sessions__}{$session};
     }
 }
