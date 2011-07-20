@@ -1840,6 +1840,8 @@ sub stop_parse
 
     $self->{colorized__} .= $self->clear_out_base64();
 
+    $self->clear_out_qp();
+
     # If we reach here and discover that we think that we are in an
     # unclosed HTML tag then there has probably been an error (such as
     # a < in the text messing things up) and so we dump whatever is
@@ -2023,6 +2025,8 @@ sub parse_line
 
                     print "Hit MIME boundary --$1\n" if $self->{debug__};
 
+                    $self->clear_out_qp();
+
                     # Decode base64 for every part.
                     $self->{colorized__} .= $self->clear_out_base64() . "\n\n";
 
@@ -2136,6 +2140,36 @@ sub clear_out_base64
     $self->{base64__} = '';
 
     return $colorized;
+}
+
+# ----------------------------------------------------------------------------
+#
+# clear_out_qp
+#
+# If there's anything in the {prev__} then decode it and parse it
+#
+# ----------------------------------------------------------------------------
+sub clear_out_qp
+{
+    my ( $self ) = @_;
+
+    if ( ( $self->{encoding__} =~ /quoted\-printable/i ) &&
+         ( $self->{prev__} ne '' ) ) {
+        my $line = decode_qp( $self->{prev__} );
+        $line =~ s/\x00/NUL/g;
+
+        if ( $self->{lang__} eq 'Nihongo' ) {
+            $line = convert_encoding(
+                $line, $self->{charset__}, 'euc-jp', '7bit-jis',
+                @{ $encoding_candidates{ $self->{lang__} } } );
+            $line = $self->{nihongo_parser__}{parse}( $self, $line );
+        }
+
+        $self->{ut__} .= $self->splitline( $line, '' );
+
+        $self->parse_html( $line, 0 );
+        $self->{prev__} = '';
+    }
 }
 
 # ----------------------------------------------------------------------------
