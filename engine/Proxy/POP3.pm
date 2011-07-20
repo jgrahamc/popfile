@@ -200,8 +200,8 @@ sub child__
     $s =~ s/(\$|\@|\[|\]|\(|\)|\||\?|\*|\.|\^|\+)/\\$1/;
 
     my $transparent  = "^USER ([^$s]+)\$";
-    my $user_command = "USER ([^$s]+)($s(\\d+))?$s([^$s]+)($s([^$s]+))?";
-    my $apop_command = "APOP ([^$s]+)($s(\\d+))?$s([^$s]+) (.*?)";
+    my $user_command = "USER ([^$s]+)($s(\\d{1,5}))?$s([^$s]+)($s([^$s]+))?";
+    my $apop_command = "APOP ([^$s]+)($s(\\d{1,5}))?$s([^$s]+) (.*?)";
 
     $self->log_( 2, "Regexps: $transparent, $user_command, $apop_command" );
 
