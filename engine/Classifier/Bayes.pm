@@ -1429,7 +1429,14 @@ sub write_line__
 {
     my ( $self, $file, $line, $class ) = @_;
 
-    print $file $line if defined( $file );
+    if ( defined( $file ) && ( ref $file eq 'GLOB' ) ) {
+        if ( defined( fileno $file ) ) {
+            print $file $line;
+        } else {
+            my ( $package, $filename, $line, $subroutine ) = caller;
+            $self->log_( 0, "Tried to write to a closed file. Called from $package line $line" );
+        }
+    }
 
     if ( $class eq '' ) {
         $self->{parser__}->parse_line( $line );
@@ -2734,7 +2741,9 @@ sub classify_and_modify
     # middle of downloading a message and we refresh the history we do not
     # get class file errors
 
-    open MSG, ">$msg_file" unless $nosave;
+    if ( !$nosave ) {
+        open MSG, ">$msg_file" or $self->log_( 0, "Could not open $msg_file : $!" );
+    }
 
     $self->log_( 1, "Reading mail message." );
     while ( my $line = $self->slurp_( $mail ) ) {
