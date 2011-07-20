@@ -9,7 +9,7 @@ use POPFile::Module;
 # This module handles POPFile's logger.  It is used to save debugging
 # information to disk or to send it to the screen.
 #
-# Copyright (c) 2001-2009 John Graham-Cumming
+# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

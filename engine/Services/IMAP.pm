@@ -11,7 +11,7 @@ use Fcntl;
 #
 # IMAP.pm --- a module to use POPFile for an IMAP connection.
 #
-# Copyright (c) 2001-2009 John Graham-Cumming
+# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   $Revision$
 #

@@ -11,7 +11,7 @@ package POPFile::Loader;
 # Subroutines not so marked are suitable for use by POPFile-based
 # utilities to assist in loading and executing modules
 #
-# Copyright (c) 2001-2009 John Graham-Cumming
+# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

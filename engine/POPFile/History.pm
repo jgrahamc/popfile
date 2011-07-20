@@ -9,7 +9,7 @@ use POPFile::Module;
 # This module handles POPFile's history.  It manages entries in the POPFile
 # database and on disk that store messages previously classified by POPFile.
 #
-# Copyright (c) 2001-2009 John Graham-Cumming
+# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

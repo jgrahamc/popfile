@@ -6,7 +6,7 @@
 # Checks whether the modules specified in the file popfile.pck are
 # installed.
 #
-# Copyright (c) 2005-2009 John Graham-Cumming
+# Copyright (c) 2005-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

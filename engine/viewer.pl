@@ -3,7 +3,7 @@
 #
 # viewer.pl --- Used to view information about bucket probabilities
 #
-# Copyright (c) 2001-2009 John Graham-Cumming
+# Copyright (c) 2001-2011 John Graham-Cumming
 #
 # ----------------------------------------------------------------------------
 

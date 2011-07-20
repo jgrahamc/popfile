@@ -3,7 +3,7 @@
 #
 # traintest.pl - Simulate training on errors using a saved archive.
 #
-# Copyright (c) 2001-2009 John Graham-Cumming
+# Copyright (c) 2001-2011 John Graham-Cumming
 #
 # ----------------------------------------------------------------------------
 
