@@ -305,6 +305,24 @@ if ( $pid == 0 ) {
     test_assert_equal( $line, "HTTP/1.0 500 Error$eol" );
     close $client;
 
+    # Send invalid body data
+
+    my $client = IO::Socket::INET->new(
+                    Proto    => "tcp",
+                    PeerAddr => 'localhost',
+                    PeerPort => $port );
+
+    select( undef, undef, undef, 0.1 );
+
+    test_assert( defined( $client ) );
+    test_assert( $client->connected );
+
+    print $client "POST /body HTTP/1.0$eol" . "Content-Length: 12$eol$eol";
+    select( undef, undef, undef, 0.1 );
+    $line = <$client>;
+    test_assert_equal( $line, "HTTP/1.0 400 Error$eol" );
+    close $client;
+
     # kill child
 
     my $client = IO::Socket::INET->new(

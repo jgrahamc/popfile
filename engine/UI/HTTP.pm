@@ -107,7 +107,7 @@ sub start
         my $name = $self->name();
         print STDERR <<EOM;                                                   # PROFILE BLOCK START
 
-\nCouldn't start the $name $protocol interface because POPFile could not bind to the
+\nCouldn\'t start the $name $protocol interface because POPFile could not bind to the
 $protocol port $port. This could be because there is another service
 using that port or because you do not have the right privileges on
 your system (On Unix systems this can happen if you are not root
@@ -217,8 +217,9 @@ sub service
                     if ( ( defined( $client ) ) &&                      # PROFILE BLOCK START
                          ( my $request = $self->slurp_( $client ) ) ) { # PROFILE BLOCK STOP
                         my $content_length = 0;
-                        my $content;
+                        my $content = '';
                         my $cookie = '';
+                        my $status_code = 200;
 
                         $self->log_( 2, $request );
 
@@ -242,20 +243,28 @@ sub service
                         if ( $content_length > 0 ) {
                             $content = $self->slurp_buffer_( $client, # PROFILE BLOCK START
                                 $content_length );                    # PROFILE BLOCK STOP
-                            $self->log_( 2, $content );
+                            if ( !defined( $content ) ) {
+                                $status_code = 400;
+                            } else {
+                                $self->log_( 2, $content );
+                            }
                         }
 
                         # Handle decryption of a cookie header
 
                         $cookie = $self->decrypt_cookie__( $cookie );
 
-                        if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
-                            $code = $self->handle_url( $client, $2, $1, # PROFILE BLOCK START
-                                        $content, $cookie );            # PROFILE BLOCK STOP
-                            $self->log_( 2,                                # PROFILE BLOCK START
-                                "HTTP handle_url returned code $code\n" ); # PROFILE BLOCK STOP
+                        if ( $status_code != 200 ) {
+                            $self->http_error_( $client, $status_code );
                         } else {
-                            $self->http_error_( $client, 500 );
+                            if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
+                                $code = $self->handle_url( $client, $2, $1, # PROFILE BLOCK START
+                                            $content, $cookie );            # PROFILE BLOCK STOP
+                                $self->log_( 2,                                # PROFILE BLOCK START
+                                    "HTTP handle_url returned code $code\n" ); # PROFILE BLOCK STOP
+                            } else {
+                                $self->http_error_( $client, 500 );
+                            }
                         }
                     }
                 }
@@ -365,6 +374,8 @@ sub parse_form_
 {
     my ( $self, $arguments ) = @_;
 
+    return if ( !defined( $arguments ) );
+
     # Normally the browser should have done &amp; to & translation on
     # URIs being passed onto us, but there was a report that someone
     # was having a problem with form arguments coming through with
@@ -456,7 +467,7 @@ sub escape_html_
     $text =~ s/\"/&quot;/g;
     $text =~ s/>/&gt;/g;
     $text =~ s/</&lt;/g;
-    $text =~ s/'/&#39;/g;
+    $text =~ s/\'/&#39;/g;
 
     return $text;
 }
@@ -490,7 +501,7 @@ Click <a href=\"/\">here</a> to continue.
     $self->log_( 1, $text );
 
     my $error_code = 500;
-    $error_code = $error if ( $error eq '404' );
+    $error_code = $error if ( $error =~ /^\d{3}$/ );
 
     print $client "HTTP/1.0 $error_code Error$eol";
     print $client "Content-Type: text/html$eol";

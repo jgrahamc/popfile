@@ -3830,8 +3830,14 @@ sub view_page
         # not need to parse it again and hence we pass in undef for
         # the filename
 
-        my $current_class = $self->classifier_()->classify(    # PROFILE BLOCK START
-            $session, $mail_file, $templ, \%matrix, \%idmap ); # PROFILE BLOCK STOP
+        my $current_class = 'unclassified';
+
+        if ( -f $mail_file ) {
+            $current_class = $self->classifier_()->classify(       # PROFILE BLOCK START
+                $session, $mail_file, $templ, \%matrix, \%idmap ); # PROFILE BLOCK STOP
+        } else {
+            $self->log_( 0, "Message file '$mail_file' is not found." );
+        }
 
         # Check whether the original classfication is still valid.  If
         # not, add a note at the top of the page:
@@ -3848,9 +3854,11 @@ sub view_page
 
         $self->classifier_()->wordscores( 0 );
 
-        $templ->param( 'View_Message' =>                     # PROFILE BLOCK START
-            $self->classifier_()->fast_get_html_colored_message(
-                $session, $mail_file, \%matrix, \%idmap ) ); # PROFILE BLOCK STOP
+        if ( -f $mail_file ) {
+            $templ->param( 'View_Message' =>                     # PROFILE BLOCK START
+                $self->classifier_()->fast_get_html_colored_message(
+                    $session, $mail_file, \%matrix, \%idmap ) ); # PROFILE BLOCK STOP
+        }
 
         # We want to insert a link to change the output format at the
         # start of the word matrix.  The classifier puts a comment in
