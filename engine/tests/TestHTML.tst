@@ -97,9 +97,7 @@ if ( $pid == 0 ) {
     $mq->pipeready( \&pipeready );
 
     $POPFile->CORE_start();
-    $hi->service();
-    $mq->service();
-    $h->service();
+    $POPFile->CORE_service( 1 );
 
     my $session = $b->get_administrator_session_key();
     my $inserted_time = time - 100;
@@ -121,8 +119,7 @@ if ( $pid == 0 ) {
             $hi->commit_slot( $session, $slot, $class, 0 );
         }
     }
-    $mq->service();
-    $hi->service();
+    $POPFile->CORE_service( 1 );
 
     close $dwriter;
     close $ureader;
@@ -135,9 +132,7 @@ if ( $pid == 0 ) {
     test_assert_equal( $lang->{LanguageCode}, 'en' );
 
     while ( 1 ) {
-        $h->service();
-        $b->service();
-        $mq->service();
+        $POPFile->CORE_service( 1 );
 
         if ( pipeready( $dreader ) ) {
             my $command = <$dreader> || '';
@@ -267,7 +262,10 @@ EOM
     close $uwriter;
     $dwriter->autoflush(1);
 
-    my $ua = new LWP::UserAgent;
+    sleep 1;
+
+    my $ua = LWP::UserAgent->new( timeout => 10 );
+    $ua->no_proxy( '127.0.0.1' );
     my $line_number = 0;
     my %h = ( port => \$port );
 
@@ -279,6 +277,8 @@ EOM
 
     my $in = new String::Interpolate %h;
 
+    my $connected = 0;
+
     # Wait for the UI to become available
 
     my $now = time;
@@ -286,6 +286,7 @@ EOM
         my $request = HTTP::Request->new('GET', "http://127.0.0.1:$port/" );
         my $response = $ua->request($request);
         if ( $response->code == 200 ) {
+            $connected = 1;
             last;
         }
     }
@@ -293,6 +294,9 @@ EOM
     our $url;
     our $content;
     open SCRIPT, "<TestHTML.script";
+
+    test_assert_equal( $connected, 1, "Connect to UI" );
+    goto skip if ( $connected == 0 );
 
     # The commands in this loop are documented in TestHTML.script
 
