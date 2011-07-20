@@ -1353,8 +1353,6 @@ sub magnet_match_helper__
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $match = lc($match);
-
     my @magnets;
 
     my $bucketid = $self->get_bucket_id( $session, $bucket );
@@ -1378,19 +1376,55 @@ sub magnet_match_helper__
 
     foreach my $m (@magnets) {
         my ( $magnet, $id ) = @{$m};
-        $magnet = lc($magnet);
 
-        for my $i (0..(length($match)-length($magnet))) {
-            if ( substr( $match, $i, length($magnet)) eq $magnet ) {
-                $self->{magnet_used__}   = 1;
-                $self->{magnet_detail__} = $id;
+        if ( $self->single_magnet_match( $magnet, $match, $type ) ) {
+            $self->{magnet_used__}   = 1;
+            $self->{magnet_detail__} = $id;
 
-                return 1;
-            }
+            return 1;
         }
     }
 
     return 0;
+}
+
+#----------------------------------------------------------------------------
+#
+# single_magnet_match
+#
+# Helper the determines if a specific string matches a specific magnet
+#
+# $magnet          The magnet string
+# $match           The string to match
+# $type            The magnet type to check
+#
+#----------------------------------------------------------------------------
+sub single_magnet_match {
+    my ( $self, $magnet, $match, $type ) = @_;
+    my $matched = 0;
+
+    if ( $type =~ /^(from|to)$/ ) {
+        # From / To
+        if ( $magnet =~ /[\w]+\@[\w]+/ ) {
+            # e-mail address -> exact match
+            $matched = 1 if ( $match =~ m/(^|[^\w\-])\Q$magnet\E($|[^\w\.])/i );
+        } elsif ( $magnet =~ /\./ ) {
+            # domain name -> domain match
+            if ( $magnet =~ /^[\@\.]/ ) {
+                $matched = 1 if ( $match =~ /\Q$magnet\E($|[^\w\.])/i );
+            } else {
+                $matched = 1 if ( $match =~ m/[\@\.]\Q$magnet\E($|[^\w\.])/i );
+            }
+        } else {
+            # name -> word match
+            $matched = 1 if ( $match =~ m/(^|[^\w])\Q$magnet\E($|[^\w])/i );
+        }
+    } else {
+        # Subject -> word match
+        $matched = 1 if ( $match =~ m/(^|[^\w])\Q$magnet\E($|[^\w])/i );
+    }
+
+    return $matched;
 }
 
 #----------------------------------------------------------------------------

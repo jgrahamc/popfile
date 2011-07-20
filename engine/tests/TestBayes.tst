@@ -734,6 +734,62 @@ foreach my $word (keys %words) {
 #test_assert( !defined( $line ) );
 #close FILE;
 
+# single_magnet_match
+
+# e-mail address -> matches exact address
+test_assert(  $b->single_magnet_match( 'test@example.com', 'test@example.com',      'from' ) );
+test_assert(  $b->single_magnet_match( 'test@example.com', '<test@example.com>',    'from' ) );
+test_assert( !$b->single_magnet_match( 'test@example.com', 'testtest@example.com',  'from' ) );
+test_assert( !$b->single_magnet_match( 'test@example.com', 'test@example.com.jp',   'from' ) );
+test_assert( !$b->single_magnet_match( 'test@example.com', 'test-test@example.com', 'from' ) );
+test_assert( !$b->single_magnet_match( 'test@example.com', 'test_test@example.com', 'from' ) );
+
+test_assert(  $b->single_magnet_match( 'test@example.com', 'test@example.com',     'to' ) );
+test_assert(  $b->single_magnet_match( 'test@example.com', '<test@example.com>',   'to' ) );
+test_assert( !$b->single_magnet_match( 'test@example.com', 'testtest@example.com', 'to' ) );
+test_assert( !$b->single_magnet_match( 'test@example.com', 'test@example.com.jp',  'to' ) );
+
+# domain names begin with at(@) -> matches exact domain
+test_assert(  $b->single_magnet_match( '@example.com', '<test@example.com>',     'from' ) );
+test_assert(  $b->single_magnet_match( '@example.com', '<test2@example.com>',    'from' ) );
+test_assert( !$b->single_magnet_match( '@example.com', '<test@sub.example.com>', 'from' ) );
+test_assert( !$b->single_magnet_match( '@example.com', '<test@example.com.jp>',  'from' ) );
+
+# domain names begin with dot(.) -> matches sub-domains
+test_assert( !$b->single_magnet_match( '.example.com', '<test@example.com>',     'from' ) );
+test_assert( !$b->single_magnet_match( '.example.com', '<test2@example.com>',    'from' ) );
+test_assert(  $b->single_magnet_match( '.example.com', '<test@sub.example.com>', 'from' ) );
+test_assert( !$b->single_magnet_match( '.example.com', '<test@example.com.jp>',  'from' ) );
+
+# domain names not begin with at or dot -> matches domain and sub-domains
+test_assert(  $b->single_magnet_match(  'example.com', '<test@example.com>',     'from' ) );
+test_assert(  $b->single_magnet_match(  'example.com', '<test2@example.com>',    'from' ) );
+test_assert(  $b->single_magnet_match(  'example.com', '<test@sub.example.com>', 'from' ) );
+test_assert( !$b->single_magnet_match(  'example.com', '<test@example.com.jp>',  'from' ) );
+
+# name -> word match (matches names and accounts and (sub-)domains)
+test_assert(  $b->single_magnet_match( 'foo',     'foo <test@example.com>',       'from' ) );
+test_assert(  $b->single_magnet_match( 'foo',     '"foo" <test@example.com>',     'from' ) );
+test_assert( !$b->single_magnet_match( 'foo',     'foobar <test@example.com>',    'from' ) );
+test_assert(  $b->single_magnet_match( 'foo',     '"foo bar" <test@example.com>', 'from' ) );
+test_assert(  $b->single_magnet_match( 'foo',     '"foo-bar" <test@example.com>', 'from' ) );
+test_assert( !$b->single_magnet_match( 'foo',     '"foo_bar" <test@example.com>', 'from' ) );
+test_assert(  $b->single_magnet_match( 'foo',     'foo@example.com',              'from' ) );
+test_assert(  $b->single_magnet_match( 'foo',     'bar@foo.example.com',          'from' ) );
+test_assert( !$b->single_magnet_match( 'foo',     'bar@foobar.example.com',       'from' ) );
+test_assert(  $b->single_magnet_match( 'foo bar', 'foo bar <test@example.com>',   'from' ) );
+test_assert(  $b->single_magnet_match( 'foo bar', '"foo bar" <test@example.com>', 'from' ) );
+test_assert( !$b->single_magnet_match( 'foo bar', 'foo@bar.example.com',          'from' ) );
+
+# subject -> word match
+test_assert(  $b->single_magnet_match( 'foo', 'foo',     'subject' ) );
+test_assert(  $b->single_magnet_match( 'foo', 'foo.',    'subject' ) );
+test_assert(  $b->single_magnet_match( 'foo', '"foo"',   'subject' ) );
+test_assert( !$b->single_magnet_match( 'foo', 'foobar',  'subject' ) );
+test_assert(  $b->single_magnet_match( 'foo', 'foo bar', 'subject' ) );
+test_assert(  $b->single_magnet_match( 'foo', 'foo-bar', 'subject' ) );
+test_assert( !$b->single_magnet_match( 'foo', 'foo_bar', 'subject' ) );
+
 # get_magnet_header_and_value
 
 my ( $header, $value ) = $b->get_magnet_header_and_value( $session, 1 );
@@ -793,20 +849,23 @@ test_assert_equal( $magnets[0], 'bar'      );
 
 # magnet_match__
 
-test_assert(  $b->magnet_match__( $session, 'foo',            'personal', 'from' ) );
-test_assert(  $b->magnet_match__( $session, 'barfoo',         'personal', 'from' ) );
-test_assert(  $b->magnet_match__( $session, 'foobar',         'personal', 'from' ) );
-test_assert(  $b->magnet_match__( $session, 'oldstylemagnet', 'personal', 'from' ) );
-test_assert( !$b->magnet_match__( $session, 'fo',             'personal', 'from' ) );
-test_assert( !$b->magnet_match__( $session, 'fobar',          'personal', 'from' ) );
-test_assert( !$b->magnet_match__( $session, 'oldstylmagnet',  'personal', 'from' ) );
+test_assert(  $b->magnet_match__( $session, 'foo',             'personal', 'from' ) );
+test_assert(  $b->magnet_match__( $session, 'bar foo',         'personal', 'from' ) );
+test_assert(  $b->magnet_match__( $session, 'foo bar',         'personal', 'from' ) );
+test_assert(  $b->magnet_match__( $session, 'oldstyle magnet', 'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'barfoo',          'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'foobar',          'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'oldstylemagnet',  'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'fo',              'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'fobar',           'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'oldstylmagnet',   'personal', 'from' ) );
 
-test_assert(  $b->magnet_match__( $session, 'baz@baz.com',       'personal', 'to'   ) );
-test_assert(  $b->magnet_match__( $session, 'dobaz@baz.com',     'personal', 'to'   ) );
-test_assert(  $b->magnet_match__( $session, 'dobaz@baz.com.edu', 'personal', 'to'   ) );
-test_assert( !$b->magnet_match__( $session, 'bam@baz.com',       'personal', 'to'   ) );
-test_assert( !$b->magnet_match__( $session, 'doba@baz.com',      'personal', 'to'   ) );
-test_assert( !$b->magnet_match__( $session, 'dobz@baz.com.edu',  'personal', 'to'   ) );
+test_assert(  $b->magnet_match__( $session, 'baz@baz.com',       'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'dobaz@baz.com',     'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'dobaz@baz.com.edu', 'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'bam@baz.com',       'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'doba@baz.com',      'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'dobz@baz.com.edu',  'personal', 'to' ) );
 
 $b->create_magnet( $session, 'zeotrope', 'from', '@yahoo.com' );
 test_assert(  $b->magnet_match__( $session, 'baz@yahoo.com', 'zeotrope', 'from' ) );
@@ -820,10 +879,11 @@ test_assert(  $b->magnet_match__( $session, '@__r',          'zeotrope', 'from' 
 $b->delete_magnet( $session, 'zeotrope', 'from', '__r' );
 
 $b->create_magnet( $session, 'zeotrope', 'from', 'foo$bar' );
-test_assert( !$b->magnet_match__( $session, 'foo@bar',   'zeotrope', 'from' ) );
-test_assert( !$b->magnet_match__( $session, 'foo$baz',   'zeotrope', 'from' ) );
-test_assert(  $b->magnet_match__( $session, 'foo$bar',   'zeotrope', 'from' ) );
-test_assert(  $b->magnet_match__( $session, 'foo$barum', 'zeotrope', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'foo@bar',    'zeotrope', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'foo$baz',    'zeotrope', 'from' ) );
+test_assert(  $b->magnet_match__( $session, 'foo$bar',    'zeotrope', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'foo$barum',  'zeotrope', 'from' ) );
+test_assert(  $b->magnet_match__( $session, 'foo$bar um', 'zeotrope', 'from' ) );
 $b->delete_magnet( $session, 'zeotrope', 'from', 'foo$bar' );
 
 # get_magnet_types

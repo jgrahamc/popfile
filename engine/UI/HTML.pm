@@ -2332,7 +2332,8 @@ sub magnet_page
                             @magnets{ $self->classifier_()->get_magnets( $session, $bucket, $mtype )} = ();
 
                             for my $from (keys %magnets)  {
-                                if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
+                                if ( ( $self->classifier_()->single_magnet_match( $mtext,  $from, $mtype ) ) ||   # PROFILE BLOCK START
+                                     ( $self->classifier_()->single_magnet_match(  $from, $mtext, $mtype ) ) ) {  # PROFILE BLOCK STOP
                                     $found = 1;
                                     $self->error_message__(       # PROFILE BLOCK START
                                             $templ,
