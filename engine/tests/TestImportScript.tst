@@ -46,6 +46,8 @@ test_assert_regexp( $line, 'import user data into the new database' );
 test_assert( ($? >> 8) != 0 );
 test_assert_regexp( shift @stdout, 'import user data into the new database' );
 
+test_assert( !-e 'popfile.cfg' );
+
 # Save STDERR
 
 open my $old_stderr, ">&STDERR";
@@ -63,6 +65,8 @@ close TEMP;
 test_assert_regexp( $line, 'Error : User \'none\' does not exist, import aborted' );
 test_assert_regexp( shift @stdout, 'Import from database \'./import/popfile.db\'' );
 
+test_assert( !-e 'popfile.cfg' );
+
 # Bad new user name
 
 open STDERR, ">temp.tmp";
@@ -76,6 +80,7 @@ $line = <TEMP>;
 close TEMP;
 test_assert_regexp( $line, 'Error : Bad new user name \'admin\', import aborted' );
 
+test_assert( !-e 'popfile.cfg' );
 
 # Check that import actually works
 
@@ -105,6 +110,8 @@ foreach my $bucket qw(spam other personal) {
 $line = shift @stdout;
 test_assert_regexp( $line, 'Imported the database successfully' );
 
+test_assert( !-e 'popfile.cfg' );
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -121,7 +128,8 @@ $POPFile->CORE_initialize();
 $POPFile->CORE_config( 1 );
 $POPFile->CORE_start();
 
-my $b = $POPFile->get_module( 'Classifier/Bayes' );
+my $b = $POPFile->get_module( 'Classifier::Bayes' );
+my $c = $POPFile->get_module( 'POPFile::Configuration' );
 my $session1 = $b->get_session_key( 'admin', '' );
 my $session2 = $b->get_session_key( 'importeduser', $password );
 
@@ -160,6 +168,9 @@ foreach my $bucket qw(spam other personal) {
 
 $b->release_session_key( $session1 );
 $b->release_session_key( $session2 );
+
+$c->load_configuration();
+
 $POPFile->CORE_stop();
 
 # Restore STDERR

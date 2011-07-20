@@ -61,9 +61,6 @@ if ( $#ARGV == -1 ) {
         my $current_piddir = $c->config_( 'piddir' );
         $c->config_( 'piddir', $c->config_( 'piddir' ) . 'pipe.pl.' );
 
-        # TODO: interface violation
-        $c->{save_needed__} = 0;
-
         $POPFile->CORE_start();
 
         my $b = $POPFile->get_module('Classifier::Bayes');
@@ -72,6 +69,11 @@ if ( $#ARGV == -1 ) {
         $b->classify_and_modify( $session, \*STDIN, \*STDOUT, 1, '', 0, 1, "\n" );
 
         $c->config_( 'piddir', $current_piddir );
+
+        # Reload configuration file ( to avoid updating configurations )
+
+        $c->load_configuration();
+
         $b->release_session_key( $session );
         $POPFile->CORE_stop();
     }

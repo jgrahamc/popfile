@@ -117,6 +117,10 @@ if ( $#ARGV > 0 ) {
     undef $h;
 
     if ( !defined( $userid) ) {
+
+        $c2->load_configuration();
+        $c->load_configuration();
+
         $POPFile2->CORE_stop();
         $POPFile->CORE_stop();
         print STDERR "Error : User '$username' does not exist, import aborted\n";
@@ -237,6 +241,9 @@ if ( $#ARGV > 0 ) {
         print STDERR "Error : Failed to create a user '$newusername', import aborted\n";
         $code = 1;
     }
+
+    $c2->load_configuration();
+    $c->load_configuration();
 
     $POPFile2->CORE_stop();
     $POPFile->CORE_stop();

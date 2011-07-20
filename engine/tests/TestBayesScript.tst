@@ -94,4 +94,8 @@ foreach my $word (keys %output) {
     test_assert_equal( $words{$word}, $output{$word}, $word );
 }
 
+# Check if the configuration file is not created
+
+test_assert( !-e 'popfile.cfg', "availability of popfile.cfg" );
+
 1;

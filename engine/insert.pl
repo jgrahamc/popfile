@@ -58,7 +58,8 @@ if ( $#ARGV > 0 ) {
 
         if ( $multiuser_mode && $#argv_backup < 2 ) {
             &usage;
-            exit 1;
+            $code = 1;
+            goto skip;
         }
 
         my $user   = shift @argv_backup if ( $multiuser_mode );
@@ -73,9 +74,6 @@ if ( $#ARGV > 0 ) {
         }
 
         $POPFile->CORE_start();
-
-        # TODO: interface violation
-        $c->{save_needed__} = 0;
 
         my $b = $POPFile->get_module( 'Classifier::Bayes' );
         my $session = $b->get_administrator_session_key();
@@ -124,6 +122,12 @@ if ( $#ARGV > 0 ) {
         $c->config_( 'piddir', $current_piddir );
         $b->release_session_key( $user_session ) if ( $multiuser_mode && defined($user_session) );
         $b->release_session_key( $session );
+
+skip:
+        # Reload configuration file ( to avoid updating configurations )
+
+        $c->load_configuration();
+
         $POPFile->CORE_stop();
     }
 } else {

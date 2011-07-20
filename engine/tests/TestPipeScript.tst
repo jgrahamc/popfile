@@ -65,4 +65,8 @@ close TEMP;
 
 unlink 'temp.tmp';
 
+# Check if the configuration file is not created
+
+test_assert( !-e 'popfile.cfg', "availability of popfile.cfg" );
+
 1;

@@ -94,6 +94,10 @@ $line = shift @stdout;
 
 test_assert_regexp( $line, 'Added 1 files to `personal\'' );
 
+# Check if the configuration file is not created
+
+test_assert( !-e 'popfile.cfg', "availability of popfile.cfg" );
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -110,7 +114,7 @@ $POPFile->CORE_initialize();
 $POPFile->CORE_config( 1 );
 $POPFile->CORE_start();
 
-my $b = $POPFile->get_module( 'Classifier/Bayes' );
+my $b = $POPFile->get_module( 'Classifier::Bayes' );
 my $session = $b->get_session_key( 'admin', '' );
 
 foreach my $word (keys %words) {
