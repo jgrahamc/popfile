@@ -38,6 +38,7 @@ my $cr = "\015";
 my $lf = "\012";
 
 my $eol = "$cr$lf";
+my $timeout = 2;
 
 
 use POPFile::Loader;
@@ -98,7 +99,7 @@ my $port = 9000 + int( rand( 1000 ) );
 
 $p->config_( 'port', $port );
 $p->config_( 'force_fork', 0 );
-$p->global_config_( 'timeout', 1 );
+$p->global_config_( 'timeout', $timeout );
 
 $p->config_( 'enabled', 0 );
 test_assert_equal( $p->start(), 2 );
@@ -1355,6 +1356,62 @@ if ( $pid == 0 ) {
 
         close $client;
 
+        # Check server hang
+
+        $client = connect_proxy();
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1:8110:hang$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome hang$eol" );
+
+        print $client "PASS secret$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Now logged in$eol" );
+
+        wait_proxy();
+
+        print $client "RETR 1$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[0] ) . "$eol" );
+        $cam = $messages[0];
+        $cam =~ s/msg$/cam/;
+
+        test_assert( open FILE, "<$cam" );
+        binmode FILE;
+        while ( <FILE> ) {
+            my $line = $_;
+            $line   =~ s/\r|\n//g;
+            next if ( $line !~ /^(From|Subject|X-Text-Classification|X-POPFile-Link)/ );
+            $result = <$client>;
+            $line =~ s/Subject: \[.+\]/Subject: /;
+            $line =~ s/X-Text-Classification: .+/X-Text-Classification: /;
+            $result =~ s/Subject: \[.+\]/Subject: /;
+            $result =~ s/X-Text-Classification: .+/X-Text-Classification: /;
+            $result =~ s/127\.0\.0\.1:$http_port/127.0.0.1:8080/;
+            $result =~ s/view=9/view=popfile0=0.msg/;
+            $result =~ s/\r|\n//g;
+            test_assert_equal( $result, $line );
+        }
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR no response from mail server$eol" );
+
+        wait_proxy();
+
+        close $client;
+
         # Test QUIT straight after connect
 
         $client = connect_proxy();
@@ -2108,10 +2165,10 @@ sub server
                     }
 
                     if ( $goslow ) {
-                        select( undef, undef, undef, 3 );
+                        select( undef, undef, undef, $timeout * 0.8 );
                     }
                     if ( $hang ) {
-                        select( undef, undef, undef, 30 );
+                        select( undef, undef, undef, $timeout * 5 );
                     }
                 }
                 close FILE;
@@ -2127,27 +2184,27 @@ sub server
             my $index = $1 - 1;
             my $countdown = $2;
             if ( defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
-                 print $client "+OK " . ( -s $messages[$index] ) . "$eol";
+                print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
-                 open FILE, "<$messages[$index]";
-                 binmode FILE;
-                 while ( <FILE> ) {
-                     my $line = $_;
-                     s/\r|\n//g;
-                     print $client "$_$eol";
+                open FILE, "<$messages[$index]";
+                binmode FILE;
+                while ( <FILE> ) {
+                    my $line = $_;
+                    s/\r|\n//g;
+                    print $client "$_$eol";
 
-                     if ( $line =~ /^[\r\n]+$/ ) {
-                         last;
-                     }
-                 }
-                 while ( defined ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
-                     $line =~ s/\r|\n//g;
-                     print $client "$line$eol";
-                     $countdown -= 1;
-                 }
-                 close FILE;
+                    if ( $line =~ /^[\r\n]+$/ ) {
+                        last;
+                    }
+                }
+                while ( defined ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
+                    $line =~ s/\r|\n//g;
+                    print $client "$line$eol";
+                    $countdown -= 1;
+                }
+                close FILE;
 
-                 print $client ".$eol";
+                print $client ".$eol";
 
             } else {
                 print $client "-ERR No such message $1$eol";

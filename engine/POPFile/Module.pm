@@ -376,8 +376,7 @@ sub log_
     my ( $self, $level, $message ) = @_;
 
     my ( $package, $file, $line ) = caller;
-    $self->logger_()->debug( $level, $self->{name__} . ": $line: " . # PROFILE BLOCK START
-        $message );                                                  # PROFILE BLOCK STOP
+    $self->logger_()->debug( $level, "$self->{name__}: $line: $message" );
 }
 
 # ----------------------------------------------------------------------------
@@ -655,25 +654,7 @@ sub flush_slurp_data__
 
         if ( $slurp_data__{"$handle"}{data} eq '' ) {
 
-            # This unpleasant boolean is to handle the case where we
-            # are slurping a non-socket stream under Win32
-
-            my $can_read;
-
-            $can_read = ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) );
-
-            if ( !$can_read ) {
-                if ( $handle =~ /ssl/i ) {
-                    # If using SSL, check internal buffer of OpenSSL first.
-                    $can_read = ( $handle->pending() > 0 );
-                }
-                if ( !$can_read ) {
-                    $can_read = defined( $slurp_data__{"$handle"}{select}->can_read( $self->global_config_( 'timeout' ) ) );
-                }
-            }
-
-            if ( $can_read ) {
-
+            if ( $self->can_read__( $handle )) {
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );
                 if ( $retcode == 1 ) {
@@ -728,7 +709,8 @@ sub slurp_buffer_
 
     while ( $self->slurp_data_size__( $handle ) < $length ) {
         my $c;
-        if ( sysread( $handle, $c, $length ) > 0 ) {
+        if ( $self->can_read__( $handle, 0.01 ) &&       # PROFILE BLOCK START
+             ( sysread( $handle, $c, $length ) > 0 ) ) { # PROFILE BLOCK STOP
             $slurp_data__{"$handle"}{data} .= $c;
         } else {
             last;
@@ -742,8 +724,8 @@ sub slurp_buffer_
         $slurp_data__{"$handle"}{data} = '';
     } else {
         $result = substr( $slurp_data__{"$handle"}{data}, 0, $length );
-        $slurp_data__{"$handle"}{data} =
-            substr( $slurp_data__{"$handle"}{data}, $length );
+        $slurp_data__{"$handle"}{data} =                       # PROFILE BLOCK START
+            substr( $slurp_data__{"$handle"}{data}, $length ); # PROFILE BLOCK STOP
     }
 
     return ($result ne '')?$result:undef;
@@ -769,7 +751,9 @@ sub slurp_buffer_
 # ----------------------------------------------------------------------------
 sub slurp_
 {
-    my ( $self, $handle ) = @_;
+    my ( $self, $handle, $timeout ) = @_;
+
+    $timeout = $self->global_config_( 'timeout' ) if ( !defined( $timeout ) );
 
     if ( !defined( $slurp_data__{"$handle"}{data} ) ) {
         $slurp_data__{"$handle"}{select} = new IO::Select( $handle );
@@ -784,16 +768,25 @@ sub slurp_
 
     my $c;
 
-    while ( sysread( $handle, $c, 160 ) > 0 ) {
-        $slurp_data__{"$handle"}{data} .= $c;
+    if ( $self->can_read__( $handle, $timeout ) ) {
+        while ( sysread( $handle, $c, 160 ) > 0 ) {
+            $slurp_data__{"$handle"}{data} .= $c;
 
-        $self->log_( 2, "Read slurp data: $c" );
+            $self->log_( 2, "Read slurp data: $c" );
 
-        $result = $self->flush_slurp_data__( $handle );
+            $result = $self->flush_slurp_data__( $handle );
 
-        if ( $result ne '' ) {
-            return $result;
+            if ( $result ne '' ) {
+                return $result;
+            }
         }
+    } else {
+
+        # Server has not respond. Close the connection and return
+
+        $self->done_slurp_( $handle );
+        close $handle;
+        return undef;
     }
 
     # If we get here with something in line then the file ends without any
@@ -896,6 +889,46 @@ sub flush_extra_
     }
 
    return $full_buf;
+}
+
+# ----------------------------------------------------------------------------
+#
+# can_read__ - Check whether we can read from the specified handle
+#
+# Returns true if we can read from the handle
+#
+# $handle      A connection handle
+# $timeout     A timeout period (in seconds)
+#
+# ----------------------------------------------------------------------------
+sub can_read__
+{
+    my ( $self, $handle, $timeout ) = @_;
+    $timeout = $self->global_config_( 'timeout' ) if ( !defined($timeout) );
+
+    # This unpleasant boolean is to handle the case where we
+    # are slurping a non-socket stream under Win32
+
+    my $can_read = ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) );
+
+    if ( !$can_read ) {
+        if ( $handle =~ /ssl/i ) {
+
+            # If using SSL, check internal buffer of OpenSSL first.
+
+            $can_read = ( $handle->pending() > 0 );
+        }
+        if ( !$can_read ) {
+            if ( defined( $slurp_data__{"$handle"}{select} ) ) {
+                $can_read = defined( $slurp_data__{"$handle"}{select}->can_read( $timeout ) );
+            } else {
+                my $selector    = new IO::Select( $handle );
+                $can_read = defined( $selector->can_read( $timeout ) );
+            }
+        }
+    }
+
+    return $can_read;
 }
 
 # ----------------------------------------------------------------------------
