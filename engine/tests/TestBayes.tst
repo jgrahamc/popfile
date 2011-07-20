@@ -255,9 +255,9 @@ test_assert( !defined($b->remove_user( $session1, 'testuser'  )) );
 test_assert( !defined($b->get_user_list( $session1 )) );
 test_assert( !defined($b->get_user_id( $session1, 'testuser' )) );
 
-test_assert( !defined($b->get_accounts( $session1, $id1 )) );
-test_assert_equal( $b->add_account(    $session1, $id1, 'pop3', 'foo:bar2' ), 0 );
-test_assert_equal( $b->remove_account( $session1, $id1, 'pop3', 'foo:bar'  ), 0 );
+test_assert( !defined($b->get_accounts(   $session1, $id1 )) );
+test_assert( !defined($b->add_account(    $session1, $id1, 'pop3', 'foo:bar2' )) );
+test_assert( !defined($b->remove_account( $session1, $id1, 'pop3', 'foo:bar'  )) );
 
 test_assert( !defined($b->get_session_key_from_token( $session1, 'smtp', 'token' )) );
 

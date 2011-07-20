@@ -1905,11 +1905,11 @@ sub users_page
              ( $self->{form_}{newaccount} =~ /^.+:.+$/ ) ) {  # PROFILE BLOCK STOP
             my $id = $self->classifier_()->get_user_id( $session, $self->{form_}{editname} );
             my $result = $self->classifier_()->add_account( $session, $id, 'pop3', $self->{form_}{newaccount} );
-            if ( $result == -1 ) {
-                $self->error_message__( $templ, $self->language($session)->{Users_Duplicate_Account} );
+            if ( !defined( $result ) || $result == 0 ) {
+                $self->error_message__( $templ, $self->language($session)->{Users_Failed_Account} );
             } else {
-                if ( $result == 0 ) {
-                    $self->error_message__( $templ, $self->language($session)->{Users_Failed_Account} );
+                if ( $result == -1 ) {
+                    $self->error_message__( $templ, $self->language($session)->{Users_Duplicate_Account} );
                 }
             }
         } else {

@@ -3259,7 +3259,7 @@ sub remove_account
     # Check that this user is an administrator
 
     if ( !$self->is_admin_session( $session ) ) {
-        return 0;
+        return undef;
     }
 
     my $result = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
