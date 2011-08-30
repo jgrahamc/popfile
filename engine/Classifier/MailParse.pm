@@ -292,8 +292,7 @@ sub new
     $self->{lang__}    = '';
     $self->{first20__} = '';
 
-    # For support Quoted Printable in Japanese text, save encoded text
-    # in multiple lines
+    # For support Quoted Printable, save encoded text in multiple lines
 
     $self->{prev__} = '';
 
