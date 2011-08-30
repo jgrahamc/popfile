@@ -108,6 +108,7 @@ if ( $pid == 0 ) {
     my @messages = sort glob 'TestMails/TestMailParse*.msg';
     foreach my $msg (@messages) {
         next if ( $msg =~ /TestMailParse026/ );
+        next if ( $msg =~ /TestMailParse099/ );
         my $cls = $msg;
         $cls =~ s/\.msg$/\.cls/;
         if ( open my $CLS, '<', $cls ) {
@@ -295,7 +296,7 @@ EOM
     our $content;
     open SCRIPT, "<TestHTML.script";
 
-    test_assert_equal( $connected, 1, "Connect to UI" );
+    test_assert_equal( $connected, 1, "Cannot connect to UI" );
     goto skip if ( $connected == 0 );
 
     # The commands in this loop are documented in TestHTML.script

@@ -26,7 +26,10 @@ to:.jp 1
 to:ne.jp 1
 to:xxx.ne.jp 1
 to:xxxx@xxx.ne.jp 1
-xxx 2
+.xxx 1
+x.xxx 1
+xx.xxx.x.xxx 1
+xxx.x.xxx 1
 xxx.ne.jp 2
 xxxx@xxx.ne.jp 2
 xxxxxx@ezweb.ne.jp 1

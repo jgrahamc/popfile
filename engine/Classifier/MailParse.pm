@@ -717,9 +717,9 @@ sub add_line
             # http://en.wikipedia.org/wiki/List_of_Internet_top-level_domains
 
             while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)          # PROFILE BLOCK START
-                               (aero|asia|biz|cat|com|coop|edu|gov|info|int|
-                                jobs|mil|mobi|museum|name|net|org|pro|tel|
-                                travel)
+                               (aero|arpa|asia|biz|cat|com|coop|edu|gov|info|
+                                int|jobs|mil|mobi|museum|name|net|org|pro|tel|
+                                travel|xxx)
                                ([^[:alpha:]0-9\-_\.]|$)/$4/ix ) { # PROFILE BLOCK STOP
                 $self->add_url( "$1$3", $encoded, '', '', $prefix );
             }
@@ -730,7 +730,7 @@ sub add_line
             while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)            # PROFILE BLOCK START
                                (a[cdefgilmnoqrstuwxz]|
                                 b[abdefghijmnorstvwyz]|
-                                c[acdfghiklmnoruvxyz]|
+                                c[acdfghiklmnorsuvxyz]|
                                 d[ejkmoz]|
                                 e[cegrstu]|
                                 f[ijkmor]|
@@ -746,12 +746,12 @@ sub add_line
                                 p[aefghklmnrstwy]|
                                 qa|
                                 r[eosuw]|
-                                s[abcdeghijklmnorsvyz]|
+                                s[abcdeghijklmnortuvyz]|
                                 t[cdfghjklmnoprtvwz]|
                                 u[agksyz]|
                                 v[aceginu]|
                                 w[fs]|
-                                y[etu]|
+                                y[et]|
                                 z[amw])
                                ([^[:alpha:]0-9\-_\.]|$)/$4/ix )  {  # PROFILE BLOCK STOP
                 $self->add_url( "$1$3", $encoded, '', '', $prefix );
@@ -1398,8 +1398,9 @@ sub add_url
     }
 
     if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)          # PROFILE BLOCK START
-                    (com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|
-                     name|pro|[[:alpha:]]{2})
+                    (aero|arpa|asia|biz|cat|com|coop|edu|gov|info|
+                     int|jobs|mil|mobi|museum|name|net|org|pro|tel|
+                     travel|xxx|[a-z]{2})
                     ([^[:alpha:]0-9\-_\.]|$)/$4/ix ) { # PROFILE BLOCK STOP
         $host     = "$1$3";
         $hostform = "name";

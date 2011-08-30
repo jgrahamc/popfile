@@ -1509,6 +1509,7 @@ if ( $have_text_kakasi ) {
             my $mail = <MAIL>;
             next if ( $mail =~ /X-POPFile-TimeoutPrevention/ );
             $mail =~ s/[\r\n]//g;
+            $mail =~ s/popfile0=0\.msg/$slot/;
             my $temp = <TEMP>;
             $temp =~ s/[\r\n]//g;
             test_assert_equal( $temp, $mail );
