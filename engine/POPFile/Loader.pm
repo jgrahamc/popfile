@@ -112,6 +112,7 @@ sub new
     $self->{reaper__}       = '';
     $self->{childexit__}    = '';
     $self->{warning__}      = '';
+    $self->{die__}          = '';
 
     # POPFile's version number as individual numbers and as
     # string
@@ -150,12 +151,13 @@ sub CORE_loader_init
     # to $self, without exposing $self to the unwashed. No reference to
     # POPFile::Loader is needed by the caller
 
-    $self->{aborting__} = sub { $self->CORE_aborting(@_) };
+    $self->{aborting__}  = sub { $self->CORE_aborting(@_) };
     $self->{pipeready__} = sub { $self->pipeready(@_) };
-    $self->{forker__} = sub { $self->CORE_forker(@_) };
-    $self->{reaper__} = sub { $self->CORE_reaper(@_) };
+    $self->{forker__}    = sub { $self->CORE_forker(@_) };
+    $self->{reaper__}    = sub { $self->CORE_reaper(@_) };
     $self->{childexit__} = sub { $self->CORE_childexit(@_) };
-    $self->{warning__} = sub { $self->CORE_warning(@_) };
+    $self->{warning__}   = sub { $self->CORE_warning(@_) };
+    $self->{die__}       = sub { $self->CORE_die(@_) };
 
     # See if there's a file named popfile_version that contains the
     # POPFile version number
@@ -388,10 +390,39 @@ sub CORE_warning
     my ( $self, @message ) = @_;
 
     if ( $self->module_config( 'GLOBAL', 'debug' ) > 0 ) {
-        $self->{components__}{core}{logger}->debug( 0, 'Perl warning: ' .
-                                                       $message[0] );
-        warn $message[0];
+        $self->{components__}{core}{logger}->debug( 0, "Perl warning: @message" );
+        warn @message;
     }
+}
+
+#----------------------------------------------------------------------------
+#
+# CORE_die
+#
+# Called when a fatal error occurs.
+# Output the error message to the log file and exit.
+#
+#----------------------------------------------------------------------------
+sub CORE_die
+{
+    my ( $self, @message ) = @_;
+
+    # Do nothing when dies in eval
+
+    return if $^S;
+
+    # Print error message
+
+    print STDERR @message;
+
+    if ( $self->module_config( 'GLOBAL', 'debug' ) > 0 ) {
+        $self->{components__}{core}{logger}->debug( 0, "Perl fatal error : @message" );
+    }
+
+    # Try to stop safely
+
+    $self->CORE_stop( );
+    exit 1;
 }
 
 #----------------------------------------------------------------------------
@@ -549,6 +580,10 @@ sub CORE_signals
     # Better handling of the Perl warnings
 
     $SIG{__WARN__} = $self->{warning__};
+
+    # Try to capture the Perl errors
+
+    $SIG{__DIE__} = $self->{die__};
 
     return $SIG;
 }
