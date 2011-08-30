@@ -259,7 +259,7 @@ sub service {
 				$self->user_config_( $userId, 'training_mode', 0 );
 
 				# say__() and get_response__() will die with this message:
-				if ( $@ =~ /^POPFILE-IMAP-EXCEPTION: (.+\)\))/ ) {
+				if ( $@ =~ /^POPFILE-IMAP-EXCEPTION: (.+\)\))/s ) {
 					$self->log_( 0, $1 );
 				}
 				# If we didn't die but somebody else did, we have empathy.
@@ -454,7 +454,11 @@ sub disconnect_folders__ {
     foreach my $folder ( keys %{$self->{folders__}} ) {
         my $imap = $self->{folders__}{$folder}{imap};
         if ( defined $imap  && $imap->connected() ) {
-            $imap->logout( $folder );
+            # Workaround for a bug that causes POPFile to crash while its
+            # termination
+            eval {
+                $imap->logout( $folder );
+            };
         }
     }
 
