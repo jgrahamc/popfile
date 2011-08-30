@@ -16,11 +16,11 @@ Date: Mon, 20 Jan 03 16:59:20
 From: <elia@tpkm.ru>
 Subject: VI ID: 24052  Status: Open  Sev: 2
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="isboundary"
+Content-Type: multipart/mixed; boundary="is@boundary"
 X-Text-Classification: work
 X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=popfile1043193600_48.msg
 
---isboundary
+--is@boundary
 Content-Type: text/html; charset=us-ascii
 
 <HTML><HEAD>
@@ -140,4 +140,4 @@ href="mailto:BugTracker@rltvty.com">BugTracker@rltvty.com</A>
 <HR>
 </BODY></HTML>
 
---isboundary--
+--is@boundary--
