@@ -105,6 +105,7 @@ sub start
             $protocol = 'HTTPS';
         }
         my $name = $self->name();
+        $self->log_( 0, "Couldn't start the $name $protocol interface because POPFile could not bind to the listen port $port" );
         print STDERR <<EOM;                                                   # PROFILE BLOCK START
 
 \nCouldn\'t start the $name $protocol interface because POPFile could not bind to the

@@ -132,10 +132,11 @@ sub start
     if ( !defined( $self->{server__} ) ) {
         my $port = $self->config_( 'port' );
         my $name = $self->name();
+        $self->log_( 0, "Couldn't start the $name interface because POPFile could not bind to the listen port $port" );
 
         print <<EOM;
 
-\nCouldn't start the $name XMLRPC interface because POPFile could not bind to
+\nCouldn\'t start the $name interface because POPFile could not bind to
 the XMLRPC port $port. This could be because there is another service
 using that port or because you do not have the right privileges on
 your system (On Unix systems this can happen if you are not root
