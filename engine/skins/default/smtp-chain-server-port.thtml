@@ -1,8 +1,0 @@
-<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-    <label class="securityLabel" for="securitySecureSMTPPort">
-        <TMPL_VAR NAME="Localize_Security_SMTPPort">:
-    </label>
-    <br />
-    <input type="text" name="smtp_chain_server_port" id="securitySecureSMTPPort" value="<TMPL_VAR NAME="smtp_chain_port" ESCAPE=HTML>" />
-    <input type="submit" class="submit" name="update_smtp_server_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-</form>
