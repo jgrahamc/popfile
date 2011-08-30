@@ -336,6 +336,7 @@ sub configure_item
     if ( $name eq 'smtp_fork_and_port' ) {
         $templ->param( 'smtp_port'          => $self->config_( 'port' ) );
         $templ->param( 'smtp_force_fork_on' => ( $self->config_( 'force_fork' ) == 1 ) );
+        return;
     }
 
     if ( $name eq 'smtp_local' ) {
@@ -346,6 +347,7 @@ sub configure_item
     if ( $name eq 'smtp_server' ) {
         $templ->param( 'smtp_chain_server' => $self->config_( 'chain_server' ) );
         $templ->param( 'smtp_chain_port' => $self->config_( 'chain_port' ) );
+        return;
     }
 
 
@@ -368,7 +370,7 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
-    my ($status, $error, $changed);
+    my ( $status, $error, $changed );
 
     if ( $name eq 'smtp_fork_and_port' ) {
 
