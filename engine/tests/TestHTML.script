@@ -1136,11 +1136,11 @@ MATCH <a name="message_header" />
 
 GET /history
 SETSUBMIT search isnotpresent
-MATCH No messages.
+MATCH No matching messages.
 NOTMATCH Jump to page
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
-NOTMATCH No messages.
+NOTMATCH No matching messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to page
 
@@ -1150,7 +1150,7 @@ NOTMATCH Enlarge your package Doctor ApprovedNHOB...
 NOTMATCH Jump to page
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
-NOTMATCH No messages.
+NOTMATCH No matching messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to page
 
@@ -1159,7 +1159,7 @@ NOTMATCH test\@test.com
 MATCH Enlarge your package Doctor ApprovedNHOB...
 NOTMATCH Jump to page
 CLICK reset_filter_search
-NOTMATCH No messages.
+NOTMATCH No matching messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to page
 
@@ -1198,7 +1198,7 @@ GET /history?start_message=20&amp;filter=spam
 NOTMATCH Testing Refresh
 SETINPUT filter other
 CLICK setfilter
-MATCH No messages.
+MATCH No matching messages.
 SETINPUT filter __filter__magnet
 CLICK setfilter
 MATCH Magnetic Attraction for Ferrous Females

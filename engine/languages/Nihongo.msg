@@ -300,7 +300,8 @@ History_RemoveAll                       全て削除
 History_RemovePage                      このページを削除
 History_RemoveChecked                   チェックされたものを削除
 History_SearchMessage                   差出人/件名 を検索
-History_NoMessages                      該当メッセージはありません
+History_NoMessages                      メッセージはありません
+History_NoMatchingMessages              条件に一致するメッセージはありません
 History_ShowMagnet                      マグネット
 History_Negate_Search                   条件にあわないものを検索
 History_Magnet                          &nbsp;(マグネット分類されたメッセージのみを表示)

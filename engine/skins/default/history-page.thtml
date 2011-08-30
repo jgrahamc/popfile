@@ -285,7 +285,15 @@
     <tr>
         <td>
             <span class="bucketsLabel">
-                 <TMPL_VAR NAME="Localize_History_NoMessages">.
+                <TMPL_IF NAME="History_Field_Search">
+                  <TMPL_VAR NAME="Localize_History_NoMatchingMessages">.
+                <TMPL_ELSE>
+                  <TMPL_IF NAME="History_Field_Filter">
+                    <TMPL_VAR NAME="Localize_History_NoMatchingMessages">.
+                  <TMPL_ELSE>
+                    <TMPL_VAR NAME="Localize_History_NoMessages">.
+                  </TMPL_IF>
+                </TMPL_IF>
             </span>
         </td>
         <td></td>
