@@ -260,7 +260,7 @@ Magnet_Error3                           S'ha creat el nou imant '%s' a la cistel
 Magnet_CurrentMagnets                   Imants actuals
 Magnet_Message1                         Els imants següents impliquen que un missatge sigui sempre encasellat a la cistella indicada
 Magnet_CreateNew                        Crear imant nou
-Magnet_Explanation                      Disposeu de tres tipus d'imants:</b> <ul><li><b>Adreça Des de o nom:</b> Per exemple: john@company.com per evitar una adreça específica, <br />company.com per evitar tothom de company.com, <br />John Doe per evitar una persona concreta, John per evitar-los tots</li><li><b>Adreça A/Còpia o nom:</b> Com un imant Des de: però per a l'adressa A:/Còpia: a un missatge</li> <li><b>Mots Assumpte:</b> Per exemple: hello per evitar tots els missatges amb hello a l'assumpte</li></ul>
+Magnet_Explanation                      <b>Disposeu de tres tipus d'imants:</b> <ul><li><b>Adreça Des de o nom:</b> Per exemple: john@company.com per evitar una adreça específica, <br />company.com per evitar tothom de company.com, <br />John Doe per evitar una persona concreta, John per evitar-los tots</li><li><b>Adreça A/Còpia o nom:</b> Com un imant Des de: però per a l'adressa A:/Còpia: a un missatge</li> <li><b>Mots Assumpte:</b> Per exemple: hello per evitar tots els missatges amb hello a l'assumpte</li></ul>
 Magnet_MagnetType                       Tipus d'imant
 Magnet_Value                            Valors
 Magnet_Always                           Va sempre a la cistella

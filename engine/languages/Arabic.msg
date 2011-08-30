@@ -1,4 +1,4 @@
-﻿# Copyright (c) 2001-2011 John Graham-Cumming
+# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -258,7 +258,7 @@ Magnet_Error3                           إصنع مغناطيس جديد '%s' ف
 Magnet_CurrentMagnets                   مغناطيسات حالية
 Magnet_Message1                         المغناطيسات التالية تجعل البريد أن يتصنف في الدلو المذكور.
 Magnet_CreateNew                        صنع مغناطيس جديد
-Magnet_Explanation                      توجد هذه الأنواع من المغناطسيات:</b> <ul><li><b>إسم أو عنوان المرسل</b> مثال: john@company.com لمطابقة وفق عنوان محدد، <br />company.com لمطابقة كل المرسلين من company.com، <br />John Doe لمطابقة وفق اسم شخص محدد، <br />John لمطابقة كل الأشخاص بذلك الأسم</li><li><b>إسم أو عنوان المستقبل:</b> نفس مثال المرسل: لكن يتم التصنيف على على عنوان To/Cc في الرسالة</li> <li><b>كلمات الموضوع:</b> مثال: hello لمطابقة كل الرسائل التي بها hello في سطر الموضوع</li></ul>
+Magnet_Explanation                      <b>توجد هذه الأنواع من المغناطسيات:</b> <ul><li><b>إسم أو عنوان المرسل</b> مثال: john@company.com لمطابقة وفق عنوان محدد، <br />company.com لمطابقة كل المرسلين من company.com، <br />John Doe لمطابقة وفق اسم شخص محدد، <br />John لمطابقة كل الأشخاص بذلك الأسم</li><li><b>إسم أو عنوان المستقبل:</b> نفس مثال المرسل: لكن يتم التصنيف على على عنوان To/Cc في الرسالة</li> <li><b>كلمات الموضوع:</b> مثال: hello لمطابقة كل الرسائل التي بها hello في سطر الموضوع</li></ul>
 Magnet_MagnetType                       نوع المغناطيس
 Magnet_Value                            قيمة
 Magnet_Always                           يذهب فوراً إلى الدلو
