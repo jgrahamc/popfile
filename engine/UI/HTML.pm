@@ -704,6 +704,10 @@ sub url_handler__
     }
 
     if ( $url eq '/logout' ) {
+        # Release session key
+
+        $self->classifier_()->release_session_key( $session );
+
         $self->http_redirect_( $client, '/', 'LOGGED-OUT' );
         return 1;
     }
