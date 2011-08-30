@@ -179,6 +179,10 @@ sub initialize
 
     $self->config_( 'cookie_cipher', 'Blowfish' );
 
+    # If you want to highlight active search or filter settings
+
+    $self->config_( 'search_filter_highlight', 0 );
+
     # Load skins
 
     $self->load_skins__();
@@ -3409,6 +3413,7 @@ sub history_page
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
     $templ->param( 'History_If_MultiPage'  => $page_size <= $query_size );
+    $templ->param( 'History_Search_Filter_Highlight'  => $self->config_( 'search_filter_highlight' ) );
 
     my @buckets = $self->classifier_()->get_buckets( $session );
 

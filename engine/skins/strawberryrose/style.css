@@ -564,3 +564,10 @@ div.helpMessage {
 .advancedWidgets {
   margin-top: 1em;
 }
+
+/*********************************************************/
+/* History Search Filter Highlight */
+
+div.historySearchFilterActive {
+  background-color: #FF6666;
+}

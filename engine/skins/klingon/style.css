@@ -235,3 +235,9 @@ div.error02 {
   color: red;
 }
 
+/*********************************************************/
+/* History Search Filter Highlight */
+
+div.historySearchFilterActive {
+  background-color: #FF8000;
+}

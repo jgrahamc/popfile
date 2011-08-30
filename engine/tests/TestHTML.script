@@ -1163,6 +1163,18 @@ NOTMATCH No messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to page
 
+# Check search filter highlight
+
+NOTMATCH historySearchFilterActive
+SETCONFIG html_search_filter_highlight 1
+SETSUBMIT search Doctor
+MATCH historySearchFilterActive
+SETCONFIG html_search_filter_highlight 0
+SETSUBMIT search Doctor
+NOTMATCH historySearchFilterActive
+CLICK reset_filter_search
+NOTMATCH historySearchFilterActive
+
 # Check filter
 
 SETINPUT filter personal
@@ -1204,6 +1216,20 @@ CLICK setfilter
 MATCH Magnetic Attraction for Ferrous Females
 NOTMATCH Testing Refresh
 CLICK reset_filter_search
+
+# Check search filter highlight
+
+NOTMATCH historySearchFilterActive
+SETCONFIG html_search_filter_highlight 1
+SETINPUT filter spam
+CLICK setfilter
+MATCH historySearchFilterActive
+SETCONFIG html_search_filter_highlight 0
+SETINPUT filter spam
+CLICK setfilter
+NOTMATCH historySearchFilterActive
+CLICK reset_filter_search
+NOTMATCH historySearchFilterActive
 
 # Check that reclassification doesn't clear the negate
 # flag

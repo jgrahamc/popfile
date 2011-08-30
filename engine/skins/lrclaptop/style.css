@@ -252,3 +252,10 @@ div.helpMessage {
   padding: 0.4em;
   padding-bottom: 0;
 }
+
+/*********************************************************/
+/* History Search Filter Highlight */
+
+div.historySearchFilterActive {
+  background-color: #DFDFAF;
+}

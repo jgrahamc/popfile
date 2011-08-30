@@ -426,3 +426,10 @@ h2.history {
   width:100%;
   height: 1em;
 }
+
+/*********************************************************/
+/* History Search Filter Highlight */
+
+div.historySearchFilterActive {
+  background-color: #A6C4D8;
+}

@@ -1,3 +1,13 @@
+<TMPL_IF NAME="History_Search_Filter_Highlight">
+  <TMPL_IF NAME="History_Field_Search">
+    <div class="historySearchFilterActive">
+  <TMPL_ELSE>
+    <TMPL_IF NAME="History_Field_Filter">
+    <div class="historySearchFilterActive">
+    </TMPL_IF>
+  </TMPL_IF>
+</TMPL_IF>
+
 <form action="/history" method="post">
 <div class="search">
     <label class="historyLabel" for="historySearch" title="<TMPL_VAR NAME="Localize_tip_History_Search">">
@@ -51,3 +61,13 @@
     </label>
 </div>
 </form>
+
+<TMPL_IF NAME="History_Search_Filter_Highlight">
+  <TMPL_IF NAME="History_Field_Search">
+    </div>
+  <TMPL_ELSE>
+    <TMPL_IF NAME="History_Field_Filter">
+    </div>
+    </TMPL_IF>
+  </TMPL_IF>
+</TMPL_IF>
