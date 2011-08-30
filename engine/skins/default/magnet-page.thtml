@@ -33,7 +33,7 @@
         </TMPL_IF>
 
             <td>
-                <select name="type<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsAddType">
+                <select name="type<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsModifyType<TMPL_VAR NAME="Magnet_Row_ID">">
 
                     <TMPL_LOOP NAME="Magnet_Loop_Loop_Types">
 
@@ -48,7 +48,7 @@
                 <input type="text" name="text<TMPL_VAR NAME="Magnet_Row_ID">" value="<TMPL_VAR NAME="Magnet_Validating">" size="<TMPL_VAR NAME="Magnet_Size">" />
             </td>
             <td align="center">
-                <select name="bucket<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsAddBucket">
+                <select name="bucket<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsModifyBucket<TMPL_VAR NAME="Magnet_Row_ID">">
 
                     <TMPL_LOOP NAME="Magnet_Loop_Loop_Buckets">
 

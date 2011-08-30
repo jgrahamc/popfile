@@ -38,7 +38,7 @@ function serverMode(state) {
                             </label>
                             <br />
                             <div style="margin-left:1em;" class="adminAcceptRemote">
-                                <input type="checkbox" name="serveropt_html" id="securityAcceptHTTP" name="toggle" <TMPL_IF NAME="If_Javascript_OK"><TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF></TMPL_IF> <TMPL_IF NAME="Security_If_Local_html"><TMPL_ELSE>checked="checked"</TMPL_IF>/>
+                                <input type="checkbox" name="serveropt_html" id="securityAcceptHTTP" <TMPL_IF NAME="If_Javascript_OK"><TMPL_IF NAME="Security_If_Local">disabled</TMPL_IF></TMPL_IF> <TMPL_IF NAME="Security_If_Local_html"><TMPL_ELSE>checked="checked"</TMPL_IF>/>
                                 <label class="administrationLabel" for="securityAcceptHTTP">
                                     <TMPL_VAR NAME="Localize_Security_UI">
                                 </label>
@@ -144,7 +144,7 @@ function serverMode(state) {
                 <TMPL_ELSE>
                 <tr class="rowEven">
                 </TMPL_IF>
-                    <td aligh="left" ><TMPL_VAR NAME="CurrentSessions_UserName" ESCAPE=HTML></td>
+                    <td align="left" ><TMPL_VAR NAME="CurrentSessions_UserName" ESCAPE=HTML></td>
                     <td align="left" ><TMPL_VAR NAME="CurrentSessions_LastUsed"></td>
                     <td align="right"><TMPL_VAR NAME="CurrentSessions_IdleTime"></td>
                 </tr>

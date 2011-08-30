@@ -177,7 +177,7 @@
                 <h2><TMPL_VAR NAME="Localize_Users_Parameters"> (<TMPL_VAR NAME="Users_Edit_User_Name">)</h2>
                  
             <form action="/users" method="post">
-                <table width="100%">
+                <table width="100%" summary="">
                     <tr>
                         <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
                         <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Value"></th>

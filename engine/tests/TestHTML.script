@@ -184,7 +184,7 @@ SETSUBMIT password
 
 GET       /administration
 MATCH     Current Active User Sessions
-MATCH     <td aligh="left" >admin</td>
+MATCH     <td align="left" >admin</td>
 
 # Advanced page (No single user mode options)
 
@@ -2034,17 +2034,17 @@ MATCH
 ENDMATCH
 
 MATCH
-<td bgcolor="red" title="other (12.75)" width="12.75%" height="20">
+<td style="background:red; width:12.75%; height:20px;" title="other (12.75)">
 <img src="pix.gif" alt="" height="20" width="1" />
 </td>
 ENDMATCH
 MATCH
-<td bgcolor="green" title="personal (0.74)" width="0.74%" height="20">
+<td style="background:green; width:0.74%; height:20px;" title="personal (0.74)">
 <img src="pix.gif" alt="" height="20" width="1" />
 </td>
 ENDMATCH
 MATCH
-<td bgcolor="blue" title="spam (86.52)" width="86.52%" height="20">
+<td style="background:blue; width:86.52%; height:20px;" title="spam (86.52)">
 <img src="pix.gif" alt="" height="20" width="1" />
 </td>
 ENDMATCH

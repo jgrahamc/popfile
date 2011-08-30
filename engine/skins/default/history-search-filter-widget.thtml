@@ -27,7 +27,7 @@
         <TMPL_VAR NAME="Localize_History_FilterBy">
     </label>
     <br>
-    <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
+    <input type="hidden" name="sort" value="<TMPL_VAR ESCAPE=HTML NAME="History_Field_Sort">" />
     <select name="filter" id="historyFilter">
         <option value="">&nbsp;</option>
 
@@ -39,13 +39,13 @@
 
         </TMPL_LOOP>
 
-        <option value="__filter__magnet" <TMPL_VAR NAME="History_Filter_Magnet">>
+        <option value="__filter__magnet" <TMPL_VAR ESCAPE=HTML NAME="History_Filter_Magnet">>
             &lt;<TMPL_VAR NAME="Localize_History_ShowMagnet">&gt;
         </option>
-        <option value="unclassified" <TMPL_VAR NAME="History_Filter_Unclassified">>
+        <option value="unclassified" <TMPL_VAR ESCAPE=HTML NAME="History_Filter_Unclassified">>
             &lt;unclassified&gt;
         </option>
-        <option value="__filter__reclassified" <TMPL_VAR NAME="History_Filter_Reclassified">>
+        <option value="__filter__reclassified" <TMPL_VAR ESCAPE=HTML NAME="History_Filter_Reclassified">>
             &lt;reclassified&gt;
         </option>
     </select>
@@ -55,7 +55,7 @@
 
 <div class="negate">
     <input type="hidden" name="negate" value="" />
-    <input type="checkbox" name="negate" id="negate" class="checkbox" <TMPL_VAR NAME="History_Field_Not"> />
+    <input type="checkbox" name="negate" id="negate" class="checkbox" <TMPL_VAR ESCAPE=HTML NAME="History_Field_Not"> />
     <label class="historyLabel" for="negate" title="<TMPL_VAR NAME="Localize_tip_History_SearchNegate">">
         <TMPL_VAR NAME="Localize_History_Negate_Search">
     </label>

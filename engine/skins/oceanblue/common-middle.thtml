@@ -26,10 +26,10 @@
 
 
     <TMPL_IF NAME="Header_If_Message">
-    <table class="shellStatusMessage"><tr class="shellStatusRow"><td><TMPL_VAR NAME="Header_Message"></td></tr></table>
+    <table class="shellStatusMessage" summary=""><tr class="shellStatusRow"><td><TMPL_VAR NAME="Header_Message"></td></tr></table>
     </TMPL_IF>
     <TMPL_IF NAME="Header_If_Error">
-    <table class="shellErrorMessage"><tr class="shellErrorRow"><td><TMPL_VAR NAME="Header_Error"></td></tr></table>
+    <table class="shellErrorMessage" summary=""><tr class="shellErrorRow"><td><TMPL_VAR NAME="Header_Error"></td></tr></table>
     </TMPL_IF>
     <TMPL_IF NAME="Header_If_Password">
     <TMPL_ELSE>

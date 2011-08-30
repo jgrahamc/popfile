@@ -7,5 +7,6 @@
     <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">print.css" media="print">
     <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">handheld.css" media="handheld">
     <TMPL_IF NAME="If_Language_RTL"><link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">rtl.css" media="all"></TMPL_IF>
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
 <TMPL_INCLUDE NAME="common-javascript.thtml">
 </head>

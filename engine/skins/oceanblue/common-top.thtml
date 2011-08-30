@@ -5,5 +5,6 @@
 <link rel="icon" href="favicon.ico">
 <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">style.css" title="POPFile-Style">
 <!--[if lt IE 7]><link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">ie6.css"><![endif]-->
+<meta http-equiv="Content-Script-Type" content="text/javascript">
 <TMPL_INCLUDE NAME="common-javascript.thtml">
 </head>
