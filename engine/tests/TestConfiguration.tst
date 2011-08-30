@@ -78,9 +78,9 @@ test_assert_equal( $c->start(), 1 );
 $c->stop();
 test_assert( !$c->check_pid_() );
 
-# disable logging
+# enable logging
 
-$c->global_config_( 'debug', 0 );
+$c->global_config_( 'debug', 1 );
 
 # Check instance coordination via PID file
 
@@ -91,7 +91,7 @@ my $process = fork;
 
 if ($process != 0) {
     #parent loop
-    test_assert_equal(  $c->start(), 0);
+    test_assert_equal( $c->start(), 0 );
     test_assert( !defined( $c->live_check_() ) );
 } elsif ($process == 0) {
     #child loop
@@ -108,7 +108,7 @@ if ($process != 0) {
     $c->service();
 } elsif ($process == 0) {
     #child loop
-    test_assert_equal(  $c->start(), 0);
+    test_assert_equal( $c->start(), 0 );
     test_assert( !defined( $c->live_check_() ) );
 
     exit(0);
@@ -117,6 +117,12 @@ if ($process != 0) {
 close STDERR;
 $c->stop();
 
+# Check if unexpected message is recorded
+
+my $l = $POPFile->get_module( 'POPFile/Logger' );
+my @last_ten = $l->last_ten();
+test_assert_not_regexp( pop @last_ten, /Can't write to the configuration file/, "Unexpected log message." );
+
 # Check that the popfile.cfg was written
 
 my @expected_config = (
@@ -124,7 +130,7 @@ my @expected_config = (
  'GLOBAL_cert_file ./certs/server-cert.pem',
  'GLOBAL_crypt_device ',
  'GLOBAL_crypt_strength 0',
- 'GLOBAL_debug 0',
+ 'GLOBAL_debug 1',
  'GLOBAL_key_file ./certs/server-key.pem',
  'GLOBAL_language English',
  'GLOBAL_message_cutoff 100000',

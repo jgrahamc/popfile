@@ -593,7 +593,9 @@ sub load_configuration
 
     $self->{started__} = 1;
 
-    if ( open CONFIG, '<' . $self->get_user_path( 'popfile.cfg' ) ) {
+    my $config_file = $self->get_user_path( 'popfile.cfg' );
+
+    if ( open CONFIG, '<', $config_file ) {
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
             if ( /(\S+) (.+)?/ ) {
@@ -613,6 +615,10 @@ sub load_configuration
         }
 
         close CONFIG;
+    } else {
+        if ( -e $config_file && !-r _ ) {
+            $self->log_( 0, "Couldn't load from the configuration file $config_file" );
+        }
     }
 
     $self->{save_needed__} = 0;
@@ -634,7 +640,14 @@ sub save_configuration
         return;
     }
 
-    if ( open CONFIG, '>' . $self->get_user_path( 'popfile.cfg.tmp' ) ) {
+    my $config_file = $self->get_user_path( 'popfile.cfg' );
+    my $config_temp = $self->get_user_path( 'popfile.cfg.tmp' );
+
+    if ( -e $config_file && !-w _ ) {
+        $self->log_( 0, "Can't write to the configuration file $config_file" );
+    }
+
+    if ( open CONFIG, '>', $config_temp ) {
         $self->{save_needed__} = 0;
 
         foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
@@ -643,8 +656,9 @@ sub save_configuration
 
         close CONFIG;
 
-        rename $self->get_user_path( 'popfile.cfg.tmp' ), # PROFILE BLOCK START
-               $self->get_user_path( 'popfile.cfg' );     # PROFILE BLOCK STOP
+        rename $config_temp, $config_file;
+    } else {
+        $self->log_( 0, "Couldn't open a temporary configuration file $config_temp" );
     }
 }
 
