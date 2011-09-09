@@ -1823,6 +1823,10 @@ sub start_parse
         # Initialize Nihongo (Japanese) parser
         $self->{nihongo_parser__}{init}( $self );
     }
+
+    # Store encoded text
+
+    $self->{encoded_text__} = '';
 }
 
 # ----------------------------------------------------------------------------
@@ -1837,6 +1841,8 @@ sub start_parse
 sub stop_parse
 {
     my ( $self ) = @_;
+
+    $self->clear_out_encoded_text() if ( $self->{lang__} eq 'Nihongo' );
 
     $self->{colorized__} .= $self->clear_out_base64();
 
@@ -1922,17 +1928,15 @@ sub parse_line
                 $line =~ s/\x00/NUL/g;
             }
 
-            if ( ( $self->{lang__} eq 'Nihongo' ) &&      # PROFILE BLOCK START
-                 !$self->{in_headers__} &&
-                 ( $self->{encoding__} !~ /base64/i ) ) { # PROFILE BLOCK STOP
-
-                # Decode \x??
-                $line =~ s/\\x([8-9A-F][A-F0-9])/pack("C", hex($1))/eig;
-
-                $line = convert_encoding(                           # PROFILE BLOCK START
-                    $line, $self->{charset__}, 'euc-jp', '7bit-jis',
-                    @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
-                $line = $self->{nihongo_parser__}{parse}( $self, $line );
+            if ( $self->{lang__} eq 'Nihongo' ) {
+                if ( ( $self->{mime__} ne '' ) &&                     # PROFILE BLOCK START
+                     ( $line =~ /^\-\-($self->{mime__})(\-\-)?/ ) ) { # PROFILE BLOCK STOP
+                    $self->clear_out_encoded_text();
+                } elsif ( ( !$self->{in_headers__} ) &&            # PROFILE BLOCK START
+                          ( $self->{encoding__} !~ /base64/i ) ) { # PROFILE BLOCK STOP
+                    $self->{encoded_text__} .= $line;
+                    next;
+                }
             }
 
             if ( $self->{color__} ne '' ) {
@@ -2169,6 +2173,42 @@ sub clear_out_qp
 
         $self->parse_html( $line, 0 );
         $self->{prev__} = '';
+    }
+}
+
+# ----------------------------------------------------------------------------
+#
+# clear_out_encoded_text
+#
+# If there's anything in the {encoded_text__} then decode it and parse it
+#
+# ----------------------------------------------------------------------------
+sub clear_out_encoded_text
+{
+    my ( $self ) = @_;
+
+    if ($self->{encoded_text__} ne '') {
+        # Decode \x??
+        $self->{encoded_text__} =~ s/\\x([8-9A-F][A-F0-9])/pack("C", hex($1))/eig if ($self->{encoded_text__} !~ /\\x[0-7][0-9A-F]/);
+
+        $self->{encoded_text__} = convert_encoding( $self->{encoded_text__}, $self->{charset__}, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
+        $self->{encoded_text__} = $self->{nihongo_parser__}{parse}( $self, $self->{encoded_text__} );
+
+        if ($self->{color__} ne '' ) {
+
+            if (!$self->{in_html_tag__}) {
+                $self->{colorized__} .= $self->{ut__};
+                $self->{ut__} = '';
+            }
+
+            $self->{ut__} .= $self->splitline($self->{encoded_text__}, $self->{encoding__});
+        }
+
+        $self->{encoded_text__} =~ s/[\r\n]+/\n/g;
+        foreach my $jline (split(/\n/, $self->{encoded_text__})) {
+            parse_html( $self, $jline, 0 );
+        }
+        $self->{encoded_text__} = '';
     }
 }
 
