@@ -11,6 +11,6 @@
 +     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
 +      ? SvPVX(sv) : sv_2pv_nolen(sv))
 + 
-  #ifdef debug		/* causes problems with DBIS->debug	*/
+  #ifdef debug            /* causes problems with DBIS->debug     */
   #undef debug
   #endif

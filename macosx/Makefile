@@ -1,20 +1,23 @@
+# ---------------------------------------------------------------------------
+#
 # Copyright (c) John Graham-Cumming
 #
 #   This file is part of POPFile
-#
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
 #
 #   POPFile is free software; you can redistribute it and/or modify it
 #   under the terms of version 2 of the GNU General Public License as
 #   published by the Free Software Foundation.
 #
+#   POPFile is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
 #   You should have received a copy of the GNU General Public License
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+# ---------------------------------------------------------------------------
 
 .PHONY: all build clean
 
@@ -28,7 +31,7 @@ PACKAGE_VERSION_RC=$(RC)
 
 PACKAGE_NAME=$(PACKAGE_TITLE)-$(PACKAGE_VERSION)$(PACKAGE_VERSION_RC)
 PACKAGE_ROOT=./Package_Root
-PACKAGE_ID=org.getpopfile
+PACKAGE_ID=org.getpopfile.macosx
 
 RESOURCES=./Resources
 
@@ -55,12 +58,12 @@ $(ARCHIVE): $(IMAGE)
 	gzip -c $(IMAGE) > $(ARCHIVE)
 	
 	@echo "...done"
-$(IMAGE): installer ssl_installer utility_scripts
+$(IMAGE): installer utility_scripts
 	@rm -f $@
 	
 	@echo "Creating disk image ..."
 	
-	hdiutil create -megabytes 6 $(IMAGE) -layout NONE
+	hdiutil create -megabytes 8 $(IMAGE) -layout NONE
 	disk=`hdid -nomount $(IMAGE)` ; \
 	newfs_hfs -v $(VOLUME_NAME) $$disk ; \
 	hdiutil eject $$disk ; \
@@ -79,13 +82,12 @@ clean:
 	rm -rf $(POPFILE_ROOT)/*.pl $(POPFILE_ROOT)/*.png $(POPFILE_ROOT)/*.gif $(POPFILE_ROOT)/*.pck $(POPFILE_ROOT)/POPFile $(POPFILE_ROOT)/Classifier $(POPFILE_ROOT)/Proxy $(POPFILE_ROOT)/Services $(POPFILE_ROOT)/UI $(POPFILE_ROOT)/languages $(POPFILE_ROOT)/skins $(POPFILE_ROOT)/stopwords $(POPFILE_ROOT)/license $(POPFILE_ROOT)/favicon.ico $(POPFILE_ROOT)/v*.change*
 	rm -rf $(RESOURCES)/License.txt $(RESOURCES)/English.lproj/ReadMe.txt $(RESOURCES)/Japanese.lproj/ReadMe.txt
 
-	$(MAKE) -C ./addssl clean
 	$(MAKE) -C ./modules clean
 
 engine = $(ENGINE)/*.pl $(ENGINE)/POPFile/*.pm $(ENGINE)/Classifier/*.pm $(ENGINE)/Proxy/*.pm $(ENGINE)/UI/*.pm $(ENGINE)/Services/IMAP.pm $(ENGINE)/Services/IMAP/Client.pm $(ENGINE)/skins/*/*.css $(ENGINE)/skins/*/*.gif $(ENGINE)/skins/*/*.thtml $(ENGINE)/stopwords $(ENGINE)/license $(ENGINE)/favicon.ico $(ENGINE)/v$(POPFILE_VERSION).change $(ENGINE)/v$(POPFILE_VERSION).change.nihongo
 
 installer: documents engine build_modules
-installer: $(engine) ./Readme.txt
+installer: $(engine) ./Readme.txt ./Readme-SnowLeopard.txt ./Readme-Lion.txt
 	rm -rf $(PACKAGE_DIST)
 	mkdir $(PACKAGE_DIST)
 
@@ -130,10 +132,19 @@ installer: $(engine) ./Readme.txt
 
 	@echo "...done"
 
-	cp ./Readme.txt $(PACKAGE_DIST)
-
-ssl_installer: modules
-	$(MAKE) -C ./addssl
+	PERL510=`perl -e 'print $$] ge qw{5.010000};'`; \
+	PERL512=`perl -e 'print $$] ge qw{5.012000};'`; \
+	if test "$$PERL512" == "1"; \
+	then \
+		cp ./Readme-Lion.txt $(PACKAGE_DIST); \
+	else \
+		if test "$$PERL510" == "1"; \
+		then \
+			cp ./Readme-SnowLeopard.txt $(PACKAGE_DIST); \
+		else \
+			cp ./Readme.txt $(PACKAGE_DIST); \
+		fi; \
+	fi;
 
 utility_scripts: build-utilities
 	if test ! -d $(PACKAGE_DIST)/utilities; then mkdir $(PACKAGE_DIST)/utilities ; fi
@@ -149,12 +160,26 @@ mecab:
 build_modules:
 	$(MAKE) -C ./modules
 
-documents: $(ENGINE)/license $(ENGINE)/v$(POPFILE_VERSION).change $(ENGINE)/v$(POPFILE_VERSION).change.nihongo Readme.txt
+documents: $(ENGINE)/license $(ENGINE)/v$(POPFILE_VERSION).change $(ENGINE)/v$(POPFILE_VERSION).change.nihongo InstallationCheck InstallationCheck-SnowLeopard InstallationCheck-Lion
 	cp $(ENGINE)/license $(RESOURCES)/License.txt
 	if test ! -d $(RESOURCES)/English.lproj; then mkdir $(RESOURCES)/English.lproj ; fi
 	if test ! -d $(RESOURCES)/Japanese.lproj; then mkdir $(RESOURCES)/Japanese.lproj ; fi
-	perl -e '$$_=join(qw(),<>);s/(?<!\n)\n(?!\n)/ /g;print;' < $(ENGINE)/v$(POPFILE_VERSION).change > $(RESOURCES)/English.lproj/ReadMe.txt
-	perl -e '$$_=join(qw(),<>);s/(?<!\n)\n(?!\n)/ /g;print;' <  $(ENGINE)/v$(POPFILE_VERSION).change.nihongo > $(RESOURCES)/Japanese.lproj/ReadMe.txt
+	perl -e '$$_=join(qw(),<>);s/(?<!\n)\n(?![\n ])/ /g;print;' < $(ENGINE)/v$(POPFILE_VERSION).change > $(RESOURCES)/English.lproj/ReadMe.txt
+	SWVER=`sw_vers -productVersion | awk -F "." '{print $$2}'`; \
+	if test "$$SWVER" == "6"; \
+	then \
+		cp InstallationCheck-SnowLeopard $(RESOURCES)/InstallationCheck; \
+		perl -e '$$_=join(qw(),<>);s/(?<!\n)\n(?![\n ])/ /g;print;' <  $(ENGINE)/v$(POPFILE_VERSION).change.nihongo > $(RESOURCES)/Japanese.lproj/ReadMe.txt; \
+	else \
+		if test "$$SWVER" == "7"; \
+		then \
+			perl -MEncode -e '$$_=join(qw(),<>);s/(?<!\n)\n(?![\n ])/ /g;Encode::from_to($$_,"shift_jis","utf8");print;' <  $(ENGINE)/v$(POPFILE_VERSION).change.nihongo > $(RESOURCES)/Japanese.lproj/ReadMe.txt; \
+			cp InstallationCheck-Lion $(RESOURCES)/InstallationCheck; \
+		else \
+			perl -e '$$_=join(qw(),<>);s/(?<!\n)\n(?![\n ])/ /g;print;' <  $(ENGINE)/v$(POPFILE_VERSION).change.nihongo > $(RESOURCES)/Japanese.lproj/ReadMe.txt; \
+			cp InstallationCheck $(RESOURCES)/InstallationCheck; \
+		fi; \
+	fi;
 
 engine: $(engine)
 	rm -rf $(POPFILE_ROOT)/*.pl $(POPFILE_ROOT)/*.png $(POPFILE_ROOT)/*.gif $(POPFILE_ROOT)/*.pck $(POPFILE_ROOT)/POPFile $(POPFILE_ROOT)/Classifier $(POPFILE_ROOT)/Proxy $(POPFILE_ROOT)/Services $(POPFILE_ROOT)/UI $(POPFILE_ROOT)/languages $(POPFILE_ROOT)/skins $(POPFILE_ROOT)/stopwords $(POPFILE_ROOT)/license $(POPFILE_ROOT)/v*.change*
@@ -162,15 +187,16 @@ engine: $(engine)
 
 	cp $(ENGINE)/popfile.pl $(POPFILE_ROOT)
 	cp $(ENGINE)/popfile.pck $(POPFILE_ROOT)
+	cp $(ENGINE)/import.pl $(POPFILE_ROOT)
 	cp $(ENGINE)/insert.pl $(POPFILE_ROOT)
 	cp $(ENGINE)/bayes.pl $(POPFILE_ROOT)
 	cp $(ENGINE)/pipe.pl $(POPFILE_ROOT)
 
 	cp $(ENGINE)/favicon.ico $(POPFILE_ROOT)
 
-	cp $(ENGINE)/pix.gif $(POPFILE_ROOT)
-	cp $(ENGINE)/otto.gif $(POPFILE_ROOT)
-	cp $(ENGINE)/otto.png $(POPFILE_ROOT)
+#	cp $(ENGINE)/pix.gif $(POPFILE_ROOT)
+#	cp $(ENGINE)/otto.gif $(POPFILE_ROOT)
+#	cp $(ENGINE)/otto.png $(POPFILE_ROOT)
 
 	mkdir $(POPFILE_ROOT)/Classifier
 	cp $(ENGINE)/Classifier/*.pm $(POPFILE_ROOT)/Classifier
