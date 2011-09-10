@@ -327,13 +327,15 @@ $cl->update_tag( "faketag(|", "foo", 1, 0 );
 # Since the [[:alpha:]] regular expression is affected by the system locale, fix the
 # locale to 'C'.
 
-use POSIX qw( locale_h );
-my $current_locale = setlocale( LC_CTYPE );
-setlocale( LC_CTYPE, 'C' );
+#use POSIX qw( locale_h );
+#my $current_locale = setlocale( LC_CTYPE );
+#setlocale( LC_CTYPE, 'C' );
+#binmode STDOUT, ":utf8";
 
 my @parse_tests = sort glob 'TestMails/TestMailParse*.msg';
 
 for my $parse_test (@parse_tests) {
+#            no warnings 'utf8';
     my $words = $parse_test;
     $words    =~ s/msg/wrd/;
 
@@ -342,7 +344,7 @@ for my $parse_test (@parse_tests) {
 
     $cl->parse_file( $parse_test );
 
-    open WORDS, "<$words";
+    open WORDS, "<:utf8", "$words";
     while ( <WORDS> ) {
         if ( /^(.+) (\d+)/ ) {
             my ( $word, $value ) = ( $1, $2 );
@@ -361,7 +363,7 @@ for my $parse_test (@parse_tests) {
         # 0 to 1 and run once
 
         if ( 0 ) {
-             open UPDATE, ">>$words";
+             open UPDATE, ">>:utf8", "$words";
              print UPDATE "$missed $cl->{words__}{$missed}\n";
              close UPDATE;
         }

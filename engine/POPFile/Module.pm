@@ -1012,6 +1012,14 @@ sub database_
     return $self->get_module__( 'database', 'POPFile::Database' );
 }
 
+sub ui_html_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'html', 'UI::HTML' );
+}
+
+
 # Returns a the database handle owned by the POPFile::Database object.
 # If this method is called then the caller must clean up the handle.
 

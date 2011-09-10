@@ -29,7 +29,7 @@ use POPFile::Module;
 
 use strict;
 use warnings;
-use locale;
+use utf8;
 
 # These are used for Japanese support
 
@@ -180,7 +180,7 @@ sub add_stopword
             return 0;
         }
     } else {
-        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:alpha:]\-_\.\@0-9]/i ) ) {
+        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^\p{IsWord}\-\.\@]/i ) ) {
             return 0;
         }
     }
@@ -208,7 +208,7 @@ sub remove_stopword
             return 0;
         }
     } else {
-        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:alpha:]\-_\.\@0-9]/i ) ) {
+        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^\p{IsWord}\-\.\@]/i ) ) {
             return 0;
         }
     }

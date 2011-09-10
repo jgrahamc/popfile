@@ -25,7 +25,7 @@ package Classifier::MailParse;
 
 use strict;
 use warnings;
-use locale;
+use utf8;
 
 use MIME::Base64;
 use MIME::QuotedPrint;
@@ -703,10 +703,10 @@ sub add_line
             # with <> and have an @ in them
 
             while ( $line =~ s/(mailto:)?                      # PROFILE BLOCK START
-                               ([[:alpha:]0-9\-_\.]+?
+                               ([a-z0-9\-_\.]+?
                                @
-                               ([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))
-                               ([\"\&\)\?\:\/ >\&\;]|$)//x ) { # PROFILE BLOCK STOP
+                               ([a-z0-9\-_\.]+\.[a-z0-9\-_]+))
+                               ([\"\&\)\?\:\/ >\&\;]|$)//ix ) { # PROFILE BLOCK STOP
                 $self->update_word( $2, $encoded, ( $1 ? $1 : '' ),  # PROFILE BLOCK START
                                     '[\&\?\:\/ >\&\;]', $prefix );   # PROFILE BLOCK STOP
                 $self->add_url( $3, $encoded, '\@', '[\&\?\:\/]', $prefix );
@@ -715,18 +715,18 @@ sub add_line
             # Grab domain names (gTLD)
             # http://en.wikipedia.org/wiki/List_of_Internet_top-level_domains
 
-            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)          # PROFILE BLOCK START
+            while ( $line =~ s/(([a-z0-9\-_]+\.)+)          # PROFILE BLOCK START
                                (aero|arpa|asia|biz|cat|com|coop|edu|gov|info|
                                 int|jobs|mil|mobi|museum|name|net|org|pro|tel|
                                 travel|xxx)
-                               ([^[:alpha:]0-9\-_\.]|$)/$4/ix ) { # PROFILE BLOCK STOP
+                               ([^a-z0-9\-_\.]|$)/$4/ix ) { # PROFILE BLOCK STOP
                 $self->add_url( "$1$3", $encoded, '', '', $prefix );
             }
 
             # Grab country domain names (ccTLD)
             # http://en.wikipedia.org/wiki/List_of_Internet_top-level_domains
 
-            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)            # PROFILE BLOCK START
+            while ( $line =~ s/(([a-z0-9\-_]+\.)+)            # PROFILE BLOCK START
                                (a[cdefgilmnoqrstuwxz]|
                                 b[abdefghijmnorstvwyz]|
                                 c[acdfghiklmnorsuvxyz]|
@@ -752,15 +752,15 @@ sub add_line
                                 w[fs]|
                                 y[et]|
                                 z[amw])
-                               ([^[:alpha:]0-9\-_\.]|$)/$4/ix )  {  # PROFILE BLOCK STOP
+                               ([^a-z0-9\-_\.]|$)/$4/ix )  {  # PROFILE BLOCK STOP
                 $self->add_url( "$1$3", $encoded, '', '', $prefix );
             }
 
             # Grab IP addresses
 
-            while ( $line =~ s/(?<![[:alpha:]\d.])      # PROFILE BLOCK START
+            while ( $line =~ s/(?<![\p{IsAlpha}\d.])      # PROFILE BLOCK START
                                (([12]?\d{1,2}\.){3}[12]?\d{1,2})
-                               (?![[:alpha:]\d])//x ) { # PROFILE BLOCK STOP
+                               (?![\p{IsAlpha}\d])//x ) { # PROFILE BLOCK STOP
                 $self->update_word( $1, $encoded, '', '', $prefix );
             }
 
@@ -849,7 +849,7 @@ sub add_line
                     # (according to the OED) is
                     # pneumonoultramicroscopicsilicovolcanoconiosis
 
-                    while ( $line =~ s/([[:alpha:]][[:alpha:]\']{1,44})  # PROFILE BLOCK START
+                    while ( $line =~ s/([\p{IsAlpha}][\p{IsAlpha}\']{1,44})  # PROFILE BLOCK START
                                        ([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)
                                       //x ) {                            # PROFILE BLOCK STOP
                         if ( ( $self->{in_headers__} == 0 ) &&    # PROFILE BLOCK START
@@ -1045,9 +1045,9 @@ sub update_tag
             if ( $value =~ /^mailto:/i ) {
                 if ( ( $tag =~ /^a$/ ) &&                        # PROFILE BLOCK START
                      ( $value =~ /^mailto:
-                                  ([[:alpha:]0-9\-_\.]+?
+                                  ([a-z0-9\-_\.]+?
                                    @
-                                   ([[:alpha:]0-9\-_\.]+?))
+                                   ([a-z0-9\-_\.]+?))
                                   ([>\&\?\:\/\" \t]|$)/ix ) )  { # PROFILE BLOCK STOP
                     $self->update_word(                               # PROFILE BLOCK START
                         $1, $encoded, 'mailto:',
@@ -1316,9 +1316,9 @@ sub update_tag
             # mailto forms
 
             if ( $value =~ /^mailto:                     # PROFILE BLOCK START
-                            ([[:alpha:]0-9\-_\.]+?
+                            ([a-z0-9\-_\.]+?
                              @
-                             ([[:alpha:]0-9\-_\.]+?))
+                             ([a-z0-9\-_\.]+?))
                             ([>\&\?\:\/\" \t]|$)/ix )  { # PROFILE BLOCK STOP
                 $self->update_word(                               # PROFILE BLOCK START
                     $1, $encoded, 'mailto:',
@@ -1387,7 +1387,7 @@ sub add_url
     # Extract authorization information from the URL
     # (e.g. http://foo@bar.com)
 
-    if ( $url =~ s/^(([[:alpha:]0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40))+// ) {
+    if ( $url =~ s/^(([a-z0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40))+// ) {
         $authinfo = $1;
 
         if ( $authinfo ne '' ) {
@@ -1396,11 +1396,11 @@ sub add_url
         }
     }
 
-    if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)          # PROFILE BLOCK START
+    if ( $url =~ s/^(([a-z0-9\-_]+\.)+)          # PROFILE BLOCK START
                     (aero|arpa|asia|biz|cat|com|coop|edu|gov|info|
                      int|jobs|mil|mobi|museum|name|net|org|pro|tel|
                      travel|xxx|[a-z]{2})
-                    ([^[:alpha:]0-9\-_\.]|$)/$4/ix ) { # PROFILE BLOCK STOP
+                    ([^a-z0-9\-_\.]|$)/$4/ix ) { # PROFILE BLOCK STOP
         $host     = "$1$3";
         $hostform = "name";
     } else {
@@ -1689,12 +1689,13 @@ sub parse_html
 # ----------------------------------------------------------------------------
 sub parse_file
 {
-    my ( $self, $file, $max_size, $reset ) = @_;
+    my ( $self, $file, $max_size, $reset, $default_charset ) = @_;
 
     $reset    = 1 if ( !defined( $reset    ) );
     $max_size = 0 if ( !defined( $max_size ) || ( $max_size =~ /\D/ ) );
+    $default_charset = 'iso-8859-1' if ( !defined $default_charset );
 
-    $self->start_parse( $reset );
+    $self->start_parse( $reset, $default_charset );
 
     my $size_read = 0;
 
@@ -1746,7 +1747,7 @@ sub parse_file
 # ----------------------------------------------------------------------------
 sub start_parse
 {
-    my ( $self, $reset ) = @_;
+    my ( $self, $reset, $default_charset ) = @_;
 
     $reset = 1 if ( !defined( $reset ) );
 
@@ -1807,7 +1808,14 @@ sub start_parse
     $self->{colorized__} = '';
     $self->{colorized__} .= "<tt>" if ( $self->{color__} ne '' );
 
+    # Default character set
+
+    $default_charset = 'iso-8859-1' if ( !defined $default_charset );
+
+    $self->{default_charset__} = $default_charset;
+
     # Clear the character set to avoid using the wrong charsets
+
     $self->{charset__} = '';
 
     if ( $self->{lang__} eq 'Nihongo' ) {
@@ -1822,6 +1830,8 @@ sub start_parse
 
         # Initialize Nihongo (Japanese) parser
         $self->{nihongo_parser__}{init}( $self );
+    } else {
+        $encoding_candidates{ $self->{lang__} } = [ $self->{default_charset__} ];
     }
 
     # Store encoded text
@@ -1936,6 +1946,17 @@ sub parse_line
                           ( $self->{encoding__} !~ /base64/i ) ) { # PROFILE BLOCK STOP
                     $self->{encoded_text__} .= $line;
                     next;
+                }
+            } else {
+                if ( !$self->{in_headers__} &&                # PROFILE BLOCK START
+                     ( $self->{encoding__} !~ /base64/i ) ) { # PROFILE BLOCK STOP
+                    # TODO:
+                    #   - We should use default character set of language
+                    #     as Default and Candidates
+
+                    $line = convert_encoding(                           # PROFILE BLOCK START
+                        $line, $self->{charset__}, 'utf-8', $self->{default_charset__},
+                        @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
                 }
             }
 
@@ -2123,10 +2144,22 @@ sub clear_out_base64
                 $decoded, $self->{charset__}, 'euc-jp', '7bit-jis',
                 @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
             $decoded = $self->{nihongo_parser__}{parse}( $self, $decoded );
+        } else {
+            # TODO:
+            #   - We should use default character set of language
+
+            $decoded = convert_encoding(
+                $decoded, $self->{charset__}, 'utf-8', $self->{default_charset__},
+                @{ $encoding_candidates{ $self->{lang__} } } );
         }
 
-        $self->parse_html( $decoded, 1 );
-
+		eval {
+        	$self->parse_html( $decoded, 1 );
+		};
+		if ( $@ ) {
+    		print "Decode error: $@" if $self->{debug__};
+		    return '';
+		}
         print "Decoded: " . $decoded . "\n" if $self->{debug__};
 
         if ( $self->{color__} ne '' ) {
@@ -2167,6 +2200,13 @@ sub clear_out_qp
                 $line, $self->{charset__}, 'euc-jp', '7bit-jis',
                 @{ $encoding_candidates{ $self->{lang__} } } );
             $line = $self->{nihongo_parser__}{parse}( $self, $line );
+        } else {
+            # TODO:
+            #   - We should use default character set of language
+
+            $line = convert_encoding(
+                $line, $self->{charset__}, 'utf-8', $self->{default_charset__},
+                @{ $encoding_candidates{ $self->{lang__} } } );
         }
 
         $self->{ut__} .= $self->splitline( $line, '' );
@@ -2263,6 +2303,10 @@ sub decode_string
                     $value = convert_encoding(                          # PROFILE BLOCK START
                         $value, $charset, 'euc-jp', '7bit-jis',
                         @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
+                } else {
+                    $value = convert_encoding(
+                        $value, $charset, 'utf-8', $self->{default_charset__},
+                        @{ $encoding_candidates{ $self->{lang__} } } );
                 }
                 $last_is_encoded = 1;
             } elsif ( $encoding =~ /^[qQ]$/ ) {
@@ -2276,6 +2320,10 @@ sub decode_string
                     $value = convert_encoding(                          # PROFILE BLOCK START
                         $value, $charset, 'euc-jp', '7bit-jis',
                         @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
+                } else {
+                    $value = convert_encoding(
+                        $value, $charset, 'utf-8', $self->{default_charset__},
+                        @{ $encoding_candidates{ $self->{lang__} } } );
                 }
                 $last_is_encoded = 1;
             }
@@ -2396,12 +2444,12 @@ sub parse_header
             }
         }
 
-        while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// ) {
+        while ( $argument =~ s/<([a-z0-9\-_\.]+?@([a-z0-9\-_\.]+?))>//i ) {
             $self->update_word( $1, 0, ';', '&', $prefix );
             $self->add_url( $2, 0, '@', '[&<]', $prefix );
         }
 
-        while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+))// ) {
+        while ( $argument =~ s/([a-z0-9\-_\.]+?@([a-z0-9\-_\.]+))//i ) {
             $self->update_word( $1, 0, '', '', $prefix );
             $self->add_url( $2, 0, '@', '', $prefix );
         }
@@ -2416,10 +2464,22 @@ sub parse_header
         $argument = $self->decode_string( $argument, $self->{lang__} );
         if ( $self->{subject__} eq '' ) {
 
-            # In Japanese mode, parse subject with Nihongo (Japanese) parser
+            if ( $argument ne '' ) {
+                if ( $self->{lang__} eq 'Nihongo' ) {
+                    # In Japanese mode, parse subject with Nihongo (Japanese) parser)
 
-            $argument = $self->{nihongo_parser__}{parse}( $self, $argument )    # PROFILE BLOCK START
-                if ( ( $self->{lang__} eq 'Nihongo' ) && ( $argument ne '' ) ); # PROFILE BLOCK STOP
+                    $argument = $self->{nihongo_parser__}{parse}( $self, $argument );
+                } else {
+                    # TODO:
+                    #   - We should use default character set for language
+                    #     as Default and Candidates.
+                    #   - We should use character set specified in mail header
+
+                    $argument = convert_encoding( $argument, $self->{default_charset__}, 'utf-8',
+                                                  $self->{default_charset__},
+                                                  @{ $encoding_candidates{ $self->{lang__} } } );
+                }
+            }
 
             $self->{subject__} = $argument;
             $self->{subject__} =~ s/[\t\r\n]//g;
@@ -2923,7 +2983,16 @@ sub convert_encoding
         eval {
             no warnings 'utf8';
             if ( ref $enc ) {
-                $string = Encode::encode( $to, $enc->decode( $string ) );
+                # TODO:
+                #   - We should use decode in all languages
+                #     Since Nihongo (Japanese) mode is highly depended on
+                #     EUC-JP character set, we should work more for Japanese.
+
+                if ( $to eq 'utf-8' ) {
+                    $string = $enc->decode( $string );
+                } else {
+                    $string = Encode::encode( $to, $enc->decode( $string ) );
+                }
             } else {
                 Encode::from_to( $string, $from, $to );
             }

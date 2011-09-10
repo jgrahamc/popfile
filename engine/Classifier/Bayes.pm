@@ -32,7 +32,7 @@ use POPFile::Module;
 
 use strict;
 use warnings;
-use locale;
+use utf8;
 use Classifier::MailParse;
 use IO::Handle;
 use DBI;
@@ -185,6 +185,10 @@ sub new
 
     $self->{db_is_sqlite__}      = 0;
     $self->{db_name__}           = '';
+
+    # Default character set
+
+    $self->{default_charset__}   = '';
 
     # Must call bless before attempting to call any methods
 
@@ -1099,7 +1103,7 @@ sub upgrade_predatabase_data__
             unlink "$bucket/color";
         }
 
-        $bucket =~ /([[:alpha:]0-9-_]+)$/;
+        $bucket =~ /([a-z0-9_-]+)$/;
         $bucket =  $1;
 
         $self->set_bucket_color( $session, $bucket, ($color eq '')?$self->{possible_colors__}[$c]:$color );
@@ -1126,7 +1130,7 @@ sub upgrade_bucket__
 {
     my ( $self, $session, $bucket ) = @_;
 
-    $bucket =~ /([[:alpha:]0-9-_]+)$/;
+    $bucket =~ /([a-z0-9_-]+)$/;
     $bucket =  $1;
 
     $self->create_bucket( $session, $bucket );
@@ -1134,7 +1138,7 @@ sub upgrade_bucket__
     if ( open PARAMS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" ) ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
-            if ( /^([[:lower:]]+) ([^\r\n\t ]+)$/ )  {
+            if ( /^([a-z]+) ([^\r\n\t ]+)$/ )  {
                 $self->set_bucket_parameter( $session, $bucket, $1, $2 );
             }
         }
@@ -2185,8 +2189,10 @@ sub classify
     if ( defined( $file ) ) {
         return undef if ( !-e $file );
 
-        $self->{parser__}->parse_file( $file,                                           # PROFILE BLOCK START
-                                       $self->global_config_( 'message_cutoff'   ) );   # PROFILE BLOCK STOP
+        $self->{parser__}->parse_file( $file,                                     # PROFILE BLOCK START
+                                       $self->global_config_( 'message_cutoff' ),
+                                       1,
+                                       $self->default_charset() );                # PROFILE BLOCK STOP
     }
 
     # Get the list of buckets
@@ -2765,7 +2771,7 @@ sub classify_and_modify
 
     $class = '' if ( !defined( $class ) );
     if ( $class eq '' ) {
-        $self->{parser__}->start_parse();
+        $self->{parser__}->start_parse( undef, $self->default_charset() );
         ( $slot, $msg_file ) = $self->history_()->reserve_slot( $session );
     } else {
         $msg_file = $self->history_()->get_slot_file( $slot );
@@ -4642,8 +4648,10 @@ sub get_html_colored_message
     $self->{parser__}->{color_userid__} = undef;
     $self->{parser__}->{bayes__} = bless $self;
 
-    my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START
-            $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
+    my $result = $self->{parser__}->parse_file( $file,  # PROFILE BLOCK START
+            $self->global_config_( 'message_cutoff' ),
+            1,
+            $self->default_charset() );                 # PROFILE BLOCK STOP
 
     $self->{parser__}->{color__} = '';
 
@@ -4676,8 +4684,10 @@ sub fast_get_html_colored_message
     $self->{parser__}->{color_userid__} = $userid;
     $self->{parser__}->{bayes__}        = bless $self;
 
-    my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START
-            $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
+    my $result = $self->{parser__}->parse_file( $file,  # PROFILE BLOCK START
+            $self->global_config_( 'message_cutoff' ),
+            1,
+            $self->default_charset() );                 # PROFILE BLOCK STOP
 
     $self->{parser__}->{color__} = '';
 
@@ -4706,7 +4716,7 @@ sub create_bucket
         return 0;
     }
 
-    return 0 if ( $bucket =~ /[^[:lower:]\-_0-9]/ );
+    return 0 if ( $bucket =~ /[^a-z\-_0-9]/ );
 
     $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
         'insert into buckets ( name, pseudo, userid )
@@ -4782,7 +4792,7 @@ sub rename_bucket
         return 0;
     }
 
-    return 0 if ( $new_bucket =~ /[^[:lower:]\-_0-9]/ );
+    return 0 if ( $new_bucket =~ /[^a-z\-_0-9]/ );
 
     my $id = $self->get_bucket_id( $session, $old_bucket );
 
@@ -4827,13 +4837,14 @@ sub add_messages_to_bucket
     # This is done to clear out the word list because in the loop
     # below we are going to not reset the word list on each parse
 
-    $self->{parser__}->start_parse();
+    $self->{parser__}->start_parse( undef, $self->default_charset() );
     $self->{parser__}->stop_parse();
 
     foreach my $file (@files) {
         $self->{parser__}->parse_file( $file,  # PROFILE BLOCK START
             $self->global_config_( 'message_cutoff' ),
-            0 );  # PROFILE BLOCK STOP (Do not reset word list)
+            0,
+            $self->default_charset() );  # PROFILE BLOCK STOP (Do not reset word list)
     }
 
     $self->add_words_to_bucket__( $session, $bucket, 1 );
@@ -4890,7 +4901,9 @@ sub remove_message_from_bucket
     }
 
     $self->{parser__}->parse_file( $file,            # PROFILE BLOCK START
-        $self->global_config_( 'message_cutoff' ) ); # PROFILE BLOCK STOP
+        $self->global_config_( 'message_cutoff' ),
+        1,
+        $self->default_charset() ); # PROFILE BLOCK STOP
     $self->add_words_to_bucket__( $session, $bucket, -1 );
 
     $self->db_update_cache__( $session, $bucket );
@@ -5319,6 +5332,29 @@ sub remove_stopword
 
     return $self->{parser__}->{mangle__}->remove_stopword(  # PROFILE BLOCK START
         $stopword, $self->global_config_( 'language' ) );   # PROFILE BLOCK STOP
+}
+
+#----------------------------------------------------------------------------
+#
+# default_charset
+#
+# Get default character set
+#
+#----------------------------------------------------------------------------
+sub default_charset
+{
+    my ( $self ) = @_;
+
+    if ( $self->{default_charset__} eq '' ) {
+        my $h = $self->ui_html_();
+        if ( defined $h ) {
+            $self->{default_charset__} = $h->language()->{LanguageCharset};
+        } else {
+            return undef;
+        }
+    }
+
+    return $self->{default_charset__};
 }
 
 #----------------------------------------------------------------------------

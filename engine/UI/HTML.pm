@@ -29,7 +29,7 @@ use UI::HTTP;
 
 use strict;
 use warnings;
-use locale;
+use utf8;
 
 use IO::Socket;
 use IO::Select;
@@ -2745,7 +2745,7 @@ sub corpus_page
     # This regular expression defines the characters that are NOT valid
     # within a bucket name
 
-    my $invalid_bucket_chars = '[^[:lower:]\-_0-9]';
+    my $invalid_bucket_chars = '[^a-z\-_0-9]';
 
     if ( ( defined($self->{form_}{cname}) ) && ( $self->{form_}{cname} ne '' ) ) {
         if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
