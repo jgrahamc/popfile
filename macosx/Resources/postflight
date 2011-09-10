@@ -40,6 +40,6 @@ rm $KANWADICT_PATH/kanwadict-body
 
 POPFILE_STARTUP=/Library/StartupItems/POPFile/POPFile
 
-"$POPFILE_STARTUP" start
+"$POPFILE_STARTUP" restart
 
 exit 0

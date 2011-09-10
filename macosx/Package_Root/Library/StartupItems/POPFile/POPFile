@@ -1,22 +1,25 @@
 #!/bin/sh
 
+# ---------------------------------------------------------------------------
+#
 # Copyright (c) John Graham-Cumming
 #
 #   This file is part of POPFile
-#
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
 #
 #   POPFile is free software; you can redistribute it and/or modify it
 #   under the terms of version 2 of the GNU General Public License as
 #   published by the Free Software Foundation.
 #
+#   POPFile is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
 #   You should have received a copy of the GNU General Public License
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+# ---------------------------------------------------------------------------
 
 
 . /etc/rc.common
@@ -33,7 +36,7 @@ export MECABRC="$POPFILEDIR/mecab/etc/mecabrc"
 StartService ()
 {
     pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
-    if ! [ $pid ]; then
+    if [ "" == "$pid" ]; then
       ConsoleMessage "Starting POPFile POP mail proxy"
       rm -f "$POPFILE_USER"/popfile.pid
       /usr/bin/perl -I"$POPFILE_ROOT"/lib "$POPFILE_ROOT"/popfile.pl > "$POPFILE_USER"/console.log 2>&1 &
@@ -45,7 +48,7 @@ StartService ()
 StopService ()
 {
     pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
-    if [ $pid ]; then
+    if [ "" != "$pid" ]; then
       ConsoleMessage "Stopping POPFile POP mail proxy"
       kill -6 $pid
       rm -f "$POPFILE_USER"/popfile.pid
@@ -57,7 +60,7 @@ StopService ()
 RestartService ()
 {
     pid=$( ps -axww | grep popfile.pl | grep -v grep | awk '{ print $1 }' )
-    if [ $pid ]; then
+    if [ "" != "$pid" ]; then
       ConsoleMessage "Restarting POPFile POP mail proxy"
       kill -HUP $pid
     else
