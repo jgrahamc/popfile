@@ -44,7 +44,6 @@ if ( $PERL_VERSION ge '5.010000' ) {
     $SDK = '/Developer/SDKs/MacOSX10.4u.sdk';
     $MIN_VERSION = '-mmacosx-version-min=10.3';
     $ARCH = '-arch i386 -arch ppc750 -arch ppc7400';
-
 }
 
 my %params = (

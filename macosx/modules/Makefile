@@ -51,9 +51,9 @@ TAGSET = HTML-Tagset-3.20
 TAGSET_ARCHIVE = $(TAGSET).tar.gz
 TAGSET_URL = http://search.cpan.org/CPAN/authors/id/P/PE/PETDANCE/$(TAGSET_ARCHIVE)
 
-TEMPLATE = HTML-Template-2.9
+TEMPLATE = HTML-Template-2.10
 TEMPLATE_ARCHIVE = $(TEMPLATE).tar.gz
-TEMPLATE_URL = http://search.cpan.org/CPAN/authors/id/S/SA/SAMTREGAR/$(TEMPLATE_ARCHIVE)
+TEMPLATE_URL = http://search.cpan.org/CPAN/authors/id/W/WO/WONKO/$(TEMPLATE_ARCHIVE)
 
 TIMEDATE = TimeDate-1.20
 TIMEDATE_ARCHIVE = $(TIMEDATE).tar.gz
@@ -61,7 +61,7 @@ TIMEDATE_URL = http://search.cpan.org/CPAN/authors/id/G/GB/GBARR/$(TIMEDATE_ARCH
 
 # v2.0
 
-DIGESTSHA = Digest-SHA-5.47
+DIGESTSHA = Digest-SHA-5.70
 DIGESTSHA_ARCHIVE = $(DIGESTSHA).tar.gz
 DIGESTSHA_URL = http://search.cpan.org/CPAN/authors/id/M/MS/MSHELOR/$(DIGESTSHA_ARCHIVE)
 
@@ -69,7 +69,7 @@ CRYPT_CBC = Crypt-CBC-2.30
 CRYPT_CBC_ARCHIVE = $(CRYPT_CBC).tar.gz
 CRYPT_CBC_URL = http://search.cpan.org/CPAN/authors/id/L/LD/LDS/$(CRYPT_CBC_ARCHIVE)
 
-CRYPT_BLOWFISH = Crypt-Blowfish-2.10
+CRYPT_BLOWFISH = Crypt-Blowfish-2.12
 CRYPT_BLOWFISH_ARCHIVE = $(CRYPT_BLOWFISH).tar.gz
 CRYPT_BLOWFISH_URL = http://search.cpan.org/CPAN/authors/id/D/DP/DPARIS/$(CRYPT_BLOWFISH_ARCHIVE)
 
@@ -87,7 +87,7 @@ CLASS_INSPECTOR = Class-Inspector-1.25
 CLASS_INSPECTOR_ARCHIVE = $(CLASS_INSPECTOR).tar.gz
 CLASS_INSPECTOR_URL = http://search.cpan.org/CPAN/authors/id/A/AD/ADAMK/$(CLASS_INSPECTOR_ARCHIVE)
 
-VERSION_MODULE = version-0.94
+VERSION_MODULE = version-0.95
 VERSION_ARCHIVE = $(VERSION_MODULE).tar.gz
 VERSION_URL = http://search.cpan.org/CPAN/authors/id/J/JP/JPEACOCK/$(VERSION_ARCHIVE)
 
@@ -103,17 +103,17 @@ TEXTKAKASI_URL = http://search.cpan.org/CPAN/authors/id/D/DA/DANKOGAI/$(TEXTKAKA
 
 # SSL support
 
-NETSSLEAY = Net-SSLeay-1.36
+NETSSLEAY = Net-SSLeay-1.42
 NETSSLEAY_ARCHIVE = $(NETSSLEAY).tar.gz
-NETSSLEAY_URL = http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/$(NETSSLEAY_ARCHIVE)
+NETSSLEAY_URL = http://search.cpan.org/CPAN/authors/id/M/MI/MIKEM/$(NETSSLEAY_ARCHIVE)
 
-IOSOCKETSSL = IO-Socket-SSL-1.44
+IOSOCKETSSL = IO-Socket-SSL-1.53
 IOSOCKETSSL_ARCHIVE = $(IOSOCKETSSL).tar.gz
 IOSOCKETSSL_URL = http://search.cpan.org/CPAN/authors/id/S/SU/SULLR/$(IOSOCKETSSL_ARCHIVE)
 
 # Socks support
 
-SOCKS = IO-Socket-Socks-0.5
+SOCKS = IO-Socket-Socks-0.60
 SOCKS_ARCHIVE = $(SOCKS).tar.gz
 SOCKS_URL = http://search.cpan.org/CPAN/authors/id/O/OL/OLEG/$(SOCKS_ARCHIVE)
 
@@ -211,68 +211,68 @@ core_modules_build: $(CORE_ARCHIVES)
 core_modules_build: fakeconfig
 	if test ! -d $(DBI); then tar xzf $(DBI_ARCHIVE); patch $(DBI)/DBIXS.h < ./DBIXS.h.patch; fi
 	cd $(DBI) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(SQLITE); then tar xzf $(SQLITE_ARCHIVE); fi
 	cd $(SQLITE) ; \
-	if test ! -e Makefile; then perl -I.. -I../$(DBI) -I../$(DBI)/lib -I../$(DBI)/blib/arch -MConfig_ub Makefile.PL USE_LOCAL_SQLITE=1 ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -I../$(DBI) -I../$(DBI)/lib -I../$(DBI)/blib/arch -MConfig_ub Makefile.PL USE_LOCAL_SQLITE=1 ; fi ;\
 	make
 
 	if test ! -d $(SQLITE2); then tar xzf $(SQLITE2_ARCHIVE); fi
 	cd $(SQLITE2) ; \
-	if test ! -e Makefile; then perl -I.. -I../$(DBI) -I../$(DBI)/lib -I../$(DBI)/blib/arch -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -I../$(DBI) -I../$(DBI)/lib -I../$(DBI)/blib/arch -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(TAGSET); then tar xzf $(TAGSET_ARCHIVE); fi
 	cd $(TAGSET) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(TEMPLATE); then tar xzf $(TEMPLATE_ARCHIVE); fi
 	cd $(TEMPLATE) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(TIMEDATE); then tar xzf $(TIMEDATE_ARCHIVE); fi
 	cd $(TIMEDATE) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(DIGESTSHA); then tar xzf $(DIGESTSHA_ARCHIVE); fi
 	cd $(DIGESTSHA) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(CRYPT_CBC); then tar xzf $(CRYPT_CBC_ARCHIVE); fi
 	cd $(CRYPT_CBC) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(CRYPT_BLOWFISH); then tar xzf $(CRYPT_BLOWFISH_ARCHIVE); fi
 	cd $(CRYPT_BLOWFISH) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(CRYPT_OPENSSL_RANDOM); then tar xzf $(CRYPT_OPENSSL_RANDOM_ARCHIVE); fi
 	cd $(CRYPT_OPENSSL_RANDOM) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 xmlrpc_modules_build: $(XMLRPC_ARCHIVES)
 	if test ! -d $(VERSION_MODULE); then tar xzf $(VERSION_ARCHIVE); fi
 	cd $(VERSION_MODULE) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL --perl_only ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL --perl_only ; fi ;\
 	make
 
 	if test ! -d $(CLASS_INSPECTOR); then tar xzf $(CLASS_INSPECTOR_ARCHIVE); fi
 	cd $(CLASS_INSPECTOR) ; \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(SOAPLITE); then tar xzf $(SOAPLITE_ARCHIVE); fi
 	cd $(SOAPLITE) ; \
-	if test ! -e Makefile; then perl -I.. -I../$(CLASS_INSPECTOR)/blib/lib -MConfig_ub Makefile.PL -noprompt; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -I../$(CLASS_INSPECTOR)/blib/lib -MConfig_ub Makefile.PL -noprompt; fi ;\
 	make
 
 japanese_modules_build: $(JAPANESESUPPORT_ARCHIVES)
@@ -280,8 +280,8 @@ japanese_modules_build: $(JAPANESESUPPORT_ARCHIVES)
 	cd $(KAKASI); \
 	if test ! -e Makefile; \
 	then \
-	  PERL510=`perl -e 'print $$] ge qw{5.010000};'`; \
-	  PERL512=`perl -e 'print $$] ge qw{5.012000};'`; \
+	  PERL510=`/usr/bin/perl -e 'print $$] ge qw{5.010000};'`; \
+	  PERL512=`/usr/bin/perl -e 'print $$] ge qw{5.012000};'`; \
 	  if test "$$PERL512" == "1"; \
 	  then \
 		env CPPFLAGS="-Os -g -isysroot /Developer/SDKs/MacOSX10.7.sdk -arch i386 -arch x86_64" \
@@ -304,24 +304,24 @@ japanese_modules_build: $(JAPANESESUPPORT_ARCHIVES)
 
 	if test ! -d $(TEXTKAKASI); then tar xzf $(TEXTKAKASI_ARCHIVE); fi
 	cd $(TEXTKAKASI); \
-	if test ! -e Makefile; then perl -I.. -MConfig_kakasi Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_kakasi Makefile.PL ; fi ;\
 	make
 
 ssl_modules_build: $(SSL_ARCHIVES)
 	if test ! -d $(NETSSLEAY); then tar xzf $(NETSSLEAY_ARCHIVE); fi
 	cd $(NETSSLEAY); \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 	if test ! -d $(IOSOCKETSSL); then tar xzf $(IOSOCKETSSL_ARCHIVE); fi
 	cd $(IOSOCKETSSL); \
-	if test ! -e Makefile; then perl -I.. -I../$(NETSSLEAY)/blib/lib -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -I../$(NETSSLEAY)/blib/lib -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 socks_modules_build: $(SOCKS_ARCHIVES)
 	if test ! -d $(SOCKS); then tar xzf $(SOCKS_ARCHIVE); fi
 	cd $(SOCKS); \
-	if test ! -e Makefile; then perl -I.. -MConfig_ub Makefile.PL ; fi ;\
+	if test ! -e Makefile; then /usr/bin/perl -I.. -MConfig_ub Makefile.PL ; fi ;\
 	make
 
 $(DBI_ARCHIVE):
@@ -417,13 +417,13 @@ $(SOCKS_ARCHIVE):
 
 fakeconfig:
 	@echo Checking ExtUtils::FakeConfig version...
-	@perl -MExtUtils::FakeConfig -e 'print $$ExtUtils::FakeConfig::VERSION,"\n";'
+	@/usr/bin/perl -MExtUtils::FakeConfig -e 'print $$ExtUtils::FakeConfig::VERSION,"\n";'
 
 kakasi_dictionary: $(KAKASI)/kanwadict $(KAKASI)/itaijidict
 	cd $(KAKASI) ; \
 	head -c 73728 <kanwadict >kanwadict-head ; \
 	tail -c +73729 <kanwadict >kanwadict-body ; \
-	perl -e 'binmode STDIN; binmode STDOUT; $$a = qw(); while (<>) {$$a.=$$_}; $$a =~ s/(.)(.)(.)(.)/$$4$$3$$2$$1/sg; print $$a;' <kanwadict-head >kanwadict-head-swap ; \
+	/usr/bin/perl -e 'binmode STDIN; binmode STDOUT; $$a = qw(); while (<>) {$$a.=$$_}; $$a =~ s/(.)(.)(.)(.)/$$4$$3$$2$$1/sg; print $$a;' <kanwadict-head >kanwadict-head-swap ; \
 	CPU_TYPE=`/usr/bin/uname -p` ; \
 	case $$CPU_TYPE in \
 	powerpc ) \
