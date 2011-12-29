@@ -21,6 +21,8 @@
 #
 # ----------------------------------------------------------------------------
 
+use utf8;
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -63,8 +65,8 @@ test_assert_equal( $w->add_stopword( 'b*ox', 'English' ), 0 );
 # Test Japanese
 test_assert_equal( $w->add_stopword( chr(0x8e) . chr(0xa0), 'Nihongo' ), 0 );
 test_assert_equal( $w->remove_stopword( chr(0x8e) . chr(0xa0), 'Nihongo' ), 0 );
-test_assert_equal( $w->add_stopword( chr(0xa4) . chr(0xa2), 'Nihongo' ), 1 );
-test_assert_equal( $w->remove_stopword( chr(0xa4) . chr(0xa2), 'Nihongo' ), 1 );
+test_assert_equal( $w->add_stopword( "あ", 'Nihongo' ), 1 );
+test_assert_equal( $w->remove_stopword( "あ", 'Nihongo' ), 1 );
 
 # Getter/setter
 my %stops = ( 'oneword', 1 );

@@ -21,6 +21,7 @@
 #
 # ----------------------------------------------------------------------------
 
+use utf8;
 
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
@@ -1436,6 +1437,12 @@ if ( $have_text_kakasi ) {
 
     $b->{parser__}->{lang__} = 'Nihongo';
 
+    if ( $^O eq 'Win32' ) {
+        binmode STDOUT, ":encoding(cp932)";
+    } else {
+        binmode STDOUT, ":utf8";
+    }
+
     # Test Japanese magnet. GOMI means "trash" in Japanese.
 
     $b->create_bucket( $session, 'gomi' );
@@ -1443,29 +1450,30 @@ if ( $have_text_kakasi ) {
     # create_magnet
 
     $b->clear_magnets( $session );
-    $b->create_magnet( $session, 'gomi', 'subject', chr(0xbe) . chr(0xb5) . chr(0xc2) . chr(0xfa) );
+    $b->create_magnet( $session, 'gomi', 'subject', "承諾" );
     test_assert_equal( $b->classify( $session, 'TestMails/TestNihongo021.msg' ), 'gomi' );
 
     test_assert_equal( $b->magnet_count( $session ), 1 );
-    $b->create_magnet( $session, 'gomi', 'subject', chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8));
+    $b->create_magnet( $session, 'gomi', 'subject', "テスト");
     test_assert_equal( $b->magnet_count( $session ), 2 );
 
     # get_magnets
 
     my @magnets = $b->get_magnets( $session, 'gomi', 'subject' );
     test_assert_equal( $#magnets, 1 );
-    test_assert_equal( $magnets[0], chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8) );
-    test_assert_equal( $magnets[1], chr(0xbe) . chr(0xb5) . chr(0xc2) . chr(0xfa) );
+    test_assert_equal( $magnets[0], "テスト" );
+    test_assert_equal( $magnets[1], "承諾" );
 
     # delete_magnet
-    $b->delete_magnet( $session, 'gomi', 'subject', chr(0xbe) . chr(0xb5) . chr(0xc2) . chr(0xfa) );
+
+    $b->delete_magnet( $session, 'gomi', 'subject', "承諾" );
     test_assert_equal( $b->magnet_count( $session ), 1 );
 
     # add_message_to_bucket
 
     my %words;
 
-    open WORDS, "<TestMails/TestNihongo021.wrd";
+    open WORDS, "<:encoding(euc-jp)", "TestMails/TestNihongo021.wrd";
     while ( <WORDS> ) {
         if ( /(.+) (\d+)/ ) {
             $words{$1} = $2;
@@ -1483,9 +1491,9 @@ if ( $have_text_kakasi ) {
 
     my @words = $b->get_bucket_word_prefixes( $session, 'gomi' );
     test_assert_equal( $#words, 20 );
-    test_assert_equal( $words[18], chr(0xa4) . chr(0xb3) );
-    test_assert_equal( $words[19], chr(0xa4) . chr(0xc7) );
-    test_assert_equal( $words[20], chr(0xa5) . chr(0xb9) );
+    test_assert_equal( $words[18], "こ" );
+    test_assert_equal( $words[19], "ス" );
+    test_assert_equal( $words[20], "で" );
 
     # quarantine test
 

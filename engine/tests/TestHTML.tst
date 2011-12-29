@@ -24,6 +24,7 @@
 use strict;
 use warnings;
 no warnings qw(redefine);
+use utf8;
 
 use POSIX qw(locale_h);
 use POSIX ":sys_wait_h";
@@ -711,7 +712,10 @@ sub unit_tests {
     $h->{language__}{global}{Locale_Thousands} = '&nbsp;';
     test_assert_equal( $h->pretty_number( 1234 ), '1&nbsp;234' );
 
+    test_assert_equal( $h->shorten__( 'This is a test title of a message', 10 ), 'This is a ...' );
 
+    test_assert_equal( $h->shorten__( '日本語のタイトルのテスト', 10 ), '日本語のタイトルのテ...' );
+    test_assert_equal( $h->shorten__( '日本語のタイトルのテスト', 9 ), '日本語のタイトルの...' );
 }
 
 1;

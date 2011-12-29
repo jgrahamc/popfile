@@ -21,6 +21,10 @@
 #
 # ----------------------------------------------------------------------------
 
+use strict;
+use warnings;
+use utf8;
+
 use POPFile::Loader;
 my $POPFile = POPFile::Loader->new();
 $POPFile->CORE_loader_init();
@@ -565,11 +569,17 @@ if ( $have_text_kakasi ) {
     test_assert( $b->start() );
     $cl->{lang__} = 'Nihongo';
 
+    if ( $^O eq 'Win32' ) {
+        binmode STDOUT, ":encoding(cp932)";
+    } else {
+        binmode STDOUT, ":utf8";
+    }
+
     my $nihongo_parser = $cl->setup_nihongo_parser( 'kakasi' );
     test_assert_equal( $nihongo_parser, 'kakasi' );
 
     # Test decode_string
-    my $original_string = 'POPFile' . pack( "H*", "a4cfbcabc6b0a5e1a1bca5ebbfb6a4eacaaca4b1a5c4a1bca5eba4c7a4b9" );
+    my $original_string = "POPFileは自動メール振り分けツールです";
 
     test_assert_equal( $cl->decode_string('=?ISO-2022-JP?B?UE9QRmlsZRskQiRPPCtGMCVhITwlaz82JGpKLCQxJUQhPCVrJEckORsoQg==?='), $original_string );
     test_assert_equal( $cl->decode_string('=?SHIFT_JIS?B?UE9QRmlsZYLNjqmTroOBgVuDi5BVguiVqoKvg2OBW4OLgsWCtw==?='), $original_string );
@@ -589,11 +599,11 @@ if ( $have_text_kakasi ) {
 
     $cl->{nihongo_parser__}{init}($cl);
 
-    my $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b020a5e1a1bca5eb20bfb6a4eacaaca4b120a5c4a1bca5eb20a4c7a4b9" );
+    my $wakati_string = "POPFile は 自動 メール 振り分け ツール です";
     test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
 
-    $original_string = pack( "H*", "504f5046696c65a4cfbcab0a09c6b0a5e1a1bca5ebbfb609a4ea0dcaac202020a4b1a5c4a1bca5eba4c7a4b9" );
-    $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b00a09a5e1a1bca5eb20bfb6a4eacaaca4b1090d202020a5c4a1bca5eb20a4c7a4b9" );
+    $original_string = "POPFile は自\x0a動\x09メール振\x09り\x0d分   けツールです";
+    $wakati_string = "POPFile は 自動\x0a\x09メール 振り分け\x09\x0d   ツール です";
     test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
 
     $cl->{nihongo_parser__}{close}($cl);
@@ -604,6 +614,7 @@ if ( $have_text_kakasi ) {
     $cl->{kakasi_mutex__} = new POPFile::Mutex( 'mailparse_kakasi' );
     $cl->{need_kakasi_mutex__} = 1;
 
+    #$cl->{debug__} = 1;
     my @parse_tests = sort glob 'TestMails/TestNihongo*.msg';
 
     for my $parse_test (@parse_tests) {
@@ -616,10 +627,11 @@ if ( $have_text_kakasi ) {
 
         $cl->parse_file( $parse_test );
 
-        open WORDS, "<$words";
+        open WORDS, "<:encoding(euc-jp)", $words;
         while ( <WORDS> ) {
             if ( /^(.+) (\d+)/ ) {
                 my ( $word, $value ) = ( $1, $2 );
+                $word = lc $word if ( $word !~ /:/ );
                 test_assert_equal( $cl->{words__}{$word}, $value, "$words $word $value" );
                 delete $cl->{words__}{$word};
             }
@@ -650,8 +662,12 @@ if ( $have_text_kakasi ) {
 
     $cl->{nihongo_parser__}{init}($cl);
 
-    $original_string = pack( "H*", "504f5046696c65a4cfbcabc6b0a5e1a1bca5ebbfb6a4eacaaca4b1a5c4a1bca5eba4c7a4b9" );
-    $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b020a5e1a1bca5eb20bfb620a4ea20caac20a4b120a5c4a1bca5eb20a4c7a4b920" );
+    $original_string = "POPFileは自動メール振り分けツールです";
+    $wakati_string = "POPFile は 自動 メール 振 り 分 け ツール です ";
+    test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
+
+    $original_string = "適当に云々とか＠！％とか半角ｶﾀｶﾅとかも試してみます";
+    $wakati_string = "適当 に 云々 とか ＠ ！ ％ とか 半角 ｶﾀｶﾅ とかも 試 してみます ";
     test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
 
     $cl->{nihongo_parser__}{close}($cl);
@@ -675,7 +691,9 @@ if ( $have_text_kakasi ) {
         $cl->{nihongo_parser__}{init}($cl);
 
         $original_string = pack( "H*", "504f5046696c65a4cfbcabc6b0a5e1a1bca5ebbfb6a4eacaaca4b1a5c4a1bca5eba4c7a4b9" );
+#        $original_string = "POPFileは自動メール振り分けツールです";
         $wakati_string = pack( "H*", "504f5046696c6520a4cf20bcabc6b020a5e1a1bca5eb20bfb6a4eacaaca4b120a5c4a1bca5eb20a4c7a4b9200a" );
+#        $wakati_string = "POPFile は 自動 メール 振り分け ツール で す \x0a";
         test_assert_equal( $cl->{nihongo_parser__}{parse}($cl, $original_string), $wakati_string );
 
         $cl->{nihongo_parser__}{close}($cl);

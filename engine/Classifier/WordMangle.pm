@@ -34,9 +34,25 @@ use utf8;
 # These are used for Japanese support
 
 my $ascii = '[\x00-\x7F]'; # ASCII chars
-my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; # 2bytes EUC-JP chars
-my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])'; # 3bytes EUC-JP chars
-my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)"; # EUC-JP chars
+
+sub InNihongo
+{
+    return <<'END';
++utf8::InHiragana
++utf8::InKatakana
++utf8::Han
+3005
+END
+}
+
+sub InWideAscii
+{
+    return <<'END';
+FF10 FF19
+FF21 FF3A
+FF41 FF5A
+END
+}
 
 #----------------------------------------------------------------------------
 # new
@@ -93,7 +109,7 @@ sub save_stopwords
 {
     my ($self) = @_;
 
-    if ( open STOPS, '>' . $self->get_user_path_( 'stopwords' ) ) {
+    if ( open STOPS, '>:utf8', $self->get_user_path_( 'stopwords' ) ) {
         for my $word (keys %{$self->{stop__}}) {
             print STOPS "$word\n";
         }
@@ -173,10 +189,10 @@ sub add_stopword
 {
     my ( $self, $stopword, $lang ) = @_;
 
-    # In Japanese mode, reject non EUC Japanese characters.
+    # In Japanese mode, reject non UTF-8 Japanese characters.
 
     if ( $lang eq 'Nihongo') {
-        if ( $stopword !~ /^($euc_jp)+$/o ) {
+        if ( $stopword !~ /^(?:[\p{InNihongo}\p{InWideAscii}]|$ascii)+$/o ) {
             return 0;
         }
     } else {
@@ -201,10 +217,10 @@ sub remove_stopword
 {
     my ( $self, $stopword, $lang ) = @_;
 
-    # In Japanese mode, reject non EUC Japanese characters.
+    # In Japanese mode, reject non UTF-8 Japanese characters.
 
     if ( $lang eq 'Nihongo') {
-        if ( $stopword !~ /^($euc_jp)+$/o ) {
+        if ( $stopword !~ /^(?:[\p{InNihongo}\p{InWideAscii}]|$ascii)+$/o ) {
             return 0;
         }
     } else {

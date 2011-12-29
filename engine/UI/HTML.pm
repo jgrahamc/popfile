@@ -61,14 +61,24 @@ my $seconds_per_day = 60 * 60 * 24;
 # ASCII characters
 my $ascii = '[\x00-\x7F]';
 
-# EUC-JP 2 byte characters
-my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])';
+sub InNihongo
+{
+    return <<'END';
++utf8::InHiragana
++utf8::InKatakana
++utf8::Han
+3005
+END
+}
 
-# EUC-JP 3 byte characters
-my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])';
-
-# EUC-JP characters
-my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)";
+sub InWideAscii
+{
+    return <<'END';
+FF10 FF19
+FF21 FF3A
+FF41 FF5A
+END
+}
 
 my %headers_table = ( 'from',       'From',         # PROFILE BLOCK START
                       'to',         'To',
@@ -2096,7 +2106,7 @@ sub advanced_page
             $c = $1;
         } else {
             if ( $self->global_config_( 'language' ) =~ /^Nihongo$/ ) {
-                $word =~ /^($euc_jp)/o;
+                $word =~ /^(.)/;
                 $c = $1;
             } else {
                 $word =~ /^(.)/;
@@ -3587,10 +3597,10 @@ sub history_page
                      $col_data{History_If_Subject_Column} = 1;
 
                      if ( $language_for_user eq 'Nihongo' ) {
-                         # Remove wrong characters as euc-jp.
+                         # Remove wrong characters as UTF-8.
                          for my $i (1..4) {
                             my $result = '';
-                            while ( $$row[$i] =~ /((?:$euc_jp){1,300})/og ) {
+                            while ( $$row[$i] =~ /((?:[\p{InNihongo}\p{InWideAscii}]|$ascii){1,300})/og ) {
                                 $result .= $1;
                             }
                             $$row[$i] = $result;
@@ -3699,9 +3709,7 @@ sub shorten__
     my ( $self, $string, $length, $language ) = @_;
 
     if ( length($string) > $length ) {
-        $string =~ /(.{$length})/;
-        $1 =~ /((?:$euc_jp)*)/o if ( $language eq 'Nihongo' );
-        $string = "$1...";
+        $string = substr( $string, 0, $length ) . '...';
     }
 
     return $string;

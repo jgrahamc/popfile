@@ -493,6 +493,12 @@ sub db_connect_helper__
         print "\nDatabase upgrade complete\n\n";
     }
 
+    # Use unicode when using SQLite
+
+    if ( $sqlite ) {
+        $db->{sqlite_unicode} = 1;
+    }
+
     return $db;
 }
 
@@ -580,7 +586,7 @@ sub db_upgrade__
 
     my $i = 0;
     my $ins_file = $self->get_user_path_( 'insert.sql' );
-    open INSERT, '>' . $ins_file;
+    open INSERT, '>:utf8', $ins_file;
 
     foreach my $table (@tables) {
         next if ( $table =~ /\.?popfile$/ );
@@ -662,7 +668,7 @@ sub db_upgrade__
     print "    Restoring old data\n    ";
 
     $db_to->begin_work;
-    open INSERT, '<' . $ins_file;
+    open INSERT, '<:utf8', $ins_file;
     $i = 0;
     my $sql = '';
     while ( <INSERT> ) {

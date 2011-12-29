@@ -33,12 +33,14 @@ use POPFile::Module;
 use strict;
 use warnings;
 use utf8;
+
 use Classifier::MailParse;
 use IO::Handle;
 use DBI;
 use Digest::MD5 qw( md5_hex );
 use Digest::SHA qw( sha256_hex );
 use MIME::Base64;
+use Unicode::Collate;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -304,17 +306,16 @@ sub start
     # LC_CTYPE to C.
     #
     # This is to avoid Perl crash on Windows because default
-    # LC_COLLATE of Japanese Win is Japanese_Japan.932(Shift_JIS),
-    # which is different from the charset POPFile uses for Japanese
-    # characters(EUC-JP).
+    # LC_COLLATE of Korean/Chinese Win is is different from the charset
+    # POPFile uses for Korean/Chinese characters.
     #
     # And on some configuration (e.g. Japanese Mac OS X), LC_CTYPE is set to
-    # UTF-8 but POPFile uses EUC-JP encoding for Japanese. In this situation
-    # lc() does not work correctly.
+    # UTF-8 but POPFile uses other encoding. In this situation lc() does not
+    # work correctly.
 
     my $language = $self->global_config_( 'language' ) || '';
 
-    if ( $language =~ /^(Nihongo$|Korean$|Chinese)/ ) {
+    if ( $language =~ /^(Korean$|Chinese)/ ) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
         setlocale( LC_CTYPE,   'C' );
@@ -1210,7 +1211,7 @@ sub upgrade_bucket__
 
         $self->db_()->begin_work;
 
-        if ( open WORDS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
+        if ( open WORDS, '<:encoding(iso-8859-1)', $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
 
             my $wc = 1;
 
@@ -1505,7 +1506,7 @@ sub add_words_to_bucket__
     # then update those counts and write them back to the database.
 
     my $words;
-    $words = join( ',', map( $self->db_()->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    $words = join( ',', map( $self->db_()->quote( $_ ), (keys %{$self->{parser__}{words__}}) ) );
     $self->{get_wordids__} = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
              "select id, word from words
                      where word in ( $words );" );                                  # PROFILE BLOCK STOP
@@ -1647,41 +1648,6 @@ sub echo_to_dot_
     close FILE if ( $isopen );
 
     return $hit_dot;
-}
-
-#----------------------------------------------------------------------------
-#
-# substr_euc__
-#
-# "substr" function which supports EUC Japanese charset
-#
-# $pos      Start position
-# $len      Word length
-#
-#----------------------------------------------------------------------------
-sub substr_euc__
-{
-    my ( $str, $pos, $len ) = @_;
-    my $result_str;
-    my $char;
-    my $count = 0;
-    if ( !$pos ) {
-        $pos = 0;
-    }
-    if ( !$len ) {
-        $len = length( $str );
-    }
-
-    for ( $pos = 0; $count < $len; $pos++ ) {
-        $char = substr( $str, $pos, 1 );
-        if ( $char =~ /[\x80-\xff]/ ) {
-            $char = substr( $str, $pos++, 2 );
-        }
-        $result_str .= $char;
-        $count++;
-    }
-
-    return $result_str;
 }
 
 #----------------------------------------------------------------------------
@@ -2295,7 +2261,7 @@ sub classify
     # winning bucket is.
 
     my $words;
-    $words = join( ',', map( $self->db_()->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    $words = join( ',', map( $self->db_()->quote( $_ ), (keys %{$self->{parser__}{words__}}) ) );
     $self->{get_wordids__} = $self->database_()->validate_sql_prepare_and_execute(  # PROFILE BLOCK START
              "select id, word
                   from words
@@ -2985,9 +2951,9 @@ sub classify_and_modify
            if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
                require Encode;
 
-               Encode::from_to( $orig_from, 'euc-jp', 'iso-2022-jp');
-               Encode::from_to( $orig_to, 'euc-jp', 'iso-2022-jp');
-               Encode::from_to( $orig_subject, 'euc-jp', 'iso-2022-jp');
+               $orig_from    = Encode::encode( 'iso-2022-jp', $orig_from    );
+               $orig_to      = Encode::encode( 'iso-2022-jp', $orig_to      );
+               $orig_subject = Encode::encode( 'iso-2022-jp', $orig_subject );
 
                $encoded_from = $orig_from;
                $encoded_to = $orig_to;
@@ -3022,7 +2988,7 @@ sub classify_and_modify
            if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
                require Encode;
 
-               Encode::from_to( $first20, 'euc-jp', 'iso-2022-jp');
+                $first20 = Encode::encode( 'iso-2022-jp', $first20 );
            }
 
            print $client $first20;
@@ -3574,14 +3540,12 @@ sub get_bucket_word_prefixes
          where matrix.wordid  = words.id and
                matrix.bucketid = $bucketid;");        # PROFILE BLOCK STOP
 
-    if ( $self->global_config_( 'language' ) eq 'Nihongo' ) {
-        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc__($_,0,1)} @{$result};
+    if ( $self->global_config_( 'language' ) eq 'Korean' ) {
+        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} @{$result};
     } else {
-        if  ( $self->global_config_( 'language' ) eq 'Korean' ) {
-            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} @{$result};
-        } else {
-            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)}  @{$result};
-        }
+        my $collator = Unicode::Collate->new;
+
+        return grep {$_ ne $prev && ($prev = $_, 1)} $collator->sort( map {substr($_,0,1)}  @{$result} );
     }
 }
 

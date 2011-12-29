@@ -47,46 +47,57 @@ my %encoding_candidates = (                       # PROFILE BLOCK START
     'Nihongo' => [ 'cp932', 'euc-jp', '7bit-jis' ]
 );                                                # PROFILE BLOCK STOP
 
-my $ascii              = '[\x00-\x7F]';                                      # ASCII chars
-my $two_bytes_euc_jp   = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])';                   # 2bytes EUC-JP chars
-my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])';                   # 3bytes EUC-JP chars
-my $euc_jp             = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)"; # EUC-JP chars
+my $ascii              = '[\x00-\x7F]';           # ASCII chars
 
-# Symbols in EUC-JP chars which cannot be considered a part of words
+sub InNihongo
+{
+    return <<'END';
++utf8::InHiragana
++utf8::InKatakana
++utf8::Han
+3005
+END
+}
 
-my $symbol_row1_euc_jp = '(?:[\xA1][\xA1-\xBB\xBD-\xFE])';
-my $symbol_row2_euc_jp = '(?:[\xA2][\xA1-\xFE])';
-my $symbol_row8_euc_jp = '(?:[\xA8][\xA1-\xFE])';
-my $symbol_euc_jp      = "(?:$symbol_row1_euc_jp|$symbol_row2_euc_jp|$symbol_row8_euc_jp)";
+sub InWideAscii
+{
+    return <<'END';
+FF10 FF19
+FF21 FF3A
+FF41 FF5A
+END
+}
 
-# Cho-on kigou(symbol in Japanese), a special symbol which can appear
-# in middle of words
+sub InWideSymbol
+{
+    return <<'END';
+3000 303F
+FE10 FE19
+FE30 FE4F
+FF01 FF0F
+FF1A FF20
+FF3B FF40
+FF5B FF60
+FF61 FF64
+END
+}
 
-my $cho_on_symbol = '(?:\xA1\xBC)';
+sub InHalfWidthKatakana
+{
+    return <<'END';
+FF66 FF9F
+END
+}
 
-# Non-symbol EUC-JP chars
-
-my $non_symbol_two_bytes_euc_jp = '(?:[\x8E\xA3-\xA7\xB0-\xFE][\xA1-\xFE])';
-my $non_symbol_euc_jp = "(?:$non_symbol_two_bytes_euc_jp|$three_bytes_euc_jp|$cho_on_symbol)";
-
-# Constants for the internal wakachigaki parser.
-# Kind of EUC-JP chars
-my $euc_jp_symbol    = '[\xA1\xA2\xA6-\xA8\xAD\xF9-\xFC][\xA1-\xFE]';                # The symbols make a word of one character.
-my $euc_jp_alphanum  = '(?:\xA3[\xB0-\xB9\xC1-\xDA\xE1-\xFA])+';                     # One or more alphabets and numbers
-my $euc_jp_hiragana  = '(?:(?:\xA4[\xA1-\xF3])+(?:\xA1[\xAB\xAC\xB5\xB6\xBC])*)+';   # One or more Hiragana characters
-my $euc_jp_katakana  = '(?:(?:\xA5[\xA1-\xF6])+(?:\xA1[\xA6\xBC\xB3\xB4])*)+';       # One or more Katakana characters
-my $euc_jp_hkatakana = '(?:\x8E[\xA6-\xDF])+';                                       # One or more Half-width Katakana characters
-my $euc_jp_kanji     = '[\xB0-\xF4][\xA1-\xFE](?:[\xB0-\xF4][\xA1-\xFE]|\xA1\xB9)?'; # One or two Kanji characters
-
-my $euc_jp_word = '(' .        # PROFILE BLOCK START
-    $euc_jp_alphanum .     '|' . 
-    $euc_jp_hiragana .     '|' . 
-    $euc_jp_katakana .     '|' . 
-    $euc_jp_hkatakana .    '|' . 
-    $euc_jp_kanji .        '|' . 
-    $euc_jp_symbol .       '|' . 
-    $ascii .              '+|' .
-    $three_bytes_euc_jp . ')'; # PROFILE BLOCK STOP
+my $nihongo_word = qr{
+    (\p{InWideSymbol}|
+     \p{InHiragana}+|
+     \p{InKatakana}+|
+     \p{InHalfWidthKatakana}+|
+     \p{Han}(?:\p{Han}|\x{3005})?|
+     \p{InWideAscii}+|
+     $ascii+)
+}x;
 
 # HTML entity mapping to character codes, this maps things like &amp;
 # to their corresponding character code
@@ -789,21 +800,14 @@ sub add_line
 
             if ( $self->{lang__} eq 'Nihongo' ) {
 
-                # In Japanese mode, non-symbol EUC-JP characters should be
+                # In Japanese mode, non-symbol UTF-8 characters should be
                 # matched.
-                #
-                # ^$euc_jp*? is added to avoid incorrect matching.
-                # For example, EUC-JP char represented by code A4C8,
-                # should not match the middle of two EUC-JP chars
-                # represented by CCA4 and C8BE, the second byte of the
-                # first char and the first byte of the second char.
 
                 # In Japanese, one character words are common, so care about
                 # words between 2 and 45 characters
 
-                while ( $line =~ s/^$euc_jp*?  # PROFILE BLOCK START
-                                   ([A-Za-z][A-Za-z\']{2,44}|
-                                    $non_symbol_euc_jp{2,45})
+                while ( $line =~ s/([\p{InNihongo}\p{InWideAscii}]{2,45}|
+                                    [a-zA-Z][a-zA-Z\']{2,45})
                                    (?:[_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)
                                   //ox ) {     # PROFILE BLOCK STOP
                     if ( ( $self->{in_headers__} == 0 ) &&    # PROFILE BLOCK START
@@ -814,7 +818,7 @@ sub add_line
 
                     $self->update_word(  # PROFILE BLOCK START
                         $1, $encoded, '',
-                        '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]|' . $symbol_euc_jp,
+                        '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]|\p{IsZ}',
                         $prefix );       # PROFILE BLOCK STOP
                 }
             } else {
@@ -2141,7 +2145,7 @@ sub clear_out_base64
 
         if ( $self->{lang__} eq 'Nihongo' ) {
             $decoded = convert_encoding(                        # PROFILE BLOCK START
-                $decoded, $self->{charset__}, 'euc-jp', '7bit-jis',
+                $decoded, $self->{charset__}, 'utf-8', '7bit-jis',
                 @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
             $decoded = $self->{nihongo_parser__}{parse}( $self, $decoded );
         } else {
@@ -2197,7 +2201,7 @@ sub clear_out_qp
 
         if ( $self->{lang__} eq 'Nihongo' ) {
             $line = convert_encoding(
-                $line, $self->{charset__}, 'euc-jp', '7bit-jis',
+                $line, $self->{charset__}, 'utf-8', '7bit-jis',
                 @{ $encoding_candidates{ $self->{lang__} } } );
             $line = $self->{nihongo_parser__}{parse}( $self, $line );
         } else {
@@ -2231,7 +2235,7 @@ sub clear_out_encoded_text
         # Decode \x??
         $self->{encoded_text__} =~ s/\\x([8-9A-F][A-F0-9])/pack("C", hex($1))/eig if ($self->{encoded_text__} !~ /\\x[0-7][0-9A-F]/);
 
-        $self->{encoded_text__} = convert_encoding( $self->{encoded_text__}, $self->{charset__}, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
+        $self->{encoded_text__} = convert_encoding( $self->{encoded_text__}, $self->{charset__}, 'utf-8', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
         $self->{encoded_text__} = $self->{nihongo_parser__}{parse}( $self, $self->{encoded_text__} );
 
         if ($self->{color__} ne '' ) {
@@ -2301,7 +2305,7 @@ sub decode_string
 
                 if ( $lang eq 'Nihongo' ) {
                     $value = convert_encoding(                          # PROFILE BLOCK START
-                        $value, $charset, 'euc-jp', '7bit-jis',
+                        $value, $charset, 'utf-8', '7bit-jis',
                         @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
                 } else {
                     $value = convert_encoding(
@@ -2318,7 +2322,7 @@ sub decode_string
 
                 if ( $lang eq 'Nihongo' ) {
                     $value = convert_encoding(                          # PROFILE BLOCK START
-                        $value, $charset, 'euc-jp', '7bit-jis',
+                        $value, $charset, 'utf-8', '7bit-jis',
                         @{ $encoding_candidates{ $self->{lang__} } } ); # PROFILE BLOCK STOP
                 } else {
                     $value = convert_encoding(
@@ -2994,10 +2998,18 @@ sub convert_encoding
                     $string = Encode::encode( $to, $enc->decode( $string ) );
                 }
             } else {
-                Encode::from_to( $string, $from, $to );
+                if ( $to eq 'utf-8' ) {
+                    $string = Encode::decode( $from, $string );
+                } else {
+                    Encode::from_to( $string, $from, $to );
+                }
             }
         };
         $string = $orig_string if ( $@ );
+    } else {
+        if ( $to =~ /utf-8/i ) {
+            $string = Encode::decode( $to, $string );
+        }
     }
     return $string;
 }
@@ -3023,7 +3035,7 @@ sub parse_line_with_kakasi
     return $line if ( $line =~ /^[\x00-\x7F]*$/ );
 
     # Split Japanese line into words using Kakasi Wakachigaki mode
-    $line = Text::Kakasi::do_kakasi( $line );
+    $line = $self->{nihongo_parser__}{obj_kakasi}->get( $line );
 
     return $line;
 }
@@ -3075,7 +3087,7 @@ sub parse_line_with_internal_parser
     return $line if ( $line =~ /^[\x00-\x7F]*$/ );
 
     # Split Japanese line into words by the kind of characters
-    $line =~ s/\G$euc_jp_word/$1 /og;
+    $line =~ s/\G$nihongo_word/$1 /og;
 
     return $line;
 }
@@ -3091,9 +3103,12 @@ sub init_kakasi
 {
     # Initialize Kakasi with Wakachigaki mode(-w is passed to
     # Kakasi as argument). Both input and ouput encoding are
-    # EUC-JP.
+    # UTF-8.
 
-    Text::Kakasi::getopt_argv( 'kakasi', '-w', '-ieuc', '-oeuc' );
+    my ( $self ) = @_;
+
+    $self->{nihongo_parser__}{obj_kakasi}
+        = Text::Kakasi->new( '-w', '-iutf8', '-outf8' );
 }
 
 # ----------------------------------------------------------------------------
@@ -3123,7 +3138,9 @@ sub init_mecab
 # ----------------------------------------------------------------------------
 sub close_kakasi
 {
-    Text::Kakasi::close_kanwadict();
+    my ( $self ) = @_;
+
+    $self->{nihongo_parser__}{obj_kakasi} = undef;
 }
 
 # ----------------------------------------------------------------------------
