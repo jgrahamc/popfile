@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+Ôªø# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -30,199 +30,199 @@ On                                      Be
 Off                                     Ki
 TurnOn                                  Bekapcsol
 TurnOff                                 Kikapcsol
-Add                                     Hozz·ad
+Add                                     Hozz√°ad
 Remove                                  Elvesz
-Previous                                Elızı
-Next                                    Kˆvetkezı
-From                                    FeladÛ
-Subject                                 TÈma
-Classification                          Oszt·lyoz·s
-Reclassify                              ⁄jraoszt·lyoz
+Previous                                El≈ëz≈ë
+Next                                    K√∂vetkez≈ë
+From                                    Felad√≥
+Subject                                 T√©ma
+Classification                          Oszt√°lyoz√°s
+Reclassify                              √öjraoszt√°lyoz
 Undo                                    Undo
-Close                                   Bez·r
+Close                                   Bez√°r
 Find                                    Keres
-Filter                                  Sz˚rı
+Filter                                  Sz≈±r≈ë
 Yes                                     Igen
 No                                      Nem
 ChangeToYes                             Kapcsold Igen-re
 ChangeToNo                              Kapcsold Nem-re
-Bucket                                  Tart·ly
-Magnet                                  M·gnes
-Delete                                  Tˆrˆl
-Create                                  LÈtrehoz
+Bucket                                  Tart√°ly
+Magnet                                  M√°gnes
+Delete                                  T√∂r√∂l
+Create                                  L√©trehoz
 To                                      Cimzett
-Total                                   ÷sszesitÈs
-Rename                                  ¡tnevez
+Total                                   √ñsszesit√©s
+Rename                                  √Åtnevez
 Frequency                               Frekvencia
-Probability                             ValÛszin˚sÈg
-Score                                   Pontsz·m
+Probability                             Val√≥szin≈±s√©g
+Score                                   Pontsz√°m
 Lookup                                  Lookup
 
 # The header and footer that appear on every UI page
-Header_Title                            POPFile VezÈrlıkˆzpont
+Header_Title                            POPFile Vez√©rl≈ëk√∂zpont
 Header_Shutdown                         Shutdown POPFile
 Header_History                          History
-Header_Buckets                          Tart·lyok
-Header_Configuration                    Be·llit·sok
-Header_Advanced                         HaladÛ
-Header_Security                         Biztons·g
-Header_Magnets                          M·gnesek
+Header_Buckets                          Tart√°lyok
+Header_Configuration                    Be√°llit√°sok
+Header_Advanced                         Halad√≥
+Header_Security                         Biztons√°g
+Header_Magnets                          M√°gnesek
 
 Footer_HomePage                         POPFile Honlap
-Footer_Manual                           KÈzikˆnyv
-Footer_Forums                           FÛrumok
+Footer_Manual                           K√©zik√∂nyv
+Footer_Forums                           F√≥rumok
 Footer_FeedMe                           Adj enni!
-Footer_RequestFeature                   Tulajdons·g kÈrÈse
+Footer_RequestFeature                   Tulajdons√°g k√©r√©se
 Footer_MailingList                      Levlista
 
-Configuration_Error1                    Az elv·lasztÛ karakter nem lehet hosszabb 1 karakternÈl
-Configuration_Error2                    A felhaszn·lÛi interfÈsz port egy sz·m kell hogy legyen 1 Ès 65535 kˆzˆtt.
-Configuration_Error3                    A POP3 port egy sz·m kell hogy legyen 1 Ès 65535 kˆzˆtt.
-Configuration_Error4                    A lapsz·m egy sz·m kell hogy legyen 1 Ès 1000 kˆzˆtt.
-Configuration_Error5                    A history-ban lÈvı napok sz·ma egy sz·m kell hogy legyen 1 Ès 366 kˆzˆtt.
-Configuration_Error6                    A TCP idıt˙llÈpÈs egy sz·m kell hogy legyen 10 Ès 1800 kˆzˆtt.
-Configuration_POP3Port                  POP3 figyelı port
-Configuration_POP3Update                Az ˙j port: %s; A v·ltoztat·s ÈletbelÈptetÈsÈhez ˙jra kell inditanod POPFile-t.
-Configuration_Separator                 Elv·lasztÛ karakter
-Configuration_SepUpdate                 Az ˙j elv·lasztÛ karakter: %s
-Configuration_UI                        Felhaszn·lÛi interfÈsz web port
-Configuration_UIUpdate                  Az ˙j felhaszn·lÛi interfÈsz web port %s; A v·ltoztat·s ÈletbelÈptetÈsÈhez ˙jra kell inditanod POPFile-t.
-Configuration_History                   Egy lapon lÈvı emailek sz·ma
-Configuration_HistoryUpdate             Az egy lapon lÈvı emailek sz·ma megv·ltozott: %s
-Configuration_Days                      A history-ban megırizendı napok sz·ma
-Configuration_DaysUpdate                A history-ban megırizendı napok sz·m·nak ˙j ÈrtÈke: %s
-Configuration_UserInterface             Felhaszn·lÛi fel¸let
+Configuration_Error1                    Az elv√°laszt√≥ karakter nem lehet hosszabb 1 karaktern√©l
+Configuration_Error2                    A felhaszn√°l√≥i interf√©sz port egy sz√°m kell hogy legyen 1 √©s 65535 k√∂z√∂tt.
+Configuration_Error3                    A POP3 port egy sz√°m kell hogy legyen 1 √©s 65535 k√∂z√∂tt.
+Configuration_Error4                    A lapsz√°m egy sz√°m kell hogy legyen 1 √©s 1000 k√∂z√∂tt.
+Configuration_Error5                    A history-ban l√©v≈ë napok sz√°ma egy sz√°m kell hogy legyen 1 √©s 366 k√∂z√∂tt.
+Configuration_Error6                    A TCP id≈ët√∫ll√©p√©s egy sz√°m kell hogy legyen 10 √©s 1800 k√∂z√∂tt.
+Configuration_POP3Port                  POP3 figyel≈ë port
+Configuration_POP3Update                Az √∫j port: %s; A v√°ltoztat√°s √©letbel√©ptet√©s√©hez √∫jra kell inditanod POPFile-t.
+Configuration_Separator                 Elv√°laszt√≥ karakter
+Configuration_SepUpdate                 Az √∫j elv√°laszt√≥ karakter: %s
+Configuration_UI                        Felhaszn√°l√≥i interf√©sz web port
+Configuration_UIUpdate                  Az √∫j felhaszn√°l√≥i interf√©sz web port %s; A v√°ltoztat√°s √©letbel√©ptet√©s√©hez √∫jra kell inditanod POPFile-t.
+Configuration_History                   Egy lapon l√©v≈ë emailek sz√°ma
+Configuration_HistoryUpdate             Az egy lapon l√©v≈ë emailek sz√°ma megv√°ltozott: %s
+Configuration_Days                      A history-ban meg≈ërizend≈ë napok sz√°ma
+Configuration_DaysUpdate                A history-ban meg≈ërizend≈ë napok sz√°m√°nak √∫j √©rt√©ke: %s
+Configuration_UserInterface             Felhaszn√°l√≥i fel√ºlet
 Configuration_Skins                     Skinek
-Configuration_SkinsChoose               V·lassz skin-t
+Configuration_SkinsChoose               V√°lassz skin-t
 Configuration_Language                  Nyelv
-Configuration_LanguageChoose            V·lassz nyelvet
+Configuration_LanguageChoose            V√°lassz nyelvet
 Configuration_ListenPorts               Figyelj portokon
-Configuration_HistoryView               History NÈzet
+Configuration_HistoryView               History N√©zet
 Configuration_TCPTimeout                TCP Kapcsolat Timeout
-Configuration_TCPTimeoutSecs            TCP kapcsolat timeout m·sodpercekben
-Configuration_TCPTimeoutUpdate          A TCP kapcsolat timeout ˙j ÈrtÈke: %s
-Configuration_ClassificationInsertion   Oszt·lyoz·s beillesztÈs
-Configuration_SubjectLine               BeillesztÈs az email tÈm·j·ba
-Configuration_XTCInsertion              X-Text-Classification alkalmaz·sa
-Configuration_XPLInsertion              X-POPFile-Link beillesztÈse
-Configuration_Logging                   NaplÛz·s
+Configuration_TCPTimeoutSecs            TCP kapcsolat timeout m√°sodpercekben
+Configuration_TCPTimeoutUpdate          A TCP kapcsolat timeout √∫j √©rt√©ke: %s
+Configuration_ClassificationInsertion   Oszt√°lyoz√°s beilleszt√©s
+Configuration_SubjectLine               Beilleszt√©s az email t√©m√°j√°ba
+Configuration_XTCInsertion              X-Text-Classification alkalmaz√°sa
+Configuration_XPLInsertion              X-POPFile-Link beilleszt√©se
+Configuration_Logging                   Napl√≥z√°s
 Configuration_None                      Nincs
-Configuration_ToScreen                  KÈpernyıre
-Configuration_ToFile                    F·jlba
-Configuration_ToScreenFile              KÈpernyıre Ès f·jlba
-Configuration_LoggerOutput              NaplÛzÛ kimenet
+Configuration_ToScreen                  K√©perny≈ëre
+Configuration_ToFile                    F√°jlba
+Configuration_ToScreenFile              K√©perny≈ëre √©s f√°jlba
+Configuration_LoggerOutput              Napl√≥z√≥ kimenet
 
-Advanced_Error1                         '%s' m·r hozz· lett adva a blokkolÛ szavakhoz
-Advanced_Error2                         A figyelmen kiv¸l hagyott szavak csak bet˚ket, sz·mokat Ès a kˆvetkezı karaktereket tartalmayhatj·k:, ., _, -, @
-Advanced_Error3                         '%s' hozz·adva a blokkolt szavak list·j·hoz
-Advanced_Error4                         '%s' nincs a blokkolt szavak kˆzˆtt
-Advanced_Error5                         '%s' tˆrˆlve a blokkolt szavak kˆz˙l
-Advanced_StopWords                      Figyelmen kiv˚l hagyott szavak
-Advanced_Message1                       A kˆvetkezı szavak minden oszt·lyoz·sbÛl ki fognak maradni, mivel t˙l s˚r˚n fordulnak elı.
-Advanced_AddWord                        SzÛ hozz·ad·sa
-Advanced_RemoveWord                     SzÛ tˆrlÈse
+Advanced_Error1                         '%s' m√°r hozz√° lett adva a blokkol√≥ szavakhoz
+Advanced_Error2                         A figyelmen kiv√ºl hagyott szavak csak bet≈±ket, sz√°mokat √©s a k√∂vetkez≈ë karaktereket tartalmayhatj√°k:, ., _, -, @
+Advanced_Error3                         '%s' hozz√°adva a blokkolt szavak list√°j√°hoz
+Advanced_Error4                         '%s' nincs a blokkolt szavak k√∂z√∂tt
+Advanced_Error5                         '%s' t√∂r√∂lve a blokkolt szavak k√∂z√∫l
+Advanced_StopWords                      Figyelmen kiv≈±l hagyott szavak
+Advanced_Message1                       A k√∂vetkez≈ë szavak minden oszt√°lyoz√°sb√≥l ki fognak maradni, mivel t√∫l s≈±r≈±n fordulnak el≈ë.
+Advanced_AddWord                        Sz√≥ hozz√°ad√°sa
+Advanced_RemoveWord                     Sz√≥ t√∂rl√©se
 
-History_Filter                          &nbsp;(csak a <font color=%s>%s</font> kontÈner tartalma l·thatÛ)
-History_Search                          &nbsp;(Tal·latok %s tÈm·ra)
-History_Title                           Utolj·ra beÈrkezett ¸zenetek
-History_Jump                            ‹zenetre ugr·s
+History_Filter                          &nbsp;(csak a <font color=%s>%s</font> kont√©ner tartalma l√°that√≥)
+History_Search                          &nbsp;(Tal√°latok %s t√©m√°ra)
+History_Title                           Utolj√°ra be√©rkezett √ºzenetek
+History_Jump                            √úzenetre ugr√°s
 History_ShowAll                         Mutasd mindet
 History_ShouldBe                        Kellene lennie
-History_NoFrom                          nincs feladÛ
-History_NoSubject                       nincs tÈma
-History_ClassifyAs                      Oszt·lyozd mint
-History_MagnetUsed                      EltÈritı m·gnes:
-History_ChangedTo                       ⁄j ÈrtÈk: <font color=%s>%s
-History_Already                         ⁄jraoszt·lyozva mint <font color=%s>%s</font>
-History_RemoveAll                       Mindet tˆrˆl
-History_RemovePage                      Tˆrˆld ezt az oldalt
-History_Remove                          Klikkelj hogy tˆrˆld a bejegyzÈseket a History-bÛl
-History_SearchMessage                   Keress feladÛ/tÈma alapj·n
-History_NoMessages                      Nincs ¸zenet
-History_ShowMagnet                      M·gnesezett
-History_Magnet                          &nbsp;(Csak m·gnesek ·ltal oszt·lyozott ¸zenetek l·tszanak)
-History_ResetSearch                     Null·z·s
+History_NoFrom                          nincs felad√≥
+History_NoSubject                       nincs t√©ma
+History_ClassifyAs                      Oszt√°lyozd mint
+History_MagnetUsed                      Elt√©rit≈ë m√°gnes:
+History_ChangedTo                       √öj √©rt√©k: <font color=%s>%s
+History_Already                         √öjraoszt√°lyozva mint <font color=%s>%s</font>
+History_RemoveAll                       Mindet t√∂r√∂l
+History_RemovePage                      T√∂r√∂ld ezt az oldalt
+History_Remove                          Klikkelj hogy t√∂r√∂ld a bejegyz√©seket a History-b√≥l
+History_SearchMessage                   Keress felad√≥/t√©ma alapj√°n
+History_NoMessages                      Nincs √ºzenet
+History_ShowMagnet                      M√°gnesezett
+History_Magnet                          &nbsp;(Csak m√°gnesek √°ltal oszt√°lyozott √ºzenetek l√°tszanak)
+History_ResetSearch                     Null√°z√°s
 
-Password_Title                          JelszÛ
-Password_Enter                          Ird be a jelszÛt
+Password_Title                          Jelsz√≥
+Password_Enter                          Ird be a jelsz√≥t
 Password_Go                             Mehet!
-Password_Error1                         Rossz jelszÛ
+Password_Error1                         Rossz jelsz√≥
 
-Security_Error1                         A secure port egy sz·m kell hogy legyen 1 Ès 65535 kˆzˆtt
-Security_Stealth                        LopakodÛ (Stealth) ‹zemmÛd/Szerver M˙kˆdÈs
-Security_NoStealthMode                  Nem (Stealth ‹zemmÛd)
-Security_ExplainStats                   (Ha ez be van kapcsolva, akkor a POPFile naponta egyszer elk¸ldi a kˆvetkezı 3 v·ltozÛ ÈrtÈkÈt egy script-nek a www.usethesource.com-ra: bc (a kontÈnerek sz·ma) mc (a POPFile ·ltal oszt·lyozott ¸zenetek sz·ma) ec (az oszt·lyoz·si hib·k sz·ma). Ezeket az adatokat egy ·llom·myban tartom, Ès arra haszn·lom ıket hogy nÈh·ny statisztikai adatok publik·ljak a POPFile hatÈkonys·g·rÛl Ès arrÛl hogy az emberek hogyan hasyn·lj·k a programot. A Web szerverem kb. 5 napig ırzi meg az inform·ciÛt, majd tˆrli. Nem t·rolok semmifÈle kapcsolatot a begy˚jtˆtt adatok Ès az IP cimek kˆzˆtt.)
-Security_ExplainUpdate                  (Ha ez be van kapcsolva, akkor a POPFile naponta egyszer elk¸ldi a kˆvetkezı 3 v·ltozÛ ÈrtÈkÈt egy script-nek a www.usethesource.com-ra: ma (az ·ltalad haszn·lt POPFile fı verziÛsz·ma) mi (az ·ltalad haszn·lt POPFile al-verziÛsz·ma) bn (az ·ltalad haszn·lt POPFile build sz·ma). Az ·ltalad haszn·lt POPFile kapni fog egy grafik·t a szervertıl, ami a lap tetejÈn lesz l·thatÛ ha egy ˙jabb verziÛ elÈrhetı. Ezeket az adatokat egy ·llom·myban tartom, Ès arra haszn·lom ıket hogy nÈh·ny statisztikai adatok publik·ljak a POPFile hatÈkonys·g·rÛl Ès arrÛl hogy az emberek hogyan hasyn·lj·k a programot. A Web szerverem kb. 5 napig ırzi meg az inform·ciÛt, majd tˆrli. Nem t·rolok semmifÈle kapcsolatot a begy˚jtˆtt adatok Ès az IP cimek kˆzˆtt.) 
-Security_PasswordTitle                  Felhasz·lÛi fel¸let jelszÛ
-Security_Password                       JelszÛ
-Security_PasswordUpdate                 Az ˙j jelszÛ: %s
+Security_Error1                         A secure port egy sz√°m kell hogy legyen 1 √©s 65535 k√∂z√∂tt
+Security_Stealth                        Lopakod√≥ (Stealth) √územm√≥d/Szerver M√∫k√∂d√©s
+Security_NoStealthMode                  Nem (Stealth √územm√≥d)
+Security_ExplainStats                   (Ha ez be van kapcsolva, akkor a POPFile naponta egyszer elk√ºldi a k√∂vetkez≈ë 3 v√°ltoz√≥ √©rt√©k√©t egy script-nek a www.usethesource.com-ra: bc (a kont√©nerek sz√°ma) mc (a POPFile √°ltal oszt√°lyozott √ºzenetek sz√°ma) ec (az oszt√°lyoz√°si hib√°k sz√°ma). Ezeket az adatokat egy √°llom√°myban tartom, √©s arra haszn√°lom ≈ëket hogy n√©h√°ny statisztikai adatok publik√°ljak a POPFile hat√©konys√°g√°r√≥l √©s arr√≥l hogy az emberek hogyan hasyn√°lj√°k a programot. A Web szerverem kb. 5 napig ≈ërzi meg az inform√°ci√≥t, majd t√∂rli. Nem t√°rolok semmif√©le kapcsolatot a begy≈±jt√∂tt adatok √©s az IP cimek k√∂z√∂tt.)
+Security_ExplainUpdate                  (Ha ez be van kapcsolva, akkor a POPFile naponta egyszer elk√ºldi a k√∂vetkez≈ë 3 v√°ltoz√≥ √©rt√©k√©t egy script-nek a www.usethesource.com-ra: ma (az √°ltalad haszn√°lt POPFile f≈ë verzi√≥sz√°ma) mi (az √°ltalad haszn√°lt POPFile al-verzi√≥sz√°ma) bn (az √°ltalad haszn√°lt POPFile build sz√°ma). Az √°ltalad haszn√°lt POPFile kapni fog egy grafik√°t a szervert≈ël, ami a lap tetej√©n lesz l√°that√≥ ha egy √∫jabb verzi√≥ el√©rhet≈ë. Ezeket az adatokat egy √°llom√°myban tartom, √©s arra haszn√°lom ≈ëket hogy n√©h√°ny statisztikai adatok publik√°ljak a POPFile hat√©konys√°g√°r√≥l √©s arr√≥l hogy az emberek hogyan hasyn√°lj√°k a programot. A Web szerverem kb. 5 napig ≈ërzi meg az inform√°ci√≥t, majd t√∂rli. Nem t√°rolok semmif√©le kapcsolatot a begy≈±jt√∂tt adatok √©s az IP cimek k√∂z√∂tt.) 
+Security_PasswordTitle                  Felhasz√°l√≥i fel√ºlet jelsz√≥
+Security_Password                       Jelsz√≥
+Security_PasswordUpdate                 Az √∫j jelsz√≥: %s
 Security_AUTHTitle                      Secure Password Authentication/AUTH
 Security_SecureServer                   Secure szerver
-Security_SecureServerUpdate             Az ˙j secure szerver: %s; Ez a v·ltoz·s nem fog ÈrvÈnybe lÈpni amig ujra nem inditod a POPFile-t.
+Security_SecureServerUpdate             Az √∫j secure szerver: %s; Ez a v√°ltoz√°s nem fog √©rv√©nybe l√©pni amig ujra nem inditod a POPFile-t.
 Security_SecurePort                     Secure port
-Security_SecurePortUpdate               Az ˙j port: %s; Ez a v·ltoz·s nem fog ÈrvÈnybe lÈpni amig ujra nem inditod a POPFile-t.
-Security_POP3                           POP3 kapcsolat engedÈlyezÈse t·voli gÈpekkel
-Security_UI                             HTTP (Felhaszn·lÛi fel¸let) engedÈlyezÈse t·voli gÈpekkel
-Security_UpdateTitle                    Automatikus ˙j verziÛ ellenırzÈs
-Security_Update                         Naponta ellenırizze hogy van-e ˙j POPFile verziÛ
-Security_StatsTitle                     Statisztika k¸ldÈse
-Security_Stats                          K¸ldd el a statisztik·kat John¸nak minden nap
+Security_SecurePortUpdate               Az √∫j port: %s; Ez a v√°ltoz√°s nem fog √©rv√©nybe l√©pni amig ujra nem inditod a POPFile-t.
+Security_POP3                           POP3 kapcsolat enged√©lyez√©se t√°voli g√©pekkel
+Security_UI                             HTTP (Felhaszn√°l√≥i fel√ºlet) enged√©lyez√©se t√°voli g√©pekkel
+Security_UpdateTitle                    Automatikus √∫j verzi√≥ ellen≈ërz√©s
+Security_Update                         Naponta ellen≈ërizze hogy van-e √∫j POPFile verzi√≥
+Security_StatsTitle                     Statisztika k√ºld√©se
+Security_Stats                          K√ºldd el a statisztik√°kat John√ºnak minden nap
 
-Magnet_Error1                           A m·gnes '%s' m·r lÈtezik a '%s' kontÈnerben
-Magnet_Error2                           Az ˙j m·gnes '%s' ˆsszeragadhat a '%s' m·gnessel Ès hib·s eredmÈnyeket okozhat a '%s' kontÈnerben. Az ˙j m·gnes nem lett hozz·adva a rendszerhez.
-Magnet_Error3                           Hozd lÈtre a '%s' m·gnest a '%s' kontÈnerben.
-Magnet_CurrentMagnets                   M·gnesek
-Magnet_Message1                         A kˆvetkezı m·gnes minden egyes levelet a megadott kontÈnerbe fog ir·nyitani.
-Magnet_CreateNew                        Hozz lÈtre ˙j m·gnest
-Magnet_Explanation                      <b>H·rom fajta m·gnes lÈtezik:</b> <ul><li><b>FeladÛ cime vagy neve:</b> PÈld·ul: john@company.com, ha egy bizonyos email cimet keres¸nk<br>company.com ha mindenkit meg akarunk tal·lni aki a company.com cimrıl jˆn, <br>"John Doe" ha egy bizonyos embert akarunk kisz˚rni, John meg fog tal·lni minden John-t<li><b>Cimyett cime vagy neve:</b> Ugyanaz mint a FeladÛ, de ez a Cimzett nevÈben Ès cimÈben keres.<li><b>TÈma:</b> PÈld·ul: hello meg fog tal·lni minden email-t aminek a szÛ "hello" a tÈm·j·ban szerepel</ul>
-Magnet_MagnetType                       M·gnes tipus
-Magnet_Value                            …rtÈk
-Magnet_Always                           Mindig a kontÈnerbe megy
+Magnet_Error1                           A m√°gnes '%s' m√°r l√©tezik a '%s' kont√©nerben
+Magnet_Error2                           Az √∫j m√°gnes '%s' √∂sszeragadhat a '%s' m√°gnessel √©s hib√°s eredm√©nyeket okozhat a '%s' kont√©nerben. Az √∫j m√°gnes nem lett hozz√°adva a rendszerhez.
+Magnet_Error3                           Hozd l√©tre a '%s' m√°gnest a '%s' kont√©nerben.
+Magnet_CurrentMagnets                   M√°gnesek
+Magnet_Message1                         A k√∂vetkez≈ë m√°gnes minden egyes levelet a megadott kont√©nerbe fog ir√°nyitani.
+Magnet_CreateNew                        Hozz l√©tre √∫j m√°gnest
+Magnet_Explanation                      <b>H√°rom fajta m√°gnes l√©tezik:</b> <ul><li><b>Felad√≥ cime vagy neve:</b> P√©ld√°ul: john@company.com, ha egy bizonyos email cimet keres√ºnk<br>company.com ha mindenkit meg akarunk tal√°lni aki a company.com cimr≈ël j√∂n, <br>"John Doe" ha egy bizonyos embert akarunk kisz≈±rni, John meg fog tal√°lni minden John-t<li><b>Cimyett cime vagy neve:</b> Ugyanaz mint a Felad√≥, de ez a Cimzett nev√©ben √©s cim√©ben keres.<li><b>T√©ma:</b> P√©ld√°ul: hello meg fog tal√°lni minden email-t aminek a sz√≥ "hello" a t√©m√°j√°ban szerepel</ul>
+Magnet_MagnetType                       M√°gnes tipus
+Magnet_Value                            √ârt√©k
+Magnet_Always                           Mindig a kont√©nerbe megy
 
-Bucket_Error1                           KontÈner nevek csak kisbet˚ket tartalmazhatnak a-tÛl z-ig, valamint a - Ès _ jeleket
-Bucket_Error2                           M·r lÈtezik egy %s nev˚ kontÈner
-Bucket_Error3                           A %s nev˚ kontÈner lÈtrehozva
-Bucket_Error4                           KÈrem adjon meg egy nem-¸res szÛt
-Bucket_Error5                           KontÈner ·tnevezve %-rÛl %s-ra
-Bucket_Error6                           A %s nev˚ kontÈnert tˆrˆltem
-Bucket_Title                            ÷sszefoglalÛ
-Bucket_BucketName                       KontÈner nÈv
-Bucket_WordCount                        Szavak sz·ma
-Bucket_WordCounts                       Szavak sz·mai
+Bucket_Error1                           Kont√©ner nevek csak kisbet≈±ket tartalmazhatnak a-t√≥l z-ig, valamint a - √©s _ jeleket
+Bucket_Error2                           M√°r l√©tezik egy %s nev≈± kont√©ner
+Bucket_Error3                           A %s nev≈± kont√©ner l√©trehozva
+Bucket_Error4                           K√©rem adjon meg egy nem-√ºres sz√≥t
+Bucket_Error5                           Kont√©ner √°tnevezve %-r√≥l %s-ra
+Bucket_Error6                           A %s nev≈± kont√©nert t√∂r√∂ltem
+Bucket_Title                            √ñsszefoglal√≥
+Bucket_BucketName                       Kont√©ner n√©v
+Bucket_WordCount                        Szavak sz√°ma
+Bucket_WordCounts                       Szavak sz√°mai
 Bucket_UniqueWords                      Egyedi szavak
-Bucket_SubjectModification              TÈma megv·ltoztat·s
-Bucket_ChangeColor                      Szin megv·ltoztat·sa
-Bucket_NotEnoughData                    Nincs elÈg adat
-Bucket_ClassificationAccuracy           Az oszt·lyoz·s pontoss·ga
-Bucket_EmailsClassified                 Oszt·lyozott Emailek sz·ma
-Bucket_EmailsClassifiedUpper            Oszt·lyozott Emailek sz·ma
-Bucket_ClassificationErrors             Oszt·lyoz·si hib·k
-Bucket_Accuracy                         Pontoss·g
-Bucket_ClassificationCount              Oszt·lyoz·sok sz·ma
-Bucket_ResetStatistics                  Statisztika null·z·sa
-Bucket_LastReset                        UtolsÛ null·z·s
+Bucket_SubjectModification              T√©ma megv√°ltoztat√°s
+Bucket_ChangeColor                      Szin megv√°ltoztat√°sa
+Bucket_NotEnoughData                    Nincs el√©g adat
+Bucket_ClassificationAccuracy           Az oszt√°lyoz√°s pontoss√°ga
+Bucket_EmailsClassified                 Oszt√°lyozott Emailek sz√°ma
+Bucket_EmailsClassifiedUpper            Oszt√°lyozott Emailek sz√°ma
+Bucket_ClassificationErrors             Oszt√°lyoz√°si hib√°k
+Bucket_Accuracy                         Pontoss√°g
+Bucket_ClassificationCount              Oszt√°lyoz√°sok sz√°ma
+Bucket_ResetStatistics                  Statisztika null√°z√°sa
+Bucket_LastReset                        Utols√≥ null√°z√°s
 Bucket_CurrentColor                     %s a jelenlgi szin %s
-Bucket_SetColorTo                       %s szin %s-ra ·llit·sa
-Bucket_Maintenance                      Karbantart·s
-Bucket_CreateBucket                     KontÈner lÈtrehoz·sa:
-Bucket_DeleteBucket                     KontÈner tˆrlÈse:
-Bucket_RenameBucket                     KontÈner ·tnevezÈse:
-Bucket_Lookup                           KeresÈs
-Bucket_LookupMessage                    SzÛ keresÈse a kontÈnerekben
-Bucket_LookupMessage2                   KeresÈs eredmÈnye:
-Bucket_LookupMostLikely                 <b>%s</b> legvalÛszin˚bben a kˆvetkezı helyen fog megjelenni: <font color=%s>%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> egyik kontÈnerben sem tal·lhatÛ
-Bucket_DisabledGlobally                 Glob·lisan letiltott
+Bucket_SetColorTo                       %s szin %s-ra √°llit√°sa
+Bucket_Maintenance                      Karbantart√°s
+Bucket_CreateBucket                     Kont√©ner l√©trehoz√°sa:
+Bucket_DeleteBucket                     Kont√©ner t√∂rl√©se:
+Bucket_RenameBucket                     Kont√©ner √°tnevez√©se:
+Bucket_Lookup                           Keres√©s
+Bucket_LookupMessage                    Sz√≥ keres√©se a kont√©nerekben
+Bucket_LookupMessage2                   Keres√©s eredm√©nye:
+Bucket_LookupMostLikely                 <b>%s</b> legval√≥szin≈±bben a k√∂vetkez≈ë helyen fog megjelenni: <font color=%s>%s</font>
+Bucket_DoesNotAppear                    <p><b>%s</b> egyik kont√©nerben sem tal√°lhat√≥
+Bucket_DisabledGlobally                 Glob√°lisan letiltott
 Bucket_To                               to
-Bucket_Quarantine                       KarantÈn
+Bucket_Quarantine                       Karant√©n
 
-SingleBucket_Title                      %s rÈszletei
-SingleBucket_WordCount                  KontÈnerben lÈvı szavak sz·ma
-SingleBucket_TotalWordCount             ÷sszes szÛ sz·ma
-SingleBucket_Percentage                 Teljes sz·zalÈk
-SingleBucket_WordTable                  SzÛt·bl·zat % -nak
-SingleBucket_Message1                   A csillaggal jelˆlt szavak(*) rÈszt vettek az oszt·lyz·sban a POPFile legutÛbbi indit·sa Ûta. Kattints egy szÛra hogy megnÈzd a kontÈnerenkÈnti valÛszin˚sÈgÈt.
+SingleBucket_Title                      %s r√©szletei
+SingleBucket_WordCount                  Kont√©nerben l√©v≈ë szavak sz√°ma
+SingleBucket_TotalWordCount             √ñsszes sz√≥ sz√°ma
+SingleBucket_Percentage                 Teljes sz√°zal√©k
+SingleBucket_WordTable                  Sz√≥t√°bl√°zat % -nak
+SingleBucket_Message1                   A csillaggal jel√∂lt szavak(*) r√©szt vettek az oszt√°lyz√°sban a POPFile legut√≥bbi indit√°sa √≥ta. Kattints egy sz√≥ra hogy megn√©zd a kont√©nerenk√©nti val√≥szin≈±s√©g√©t.
 SingleBucket_Unique                     %s egyedi
 
-Session_Title                           POPFile Session Lej·rt
-Session_Error                           Ez a POPFile session lej·rt.  Egy lehetsÈges ok hogy elinditotta Ès le·llitotta a POPFile-t, de a bˆngÈszıt nyitva hagyta. KÈrem kattintson a fel¸l lÈvı linkek egyikÈre.
+Session_Title                           POPFile Session Lej√°rt
+Session_Error                           Ez a POPFile session lej√°rt.  Egy lehets√©ges ok hogy elinditotta √©s le√°llitotta a POPFile-t, de a b√∂ng√©sz≈ët nyitva hagyta. K√©rem kattintson a fel√ºl l√©v≈ë linkek egyik√©re.

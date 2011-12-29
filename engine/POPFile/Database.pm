@@ -464,12 +464,13 @@ sub db_connect_helper__
     close SCHEMA;
 
     my $need_upgrade = 1;
+    my $old_schema_version;
 
     # retrieve the SQL_IDENTIFIER_QUOTE_CHAR for the database then use it
     # to strip off any sqlquotechars from the table names we retrieve
 
     my $sqlquotechar = $db->get_info(29) || '';
-    my @tables = map { s/$sqlquotechar//g; $_ } ($db->tables());
+    my @tables = map { s/$sqlquotechar//g; $_ } ( $db->tables( '', '%', '%', 'table' ) );
 
     foreach my $table (@tables) {
         if ( $table =~ /\.?popfile$/ ) {
@@ -477,7 +478,8 @@ sub db_connect_helper__
                'select version from popfile;' ); # PROFILE BLOCK STOP
 
             if ( defined( $row ) ) {
-                $need_upgrade = ( $row->[0] != $version );
+                $old_schema_version = $row->[0];
+                $need_upgrade = ( $old_schema_version != $version );
             }
         }
     }
@@ -488,7 +490,7 @@ sub db_connect_helper__
 
         # The database needs upgrading
 
-        $self->db_upgrade__( $db );
+        $self->db_upgrade__( $db, undef, $old_schema_version );
 
         print "\nDatabase upgrade complete\n\n";
     }
@@ -558,11 +560,12 @@ sub insert_schema__
 # $db_to           Database handle convert to
 # $db_from         Database handle convert from
 #                  undef if upgrade POPFile schema
+# $old_schema_version Version number of old schema
 #
 #----------------------------------------------------------------------------
 sub db_upgrade__
 {
-    my ( $self, $db_to, $db_from ) = @_;
+    my ( $self, $db_to, $db_from, $old_schema_version ) = @_;
 
     my $drop_table;
 
@@ -577,7 +580,7 @@ sub db_upgrade__
     my $to_sqlite   = ( $db_to->{Driver}->{Name} =~ /SQLite/ );
 
     my $sqlquotechar = $db_from->get_info(29) || '';
-    my @tables = map { s/$sqlquotechar//g; $_ } ($db_from->tables());
+    my @tables = map { s/$sqlquotechar//g; $_ } ( $db_from->tables( '', '%', '%', 'table' ) );
 
     # We are going to dump out all the data in the database as
     # INSERT OR IGNORE statements in a temporary file, then DROP all
@@ -586,17 +589,17 @@ sub db_upgrade__
 
     my $i = 0;
     my $ins_file = $self->get_user_path_( 'insert.sql' );
-    open INSERT, '>:utf8', $ins_file;
+    open INSERT, '>', $ins_file;
 
     foreach my $table (@tables) {
         next if ( $table =~ /\.?popfile$/ );
-        if ( $from_sqlite && ( $table =~ /^(main\.)?sqlite_/ ) ) {
+        if ( $from_sqlite && ( $table =~ /^(?:(?:main|temp)\.)?sqlite_/ ) ) {
             next;
         }
         if ( $i > 99 ) {
             print "\n";
         }
-        print "    Saving table $table\n    ";
+        print "    Saving table $table\n";
 
         my $t = $db_from->prepare( "select * from $table;" );
         $t->execute;
@@ -650,9 +653,48 @@ sub db_upgrade__
         print "\n";
     }
 
+    my $charset;
+
+    if ( !defined( $old_schema_version ) || ( $old_schema_version < 9 ) ) {
+        # Schema version 9 or later uses UTF-8
+
+        # Guess character encoding of database records
+
+        if ( $self->global_config_( 'language' ) eq 'Nihongo' ) {
+            $charset = 'euc-jp';
+        } else {
+            $charset = 'iso-8859-1';
+
+            # Use charset which is recorded most times
+
+            my $sql = "select word,sum(times) from words,matrix
+                           where word like 'charset:%'
+                             and words.id=matrix.wordid
+                           group by word
+                           order by sum(times) desc;";
+
+            my $sth = $db_from->prepare( $sql );
+
+            while ( my $row = $sth->fetchrow_arrayref ) {
+                my $c = $row->[0];
+                $c =~ s/^charset://;
+                if ( Encode::resolve_alias( $c ) ) {
+                    $charset = $c;
+                    last;
+                }
+            }
+
+            $sth->finish;
+        }
+
+        $charset = "encoding($charset)";
+    } else {
+        $charset = "utf8";
+    }
+
     if ( $drop_table ) {
         foreach my $table (@tables) {
-            if ( $from_sqlite && ( $table =~ /^sqlite_/ ) ) {
+            if ( $from_sqlite && ( $table =~ /^(?:(?:main|temp)\.)?sqlite_/ ) ) {
                 next;
             }
             print "    Dropping old table $table\n";
@@ -665,10 +707,11 @@ sub db_upgrade__
         return 0;
     }
 
-    print "    Restoring old data\n    ";
+    print "    Restoring old data\n";
 
     $db_to->begin_work;
-    open INSERT, '<:utf8', $ins_file;
+
+    open INSERT, "<:$charset", $ins_file;
     $i = 0;
     my $sql = '';
     while ( <INSERT> ) {

@@ -92,7 +92,7 @@ sub load_stopwords
 {
     my ($self) = @_;
 
-    if ( open STOPS, '<' . $self->get_user_path_( 'stopwords' ) ) {
+    if ( open STOPS, '<:utf8', $self->get_user_path_( 'stopwords' ) ) {
         delete $self->{stop__};
         while ( <STOPS> ) {
             s/[\r\n]//g;

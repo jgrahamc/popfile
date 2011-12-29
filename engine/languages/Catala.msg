@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+Ôªø# Copyright (c) 2001-2011 John Graham-Cumming
 #
 # 2005/08/09 Translated by David Gimeno i Ayuso <info@sima-pc.com>
 #
@@ -38,22 +38,22 @@ TurnOff                                 Desactivar
 Add                                     Afegir
 Remove                                  Suprimir
 Previous                                Anterior
-Next                                    Seg¸ent
+Next                                    Seg√ºent
 From                                    Des de
 Subject                                 Assumpte
-Cc                                      CÚpia
+Cc                                      C√≤pia
 Classification                          Cistella
 Reclassify                              Reclassificar
 Probability                             Probabilitat
 Scores                                  Barems
-QuickMagnets                            Imants r‡pids
+QuickMagnets                            Imants r√†pids
 Undo                                    Desfer
 Close                                   Tancar
 Find                                    Cercar
 Filter                                  Filtre
-Yes                                     SÌ
+Yes                                     S√≠
 No                                      No
-ChangeToYes                             Canviar a SÌ
+ChangeToYes                             Canviar a S√≠
 ChangeToNo                              Canviar a No
 Bucket                                  Cistella
 Magnet                                  Imant
@@ -62,7 +62,7 @@ Create                                  Crear
 To                                      A
 Total                                   Total
 Rename                                  Redenominar
-Frequency                               Freq¸Ëncia
+Frequency                               Freq√º√®ncia
 Probability                             Probabilitat
 Score                                   Barem
 Lookup                                  Examinar
@@ -96,65 +96,65 @@ Locale_Date                            %d/%m %R%Z | %e/%L/%Y %R%Z
 # The header and footer that appear on every UI page
 Header_Title                            Centre de control POPFile
 Header_Shutdown                         Aturar POPFile
-Header_History                          HistÚric
+Header_History                          Hist√≤ric
 Header_Buckets                          Cistelles
-Header_Configuration                    ConfiguraciÛ
-Header_Advanced                         AvanÁat
+Header_Configuration                    Configuraci√≥
+Header_Advanced                         Avan√ßat
 Header_Security                         Seguretat
 Header_Magnets                          Imants
 
-Footer_HomePage                         P‡gina inicial POPFile
+Footer_HomePage                         P√†gina inicial POPFile
 Footer_Manual                           Manual
-Footer_Forums                           FÚrums
+Footer_Forums                           F√≤rums
 Footer_FeedMe                           Acaptar
-Footer_RequestFeature                   Sol∑licitar millora
+Footer_RequestFeature                   Sol¬∑licitar millora
 Footer_MailingList                      Llista de correu
-Footer_Wiki                             DocumentaciÛ
+Footer_Wiki                             Documentaci√≥
 
-Configuration_Error1                    El car‡cter separador ha de ser-ne un de sol
-Configuration_Error2                    El port de l'interfÌcie d'usuari ha de ser un n˙mero entre 1 i 65535
-Configuration_Error3                    El port que rep les connexions POP3 ha de ser un n˙mero entre 1 i 65535
-Configuration_Error4                    El tamany de p‡gina ha de ser un n˙mero entre 1 i 1000
-Configuration_Error5                    El nombre de dies a l'histÚric ha de ser un n˙mero entre 1 i 366
-Configuration_Error6                    El temps d'espera de TCP ha de ser un n˙mero entre 10 i 1800
-Configuration_Error7                    El port que rep les connexions XML RPC ha de ser un n˙mero entre 1 i 65535
-Configuration_Error8                    El port intermedi SOCKS V ha de ser un n˙mero entre 1 i 65535
+Configuration_Error1                    El car√†cter separador ha de ser-ne un de sol
+Configuration_Error2                    El port de l'interf√≠cie d'usuari ha de ser un n√∫mero entre 1 i 65535
+Configuration_Error3                    El port que rep les connexions POP3 ha de ser un n√∫mero entre 1 i 65535
+Configuration_Error4                    El tamany de p√†gina ha de ser un n√∫mero entre 1 i 1000
+Configuration_Error5                    El nombre de dies a l'hist√≤ric ha de ser un n√∫mero entre 1 i 366
+Configuration_Error6                    El temps d'espera de TCP ha de ser un n√∫mero entre 10 i 1800
+Configuration_Error7                    El port que rep les connexions XML RPC ha de ser un n√∫mero entre 1 i 65535
+Configuration_Error8                    El port intermedi SOCKS V ha de ser un n√∫mero entre 1 i 65535
 Configuration_POP3Port                  Port que rep les connexions POP3
-Configuration_POP3Update                S'ha actualitzat el port POP3 a %s; no tindr‡ efecte fins que reinicieu el POPFile
-Configuration_XMLRPCUpdate              S'ha actualitzat el port XML-RPC a %s; no tindr‡ efecte fins que reinicieu el POPFile
+Configuration_POP3Update                S'ha actualitzat el port POP3 a %s; no tindr√† efecte fins que reinicieu el POPFile
+Configuration_XMLRPCUpdate              S'ha actualitzat el port XML-RPC a %s; no tindr√† efecte fins que reinicieu el POPFile
 Configuration_XMLRPCPort                Port que rep les connexions XML-RPC
 Configuration_SMTPPort                  Port que rep les connexions SMTP
-Configuration_SMTPUpdate                S'ha actualitzat el port SMTP a %s; no tindr‡ efecte fins que reinicieu el POPFile
+Configuration_SMTPUpdate                S'ha actualitzat el port SMTP a %s; no tindr√† efecte fins que reinicieu el POPFile
 Configuration_NNTPPort                  Port que rep les connexions NNTP
-Configuration_NNTPUpdate                S'ha actualitzat el port NNTP a %s; no tindr‡ efecte fins que reinicieu el POPFile
+Configuration_NNTPUpdate                S'ha actualitzat el port NNTP a %s; no tindr√† efecte fins que reinicieu el POPFile
 Configuration_POPFork                   Permetre connexions concurrents POP3
 Configuration_SMTPFork                  Permetre connexions concurrents SMTP
 Configuration_NNTPFork                  Permetre connexions concurrents NNTP
-Configuration_POP3Separator             Car‡cter separador de host:port:user POP3
-Configuration_NNTPSeparator             Car‡cter separador de host:port:user NNPT
+Configuration_POP3Separator             Car√†cter separador de host:port:user POP3
+Configuration_NNTPSeparator             Car√†cter separador de host:port:user NNPT
 Configuration_POP3SepUpdate             S'ha actualitzat el separador POP3 a %s
 Configuration_NNTPSepUpdate             S'ha actualitzat el separador NNTP a %s
-Configuration_UI                        Port web d'interfÌcie d'usuari
-Configuration_UIUpdate                  S'ha actualitzat el port web d'interfÌcie d'usuari a %s; no tindr‡ efecte fins que reinicieu el POPFile
-Configuration_History                   Nombre de missatges per p‡gina
-Configuration_HistoryUpdate             S'ha actualitzat el nombre de missatges per p‡gina a %s
-Configuration_Days                      Nombre de dies a conservar l'histÚric
-Configuration_DaysUpdate                S'ha actualitzat el nombre de dies d'histÚric a %s
-Configuration_UserInterface             InterfÌcie d'usuari
+Configuration_UI                        Port web d'interf√≠cie d'usuari
+Configuration_UIUpdate                  S'ha actualitzat el port web d'interf√≠cie d'usuari a %s; no tindr√† efecte fins que reinicieu el POPFile
+Configuration_History                   Nombre de missatges per p√†gina
+Configuration_HistoryUpdate             S'ha actualitzat el nombre de missatges per p√†gina a %s
+Configuration_Days                      Nombre de dies a conservar l'hist√≤ric
+Configuration_DaysUpdate                S'ha actualitzat el nombre de dies d'hist√≤ric a %s
+Configuration_UserInterface             Interf√≠cie d'usuari
 Configuration_Skins                     Aparences
-Configuration_SkinsChoose               Trieu aparenÁa
+Configuration_SkinsChoose               Trieu aparen√ßa
 Configuration_Language                  Idioma
 Configuration_LanguageChoose            Trieu idioma
-Configuration_ListenPorts               Opcions de mÚduls
-Configuration_HistoryView               Veure histÚric
-Configuration_TCPTimeout                Temps d'espera connexiÛ
-Configuration_TCPTimeoutSecs            Temps d'espera connexiÛ en segons
-Configuration_TCPTimeoutUpdate          S'ha actualitzat el temps d'espera connexiÛ a %s
-Configuration_ClassificationInsertion   InserciÛ text del missatge
-Configuration_SubjectLine               ModificaciÛ<br>lÌnia de l'assumpte
-Configuration_XTCInsertion              CapÁalera<br>X-Text-Classification
-Configuration_XPLInsertion              CapÁalera<br>X-POPFile-Link
-Configuration_Logging                   S'est‡ registrant
+Configuration_ListenPorts               Opcions de m√≤duls
+Configuration_HistoryView               Veure hist√≤ric
+Configuration_TCPTimeout                Temps d'espera connexi√≥
+Configuration_TCPTimeoutSecs            Temps d'espera connexi√≥ en segons
+Configuration_TCPTimeoutUpdate          S'ha actualitzat el temps d'espera connexi√≥ a %s
+Configuration_ClassificationInsertion   Inserci√≥ text del missatge
+Configuration_SubjectLine               Modificaci√≥<br>l√≠nia de l'assumpte
+Configuration_XTCInsertion              Cap√ßalera<br>X-Text-Classification
+Configuration_XPLInsertion              Cap√ßalera<br>X-POPFile-Link
+Configuration_Logging                   S'est√† registrant
 Configuration_None                      Cap
 Configuration_ToScreen                  A pantalla
 Configuration_ToFile                    A fitxer
@@ -162,77 +162,77 @@ Configuration_ToScreenFile              A pantalla i fitxer
 Configuration_LoggerOutput              Sortida usuari
 Configuration_GeneralSkins              Aparences
 Configuration_SmallSkins                Aparences petites
-Configuration_TinySkins                 Aparences min˙scules
+Configuration_TinySkins                 Aparences min√∫scules
 Configuration_CurrentLogFile            &lt;Descarregar fitxer de registre actual&gt;
 Configuration_SOCKSServer               Servidor intermedi SOCKS V
 Configuration_SOCKSPort                 Port intermedi SOCKS V
 Configuration_SOCKSPortUpdate           S'ha actualitzat el port intermedi SOCKS V a %s
 Configuration_SOCKSServerUpdate         S'ha actualitzat el servidor intermedi SOCKS V a %s
-Configuration_Fields                    Columnes histÚric
+Configuration_Fields                    Columnes hist√≤ric
 
-Advanced_Error1                         '%s' ja Ès a la llista de mots a ignorar
-Advanced_Error2                         Mots a ignorar nomÈs pot contenir car‡cters alfanumËrics, ., _, - i @
+Advanced_Error1                         '%s' ja √©s a la llista de mots a ignorar
+Advanced_Error2                         Mots a ignorar nom√©s pot contenir car√†cters alfanum√®rics, ., _, - i @
 Advanced_Error3                         afegit '%s' a la llista de mots a ignorar
-Advanced_Error4                         '%s' no Ès a la llista de mots a ignorar
+Advanced_Error4                         '%s' no √©s a la llista de mots a ignorar
 Advanced_Error5                         suprimit '%s' de la llista de mots a ignorar
 Advanced_StopWords                      Mots a ignorar
-Advanced_Message1                       POPFile ignora els seg¸ents mots molt usuals:
+Advanced_Message1                       POPFile ignora els seg√ºents mots molt usuals:
 Advanced_AddWord                        Afegir mot
 Advanced_RemoveWord                     Suprimir mot
-Advanced_AllParameters                  Tots els par‡metres POPFile
-Advanced_Parameter                      Par‡metre
+Advanced_AllParameters                  Tots els par√†metres POPFile
+Advanced_Parameter                      Par√†metre
 Advanced_Value                          Valor
-Advanced_Warning                        Aquesta Ès la llista completa de par‡metres de POPFile. NomÈs usuaris avanÁats: canvieu-los i cliqueu Actualitzar; no se'n comprova la validesa.  Els Ìtems mostrats en negreta sÛn diferents dels predeterminats.
-Advanced_ConfigFile                     Fitxer de configuraciÛ:
+Advanced_Warning                        Aquesta √©s la llista completa de par√†metres de POPFile. Nom√©s usuaris avan√ßats: canvieu-los i cliqueu Actualitzar; no se'n comprova la validesa.  Els √≠tems mostrats en negreta s√≥n diferents dels predeterminats.
+Advanced_ConfigFile                     Fitxer de configuraci√≥:
 
-History_Filter                          &nbsp;(s'est‡ mostrant nomÈs la cistella <font color="%s">%s</font>)
+History_Filter                          &nbsp;(s'est√† mostrant nom√©s la cistella <font color="%s">%s</font>)
 History_FilterBy                        Filtrat per
 History_Search                          &nbsp;(cercat per Des de/Assumte %s)
 History_Title                           Missatges recents
-History_Jump                            Anar a la p‡gina
+History_Jump                            Anar a la p√†gina
 History_ShowAll                         Mostrar-ho tot
 History_ShouldBe                        Hauria de ser
-History_NoFrom                          cap lÌnia Des de
-History_NoSubject                       cap lÌnia Assumpte
+History_NoFrom                          cap l√≠nia Des de
+History_NoSubject                       cap l√≠nia Assumpte
 History_ClassifyAs                      Classificar com a
 History_MagnetUsed                      Imant usat
 History_MagnetBecause                   <b>Imant usat</b><p>Classificat com a <font color="%s">%s</font> degut a l'imant %s </p>
 History_ChangedTo                       S'ha canviat a <font color="%s">%s</font>
 History_Already                         Reclassificat com a <font color="%s">%s</font>
 History_RemoveAll                       Suprimir-ho tot
-History_RemovePage                      Suprimir p‡gina
+History_RemovePage                      Suprimir p√†gina
 History_RemoveChecked                   Suprimir marcats
-History_Remove                          Per suprimir entrades a l'histÚric, cliqueu
+History_Remove                          Per suprimir entrades a l'hist√≤ric, cliqueu
 History_SearchMessage                   Cercar Des de/Assumpte
 History_NoMessages                      Cap missatge
 History_ShowMagnet                      imantat
 History_Negate_Search                   Invertir cerca/filtre
-History_Magnet                          &nbsp;(s'est‡ mostrant nomÈs missatges classificats per imant)
-History_NoMagnet                        &nbsp;(s'est‡ mostrant nomÈs missatges no classificats per imant)
+History_Magnet                          &nbsp;(s'est√† mostrant nom√©s missatges classificats per imant)
+History_NoMagnet                        &nbsp;(s'est√† mostrant nom√©s missatges no classificats per imant)
 History_ResetSearch                     Reiniciar
 History_ChangedClass                    Ara s'hauria de classificar com a
 History_Purge                           Esborrar ara
 History_Increase                        Augmentar
 History_Decrease                        Reduir
-History_Column_Characters               Canviar l'ample de les columnes Des de, A, CÚpia i Assumpte
-History_Automatic                       Autom‡tic
+History_Column_Characters               Canviar l'ample de les columnes Des de, A, C√≤pia i Assumpte
+History_Automatic                       Autom√†tic
 History_Reclassified                    Reclassificat
 History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
 
 Password_Title                          Contrasenya
-Password_Enter                          IntroduÔu-hi la contrasenya
+Password_Enter                          Introdu√Øu-hi la contrasenya
 Password_Go                             Anar-hi!
 Password_Error1                         Contrasenya incorrecta
 
-Security_Error1                         El port ha de ser un n˙mero entre 1 i 65535
-Security_Stealth                        Mode furtiu/OperaciÛ del servidor
+Security_Error1                         El port ha de ser un n√∫mero entre 1 i 65535
+Security_Stealth                        Mode furtiu/Operaci√≥ del servidor
 Security_NoStealthMode                  No (mode furtiu)
 Security_StealthMode                    (Mode furtiu)
-Security_ExplainStats                   (Si s'activa, POPFile envia un cop al dia els tres seg¸ents valors a un programa a www.usethesource.com: bc, el nombre total de cistelles que teniu; mc, el nombre total de missatges classificats per POPFile, i ec, el nombre total d'errors de classificaciÛ. AixÚ s'emmagatzema en un fitxer i ser‡ usat per confeccionar estadÌstiques d'˙s de POPFile i com funciona de bÈ. El meu servidor web conserva els seus fitxers de registre uns 5 dies i aleshores s'esborren; no emmagatzemo cap connexiÛ entre estadÌstiques i adreces IP individuals).
-Security_ExplainUpdate                  (Si s'activa, POPFile envia un cop per dia els tres seg¸ents valors a un programa a www.usethesource.com: ma, el nombre major de versiÛ de la vostra instal∑laciÛ POPFile; mi, el nombre menor de versiÛ de la vostra instal∑laciÛ POPFile, i bn, el nombre de muntatge de la vostra instal∑laciÛ POPFile. POPFile rep una resposta en forma de gr‡fic que surt dalt de la p‡gina, si hi ha una versiÛ nova disponible. El meu servidor web conserva els seus fitxers de registre uns 5 dies i aleshores s'esborren; no emmagatzemo cap connexiÛ entre les verificacions d'actualitzaciÛ i les adreces IP individuals).
-Security_PasswordTitle                  Contrasenya d'interfÌcie d'usuari
+Security_ExplainStats                   (Si s'activa, POPFile envia un cop al dia els tres seg√ºents valors a un programa a www.usethesource.com: bc, el nombre total de cistelles que teniu; mc, el nombre total de missatges classificats per POPFile, i ec, el nombre total d'errors de classificaci√≥. Aix√≤ s'emmagatzema en un fitxer i ser√† usat per confeccionar estad√≠stiques d'√∫s de POPFile i com funciona de b√©. El meu servidor web conserva els seus fitxers de registre uns 5 dies i aleshores s'esborren; no emmagatzemo cap connexi√≥ entre estad√≠stiques i adreces IP individuals).
+Security_ExplainUpdate                  (Si s'activa, POPFile envia un cop per dia els tres seg√ºents valors a un programa a www.usethesource.com: ma, el nombre major de versi√≥ de la vostra instal¬∑laci√≥ POPFile; mi, el nombre menor de versi√≥ de la vostra instal¬∑laci√≥ POPFile, i bn, el nombre de muntatge de la vostra instal¬∑laci√≥ POPFile. POPFile rep una resposta en forma de gr√†fic que surt dalt de la p√†gina, si hi ha una versi√≥ nova disponible. El meu servidor web conserva els seus fitxers de registre uns 5 dies i aleshores s'esborren; no emmagatzemo cap connexi√≥ entre les verificacions d'actualitzaci√≥ i les adreces IP individuals).
+Security_PasswordTitle                  Contrasenya d'interf√≠cie d'usuari
 Security_Password                       Contrasenya
 Security_PasswordUpdate                 S'ha actualitzat la contrasenya
 Security_AUTHTitle                      Servidors remots
@@ -241,56 +241,56 @@ Security_SecureServerUpdate             S'ha actualitzat el servidor POP3 remot 
 Security_SecurePort                     Port POP3 remot (SPA/AUTH o servidor intermedi transparent)
 Security_SecurePortUpdate               S'ha actualitzat el port del servidor POP3 remot a %s
 Security_SMTPServer                     Servidor de cadena SMTP
-Security_SMTPServerUpdate               S'ha actualitzat el servidor de cadena SMTP a %s; no tindr‡ efecte fins que reinicieu el POPFile
+Security_SMTPServerUpdate               S'ha actualitzat el servidor de cadena SMTP a %s; no tindr√† efecte fins que reinicieu el POPFile
 Security_SMTPPort                       Port de cadena SMTP
-Security_SMTPPortUpdate                 S'ha actualitzat el port de cadena SMTP a %s; no tindr‡ efecte fins que reinicieu el POPFile
-Security_POP3                           Acceptar connexions POP3 de m‡quines remotes (cal reiniciar POPFile)
-Security_SMTP                           Acceptar connexions SMTP de m‡quines remotes (cal reiniciar POPFile)
-Security_NNTP                           Acceptar connexions NNTP de m‡quines remotes (cal reiniciar POPFile)
-Security_UI                             Acceptar connexions HTTP (interfÌcie d'usuari) de m‡quines remotes (cal reiniciar POPFile)
-Security_XMLRPC                         Acceptar connexions XML-RPC de m‡quines remotes (cal reiniciar POPFile)
-Security_UpdateTitle                    ComprovaciÛ autom‡tica d'actualitzacions
-Security_Update                         Comprovar actualitzacions de POPFile di‡riament
-Security_StatsTitle                     S'estan informant les estadÌstiques
-Security_Stats                          Enviar les estadÌstiques di‡riament
+Security_SMTPPortUpdate                 S'ha actualitzat el port de cadena SMTP a %s; no tindr√† efecte fins que reinicieu el POPFile
+Security_POP3                           Acceptar connexions POP3 de m√†quines remotes (cal reiniciar POPFile)
+Security_SMTP                           Acceptar connexions SMTP de m√†quines remotes (cal reiniciar POPFile)
+Security_NNTP                           Acceptar connexions NNTP de m√†quines remotes (cal reiniciar POPFile)
+Security_UI                             Acceptar connexions HTTP (interf√≠cie d'usuari) de m√†quines remotes (cal reiniciar POPFile)
+Security_XMLRPC                         Acceptar connexions XML-RPC de m√†quines remotes (cal reiniciar POPFile)
+Security_UpdateTitle                    Comprovaci√≥ autom√†tica d'actualitzacions
+Security_Update                         Comprovar actualitzacions de POPFile di√†riament
+Security_StatsTitle                     S'estan informant les estad√≠stiques
+Security_Stats                          Enviar les estad√≠stiques di√†riament
 
 Magnet_Error1                           Ja existeix l'imant '%s' a la cistella '%s'
 Magnet_Error2                           El nou imant '%s' interfereix amb el '%s' de la cistella '%s' i podria donar resultats ambigus.  No s'ha afegit el nou.
 Magnet_Error3                           S'ha creat el nou imant '%s' a la cistella '%s'
 Magnet_CurrentMagnets                   Imants actuals
-Magnet_Message1                         Els imants seg¸ents impliquen que un missatge sigui sempre encasellat a la cistella indicada
+Magnet_Message1                         Els imants seg√ºents impliquen que un missatge sigui sempre encasellat a la cistella indicada
 Magnet_CreateNew                        Crear imant nou
-Magnet_Explanation                      <b>Disposeu de tres tipus d'imants:</b> <ul><li><b>AdreÁa Des de o nom:</b> Per exemple: john@company.com per evitar una adreÁa especÌfica, <br />company.com per evitar tothom de company.com, <br />John Doe per evitar una persona concreta, John per evitar-los tots</li><li><b>AdreÁa A/CÚpia o nom:</b> Com un imant Des de: perÚ per a l'adressa A:/CÚpia: a un missatge</li> <li><b>Mots Assumpte:</b> Per exemple: hello per evitar tots els missatges amb hello a l'assumpte</li></ul>
+Magnet_Explanation                      <b>Disposeu de tres tipus d'imants:</b> <ul><li><b>Adre√ßa Des de o nom:</b> Per exemple: john@company.com per evitar una adre√ßa espec√≠fica, <br />company.com per evitar tothom de company.com, <br />John Doe per evitar una persona concreta, John per evitar-los tots</li><li><b>Adre√ßa A/C√≤pia o nom:</b> Com un imant Des de: per√≤ per a l'adressa A:/C√≤pia: a un missatge</li> <li><b>Mots Assumpte:</b> Per exemple: hello per evitar tots els missatges amb hello a l'assumpte</li></ul>
 Magnet_MagnetType                       Tipus d'imant
 Magnet_Value                            Valors
 Magnet_Always                           Va sempre a la cistella
-Magnet_Jump                             Anar a la p‡gina d'imants
+Magnet_Jump                             Anar a la p√†gina d'imants
 
-Bucket_Error1                           Els noms de cistella nomÈs poden contenir lletres a a z en min˙scules, n˙meros 0 a 9, mÈs - i _
+Bucket_Error1                           Els noms de cistella nom√©s poden contenir lletres a a z en min√∫scules, n√∫meros 0 a 9, m√©s - i _
 Bucket_Error2                           Ja existeix la cistella anomenada %s
 Bucket_Error3                           S'ha creat la cistella anomenada %s
-Bucket_Error4                           IntroduÔu-hi algun mot
+Bucket_Error4                           Introdu√Øu-hi algun mot
 Bucket_Error5                           Redenominada la cistella %s a %s
 Bucket_Error6                           Esborrada la cistella %s
-Bucket_Title                            ConfiguraciÛ de cistella
+Bucket_Title                            Configuraci√≥ de cistella
 Bucket_BucketName                       Nom de<br>cistella
 Bucket_WordCount                        Comptador de mots
 Bucket_WordCounts                       Comptadors de mots
 Bucket_UniqueWords                      Mots<br>distints
-Bucket_SubjectModification              ModificaciÛ<br>capÁalera assumpte
+Bucket_SubjectModification              Modificaci√≥<br>cap√ßalera assumpte
 Bucket_ChangeColor                      Color<br>cistella
 Bucket_NotEnoughData                    No hi ha prous dades
-Bucket_ClassificationAccuracy           PrecisiÛ de la classificaciÛ
+Bucket_ClassificationAccuracy           Precisi√≥ de la classificaci√≥
 Bucket_EmailsClassified                 Missatges classificats
 Bucket_EmailsClassifiedUpper            Missatges Classificats
-Bucket_ClassificationErrors             Errors de classificaciÛ
-Bucket_Accuracy                         PrecisiÛ
-Bucket_ClassificationCount              Comptador de classificaciÛ
+Bucket_ClassificationErrors             Errors de classificaci√≥
+Bucket_Accuracy                         Precisi√≥
+Bucket_ClassificationCount              Comptador de classificaci√≥
 Bucket_ClassificationFP                 Falsos positius
 Bucket_ClassificationFN                 Falsos negatius
-Bucket_ResetStatistics                  Reiniciar estadÌstiques
-Bucket_LastReset                        ⁄ltima reinicialitzaciÛ
-Bucket_CurrentColor                     El color actual de %s Ès %s
+Bucket_ResetStatistics                  Reiniciar estad√≠stiques
+Bucket_LastReset                        √öltima reinicialitzaci√≥
+Bucket_CurrentColor                     El color actual de %s √©s %s
 Bucket_SetColorTo                       S'ha canviat el color de %s a %s
 Bucket_Maintenance                      Manteniment
 Bucket_CreateBucket                     Crear una cistella de nom
@@ -299,7 +299,7 @@ Bucket_RenameBucket                     Redenominar la cistella anomenada
 Bucket_Lookup                           Examinar
 Bucket_LookupMessage                    Examinar la paraula a les cistelles
 Bucket_LookupMessage2                   Examinar el resultat per
-Bucket_LookupMostLikely                 <b>%s</b> Ès mÈs probable que aparegui a <font color="%s">%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> √©s m√©s probable que aparegui a <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> no apareix a cap de les cistelles
 Bucket_DisabledGlobally                 Globalment inhabilitat
 Bucket_To                               a
@@ -310,69 +310,69 @@ SingleBucket_WordCount                  Comptador de mots de la cistella
 SingleBucket_TotalWordCount             Comptador total de mots
 SingleBucket_Percentage                 Percentatge del total
 SingleBucket_WordTable                  Taula de mots de %s
-SingleBucket_Message1                   Cliqueu una lletra a l'Ìndex per veure la llista de mots que hi comencen. Cliqueu qualsevol mot per examinar llur probabilitat per a totes les cistelles.
+SingleBucket_Message1                   Cliqueu una lletra a l'√≠ndex per veure la llista de mots que hi comencen. Cliqueu qualsevol mot per examinar llur probabilitat per a totes les cistelles.
 SingleBucket_Unique                     %s distint
 SingleBucket_ClearBucket                Suprimir tots els mots
 
-Session_Title                           La sessiÛ POPFile ha venÁut
-Session_Error                           La vostra sessiÛ POPFile ha venÁut. AixÚ pot ser degut a haver aturat i iniciat POPFile deixant el vostre navegador web obert. Cliqueu un dels enllaÁos de mÈs amunt per continuar usant POPFile.
+Session_Title                           La sessi√≥ POPFile ha ven√ßut
+Session_Error                           La vostra sessi√≥ POPFile ha ven√ßut. Aix√≤ pot ser degut a haver aturat i iniciat POPFile deixant el vostre navegador web obert. Cliqueu un dels enlla√ßos de m√©s amunt per continuar usant POPFile.
 
-View_Title                              VisualitzaciÛ missatge individual
-View_ShowFrequencies                    Mostrar freq¸Ëncies de mot
+View_Title                              Visualitzaci√≥ missatge individual
+View_ShowFrequencies                    Mostrar freq√º√®ncies de mot
 View_ShowProbabilities                  Mostrar probabilitats de mot
-View_ShowScores                         Mostrar barems de mot i diagrama de decisiÛ
+View_ShowScores                         Mostrar barems de mot i diagrama de decisi√≥
 View_WordMatrix                         Matriu de mots
 View_WordProbabilities                  s'estan mostrant les probabilitats de mot
-View_WordFrequencies                    s'estan mostrant les freq¸Ëncies de mot
+View_WordFrequencies                    s'estan mostrant les freq√º√®ncies de mot
 View_WordScores                         s'estan mostrant els barems de mot
-View_Chart                              Diagrama de decisiÛ
+View_Chart                              Diagrama de decisi√≥
 
 Windows_TrayIcon                        Mostrar la icona POPFile a la safata de sistema del Windows?
 Windows_Console                         Executar POPFile a una finestra de consola?
-Windows_NextTime                        <p><font color="red">No tindr‡ efecte fins que reinicieu el POPFile</font>
+Windows_NextTime                        <p><font color="red">No tindr√† efecte fins que reinicieu el POPFile</font>
 
-Header_MenuSummary                      Aquesta taula Ès el men˙ de navegaciÛ que permet d'accedir a cadascuna de les diferents p‡gines del centre de control.
-History_MainTableSummary                Aquesta taula mostra el remitent i l'assumpte dels missatges rebuts adÈs i permet de revisar-los i reclassificar-los. En clicar la lÌnia de l'assumpte es mostrar‡ el missatge sencer, juntament amb la informaciÛ del per quË de llur classificaciÛ. La columna 'Hauria de ser' us permet d'especificar a quina cistella pertany o de desfer aquest canvi. La columna 'Esborrar' us permet d'esborrar de l'histÚric missatges especÌfics, si ja no els necessiteu.
-History_OpenMessageSummary              Aquesta taula contÈ el text complet d'un missatge, amb els mots usats a la classificaciÛ ressaltats segons la cistella mÈs rellevant de cadascun.
-Bucket_MainTableSummary                 Aquesta taula proporciona una ullada de les cistelles de classificaciÛ. Cada fila mostra per a cada cistella el nom, el comptador total de mots, el nombre total de mots individuals, si es modificar‡ la lÌnia d'assumpte en classificar-lo, si es deixaran en quarantena els que es rebin i una taula per seleccionar el color a usar en presentar al centre de control res de relacionat amb ella.
-Bucket_StatisticsTableSummary           Aquesta taula proporciona tres jocs d'estadÌstiques sobre el rendiment general de POPFile. El primer Ès com d'acurada Ès la classificaciÛ, el segon quants missatges i a quines cistelles s'han classificat i el tercer quants mots hi ha a cada cistella i quins percentatges representen.
-Bucket_MaintenanceTableSummary          Aquesta taula contÈ formularis que us permeten de crear, esborrar o redenominar cistelles o examinar un mot a totes les cistelles per veure quines probabilitats presenta.
-Bucket_AccuracyChartSummary             Aquesta taula representa gr‡ficament la precisiÛ de la classificaciÛ de missatges.
-Bucket_BarChartSummary                  Aquesta taula representa gr‡ficament l'assignaciÛ de percentatges a cadascuna de les diferents cistelles. S'usa tant per al nombre de missatges classificats com per als comptadors totals de mots.
-Bucket_LookupResultsSummary             Aquesta taula mostra les probabilitats associades a un mot del corpus donat. De cada cistella mostra la freq¸Ëncia en que esdevÈ el mot, la probabilitat de que hi aparegui i l'efecte general que tÈ sobre el barem de la cistella si n'hi ha cap en un missatge.
-Bucket_WordListTableSummary             Aquesta taula proporciona una llista de tots els mots d'una cistella particular, ordenats per la primera lletra com˙ a cada fila.
-Magnet_MainTableSummary                 Aquesta taula mostra la llista d'imants que s'usen per classificar missatges autom‡ticament segons unes regles fixes. Cada fila mostra com es defineix l'imant, per a quina cistella s'ha fet i un botÛ per esborrar-lo.
-Configuration_MainTableSummary          Aquesta taula contÈ un nombre de formularis que us permeten de controlar la configuraciÛ de POPFile.
-Configuration_InsertionTableSummary     Aquesta taula contÈ els botons que determinen si es fan certes modificacions a les capÁaleres o lÌnia d'assumpte del missatge abans no sigui passat al client de correu, o no.
-Security_MainTableSummary               Aquesta taula proporciona jocs de controls que afecten la seguretat de la configuraciÛ general de POPFile, si s'ha de comprovar autom‡ticament si hi ha actualitzacions del programa i si s'han enviar les estadÌstiques sobre rendiment del POPFile al magatzem central de l'autor del programa per a informaciÛ general.
-Advanced_MainTableSummary               Aquesta taula proporciona una llista de mots que POPFile ignora en classificar els missatges atesa llur freq¸Ëncia relativa als missatges de tota mena. S'ordenen per fila segons llur primera lletra.
+Header_MenuSummary                      Aquesta taula √©s el men√∫ de navegaci√≥ que permet d'accedir a cadascuna de les diferents p√†gines del centre de control.
+History_MainTableSummary                Aquesta taula mostra el remitent i l'assumpte dels missatges rebuts ad√©s i permet de revisar-los i reclassificar-los. En clicar la l√≠nia de l'assumpte es mostrar√† el missatge sencer, juntament amb la informaci√≥ del per qu√® de llur classificaci√≥. La columna 'Hauria de ser' us permet d'especificar a quina cistella pertany o de desfer aquest canvi. La columna 'Esborrar' us permet d'esborrar de l'hist√≤ric missatges espec√≠fics, si ja no els necessiteu.
+History_OpenMessageSummary              Aquesta taula cont√© el text complet d'un missatge, amb els mots usats a la classificaci√≥ ressaltats segons la cistella m√©s rellevant de cadascun.
+Bucket_MainTableSummary                 Aquesta taula proporciona una ullada de les cistelles de classificaci√≥. Cada fila mostra per a cada cistella el nom, el comptador total de mots, el nombre total de mots individuals, si es modificar√† la l√≠nia d'assumpte en classificar-lo, si es deixaran en quarantena els que es rebin i una taula per seleccionar el color a usar en presentar al centre de control res de relacionat amb ella.
+Bucket_StatisticsTableSummary           Aquesta taula proporciona tres jocs d'estad√≠stiques sobre el rendiment general de POPFile. El primer √©s com d'acurada √©s la classificaci√≥, el segon quants missatges i a quines cistelles s'han classificat i el tercer quants mots hi ha a cada cistella i quins percentatges representen.
+Bucket_MaintenanceTableSummary          Aquesta taula cont√© formularis que us permeten de crear, esborrar o redenominar cistelles o examinar un mot a totes les cistelles per veure quines probabilitats presenta.
+Bucket_AccuracyChartSummary             Aquesta taula representa gr√†ficament la precisi√≥ de la classificaci√≥ de missatges.
+Bucket_BarChartSummary                  Aquesta taula representa gr√†ficament l'assignaci√≥ de percentatges a cadascuna de les diferents cistelles. S'usa tant per al nombre de missatges classificats com per als comptadors totals de mots.
+Bucket_LookupResultsSummary             Aquesta taula mostra les probabilitats associades a un mot del corpus donat. De cada cistella mostra la freq√º√®ncia en que esdev√© el mot, la probabilitat de que hi aparegui i l'efecte general que t√© sobre el barem de la cistella si n'hi ha cap en un missatge.
+Bucket_WordListTableSummary             Aquesta taula proporciona una llista de tots els mots d'una cistella particular, ordenats per la primera lletra com√∫ a cada fila.
+Magnet_MainTableSummary                 Aquesta taula mostra la llista d'imants que s'usen per classificar missatges autom√†ticament segons unes regles fixes. Cada fila mostra com es defineix l'imant, per a quina cistella s'ha fet i un bot√≥ per esborrar-lo.
+Configuration_MainTableSummary          Aquesta taula cont√© un nombre de formularis que us permeten de controlar la configuraci√≥ de POPFile.
+Configuration_InsertionTableSummary     Aquesta taula cont√© els botons que determinen si es fan certes modificacions a les cap√ßaleres o l√≠nia d'assumpte del missatge abans no sigui passat al client de correu, o no.
+Security_MainTableSummary               Aquesta taula proporciona jocs de controls que afecten la seguretat de la configuraci√≥ general de POPFile, si s'ha de comprovar autom√†ticament si hi ha actualitzacions del programa i si s'han enviar les estad√≠stiques sobre rendiment del POPFile al magatzem central de l'autor del programa per a informaci√≥ general.
+Advanced_MainTableSummary               Aquesta taula proporciona una llista de mots que POPFile ignora en classificar els missatges atesa llur freq√º√®ncia relativa als missatges de tota mena. S'ordenen per fila segons llur primera lletra.
 
 Imap_Bucket2Folder                      Els correus de la cistella <b>%s</b> van a la carpeta
-Imap_MapError                           No podeu assignar mÈs d'una cistella a una sola carpeta!
+Imap_MapError                           No podeu assignar m√©s d'una cistella a una sola carpeta!
 Imap_Server                             Nom del servidor IMAP:
-Imap_ServerNameError                    IntroduÔu-hi el nom del servidor!
+Imap_ServerNameError                    Introdu√Øu-hi el nom del servidor!
 Imap_Port                               Port del servidor IMAP:
-Imap_PortError                          IntroduÔu-hi un n˙mero de port v‡lid!
+Imap_PortError                          Introdu√Øu-hi un n√∫mero de port v√†lid!
 Imap_Login                              Nom del compte IMAP:
-Imap_LoginError                         IntroduÔu-hi un nom d'usuari!
+Imap_LoginError                         Introdu√Øu-hi un nom d'usuari!
 Imap_Password                           Contrasenya del compte IMAP:
-Imap_PasswordError                      IntroduÔu-hi una contrasenya pel servidor!
+Imap_PasswordError                      Introdu√Øu-hi una contrasenya pel servidor!
 Imap_Expunge                            Destruir de les carpetes mirades els missatges esborrats.
-Imap_Interval                           Interval d'actualitzaciÛ, en segons:
-Imap_IntervalError                      IntroduÔu-hi un interval entre 10 i 3600 segons.
-Imap_Bytelimit                          Nombre de bytes per missatge a usar per a la classificaciÛ. IntroduÔu-hi 0 (zero) pel missatge complet:
-Imap_BytelimitError                     IntroduÔu-hi un nombre.
+Imap_Interval                           Interval d'actualitzaci√≥, en segons:
+Imap_IntervalError                      Introdu√Øu-hi un interval entre 10 i 3600 segons.
+Imap_Bytelimit                          Nombre de bytes per missatge a usar per a la classificaci√≥. Introdu√Øu-hi 0 (zero) pel missatge complet:
+Imap_BytelimitError                     Introdu√Øu-hi un nombre.
 Imap_RefreshFolders                     Recarregar la llista de carpetes
 Imap_Now                                ara!
 Imap_UpdateError1                       No s'ha pogut entrar. Verifiqueu el nom del compte i la contrasenya.
-Imap_UpdateError2                       No s'ha pogut connectar amb el servidor. Comproveu el nom i el port del servidor i assegureu-vos que sou en lÌnia.
-Imap_UpdateError3                       Configureu abans els detalls de la connexiÛ.
-Imap_NoConnectionMessage                Configureu abans els detalls de la connexiÛ. DesprÈs que hi hagueu fet, hi haur‡ mÈs opcions disponibles.
+Imap_UpdateError2                       No s'ha pogut connectar amb el servidor. Comproveu el nom i el port del servidor i assegureu-vos que sou en l√≠nia.
+Imap_UpdateError3                       Configureu abans els detalls de la connexi√≥.
+Imap_NoConnectionMessage                Configureu abans els detalls de la connexi√≥. Despr√©s que hi hagueu fet, hi haur√† m√©s opcions disponibles.
 Imap_WatchMore                          una carpeta a la llista de les carpetes mirades
-Imap_WatchedFolder                      Carpeta mirada n˙m.
+Imap_WatchedFolder                      Carpeta mirada n√∫m.
 
 Shutdown_Message                        S'ha aturat el POPFile
 
-Help_Training                           Quan useu per primer cop POPFile, no sap res i caldr‡ una mica d'entrenament. Cal entrenar POPFile per a cada cistella. L'anireu educant cada cop que reclassifiqueu un missatge que POPFile hagi classificat a una cistella incorrecta. TambÈ haureu de configurar el vostre client de correu perquË filtri els missatges segons la classificaciÛ de POPFile. Podeu trobar informaciÛ sobre com configurar el filtratge del vostre client de correu a <a href="http://getpopfile.org/docs/faq/EmailSorting">Projecte de DocumentaciÛ POPFile</a> (en anglËs).
-Help_Bucket_Setup                       POPFile necessita al menys dues cistelles a mÈs de la pseudo-cistella 'unclassified'. El que fa ˙nic POPFile Ès que pot classificar els correus en tantes cistelles com volgueu. Una configuraciÛ senzilla pot ser una cistella "spam", una "personal" i una altra "feina".
-Help_No_More                            No mostrar-m'ho mÈs
+Help_Training                           Quan useu per primer cop POPFile, no sap res i caldr√† una mica d'entrenament. Cal entrenar POPFile per a cada cistella. L'anireu educant cada cop que reclassifiqueu un missatge que POPFile hagi classificat a una cistella incorrecta. Tamb√© haureu de configurar el vostre client de correu perqu√® filtri els missatges segons la classificaci√≥ de POPFile. Podeu trobar informaci√≥ sobre com configurar el filtratge del vostre client de correu a <a href="http://getpopfile.org/docs/faq/EmailSorting">Projecte de Documentaci√≥ POPFile</a> (en angl√®s).
+Help_Bucket_Setup                       POPFile necessita al menys dues cistelles a m√©s de la pseudo-cistella 'unclassified'. El que fa √∫nic POPFile √©s que pot classificar els correus en tantes cistelles com volgueu. Una configuraci√≥ senzilla pot ser una cistella "spam", una "personal" i una altra "feina".
+Help_No_More                            No mostrar-m'ho m√©s

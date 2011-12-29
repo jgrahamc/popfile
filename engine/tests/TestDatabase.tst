@@ -48,7 +48,7 @@ test_assert_equal( $db->service(),    1 );
 
 # Database schema version
 
-my $schema_version = 8;
+my $schema_version = 9;
 
 # Test default tables and data
 
@@ -447,14 +447,13 @@ my $dbh_to = DBI->connect( $dbconnect );
 $db->db_upgrade__( $dbh_to, $dbh );
 
 $dbh_to->disconnect;
-$dbh->disconnect;
-$db->db_disconnect__();
+$db->stop();
 
 # Test for automatic conversion
 
 rename $db->get_user_path_( 'temp.db' ), $db->get_user_path_( 'popfile.db' );
 
-$db->start();
+test_assert_equal( $db->start(), 1 );
 
 $db->stop();
 $POPFile->CORE_stop();

@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 8
+-- POPFILE SCHEMA 9
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
@@ -426,9 +426,9 @@ create trigger delete_bucket_template delete on bucket_template
 
 -- Default data
 
--- This is schema version 8
+-- This is schema version 9
 
-insert into popfile ( version ) values ( 8 );
+insert into popfile ( version ) values ( 9 );
 
 -- There's always a user called 'admin'
 

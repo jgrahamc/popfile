@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+п»ї# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -25,211 +25,211 @@ LanguageDirection                       ltr
 ManualLanguage                          bg
 
 # Common words that are used on their own all over the interface
-Apply                                   Промени
-On                                      Вкл.
-Off                                     Изкл.
-TurnOn                                  Включи
-TurnOff                                 Изключи
-Add                                     Добави
-Remove                                  Премахни
-Previous                                Пред.
-Next                                    Следв.
-From                                    От
-Subject                                 Заглавие 
-Classification                          Класификация
-Reclassify                              Прекласиф.
-Undo                                    Върни
-Close                                   Затвори
-Find                                    Търси
-Filter                                  Филтър
-Yes                                     Да
-No                                      Не
-ChangeToYes                             Направи ДА
-ChangeToNo                              Направи НЕ
-Bucket                                  Кош
-Magnet                                  Магнит
-Delete                                  Изтрий
-Create                                  Създай
-To                                      До
-Total                                   Общо
-Rename                                  Преименувай
-Frequency                               Честота
-Probability                             Вероятност
-Score                                   Оценка
-Lookup                                  Търси
+Apply                                   РџСЂРѕРјРµРЅРё
+On                                      Р’РєР».
+Off                                     РР·РєР».
+TurnOn                                  Р’РєР»СЋС‡Рё
+TurnOff                                 РР·РєР»СЋС‡Рё
+Add                                     Р”РѕР±Р°РІРё
+Remove                                  РџСЂРµРјР°С…РЅРё
+Previous                                РџСЂРµРґ.
+Next                                    РЎР»РµРґРІ.
+From                                    РћС‚
+Subject                                 Р—Р°РіР»Р°РІРёРµ 
+Classification                          РљР»Р°СЃРёС„РёРєР°С†РёСЏ
+Reclassify                              РџСЂРµРєР»Р°СЃРёС„.
+Undo                                    Р’СЉСЂРЅРё
+Close                                   Р—Р°С‚РІРѕСЂРё
+Find                                    РўСЉСЂСЃРё
+Filter                                  Р¤РёР»С‚СЉСЂ
+Yes                                     Р”Р°
+No                                      РќРµ
+ChangeToYes                             РќР°РїСЂР°РІРё Р”Рђ
+ChangeToNo                              РќР°РїСЂР°РІРё РќР•
+Bucket                                  РљРѕС€
+Magnet                                  РњР°РіРЅРёС‚
+Delete                                  РР·С‚СЂРёР№
+Create                                  РЎСЉР·РґР°Р№
+To                                      Р”Рѕ
+Total                                   РћР±С‰Рѕ
+Rename                                  РџСЂРµРёРјРµРЅСѓРІР°Р№
+Frequency                               Р§РµСЃС‚РѕС‚Р°
+Probability                             Р’РµСЂРѕСЏС‚РЅРѕСЃС‚
+Score                                   РћС†РµРЅРєР°
+Lookup                                  РўСЉСЂСЃРё
 
 # The header and footer that appear on every UI page
-Header_Title                            Панел за управление на POPFile
-Header_Shutdown                         Спри POPFile
-Header_History                          Хроника
-Header_Buckets                          Кошове
-Header_Configuration                    Конфигурация
-Header_Advanced                         Специални
-Header_Security                         Защита
-Header_Magnets                          Магнити
+Header_Title                            РџР°РЅРµР» Р·Р° СѓРїСЂР°РІР»РµРЅРёРµ РЅР° POPFile
+Header_Shutdown                         РЎРїСЂРё POPFile
+Header_History                          РҐСЂРѕРЅРёРєР°
+Header_Buckets                          РљРѕС€РѕРІРµ
+Header_Configuration                    РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ
+Header_Advanced                         РЎРїРµС†РёР°Р»РЅРё
+Header_Security                         Р—Р°С‰РёС‚Р°
+Header_Magnets                          РњР°РіРЅРёС‚Рё
 
-Footer_HomePage                         Web страница на POPFile
-Footer_Manual                           Ръководство
-Footer_Forums                           Форуми
-Footer_FeedMe                           Дарение
-Footer_RequestFeature                   Идея
-Footer_MailingList                      Абонамент
+Footer_HomePage                         Web СЃС‚СЂР°РЅРёС†Р° РЅР° POPFile
+Footer_Manual                           Р СЉРєРѕРІРѕРґСЃС‚РІРѕ
+Footer_Forums                           Р¤РѕСЂСѓРјРё
+Footer_FeedMe                           Р”Р°СЂРµРЅРёРµ
+Footer_RequestFeature                   РРґРµСЏ
+Footer_MailingList                      РђР±РѕРЅР°РјРµРЅС‚
 
-Configuration_Error1                    Въведете за разделител един-единствен знак
-Configuration_Error2                    Портът за потребителския интерфейс трябва да бъде число между 1 и 65535
-Configuration_Error3                    Работният порт за POP3 трябва да бъде число между 1 и 65535
-Configuration_Error4                    Размерът на страницата трябва да бъде число между 1 и 1000
-Configuration_Error5                    Броят дни в хрониката трябва да бъде число между 1 и 366
-Configuration_Error6                    TCP таймаутът трябва да бъде число между 10 и 1800
-Configuration_POP3Port                  Работен порт за POP3
-Configuration_POP3Update                Работният порт е променен на %s; тази промяна ще се отрази при следващото стартиране на POPFile.
-Configuration_Separator                 Разделител
-Configuration_SepUpdate                 Разделителят променен на %s
-Configuration_UI                        Порт за потребителски интерфейс
-Configuration_UIUpdate                  Портът за потребителски интерфейс е променен на %s; тази промяна ще се отрази при следващото стартиране на POPFile.
-Configuration_History                   Брой съобщения на страница
-Configuration_HistoryUpdate             Броят съобщения на страница променен на %s
-Configuration_Days                      Брой дни за пазене на хроника
-Configuration_DaysUpdate                Броят на дните за пазене на хроника променен на %s
-Configuration_UserInterface             Потребителски интерфейс
+Configuration_Error1                    Р’СЉРІРµРґРµС‚Рµ Р·Р° СЂР°Р·РґРµР»РёС‚РµР» РµРґРёРЅ-РµРґРёРЅСЃС‚РІРµРЅ Р·РЅР°Рє
+Configuration_Error2                    РџРѕСЂС‚СЉС‚ Р·Р° РїРѕС‚СЂРµР±РёС‚РµР»СЃРєРёСЏ РёРЅС‚РµСЂС„РµР№СЃ С‚СЂСЏР±РІР° РґР° Р±СЉРґРµ С‡РёСЃР»Рѕ РјРµР¶РґСѓ 1 Рё 65535
+Configuration_Error3                    Р Р°Р±РѕС‚РЅРёСЏС‚ РїРѕСЂС‚ Р·Р° POP3 С‚СЂСЏР±РІР° РґР° Р±СЉРґРµ С‡РёСЃР»Рѕ РјРµР¶РґСѓ 1 Рё 65535
+Configuration_Error4                    Р Р°Р·РјРµСЂСЉС‚ РЅР° СЃС‚СЂР°РЅРёС†Р°С‚Р° С‚СЂСЏР±РІР° РґР° Р±СЉРґРµ С‡РёСЃР»Рѕ РјРµР¶РґСѓ 1 Рё 1000
+Configuration_Error5                    Р‘СЂРѕСЏС‚ РґРЅРё РІ С…СЂРѕРЅРёРєР°С‚Р° С‚СЂСЏР±РІР° РґР° Р±СЉРґРµ С‡РёСЃР»Рѕ РјРµР¶РґСѓ 1 Рё 366
+Configuration_Error6                    TCP С‚Р°Р№РјР°СѓС‚СЉС‚ С‚СЂСЏР±РІР° РґР° Р±СЉРґРµ С‡РёСЃР»Рѕ РјРµР¶РґСѓ 10 Рё 1800
+Configuration_POP3Port                  Р Р°Р±РѕС‚РµРЅ РїРѕСЂС‚ Р·Р° POP3
+Configuration_POP3Update                Р Р°Р±РѕС‚РЅРёСЏС‚ РїРѕСЂС‚ Рµ РїСЂРѕРјРµРЅРµРЅ РЅР° %s; С‚Р°Р·Рё РїСЂРѕРјСЏРЅР° С‰Рµ СЃРµ РѕС‚СЂР°Р·Рё РїСЂРё СЃР»РµРґРІР°С‰РѕС‚Рѕ СЃС‚Р°СЂС‚РёСЂР°РЅРµ РЅР° POPFile.
+Configuration_Separator                 Р Р°Р·РґРµР»РёС‚РµР»
+Configuration_SepUpdate                 Р Р°Р·РґРµР»РёС‚РµР»СЏС‚ РїСЂРѕРјРµРЅРµРЅ РЅР° %s
+Configuration_UI                        РџРѕСЂС‚ Р·Р° РїРѕС‚СЂРµР±РёС‚РµР»СЃРєРё РёРЅС‚РµСЂС„РµР№СЃ
+Configuration_UIUpdate                  РџРѕСЂС‚СЉС‚ Р·Р° РїРѕС‚СЂРµР±РёС‚РµР»СЃРєРё РёРЅС‚РµСЂС„РµР№СЃ Рµ РїСЂРѕРјРµРЅРµРЅ РЅР° %s; С‚Р°Р·Рё РїСЂРѕРјСЏРЅР° С‰Рµ СЃРµ РѕС‚СЂР°Р·Рё РїСЂРё СЃР»РµРґРІР°С‰РѕС‚Рѕ СЃС‚Р°СЂС‚РёСЂР°РЅРµ РЅР° POPFile.
+Configuration_History                   Р‘СЂРѕР№ СЃСЉРѕР±С‰РµРЅРёСЏ РЅР° СЃС‚СЂР°РЅРёС†Р°
+Configuration_HistoryUpdate             Р‘СЂРѕСЏС‚ СЃСЉРѕР±С‰РµРЅРёСЏ РЅР° СЃС‚СЂР°РЅРёС†Р° РїСЂРѕРјРµРЅРµРЅ РЅР° %s
+Configuration_Days                      Р‘СЂРѕР№ РґРЅРё Р·Р° РїР°Р·РµРЅРµ РЅР° С…СЂРѕРЅРёРєР°
+Configuration_DaysUpdate                Р‘СЂРѕСЏС‚ РЅР° РґРЅРёС‚Рµ Р·Р° РїР°Р·РµРЅРµ РЅР° С…СЂРѕРЅРёРєР° РїСЂРѕРјРµРЅРµРЅ РЅР° %s
+Configuration_UserInterface             РџРѕС‚СЂРµР±РёС‚РµР»СЃРєРё РёРЅС‚РµСЂС„РµР№СЃ
 Configuration_Skins                     Skins
 Configuration_SkinsChoose               Choose skin
-Configuration_Language                  Език
-Configuration_LanguageChoose            Избери език
-Configuration_ListenPorts               Портове
-Configuration_HistoryView               Вид на хрониката
-Configuration_TCPTimeout                TCP Таймаут
-Configuration_TCPTimeoutSecs            Таймаут на TCP връзките в секунди
-Configuration_TCPTimeoutUpdate          TCP таймаутът променен на %s
-Configuration_ClassificationInsertion   Обозначаване на класификацията
-Configuration_SubjectLine               Промяна на заглавието
-Configuration_XTCInsertion              Вмъкване на X-Text-Classification
-Configuration_XPLInsertion              Вмъкване на X-POPFile-Link
-Configuration_Logging                   Протоколиране
-Configuration_None                      Без
-Configuration_ToScreen                  На екрана
-Configuration_ToFile                    Във файл
-Configuration_ToScreenFile              Във файла и на екран
-Configuration_LoggerOutput              Място за протоколиране
+Configuration_Language                  Р•Р·РёРє
+Configuration_LanguageChoose            РР·Р±РµСЂРё РµР·РёРє
+Configuration_ListenPorts               РџРѕСЂС‚РѕРІРµ
+Configuration_HistoryView               Р’РёРґ РЅР° С…СЂРѕРЅРёРєР°С‚Р°
+Configuration_TCPTimeout                TCP РўР°Р№РјР°СѓС‚
+Configuration_TCPTimeoutSecs            РўР°Р№РјР°СѓС‚ РЅР° TCP РІСЂСЉР·РєРёС‚Рµ РІ СЃРµРєСѓРЅРґРё
+Configuration_TCPTimeoutUpdate          TCP С‚Р°Р№РјР°СѓС‚СЉС‚ РїСЂРѕРјРµРЅРµРЅ РЅР° %s
+Configuration_ClassificationInsertion   РћР±РѕР·РЅР°С‡Р°РІР°РЅРµ РЅР° РєР»Р°СЃРёС„РёРєР°С†РёСЏС‚Р°
+Configuration_SubjectLine               РџСЂРѕРјСЏРЅР° РЅР° Р·Р°РіР»Р°РІРёРµС‚Рѕ
+Configuration_XTCInsertion              Р’РјСЉРєРІР°РЅРµ РЅР° X-Text-Classification
+Configuration_XPLInsertion              Р’РјСЉРєРІР°РЅРµ РЅР° X-POPFile-Link
+Configuration_Logging                   РџСЂРѕС‚РѕРєРѕР»РёСЂР°РЅРµ
+Configuration_None                      Р‘РµР·
+Configuration_ToScreen                  РќР° РµРєСЂР°РЅР°
+Configuration_ToFile                    Р’СЉРІ С„Р°Р№Р»
+Configuration_ToScreenFile              Р’СЉРІ С„Р°Р№Р»Р° Рё РЅР° РµРєСЂР°РЅ
+Configuration_LoggerOutput              РњСЏСЃС‚Рѕ Р·Р° РїСЂРѕС‚РѕРєРѕР»РёСЂР°РЅРµ
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
 
-Advanced_Error1                         '%s' вече присъства в списъка с игнорираните думи
-Advanced_Error2                         Игнорираните думи може да съдържат само букви, цифри и знаците ., _, -, или @
-Advanced_Error3                         '%s' добавена към списъка с игнорирани думи
-Advanced_Error4                         '%s' не присъства в списъка с игнорираните думи
-Advanced_Error5                         '%s' премахната към списъка с игнорирани думи
-Advanced_StopWords                      Игнорирани думи
-Advanced_Message1                       Следните думи се игнорират при класифициране, тъй като се срещат твърде често.
-Advanced_AddWord                        Добави дума
-Advanced_RemoveWord                     Премахни дума
+Advanced_Error1                         '%s' РІРµС‡Рµ РїСЂРёСЃСЉСЃС‚РІР° РІ СЃРїРёСЃСЉРєР° СЃ РёРіРЅРѕСЂРёСЂР°РЅРёС‚Рµ РґСѓРјРё
+Advanced_Error2                         РРіРЅРѕСЂРёСЂР°РЅРёС‚Рµ РґСѓРјРё РјРѕР¶Рµ РґР° СЃСЉРґСЉСЂР¶Р°С‚ СЃР°РјРѕ Р±СѓРєРІРё, С†РёС„СЂРё Рё Р·РЅР°С†РёС‚Рµ ., _, -, РёР»Рё @
+Advanced_Error3                         '%s' РґРѕР±Р°РІРµРЅР° РєСЉРј СЃРїРёСЃСЉРєР° СЃ РёРіРЅРѕСЂРёСЂР°РЅРё РґСѓРјРё
+Advanced_Error4                         '%s' РЅРµ РїСЂРёСЃСЉСЃС‚РІР° РІ СЃРїРёСЃСЉРєР° СЃ РёРіРЅРѕСЂРёСЂР°РЅРёС‚Рµ РґСѓРјРё
+Advanced_Error5                         '%s' РїСЂРµРјР°С…РЅР°С‚Р° РєСЉРј СЃРїРёСЃСЉРєР° СЃ РёРіРЅРѕСЂРёСЂР°РЅРё РґСѓРјРё
+Advanced_StopWords                      РРіРЅРѕСЂРёСЂР°РЅРё РґСѓРјРё
+Advanced_Message1                       РЎР»РµРґРЅРёС‚Рµ РґСѓРјРё СЃРµ РёРіРЅРѕСЂРёСЂР°С‚ РїСЂРё РєР»Р°СЃРёС„РёС†РёСЂР°РЅРµ, С‚СЉР№ РєР°С‚Рѕ СЃРµ СЃСЂРµС‰Р°С‚ С‚РІСЉСЂРґРµ С‡РµСЃС‚Рѕ.
+Advanced_AddWord                        Р”РѕР±Р°РІРё РґСѓРјР°
+Advanced_RemoveWord                     РџСЂРµРјР°С…РЅРё РґСѓРјР°
 
-History_Filter                          &nbsp;(показан е само кош <font color="%s">%s</font>)
+History_Filter                          &nbsp;(РїРѕРєР°Р·Р°РЅ Рµ СЃР°РјРѕ РєРѕС€ <font color="%s">%s</font>)
 History_FilterBy                        Filter By
-History_Search                          &nbsp;(търсене за заглавие %s)
-History_Title                           Последни съобщения
-History_Jump                            Преход към съобщение
-History_ShowAll                         Покажи всички
-History_ShouldBe                        Трябва да бъде
-History_NoFrom                          Няма подател
-History_NoSubject                       Няма заглавие
-History_ClassifyAs                      Класифицирай като
-History_MagnetUsed                      Според магнит
-History_ChangedTo                       Променено на <font color="%s">%s
-History_Already                         Вече класифицирано като <font color="%s">%s</font>
-History_RemoveAll                       Премахни всички
-History_RemovePage                      Премахни тази страница
-History_Remove                          За премахване на съобщенията натисни:
-History_SearchMessage                   Търси по подател и заглавие
-History_NoMessages                      Няма съобщения
-History_ShowMagnet                      По магнит
-History_Magnet                          &nbsp;(само класифицираните по магнит)
-History_ResetSearch                     Изчисти търсенето
+History_Search                          &nbsp;(С‚СЉСЂСЃРµРЅРµ Р·Р° Р·Р°РіР»Р°РІРёРµ %s)
+History_Title                           РџРѕСЃР»РµРґРЅРё СЃСЉРѕР±С‰РµРЅРёСЏ
+History_Jump                            РџСЂРµС…РѕРґ РєСЉРј СЃСЉРѕР±С‰РµРЅРёРµ
+History_ShowAll                         РџРѕРєР°Р¶Рё РІСЃРёС‡РєРё
+History_ShouldBe                        РўСЂСЏР±РІР° РґР° Р±СЉРґРµ
+History_NoFrom                          РќСЏРјР° РїРѕРґР°С‚РµР»
+History_NoSubject                       РќСЏРјР° Р·Р°РіР»Р°РІРёРµ
+History_ClassifyAs                      РљР»Р°СЃРёС„РёС†РёСЂР°Р№ РєР°С‚Рѕ
+History_MagnetUsed                      РЎРїРѕСЂРµРґ РјР°РіРЅРёС‚
+History_ChangedTo                       РџСЂРѕРјРµРЅРµРЅРѕ РЅР° <font color="%s">%s
+History_Already                         Р’РµС‡Рµ РєР»Р°СЃРёС„РёС†РёСЂР°РЅРѕ РєР°С‚Рѕ <font color="%s">%s</font>
+History_RemoveAll                       РџСЂРµРјР°С…РЅРё РІСЃРёС‡РєРё
+History_RemovePage                      РџСЂРµРјР°С…РЅРё С‚Р°Р·Рё СЃС‚СЂР°РЅРёС†Р°
+History_Remove                          Р—Р° РїСЂРµРјР°С…РІР°РЅРµ РЅР° СЃСЉРѕР±С‰РµРЅРёСЏС‚Р° РЅР°С‚РёСЃРЅРё:
+History_SearchMessage                   РўСЉСЂСЃРё РїРѕ РїРѕРґР°С‚РµР» Рё Р·Р°РіР»Р°РІРёРµ
+History_NoMessages                      РќСЏРјР° СЃСЉРѕР±С‰РµРЅРёСЏ
+History_ShowMagnet                      РџРѕ РјР°РіРЅРёС‚
+History_Magnet                          &nbsp;(СЃР°РјРѕ РєР»Р°СЃРёС„РёС†РёСЂР°РЅРёС‚Рµ РїРѕ РјР°РіРЅРёС‚)
+History_ResetSearch                     РР·С‡РёСЃС‚Рё С‚СЉСЂСЃРµРЅРµС‚Рѕ
 
-Password_Title                          Парола
-Password_Enter                          Въведи парола
-Password_Go                             ОК
-Password_Error1                         Невалидна парола
+Password_Title                          РџР°СЂРѕР»Р°
+Password_Enter                          Р’СЉРІРµРґРё РїР°СЂРѕР»Р°
+Password_Go                             РћРљ
+Password_Error1                         РќРµРІР°Р»РёРґРЅР° РїР°СЂРѕР»Р°
 
-Security_Error1                         Портът с легитимиране трябва да бъде число между 1 и 65535
-Security_Stealth                        Скрит режим
-Security_NoStealthMode                  Не (скрит режим)
-Security_ExplainStats                   (Когато това е включено, POPFile веднъж дневно изпраща към скрипт на www.usethesource.com: bc (броя на кошовете), mc (броя съобщения, класифицирани от POPFile) и ec (броя на грешно класифицираните съобщения). Тези стойности се съхраняват във файл и благодарение на тях аз публикувам статистика за начина, по който хората използват POPFile и колко добре работи. Моят Web сървър съхранява лог-файловете си в продължение на около 5 дни, след което ги изтрива; аз не пазя връзка между статистическите данни и конкретните IP адреси.)
-Security_ExplainUpdate                  (Когато това е включено, POPFile веднъж дневно изпраща към скрипт на www.usethesource.com: bc (броя на кошовете), mc (броя съобщения, класифицирани от POPFile) и ec (броя на грешно класифицираните съобщения). POPFile получава обратно известие дали има по-нова версия на софтуера и показва съответна картинка на всяка страница. Моят Web сървър съхранява лог-файловете си в продължение на около 5 дни, след което ги изтрива; аз не пазя връзка между запитванията за нова версия и конкретните IP адреси.)
-Security_PasswordTitle                  Парола за потребителския интерфейс
-Security_Password                       Парола
-Security_PasswordUpdate                 Паролата променена на %s
-Security_AUTHTitle                      Легитимация пред сървъра/AUTH
-Security_SecureServer                   Сървър, изискващ легитимация
-Security_SecureServerUpdate             Сървърът с леитимация промене на %s; тази промяна ще бъде отразена при следващото стартиране на POPFile
-Security_SecurePort                     Порт за легитимация
-Security_SecurePortUpdate               Портът променен на %s; тази промяна ще бъде отразена при следващото стартиране на POPFile
-Security_POP3                           Приемане на POP3 връзки от други машини
-Security_UI                             Приемане на HTTP връзки (за потребителския интерфейс) от други машини
-Security_UpdateTitle                    Автоматична проверка за нови версии
-Security_Update                         Ежедневна проверка за нови версии на POPFile
-Security_StatsTitle                     Събиране на статистика
-Security_Stats                          Ежедневно изпращане на статистически данни на автора
+Security_Error1                         РџРѕСЂС‚СЉС‚ СЃ Р»РµРіРёС‚РёРјРёСЂР°РЅРµ С‚СЂСЏР±РІР° РґР° Р±СЉРґРµ С‡РёСЃР»Рѕ РјРµР¶РґСѓ 1 Рё 65535
+Security_Stealth                        РЎРєСЂРёС‚ СЂРµР¶РёРј
+Security_NoStealthMode                  РќРµ (СЃРєСЂРёС‚ СЂРµР¶РёРј)
+Security_ExplainStats                   (РљРѕРіР°С‚Рѕ С‚РѕРІР° Рµ РІРєР»СЋС‡РµРЅРѕ, POPFile РІРµРґРЅСЉР¶ РґРЅРµРІРЅРѕ РёР·РїСЂР°С‰Р° РєСЉРј СЃРєСЂРёРїС‚ РЅР° www.usethesource.com: bc (Р±СЂРѕСЏ РЅР° РєРѕС€РѕРІРµС‚Рµ), mc (Р±СЂРѕСЏ СЃСЉРѕР±С‰РµРЅРёСЏ, РєР»Р°СЃРёС„РёС†РёСЂР°РЅРё РѕС‚ POPFile) Рё ec (Р±СЂРѕСЏ РЅР° РіСЂРµС€РЅРѕ РєР»Р°СЃРёС„РёС†РёСЂР°РЅРёС‚Рµ СЃСЉРѕР±С‰РµРЅРёСЏ). РўРµР·Рё СЃС‚РѕР№РЅРѕСЃС‚Рё СЃРµ СЃСЉС…СЂР°РЅСЏРІР°С‚ РІСЉРІ С„Р°Р№Р» Рё Р±Р»Р°РіРѕРґР°СЂРµРЅРёРµ РЅР° С‚СЏС… Р°Р· РїСѓР±Р»РёРєСѓРІР°Рј СЃС‚Р°С‚РёСЃС‚РёРєР° Р·Р° РЅР°С‡РёРЅР°, РїРѕ РєРѕР№С‚Рѕ С…РѕСЂР°С‚Р° РёР·РїРѕР»Р·РІР°С‚ POPFile Рё РєРѕР»РєРѕ РґРѕР±СЂРµ СЂР°Р±РѕС‚Рё. РњРѕСЏС‚ Web СЃСЉСЂРІСЉСЂ СЃСЉС…СЂР°РЅСЏРІР° Р»РѕРі-С„Р°Р№Р»РѕРІРµС‚Рµ СЃРё РІ РїСЂРѕРґСЉР»Р¶РµРЅРёРµ РЅР° РѕРєРѕР»Рѕ 5 РґРЅРё, СЃР»РµРґ РєРѕРµС‚Рѕ РіРё РёР·С‚СЂРёРІР°; Р°Р· РЅРµ РїР°Р·СЏ РІСЂСЉР·РєР° РјРµР¶РґСѓ СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєРёС‚Рµ РґР°РЅРЅРё Рё РєРѕРЅРєСЂРµС‚РЅРёС‚Рµ IP Р°РґСЂРµСЃРё.)
+Security_ExplainUpdate                  (РљРѕРіР°С‚Рѕ С‚РѕРІР° Рµ РІРєР»СЋС‡РµРЅРѕ, POPFile РІРµРґРЅСЉР¶ РґРЅРµРІРЅРѕ РёР·РїСЂР°С‰Р° РєСЉРј СЃРєСЂРёРїС‚ РЅР° www.usethesource.com: bc (Р±СЂРѕСЏ РЅР° РєРѕС€РѕРІРµС‚Рµ), mc (Р±СЂРѕСЏ СЃСЉРѕР±С‰РµРЅРёСЏ, РєР»Р°СЃРёС„РёС†РёСЂР°РЅРё РѕС‚ POPFile) Рё ec (Р±СЂРѕСЏ РЅР° РіСЂРµС€РЅРѕ РєР»Р°СЃРёС„РёС†РёСЂР°РЅРёС‚Рµ СЃСЉРѕР±С‰РµРЅРёСЏ). POPFile РїРѕР»СѓС‡Р°РІР° РѕР±СЂР°С‚РЅРѕ РёР·РІРµСЃС‚РёРµ РґР°Р»Рё РёРјР° РїРѕ-РЅРѕРІР° РІРµСЂСЃРёСЏ РЅР° СЃРѕС„С‚СѓРµСЂР° Рё РїРѕРєР°Р·РІР° СЃСЉРѕС‚РІРµС‚РЅР° РєР°СЂС‚РёРЅРєР° РЅР° РІСЃСЏРєР° СЃС‚СЂР°РЅРёС†Р°. РњРѕСЏС‚ Web СЃСЉСЂРІСЉСЂ СЃСЉС…СЂР°РЅСЏРІР° Р»РѕРі-С„Р°Р№Р»РѕРІРµС‚Рµ СЃРё РІ РїСЂРѕРґСЉР»Р¶РµРЅРёРµ РЅР° РѕРєРѕР»Рѕ 5 РґРЅРё, СЃР»РµРґ РєРѕРµС‚Рѕ РіРё РёР·С‚СЂРёРІР°; Р°Р· РЅРµ РїР°Р·СЏ РІСЂСЉР·РєР° РјРµР¶РґСѓ Р·Р°РїРёС‚РІР°РЅРёСЏС‚Р° Р·Р° РЅРѕРІР° РІРµСЂСЃРёСЏ Рё РєРѕРЅРєСЂРµС‚РЅРёС‚Рµ IP Р°РґСЂРµСЃРё.)
+Security_PasswordTitle                  РџР°СЂРѕР»Р° Р·Р° РїРѕС‚СЂРµР±РёС‚РµР»СЃРєРёСЏ РёРЅС‚РµСЂС„РµР№СЃ
+Security_Password                       РџР°СЂРѕР»Р°
+Security_PasswordUpdate                 РџР°СЂРѕР»Р°С‚Р° РїСЂРѕРјРµРЅРµРЅР° РЅР° %s
+Security_AUTHTitle                      Р›РµРіРёС‚РёРјР°С†РёСЏ РїСЂРµРґ СЃСЉСЂРІСЉСЂР°/AUTH
+Security_SecureServer                   РЎСЉСЂРІСЉСЂ, РёР·РёСЃРєРІР°С‰ Р»РµРіРёС‚РёРјР°С†РёСЏ
+Security_SecureServerUpdate             РЎСЉСЂРІСЉСЂСЉС‚ СЃ Р»РµРёС‚РёРјР°С†РёСЏ РїСЂРѕРјРµРЅРµ РЅР° %s; С‚Р°Р·Рё РїСЂРѕРјСЏРЅР° С‰Рµ Р±СЉРґРµ РѕС‚СЂР°Р·РµРЅР° РїСЂРё СЃР»РµРґРІР°С‰РѕС‚Рѕ СЃС‚Р°СЂС‚РёСЂР°РЅРµ РЅР° POPFile
+Security_SecurePort                     РџРѕСЂС‚ Р·Р° Р»РµРіРёС‚РёРјР°С†РёСЏ
+Security_SecurePortUpdate               РџРѕСЂС‚СЉС‚ РїСЂРѕРјРµРЅРµРЅ РЅР° %s; С‚Р°Р·Рё РїСЂРѕРјСЏРЅР° С‰Рµ Р±СЉРґРµ РѕС‚СЂР°Р·РµРЅР° РїСЂРё СЃР»РµРґРІР°С‰РѕС‚Рѕ СЃС‚Р°СЂС‚РёСЂР°РЅРµ РЅР° POPFile
+Security_POP3                           РџСЂРёРµРјР°РЅРµ РЅР° POP3 РІСЂСЉР·РєРё РѕС‚ РґСЂСѓРіРё РјР°С€РёРЅРё
+Security_UI                             РџСЂРёРµРјР°РЅРµ РЅР° HTTP РІСЂСЉР·РєРё (Р·Р° РїРѕС‚СЂРµР±РёС‚РµР»СЃРєРёСЏ РёРЅС‚РµСЂС„РµР№СЃ) РѕС‚ РґСЂСѓРіРё РјР°С€РёРЅРё
+Security_UpdateTitle                    РђРІС‚РѕРјР°С‚РёС‡РЅР° РїСЂРѕРІРµСЂРєР° Р·Р° РЅРѕРІРё РІРµСЂСЃРёРё
+Security_Update                         Р•Р¶РµРґРЅРµРІРЅР° РїСЂРѕРІРµСЂРєР° Р·Р° РЅРѕРІРё РІРµСЂСЃРёРё РЅР° POPFile
+Security_StatsTitle                     РЎСЉР±РёСЂР°РЅРµ РЅР° СЃС‚Р°С‚РёСЃС‚РёРєР°
+Security_Stats                          Р•Р¶РµРґРЅРµРІРЅРѕ РёР·РїСЂР°С‰Р°РЅРµ РЅР° СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєРё РґР°РЅРЅРё РЅР° Р°РІС‚РѕСЂР°
 
-Magnet_Error1                           Магнит '%s' вече е зададен за кош '%s'
-Magnet_Error2                           Новият магнит '%s' противоречи на магнит '%s' за кош '%s' и може да предизвика нееднозначност; магнитът не е добавен.
-Magnet_Error3                           Създай нов магнит '%s' за кош '%s'
-Magnet_CurrentMagnets                   Магнити
-Magnet_Message1                         Следните магнити служат за незабавно класифициране на съобщенията в даден кош.
-Magnet_CreateNew                        Създай нов магнит
-Magnet_Explanation                      <b>Има три вида магнити:</b> <ul><li><b>Адрес или име на подател:</b> Например: john@company.com за конкретен адрес, <br />company.com за всички адреси от company.com, <br />John Doe за конкретен подател, John за всички John-овци</li><li><b>Адрес или име на получател:</b> Подобно на адреса на подател, но за адреса на получателя на съобщението</li><li><b>Думи от заглавието:</b> Например: hello за всички съобщения, чието заглавие съдържа hello</li></ul>
-Magnet_MagnetType                       Тип на магнита
-Magnet_Value                            Стойност
-Magnet_Always                           Класифицирай винаги в кош
+Magnet_Error1                           РњР°РіРЅРёС‚ '%s' РІРµС‡Рµ Рµ Р·Р°РґР°РґРµРЅ Р·Р° РєРѕС€ '%s'
+Magnet_Error2                           РќРѕРІРёСЏС‚ РјР°РіРЅРёС‚ '%s' РїСЂРѕС‚РёРІРѕСЂРµС‡Рё РЅР° РјР°РіРЅРёС‚ '%s' Р·Р° РєРѕС€ '%s' Рё РјРѕР¶Рµ РґР° РїСЂРµРґРёР·РІРёРєР° РЅРµРµРґРЅРѕР·РЅР°С‡РЅРѕСЃС‚; РјР°РіРЅРёС‚СЉС‚ РЅРµ Рµ РґРѕР±Р°РІРµРЅ.
+Magnet_Error3                           РЎСЉР·РґР°Р№ РЅРѕРІ РјР°РіРЅРёС‚ '%s' Р·Р° РєРѕС€ '%s'
+Magnet_CurrentMagnets                   РњР°РіРЅРёС‚Рё
+Magnet_Message1                         РЎР»РµРґРЅРёС‚Рµ РјР°РіРЅРёС‚Рё СЃР»СѓР¶Р°С‚ Р·Р° РЅРµР·Р°Р±Р°РІРЅРѕ РєР»Р°СЃРёС„РёС†РёСЂР°РЅРµ РЅР° СЃСЉРѕР±С‰РµРЅРёСЏС‚Р° РІ РґР°РґРµРЅ РєРѕС€.
+Magnet_CreateNew                        РЎСЉР·РґР°Р№ РЅРѕРІ РјР°РіРЅРёС‚
+Magnet_Explanation                      <b>РРјР° С‚СЂРё РІРёРґР° РјР°РіРЅРёС‚Рё:</b> <ul><li><b>РђРґСЂРµСЃ РёР»Рё РёРјРµ РЅР° РїРѕРґР°С‚РµР»:</b> РќР°РїСЂРёРјРµСЂ: john@company.com Р·Р° РєРѕРЅРєСЂРµС‚РµРЅ Р°РґСЂРµСЃ, <br />company.com Р·Р° РІСЃРёС‡РєРё Р°РґСЂРµСЃРё РѕС‚ company.com, <br />John Doe Р·Р° РєРѕРЅРєСЂРµС‚РµРЅ РїРѕРґР°С‚РµР», John Р·Р° РІСЃРёС‡РєРё John-РѕРІС†Рё</li><li><b>РђРґСЂРµСЃ РёР»Рё РёРјРµ РЅР° РїРѕР»СѓС‡Р°С‚РµР»:</b> РџРѕРґРѕР±РЅРѕ РЅР° Р°РґСЂРµСЃР° РЅР° РїРѕРґР°С‚РµР», РЅРѕ Р·Р° Р°РґСЂРµСЃР° РЅР° РїРѕР»СѓС‡Р°С‚РµР»СЏ РЅР° СЃСЉРѕР±С‰РµРЅРёРµС‚Рѕ</li><li><b>Р”СѓРјРё РѕС‚ Р·Р°РіР»Р°РІРёРµС‚Рѕ:</b> РќР°РїСЂРёРјРµСЂ: hello Р·Р° РІСЃРёС‡РєРё СЃСЉРѕР±С‰РµРЅРёСЏ, С‡РёРµС‚Рѕ Р·Р°РіР»Р°РІРёРµ СЃСЉРґСЉСЂР¶Р° hello</li></ul>
+Magnet_MagnetType                       РўРёРї РЅР° РјР°РіРЅРёС‚Р°
+Magnet_Value                            РЎС‚РѕР№РЅРѕСЃС‚
+Magnet_Always                           РљР»Р°СЃРёС„РёС†РёСЂР°Р№ РІРёРЅР°РіРё РІ РєРѕС€
 
-Bucket_Error1                           Имената на кошовете може да съдържат само малки латински букви от a до z плюс знаците - и _
-Bucket_Error2                           Вече съществува кош %s
-Bucket_Error3                           Създаден е кош %s
-Bucket_Error4                           Моля въведете нещо
-Bucket_Error5                           Кош %s преименуван на %s
-Bucket_Error6                           Изтрит е кош %s
-Bucket_Title                            Статистика
-Bucket_BucketName                       Кош
-Bucket_WordCount                        Брой думи
-Bucket_WordCounts                       Брой думи
-Bucket_UniqueWords                      Уникални думи
-Bucket_SubjectModification              Промяна на заглавието
-Bucket_ChangeColor                      Промени цвета
-Bucket_NotEnoughData                    Недостатъчно данни
-Bucket_ClassificationAccuracy           Точност на класификацията
-Bucket_EmailsClassified                 Класифицирани съобщения
-Bucket_EmailsClassifiedUpper            Класифицирани съобщения
-Bucket_ClassificationErrors             Грешки при класификацията
-Bucket_Accuracy                         Точност
-Bucket_ClassificationCount              Брой класифицирани
-Bucket_ResetStatistics                  Нулирай статистиката
-Bucket_LastReset                        Последно нулиране
-Bucket_CurrentColor                     В момента цветът за %s е %s
-Bucket_SetColorTo                       Промени цветът за %s на %s
-Bucket_Maintenance                      Промени
-Bucket_CreateBucket                     Създай кош с име
-Bucket_DeleteBucket                     Изтрий кош с име
-Bucket_RenameBucket                     Преименувай кош с име
-Bucket_Lookup                           Търсене
-Bucket_LookupMessage                    Търсене на дума по кошовете
-Bucket_LookupMessage2                   Резултати от търсенето
-Bucket_LookupMostLikely                 <b>%s</b> най-често се среща в <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> не присъства в никой кош
-Bucket_DisabledGlobally                 Изключено за всички
-Bucket_To                               към
-Bucket_Quarantine                       Карантина
+Bucket_Error1                           РРјРµРЅР°С‚Р° РЅР° РєРѕС€РѕРІРµС‚Рµ РјРѕР¶Рµ РґР° СЃСЉРґСЉСЂР¶Р°С‚ СЃР°РјРѕ РјР°Р»РєРё Р»Р°С‚РёРЅСЃРєРё Р±СѓРєРІРё РѕС‚ a РґРѕ z РїР»СЋСЃ Р·РЅР°С†РёС‚Рµ - Рё _
+Bucket_Error2                           Р’РµС‡Рµ СЃСЉС‰РµСЃС‚РІСѓРІР° РєРѕС€ %s
+Bucket_Error3                           РЎСЉР·РґР°РґРµРЅ Рµ РєРѕС€ %s
+Bucket_Error4                           РњРѕР»СЏ РІСЉРІРµРґРµС‚Рµ РЅРµС‰Рѕ
+Bucket_Error5                           РљРѕС€ %s РїСЂРµРёРјРµРЅСѓРІР°РЅ РЅР° %s
+Bucket_Error6                           РР·С‚СЂРёС‚ Рµ РєРѕС€ %s
+Bucket_Title                            РЎС‚Р°С‚РёСЃС‚РёРєР°
+Bucket_BucketName                       РљРѕС€
+Bucket_WordCount                        Р‘СЂРѕР№ РґСѓРјРё
+Bucket_WordCounts                       Р‘СЂРѕР№ РґСѓРјРё
+Bucket_UniqueWords                      РЈРЅРёРєР°Р»РЅРё РґСѓРјРё
+Bucket_SubjectModification              РџСЂРѕРјСЏРЅР° РЅР° Р·Р°РіР»Р°РІРёРµС‚Рѕ
+Bucket_ChangeColor                      РџСЂРѕРјРµРЅРё С†РІРµС‚Р°
+Bucket_NotEnoughData                    РќРµРґРѕСЃС‚Р°С‚СЉС‡РЅРѕ РґР°РЅРЅРё
+Bucket_ClassificationAccuracy           РўРѕС‡РЅРѕСЃС‚ РЅР° РєР»Р°СЃРёС„РёРєР°С†РёСЏС‚Р°
+Bucket_EmailsClassified                 РљР»Р°СЃРёС„РёС†РёСЂР°РЅРё СЃСЉРѕР±С‰РµРЅРёСЏ
+Bucket_EmailsClassifiedUpper            РљР»Р°СЃРёС„РёС†РёСЂР°РЅРё СЃСЉРѕР±С‰РµРЅРёСЏ
+Bucket_ClassificationErrors             Р“СЂРµС€РєРё РїСЂРё РєР»Р°СЃРёС„РёРєР°С†РёСЏС‚Р°
+Bucket_Accuracy                         РўРѕС‡РЅРѕСЃС‚
+Bucket_ClassificationCount              Р‘СЂРѕР№ РєР»Р°СЃРёС„РёС†РёСЂР°РЅРё
+Bucket_ResetStatistics                  РќСѓР»РёСЂР°Р№ СЃС‚Р°С‚РёСЃС‚РёРєР°С‚Р°
+Bucket_LastReset                        РџРѕСЃР»РµРґРЅРѕ РЅСѓР»РёСЂР°РЅРµ
+Bucket_CurrentColor                     Р’ РјРѕРјРµРЅС‚Р° С†РІРµС‚СЉС‚ Р·Р° %s Рµ %s
+Bucket_SetColorTo                       РџСЂРѕРјРµРЅРё С†РІРµС‚СЉС‚ Р·Р° %s РЅР° %s
+Bucket_Maintenance                      РџСЂРѕРјРµРЅРё
+Bucket_CreateBucket                     РЎСЉР·РґР°Р№ РєРѕС€ СЃ РёРјРµ
+Bucket_DeleteBucket                     РР·С‚СЂРёР№ РєРѕС€ СЃ РёРјРµ
+Bucket_RenameBucket                     РџСЂРµРёРјРµРЅСѓРІР°Р№ РєРѕС€ СЃ РёРјРµ
+Bucket_Lookup                           РўСЉСЂСЃРµРЅРµ
+Bucket_LookupMessage                    РўСЉСЂСЃРµРЅРµ РЅР° РґСѓРјР° РїРѕ РєРѕС€РѕРІРµС‚Рµ
+Bucket_LookupMessage2                   Р РµР·СѓР»С‚Р°С‚Рё РѕС‚ С‚СЉСЂСЃРµРЅРµС‚Рѕ
+Bucket_LookupMostLikely                 <b>%s</b> РЅР°Р№-С‡РµСЃС‚Рѕ СЃРµ СЃСЂРµС‰Р° РІ <font color="%s">%s</font>
+Bucket_DoesNotAppear                    <p><b>%s</b> РЅРµ РїСЂРёСЃСЉСЃС‚РІР° РІ РЅРёРєРѕР№ РєРѕС€
+Bucket_DisabledGlobally                 РР·РєР»СЋС‡РµРЅРѕ Р·Р° РІСЃРёС‡РєРё
+Bucket_To                               РєСЉРј
+Bucket_Quarantine                       РљР°СЂР°РЅС‚РёРЅР°
 
-SingleBucket_Title                      Детайли за %s
-SingleBucket_WordCount                  Брой думи в коша
-SingleBucket_TotalWordCount             Общо думи
-SingleBucket_Percentage                 Процент от общия брой
-SingleBucket_WordTable                  Думи, попадащи в %s
-SingleBucket_Message1                   Означените със звездичка (*) думи са използвани за класификация при това пускане на POPFile. Щракнете с мишката на някоя дума, за да видите вероятността за попадането й във всички кошове.
-SingleBucket_Unique                     %s уникални
+SingleBucket_Title                      Р”РµС‚Р°Р№Р»Рё Р·Р° %s
+SingleBucket_WordCount                  Р‘СЂРѕР№ РґСѓРјРё РІ РєРѕС€Р°
+SingleBucket_TotalWordCount             РћР±С‰Рѕ РґСѓРјРё
+SingleBucket_Percentage                 РџСЂРѕС†РµРЅС‚ РѕС‚ РѕР±С‰РёСЏ Р±СЂРѕР№
+SingleBucket_WordTable                  Р”СѓРјРё, РїРѕРїР°РґР°С‰Рё РІ %s
+SingleBucket_Message1                   РћР·РЅР°С‡РµРЅРёС‚Рµ СЃСЉСЃ Р·РІРµР·РґРёС‡РєР° (*) РґСѓРјРё СЃР° РёР·РїРѕР»Р·РІР°РЅРё Р·Р° РєР»Р°СЃРёС„РёРєР°С†РёСЏ РїСЂРё С‚РѕРІР° РїСѓСЃРєР°РЅРµ РЅР° POPFile. Р©СЂР°РєРЅРµС‚Рµ СЃ РјРёС€РєР°С‚Р° РЅР° РЅСЏРєРѕСЏ РґСѓРјР°, Р·Р° РґР° РІРёРґРёС‚Рµ РІРµСЂРѕСЏС‚РЅРѕСЃС‚С‚Р° Р·Р° РїРѕРїР°РґР°РЅРµС‚Рѕ Р№ РІСЉРІ РІСЃРёС‡РєРё РєРѕС€РѕРІРµ.
+SingleBucket_Unique                     %s СѓРЅРёРєР°Р»РЅРё
 
-Session_Title                           Сеансът на работа с POPFile е приключил
-Session_Error                           Вашият сеанс на работа с POPFile е приключил.  Това може да се е получило от спиране и пускане на POPFile и оставен отворен прозорец на браузера. Щракнете на някой от горните връзки, за да продължите работа с POPFile.
+Session_Title                           РЎРµР°РЅСЃСЉС‚ РЅР° СЂР°Р±РѕС‚Р° СЃ POPFile Рµ РїСЂРёРєР»СЋС‡РёР»
+Session_Error                           Р’Р°С€РёСЏС‚ СЃРµР°РЅСЃ РЅР° СЂР°Р±РѕС‚Р° СЃ POPFile Рµ РїСЂРёРєР»СЋС‡РёР».  РўРѕРІР° РјРѕР¶Рµ РґР° СЃРµ Рµ РїРѕР»СѓС‡РёР»Рѕ РѕС‚ СЃРїРёСЂР°РЅРµ Рё РїСѓСЃРєР°РЅРµ РЅР° POPFile Рё РѕСЃС‚Р°РІРµРЅ РѕС‚РІРѕСЂРµРЅ РїСЂРѕР·РѕСЂРµС† РЅР° Р±СЂР°СѓР·РµСЂР°. Р©СЂР°РєРЅРµС‚Рµ РЅР° РЅСЏРєРѕР№ РѕС‚ РіРѕСЂРЅРёС‚Рµ РІСЂСЉР·РєРё, Р·Р° РґР° РїСЂРѕРґСЉР»Р¶РёС‚Рµ СЂР°Р±РѕС‚Р° СЃ POPFile.
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.

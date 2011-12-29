@@ -1,4 +1,4 @@
-# -------------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------------
 #
 # POPFile Email Filter App		|	Copyright (c) 2001-2006 John Graham-Cumming
 # Klingon Language dictionary 	|	Translation Beta v1.0 by Ryan Allen (kxmode@yahoo.com)

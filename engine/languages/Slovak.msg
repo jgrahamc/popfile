@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+ï»¿# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -26,227 +26,227 @@ LanguageDirection                       ltr
 ManualLanguage                          en
 
 # Common words that are used on their own all over the interface
-Apply                                   Poui
-On                                      Zapnuté
-Off                                     Vypnuté
-TurnOn                                  Zapnú
-TurnOff                                 Vypnú
-Add                                     Prida
-Remove                                  Odstráni
-Previous                                Predchádzajúci
-Next                                    Nasledujúci
-From                                    Odosielate¾
+Apply                                   PouÅ¾iÅ¥
+On                                      ZapnutÃ©
+Off                                     VypnutÃ©
+TurnOn                                  ZapnÃºÅ¥
+TurnOff                                 VypnÃºÅ¥
+Add                                     PridaÅ¥
+Remove                                  OdstrÃ¡niÅ¥
+Previous                                PredchÃ¡dzajÃºci
+Next                                    NasledujÃºci
+From                                    OdosielateÄ¾
 Subject                                 Subjekt
-Classification                          Klasifikácia
+Classification                          KlasifikÃ¡cia
 Reclassify                              Preklasifikovanie
-Undo                                    Vráti
-Close                                   Zatvori
-Find                                    Nájs
+Undo                                    VrÃ¡tiÅ¥
+Close                                   ZatvoriÅ¥
+Find                                    NÃ¡jsÅ¥
 Filter                                  Filter
-Yes                                     Áno
+Yes                                     Ãno
 No                                      Nie
-ChangeToYes                             Zmeni na Áno
-ChangeToNo                              Zmeni na Nie
-Bucket                                  Kôš
+ChangeToYes                             ZmeniÅ¥ na Ãno
+ChangeToNo                              ZmeniÅ¥ na Nie
+Bucket                                  KÃ´Å¡
 Magnet                                  Magnet
-Delete                                  Zmaza
-Create                                  Vytvori
-To                                      Príjemca
+Delete                                  ZmazaÅ¥
+Create                                  VytvoriÅ¥
+To                                      PrÃ­jemca
 Total                                   Celkom
-Rename                                  Premenova
+Rename                                  PremenovaÅ¥
 Frequency                               Frekvencia
-Probability                             Pravdepodobnos
+Probability                             PravdepodobnosÅ¥
 Score                                   Hodnotenie
-Lookup                                  H¾adanie
+Lookup                                  HÄ¾adanie
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile riadiaci panel
-Header_Shutdown                         Zastavi POPFile
-Header_History                          História
-Header_Buckets                          Koše
-Header_Configuration                    Konfigurácia
-Header_Advanced                         Rozšírené
-Header_Security                         Bezpeènos
+Header_Shutdown                         ZastaviÅ¥ POPFile
+Header_History                          HistÃ³ria
+Header_Buckets                          KoÅ¡e
+Header_Configuration                    KonfigurÃ¡cia
+Header_Advanced                         RozÅ¡Ã­renÃ©
+Header_Security                         BezpeÄnosÅ¥
 Header_Magnets                          Magnety
 
-Footer_HomePage                         POPFile domovská stránka
-Footer_Manual                           Manuál
+Footer_HomePage                         POPFile domovskÃ¡ strÃ¡nka
+Footer_Manual                           ManuÃ¡l
 Footer_Forums                           Diskusie
-Footer_FeedMe                           Podpori
-Footer_RequestFeature                   Poiadavka na funkcionalitu
-Footer_MailingList                      Poštová skupina
+Footer_FeedMe                           PodporiÅ¥
+Footer_RequestFeature                   PoÅ¾iadavka na funkcionalitu
+Footer_MailingList                      PoÅ¡tovÃ¡ skupina
 
-Configuration_Error1                    Znak oddelovaèa musí by len jeden znak
-Configuration_Error2                    Port uívate¾ského rozhrania musí by v rozpätí èísel 1 a 65535
-Configuration_Error3                    Port pre POP3 musí by v rozpätí èísel 1 a 65535
-Configuration_Error4                    Ve¾kos stránky musí by v rozpätí èísel 1 a 1000
-Configuration_Error5                    Poèet dní v histórii musí by v rozpätí èísel 1 a 366
-Configuration_Error6                    Hodnota èakania na TCP musí by v rozpätí èísel 10 a 1800
+Configuration_Error1                    Znak oddelovaÄa musÃ­ byÅ¥ len jeden znak
+Configuration_Error2                    Port uÅ¾Ã­vateÄ¾skÃ©ho rozhrania musÃ­ byÅ¥ v rozpÃ¤tÃ­ ÄÃ­sel 1 aÅ¾ 65535
+Configuration_Error3                    Port pre POP3 musÃ­ byÅ¥ v rozpÃ¤tÃ­ ÄÃ­sel 1 aÅ¾ 65535
+Configuration_Error4                    VeÄ¾kosÅ¥ strÃ¡nky musÃ­ byÅ¥ v rozpÃ¤tÃ­ ÄÃ­sel 1 aÅ¾ 1000
+Configuration_Error5                    PoÄet dnÃ­ v histÃ³rii musÃ­ byÅ¥ v rozpÃ¤tÃ­ ÄÃ­sel 1 aÅ¾ 366
+Configuration_Error6                    Hodnota Äakania na TCP musÃ­ byÅ¥ v rozpÃ¤tÃ­ ÄÃ­sel 10 aÅ¾ 1800
 Configuration_POP3Port                  Port pre POP3
-Configuration_POP3Update                Port zmenenı na %s; this change will not take affect until you restart POPFile
-Configuration_Separator                 Znak oddelovaèa
-Configuration_SepUpdate                 Oddelovaè zmenenı na %s
-Configuration_UI                        Port uívate¾ského rozhrania
-Configuration_UIUpdate                  Port uívate¾ského rozhrania zmenenı na %s; this change will not take affect until you restart POPFile
-Configuration_History                   Poèet správ na stránku
-Configuration_HistoryUpdate             Zmenenı poèet správ na stránku na %s
-Configuration_Days                      Poèet dní uchovania histórie
-Configuration_DaysUpdate                Zmenenı poèet dní uchovania histórie na %s
-Configuration_UserInterface             Uívate¾ské rozhranie
-Configuration_Skins                     Vzh¾ad
-Configuration_SkinsChoose               Zvol vzh¾ad
+Configuration_POP3Update                Port zmenenÃ½ na %s; this change will not take affect until you restart POPFile
+Configuration_Separator                 Znak oddelovaÄa
+Configuration_SepUpdate                 OddelovaÄ zmenenÃ½ na %s
+Configuration_UI                        Port uÅ¾Ã­vateÄ¾skÃ©ho rozhrania
+Configuration_UIUpdate                  Port uÅ¾Ã­vateÄ¾skÃ©ho rozhrania zmenenÃ½ na %s; this change will not take affect until you restart POPFile
+Configuration_History                   PoÄet sprÃ¡v na strÃ¡nku
+Configuration_HistoryUpdate             ZmenenÃ½ poÄet sprÃ¡v na strÃ¡nku na %s
+Configuration_Days                      PoÄet dnÃ­ uchovania histÃ³rie
+Configuration_DaysUpdate                ZmenenÃ½ poÄet dnÃ­ uchovania histÃ³rie na %s
+Configuration_UserInterface             UÅ¾Ã­vateÄ¾skÃ© rozhranie
+Configuration_Skins                     VzhÄ¾ad
+Configuration_SkinsChoose               Zvol vzhÄ¾ad
 Configuration_Language                  Jazyk
 Configuration_LanguageChoose            Zvol jazyk
 Configuration_ListenPorts               Porty
-Configuration_HistoryView               Zobrazenie histórie
-Configuration_TCPTimeout                Èakanie na pripojenie TCP
-Configuration_TCPTimeoutSecs            Èakanie na pripojenie TCP v sekundách
-Configuration_TCPTimeoutUpdate          Èakanie na pripojenie TCP zmenené na %s
-Configuration_ClassificationInsertion   Vkladanie textov do správy
+Configuration_HistoryView               Zobrazenie histÃ³rie
+Configuration_TCPTimeout                ÄŒakanie na pripojenie TCP
+Configuration_TCPTimeoutSecs            ÄŒakanie na pripojenie TCP v sekundÃ¡ch
+Configuration_TCPTimeoutUpdate          ÄŒakanie na pripojenie TCP zmenenÃ© na %s
+Configuration_ClassificationInsertion   Vkladanie textov do sprÃ¡vy
 Configuration_SubjectLine               Zmena textu subjektu
-Configuration_XTCInsertion              Pridanie hlavièky X-Text-Classification
-Configuration_XPLInsertion              Pridanie hlavièky X-POPFile-Link
+Configuration_XTCInsertion              Pridanie hlaviÄky X-Text-Classification
+Configuration_XPLInsertion              Pridanie hlaviÄky X-POPFile-Link
 Configuration_Logging                   Protokol spracovania
-Configuration_None                      iadny
+Configuration_None                      Å½iadny
 Configuration_ToScreen                  Na obrazovku
-Configuration_ToFile                    Do súboru
-Configuration_ToScreenFile              Na obrazovku a do súboru
-Configuration_LoggerOutput              Vıstup protokolu
-Configuration_GeneralSkins              Vzh¾ad
-Configuration_SmallSkins                Malı vzh¾ad
-Configuration_TinySkins                 Drobnı vzh¾ad
+Configuration_ToFile                    Do sÃºboru
+Configuration_ToScreenFile              Na obrazovku a do sÃºboru
+Configuration_LoggerOutput              VÃ½stup protokolu
+Configuration_GeneralSkins              VzhÄ¾ad
+Configuration_SmallSkins                MalÃ½ vzhÄ¾ad
+Configuration_TinySkins                 DrobnÃ½ vzhÄ¾ad
 
-Advanced_Error1                         '%s' sa u nachádza v zozname Ignorované slová
-Advanced_Error2                         Ignorované slová môu obsahova len: alfanumerické znaky, ., _, -, @
-Advanced_Error3                         '%s' pridané do zoznamu Ignorované slová
-Advanced_Error4                         '%s' sa nenachádza v zozname Ignorované slová
-Advanced_Error5                         '%s' odstránené zo zoznamu Ignorované slová
-Advanced_StopWords                      Ignorované slová
-Advanced_Message1                       POPFile ignoruje nasledovné, èasto pouívané slová:
-Advanced_AddWord                        Prida slovo
-Advanced_RemoveWord                     Odstráni slovo
+Advanced_Error1                         '%s' sa uÅ¾ nachÃ¡dza v zozname IgnorovanÃ© slovÃ¡
+Advanced_Error2                         IgnorovanÃ© slovÃ¡ mÃ´Å¾u obsahovaÅ¥ len: alfanumerickÃ© znaky, ., _, -, @
+Advanced_Error3                         '%s' pridanÃ© do zoznamu IgnorovanÃ© slovÃ¡
+Advanced_Error4                         '%s' sa nenachÃ¡dza v zozname IgnorovanÃ© slovÃ¡
+Advanced_Error5                         '%s' odstrÃ¡nenÃ© zo zoznamu IgnorovanÃ© slovÃ¡
+Advanced_StopWords                      IgnorovanÃ© slovÃ¡
+Advanced_Message1                       POPFile ignoruje nasledovnÃ©, Äasto pouÅ¾Ã­vanÃ© slovÃ¡:
+Advanced_AddWord                        PridaÅ¥ slovo
+Advanced_RemoveWord                     OdstrÃ¡niÅ¥ slovo
 
-History_Filter                          &nbsp;(zobrazuje sa len kôš <font color="%s">%s</font>)
-History_FilterBy                        Filtrova pod¾a
-History_Search                          &nbsp;(vyh¾adané pod¾a odosielate¾a/subjektu %s)
-History_Title                           Posledné správy
-History_Jump                            Prejdi na správu
-History_ShowAll                         Zobraz všetky
-History_ShouldBe                        Má by
-History_NoFrom                          prazdny riadok odosielate¾a
+History_Filter                          &nbsp;(zobrazuje sa len kÃ´Å¡ <font color="%s">%s</font>)
+History_FilterBy                        FiltrovaÅ¥ podÄ¾a
+History_Search                          &nbsp;(vyhÄ¾adanÃ© podÄ¾a odosielateÄ¾a/subjektu %s)
+History_Title                           PoslednÃ© sprÃ¡vy
+History_Jump                            Prejdi na sprÃ¡vu
+History_ShowAll                         Zobraz vÅ¡etky
+History_ShouldBe                        MÃ¡ byÅ¥
+History_NoFrom                          prazdny riadok odosielateÄ¾a
 History_NoSubject                       prazdny riadok subjektu
 History_ClassifyAs                      Klasifikuj ako
-History_MagnetUsed                      Pouitı magnet
-History_ChangedTo                       Zmeò na <font color="%s">%s
-History_Already                         U reklasifikované na <font color="%s">%s</font>
-History_RemoveAll                       Odstráò všetko
-History_RemovePage                      Odstáò stranu
-History_Remove                          Ak chceš zmaza záznamy z histórie, klikni
-History_SearchMessage                   H¾adaj odosielate¾a/subjekt
-History_NoMessages                      iadne správy
-History_ShowMagnet                      zmagnetizované
-History_Magnet                          &nbsp;(zobrazujú sa len záznamy klasifikované magnetom)
-History_ResetSearch                     Vyprázdni
+History_MagnetUsed                      PouÅ¾itÃ½ magnet
+History_ChangedTo                       ZmeÅˆ na <font color="%s">%s
+History_Already                         UÅ¾ reklasifikovanÃ© na <font color="%s">%s</font>
+History_RemoveAll                       OdstrÃ¡Åˆ vÅ¡etko
+History_RemovePage                      OdstÃ¡Åˆ stranu
+History_Remove                          Ak chceÅ¡ zmazaÅ¥ zÃ¡znamy z histÃ³rie, klikni
+History_SearchMessage                   HÄ¾adaj odosielateÄ¾a/subjekt
+History_NoMessages                      Å½iadne sprÃ¡vy
+History_ShowMagnet                      zmagnetizovanÃ©
+History_Magnet                          &nbsp;(zobrazujÃº sa len zÃ¡znamy klasifikovanÃ© magnetom)
+History_ResetSearch                     VyprÃ¡zdniÅ¥
 
 Password_Title                          Heslo
 Password_Enter                          Zadaj heslo
-Password_Go                             Vstúp!
-Password_Error1                         Nesprávne heslo
+Password_Go                             VstÃºp!
+Password_Error1                         NesprÃ¡vne heslo
 
-Security_Error1                         Bezpeènostnı port musí by v rozpätí èísel 1 a 65535
-Security_Stealth                        Utajenı mód/Èinnos servera
-Security_NoStealthMode                  Nie (Utajenı mód)
-Security_ExplainStats                   (Ak je toto zapnuté, POPFile pošle raz za deò nasledovné tri hodnoty na stránku www.usethesource.com: bc (celkovı poèet košov, ktoré máš), mc (celkovı poèet správ, ktoré POPFile klasifikoval) a ec (celkovı poèet chybnıch klasifikácii).  Tieto hodnoty sa ukladajú do súboru a budú pouité na vyhodnotenie niektorıch štatistík o tom ako ¾udia pouívajú POPFile a ako dobre funguje.  Môj web server uchováva tieto informácie pribline 5 dní a potom ich zmae; Neuchovávam informácie prepojujúce štatistické údaje s konkrétnymi IP adresami.)
-Security_ExplainUpdate                  (Ak je toto zapnuté, POPFile pošle raz za deò nasledovné tri hodnoty na stránku www.usethesource.com: ma (hlavné èíslo verzie pouívaného POPFile), mi (ved¾ajšie èíslo verzie pouívaného POPFile) a bn (èíslo kompilácie pouívaného POPFile).  POPFile dostane odpoveï vo forme obrázku, ktorı sa zobrazí na vrchu stránku, ak je k dispozícii nová verzia.  Môj web server uchováva tieto informácie pribline 5 dní a potom ich zmae; Neuchovávam informácie prepojujúce štatistické údaje s konkrétnymi IP adresami.)
-Security_PasswordTitle                  Heslo uívate¾ského rozhrania
+Security_Error1                         BezpeÄnostnÃ½ port musÃ­ byÅ¥ v rozpÃ¤tÃ­ ÄÃ­sel 1 aÅ¾ 65535
+Security_Stealth                        UtajenÃ½ mÃ³d/ÄŒinnosÅ¥ servera
+Security_NoStealthMode                  Nie (UtajenÃ½ mÃ³d)
+Security_ExplainStats                   (Ak je toto zapnutÃ©, POPFile poÅ¡le raz za deÅˆ nasledovnÃ© tri hodnoty na strÃ¡nku www.usethesource.com: bc (celkovÃ½ poÄet koÅ¡ov, ktorÃ© mÃ¡Å¡), mc (celkovÃ½ poÄet sprÃ¡v, ktorÃ© POPFile klasifikoval) a ec (celkovÃ½ poÄet chybnÃ½ch klasifikÃ¡cii).  Tieto hodnoty sa ukladajÃº do sÃºboru a budÃº pouÅ¾itÃ© na vyhodnotenie niektorÃ½ch Å¡tatistÃ­k o tom ako Ä¾udia pouÅ¾Ã­vajÃº POPFile a ako dobre funguje.  MÃ´j web server uchovÃ¡va tieto informÃ¡cie pribliÅ¾ne 5 dnÃ­ a potom ich zmaÅ¾e; NeuchovÃ¡vam informÃ¡cie prepojujÃºce Å¡tatistickÃ© Ãºdaje s konkrÃ©tnymi IP adresami.)
+Security_ExplainUpdate                  (Ak je toto zapnutÃ©, POPFile poÅ¡le raz za deÅˆ nasledovnÃ© tri hodnoty na strÃ¡nku www.usethesource.com: ma (hlavnÃ© ÄÃ­slo verzie pouÅ¾Ã­vanÃ©ho POPFile), mi (vedÄ¾ajÅ¡ie ÄÃ­slo verzie pouÅ¾Ã­vanÃ©ho POPFile) a bn (ÄÃ­slo kompilÃ¡cie pouÅ¾Ã­vanÃ©ho POPFile).  POPFile dostane odpoveÄ vo forme obrÃ¡zku, ktorÃ½ sa zobrazÃ­ na vrchu strÃ¡nku, ak je k dispozÃ­cii novÃ¡ verzia.  MÃ´j web server uchovÃ¡va tieto informÃ¡cie pribliÅ¾ne 5 dnÃ­ a potom ich zmaÅ¾e; NeuchovÃ¡vam informÃ¡cie prepojujÃºce Å¡tatistickÃ© Ãºdaje s konkrÃ©tnymi IP adresami.)
+Security_PasswordTitle                  Heslo uÅ¾Ã­vateÄ¾skÃ©ho rozhrania
 Security_Password                       Heslo
-Security_PasswordUpdate                 Heslo zmenené na %s
-Security_AUTHTitle                      Bezpeèné overovanie hesla/AUTH
-Security_SecureServer                   Bezpeènostnı server
-Security_SecureServerUpdate             Bezpeènostnı server zmenenı na %s; táto zmena vstúpi do platnosti a po reštarte POPFile
-Security_SecurePort                     Bezpeènostnı port
-Security_SecurePortUpdate               Port zmenenı na %s; táto zmena vstúpi do platnosti a po reštarte POPFile
-Security_POP3                           Povo¾ POP3 pripojenia zo vzdialenıch poèítaèov (vyaduje reštart POPFile)
-Security_UI                             Povo¾ HTTP (uívate¾ské rozhranie) pripojenia zo vzdialenıch poèítaèov  (vyaduje reštart POPFile)
-Security_UpdateTitle                    Automatická kontrola novıch verzií
-Security_Update                         Kontroluj denne nové verzie programu POPFile
-Security_StatsTitle                     Oznamova štatistiky
-Security_Stats                          Posiela štatistiky denne
+Security_PasswordUpdate                 Heslo zmenenÃ© na %s
+Security_AUTHTitle                      BezpeÄnÃ© overovanie hesla/AUTH
+Security_SecureServer                   BezpeÄnostnÃ½ server
+Security_SecureServerUpdate             BezpeÄnostnÃ½ server zmenenÃ½ na %s; tÃ¡to zmena vstÃºpi do platnosti aÅ¾ po reÅ¡tarte POPFile
+Security_SecurePort                     BezpeÄnostnÃ½ port
+Security_SecurePortUpdate               Port zmenenÃ½ na %s; tÃ¡to zmena vstÃºpi do platnosti aÅ¾ po reÅ¡tarte POPFile
+Security_POP3                           PovoÄ¾ POP3 pripojenia zo vzdialenÃ½ch poÄÃ­taÄov (vyÅ¾aduje reÅ¡tart POPFile)
+Security_UI                             PovoÄ¾ HTTP (uÅ¾Ã­vateÄ¾skÃ© rozhranie) pripojenia zo vzdialenÃ½ch poÄÃ­taÄov  (vyÅ¾aduje reÅ¡tart POPFile)
+Security_UpdateTitle                    AutomatickÃ¡ kontrola novÃ½ch verziÃ­
+Security_Update                         Kontroluj denne novÃ© verzie programu POPFile
+Security_StatsTitle                     OznamovaÅ¥ Å¡tatistiky
+Security_Stats                          PosielaÅ¥ Å¡tatistiky denne
 
-Magnet_Error1                           Magnet '%s' u existuje v koši '%s'
-Magnet_Error2                           Novı magnet '%s' by sa bil s existujúcim magnetom '%s' v koši '%s' a mohol by spôsobova dvojzmyselné vısledky.  Novı magnet nebol pridanı.
-Magnet_Error3                           Vytvorenı novı magnet '%s' v koši '%s'
-Magnet_CurrentMagnets                   Aktuálne magnety
-Magnet_Message1                         Nasledovné magnety klasifikujú poštu vdy do urèeného koša.
-Magnet_CreateNew                        Vytvori novı magnet
-Magnet_Explanation                      <b>Existujú tri typy magnetov:</b> <ul><li><b>Adresa alebo meno odosielae¾a:</b> (políèko From: v pošte) Napr.: john@company.com pre konkrétnu adresu, <br />company.com pre kadého odosielate¾a z adresy company.com, <br />John Doe pre konkrétnu osobu, John pre kadného Johna</li><li><b>Adresa alebo meno príjemcu:</b> To isté ako predchádzajúce, ale pre políèko To: pošty</li> <li><b>Slová v subjekte:</b> Napr.: hello zaradí kadú poštu, ktorá má hello v subjekte</li></ul>
+Magnet_Error1                           Magnet '%s' uÅ¾ existuje v koÅ¡i '%s'
+Magnet_Error2                           NovÃ½ magnet '%s' by sa bil s existujÃºcim magnetom '%s' v koÅ¡i '%s' a mohol by spÃ´sobovaÅ¥ dvojzmyselnÃ© vÃ½sledky.  NovÃ½ magnet nebol pridanÃ½.
+Magnet_Error3                           VytvorenÃ½ novÃ½ magnet '%s' v koÅ¡i '%s'
+Magnet_CurrentMagnets                   AktuÃ¡lne magnety
+Magnet_Message1                         NasledovnÃ© magnety klasifikujÃº poÅ¡tu vÅ¾dy do urÄenÃ©ho koÅ¡a.
+Magnet_CreateNew                        VytvoriÅ¥ novÃ½ magnet
+Magnet_Explanation                      <b>ExistujÃº tri typy magnetov:</b> <ul><li><b>Adresa alebo meno odosielaÅ¥eÄ¾a:</b> (polÃ­Äko From: v poÅ¡te) Napr.: john@company.com pre konkrÃ©tnu adresu, <br />company.com pre kaÅ¾dÃ©ho odosielateÄ¾a z adresy company.com, <br />John Doe pre konkrÃ©tnu osobu, John pre kaÅ¾dnÃ©ho Johna</li><li><b>Adresa alebo meno prÃ­jemcu:</b> To istÃ© ako predchÃ¡dzajÃºce, ale pre polÃ­Äko To: poÅ¡ty</li> <li><b>SlovÃ¡ v subjekte:</b> Napr.: hello zaradÃ­ kaÅ¾dÃº poÅ¡tu, ktorÃ¡ mÃ¡ hello v subjekte</li></ul>
 Magnet_MagnetType                       Typ magnetu
 Magnet_Value                            Hodnota
-Magnet_Always                           Zaradí sa vdy do koša
+Magnet_Always                           ZaradÃ­ sa vÅ¾dy do koÅ¡a
 
-Bucket_Error1                           Názvy košov môu obsahova len znaky od a do z (malé písmo) plus - a _
-Bucket_Error2                           Kôš s názvom  %s u existuje
-Bucket_Error3                           Vytvorenı kôš s názvom %s
-Bucket_Error4                           Prosím, nezadávaj prázdne názvy
-Bucket_Error5                           Kôš je premenovanı z %s na %s
-Bucket_Error6                           Zmazanı kôš %s
-Bucket_Title                            Preh¾ad
-Bucket_BucketName                       Názov koša
-Bucket_WordCount                        Poèet slov
-Bucket_WordCounts                       Poèty slov
-Bucket_UniqueWords                      Jedineèné slová
-Bucket_SubjectModification              Modifikácia subjektu
+Bucket_Error1                           NÃ¡zvy koÅ¡ov mÃ´Å¾u obsahovaÅ¥ len znaky od a do z (malÃ© pÃ­smo) plus - a _
+Bucket_Error2                           KÃ´Å¡ s nÃ¡zvom  %s uÅ¾ existuje
+Bucket_Error3                           VytvorenÃ½ kÃ´Å¡ s nÃ¡zvom %s
+Bucket_Error4                           ProsÃ­m, nezadÃ¡vaj prÃ¡zdne nÃ¡zvy
+Bucket_Error5                           KÃ´Å¡ je premenovanÃ½ z %s na %s
+Bucket_Error6                           ZmazanÃ½ kÃ´Å¡ %s
+Bucket_Title                            PrehÄ¾ad
+Bucket_BucketName                       NÃ¡zov koÅ¡a
+Bucket_WordCount                        PoÄet slov
+Bucket_WordCounts                       PoÄty slov
+Bucket_UniqueWords                      JedineÄnÃ© slovÃ¡
+Bucket_SubjectModification              ModifikÃ¡cia subjektu
 Bucket_ChangeColor                      Zmena farby
-Bucket_NotEnoughData                    Nedostatok údajov
-Bucket_ClassificationAccuracy           Presnos klasifikácie
-Bucket_EmailsClassified                 Klasifikovaná pošta
-Bucket_EmailsClassifiedUpper            Klasifikovaná pošta
-Bucket_ClassificationErrors             Chyby klasifikácie
-Bucket_Accuracy                         Presnos
-Bucket_ClassificationCount              Poèty klasifikácie
-Bucket_ResetStatistics                  Vynulovanie štatistiky
-Bucket_LastReset                        Posledné vynulovanie
-Bucket_CurrentColor                     aktuálna farba %s je %s
+Bucket_NotEnoughData                    Nedostatok Ãºdajov
+Bucket_ClassificationAccuracy           PresnosÅ¥ klasifikÃ¡cie
+Bucket_EmailsClassified                 KlasifikovanÃ¡ poÅ¡ta
+Bucket_EmailsClassifiedUpper            KlasifikovanÃ¡ poÅ¡ta
+Bucket_ClassificationErrors             Chyby klasifikÃ¡cie
+Bucket_Accuracy                         PresnosÅ¥
+Bucket_ClassificationCount              PoÄty klasifikÃ¡cie
+Bucket_ResetStatistics                  Vynulovanie Å¡tatistiky
+Bucket_LastReset                        PoslednÃ© vynulovanie
+Bucket_CurrentColor                     aktuÃ¡lna farba %s je %s
 Bucket_SetColorTo                       Nastav farbu %s na %s
-Bucket_Maintenance                      Údrba
-Bucket_CreateBucket                     Vytvor kôš s názvom
-Bucket_DeleteBucket                     Zma kôš s názvom
-Bucket_RenameBucket                     Premenuj kôš s názvom
-Bucket_Lookup                           Vyh¾adanie
-Bucket_LookupMessage                    Vyh¾adaj slovo v košoch
-Bucket_LookupMessage2                   Vısledok h¾adania pre
-Bucket_LookupMostLikely                 <b>%s</b> sa najèastejšie nachádza v koši <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> sa nenachádza v ani jednom koši
-Bucket_DisabledGlobally                 Globálne vypnuté
+Bucket_Maintenance                      ÃšdrÅ¾ba
+Bucket_CreateBucket                     Vytvor kÃ´Å¡ s nÃ¡zvom
+Bucket_DeleteBucket                     ZmaÅ¾ kÃ´Å¡ s nÃ¡zvom
+Bucket_RenameBucket                     Premenuj kÃ´Å¡ s nÃ¡zvom
+Bucket_Lookup                           VyhÄ¾adanie
+Bucket_LookupMessage                    VyhÄ¾adaj slovo v koÅ¡och
+Bucket_LookupMessage2                   VÃ½sledok hÄ¾adania pre
+Bucket_LookupMostLikely                 <b>%s</b> sa najÄastejÅ¡ie nachÃ¡dza v koÅ¡i <font color="%s">%s</font>
+Bucket_DoesNotAppear                    <p><b>%s</b> sa nenachÃ¡dza v ani jednom koÅ¡i
+Bucket_DisabledGlobally                 GlobÃ¡lne vypnutÃ©
 Bucket_To                               na
-Bucket_Quarantine                       Karanténa
+Bucket_Quarantine                       KarantÃ©na
 
 SingleBucket_Title                      Detail pre %s
-SingleBucket_WordCount                  Poèet slov v koši
-SingleBucket_TotalWordCount             Celkovı poèet slov
+SingleBucket_WordCount                  PoÄet slov v koÅ¡i
+SingleBucket_TotalWordCount             CelkovÃ½ poÄet slov
 SingleBucket_Percentage                 Percento z celku
-SingleBucket_WordTable                  Tabu¾ka slov pre %s
-SingleBucket_Message1                   Slová oznaèené s (*) boli pouité na klasifikáciu poèas aktuálneho spustenia POPFile.  Klikni na ktoréko¾vek slovo, ak chceš vidie jeho vıskyt vo všetkıch košoch.
-SingleBucket_Unique                     %s jedineènıch
+SingleBucket_WordTable                  TabuÄ¾ka slov pre %s
+SingleBucket_Message1                   SlovÃ¡ oznaÄenÃ© s (*) boli pouÅ¾itÃ© na klasifikÃ¡ciu poÄas aktuÃ¡lneho spustenia POPFile.  Klikni na ktorÃ©koÄ¾vek slovo, ak chceÅ¡ vidieÅ¥ jeho vÃ½skyt vo vÅ¡etkÃ½ch koÅ¡och.
+SingleBucket_Unique                     %s jedineÄnÃ½ch
 
 Session_Title                           POPFile session has expired
-Session_Error                           Your POPFile session has expired.  Mohlo to nasta vypnutím a zapnutím POPFile, prièom ste nechali otvorenı web browser.  Prosím, ak chcete pokraèova v práci s POPFile, kliknite na niektorú z vrchnıch liniek.
+Session_Error                           Your POPFile session has expired.  Mohlo to nastaÅ¥ vypnutÃ­m a zapnutÃ­m POPFile, priÄom ste nechali otvorenÃ½ web browser.  ProsÃ­m, ak chcete pokraÄovaÅ¥ v prÃ¡ci s POPFile, kliknite na niektorÃº z vrchnÃ½ch liniek.
 
 
-Header_MenuSummary                      Táto tabu¾ka je navigaèné menu, ktoré sprístupòuje všetky ostatné stránky riadiaceho panelu.
-History_MainTableSummary                Táto tabu¾ka zobrazuje odosielate¾ov a subjekty aktuálne prijatıch správ a umonuje ich prezera a klasifikova.  Kliknutím na text subjektu sa zobrazí znenie správy, spolu s informáciou preèo bola klasifikovaná tak, ako bola.  Ståpec 'Má by' umoòuje urèi, do ktorého koša správa patrí, alebo zruši takúto zmenu.  Ståpec 'Odstráni' ti umoòuje zmaza danú správu z histórie, ak ju viac nepotrebuješ.
-History_OpenMessageSummary              Táto tabu¾ka obsahuje celı text správy, spolu so zvıraznenımi slovami, ktoré boli pouité pri klasifikácii do daného koša.
-Bucket_MainTableSummary                 Táto tabu¾ka obsahuje preh¾ad klasifikaènıch košov.  Kadı riadok zobrazuje názov koša, celkovı poèet slov v tomto koši, aktuálny poèet individuálnych slov v kadom koši, èi bude text subjektu správy zmenenı ak bude správa klasifikovaná, èi zaradi správy v tomto koši do karantény a tabu¾ku, kde sa dá vybra farba ktoru sa bude zobrazova všetko na riadiacom panely, tıkajúce sa tohto koša.
-Bucket_StatisticsTableSummary           Táto tabu¾ka ponúka tri štatistické preh¾ady o vıkone POPFile.  Prvı zobrazuje presnos klasifikácie, druhı ko¾ko správ bolo klasifikovanıch a do ktorıch košov a tretí zobrazuje ko¾ko slov obsahuje ktorı kôš a aké je ich relatívne percentuálne zastúpenie.
-Bucket_MaintenanceTableSummary          Táto tabu¾ka obsahuje formuláre, ktoré ti umonujú vytvori, zmaza alebo premenova koše a vyh¾ada zastúpenie slova vo všetkıch košoch a jeho relatívne zastúpenie.
-Bucket_AccuracyChartSummary             Táto tabu¾ka graficky zobrazuje  presnos klasifikácie správ.
-Bucket_BarChartSummary                  Táto tabu¾ka graficky zobrazuje percentuálne zaplnenie jednotlivıch košov.  Je pouitá zároveò pre poèet klasifikovanıch správ a celkovı poèet slov.
-Bucket_LookupResultsSummary             Táto tabu¾ka zobrazuje pravdepodobnos priradenú k jednotlivım slovám v korpuse.  Pre kadı kôš zobrazuje frekvenciu vıskytu slova, pravdepodobnos s akou sa vyskytuje v koši a celkovı vplyv slova na zaradenie správy do koša ak sa v nej dané slovo vyskytuje.
-Bucket_WordListTableSummary             Táto tabu¾ka zobrazuje zoznam všetkıch slov pre kôš, slová sú zoradené pod¾a zaèiatoènıch znakov po riadkoch.
-Magnet_MainTableSummary                 Táto tabu¾ka zobrazuje zoznam magnetov, ktoré sú pouívané na automatické klasifikovanie správ pod¾a presnıch pravidiel.  Kadı riadok zobrazuje ako je magnet definovanı, pre ktorı kôš slúi a tlaèidlo na zmazanie magnetu.
-Configuration_MainTableSummary          Táto tabu¾ka obsahuje formuláre ktoré ti umoòujú konfigurova POPFile.
-Configuration_InsertionTableSummary     Táto tabu¾ka obsahuje tlaèidlá, ktoré urèujú èi sa majú alebo nemajú vykona niektoré zmeny v záhlaví alebo texte subjektu správy skôr, ako sa posunie k poštovému klientovi.
-Security_MainTableSummary               Táto tabu¾ka poskytuje nieko¾ko nastavení, ktoré ovplyvòujú bezpeènos celkovej konfigurácie POPFile, èi sa má vykonáva automatická kontrola existencie zmien programu a èi sa má zasiela štatistika spracovania do centrálnej databázy autora programu.
-Advanced_MainTableSummary               Táto tabu¾ka zobrazuje zoznam slov, ktoré POPFile ignoruje pri klasifikovaní správ z dôvodu ich relatívne èastého vıskytu vo všeobecnıch správach. Sú zobrazené v riadkoch v závislosti od prvého znaku.
+Header_MenuSummary                      TÃ¡to tabuÄ¾ka je navigaÄnÃ© menu, ktorÃ© sprÃ­stupÅˆuje vÅ¡etky ostatnÃ© strÃ¡nky riadiaceho panelu.
+History_MainTableSummary                TÃ¡to tabuÄ¾ka zobrazuje odosielateÄ¾ov a subjekty aktuÃ¡lne prijatÃ½ch sprÃ¡v a umoÅ¾nuje ich prezeraÅ¥ a klasifikovaÅ¥.  KliknutÃ­m na text subjektu sa zobrazÃ­ znenie sprÃ¡vy, spolu s informÃ¡ciou preÄo bola klasifikovanÃ¡ tak, ako bola.  StÄºpec 'MÃ¡ byÅ¥' umoÅ¾Åˆuje urÄiÅ¥, do ktorÃ©ho koÅ¡a sprÃ¡va patrÃ­, alebo zruÅ¡iÅ¥ takÃºto zmenu.  StÄºpec 'OdstrÃ¡niÅ¥' ti umoÅ¾Åˆuje zmazaÅ¥ danÃº sprÃ¡vu z histÃ³rie, ak ju viac nepotrebujeÅ¡.
+History_OpenMessageSummary              TÃ¡to tabuÄ¾ka obsahuje celÃ½ text sprÃ¡vy, spolu so zvÃ½raznenÃ½mi slovami, ktorÃ© boli pouÅ¾itÃ© pri klasifikÃ¡cii do danÃ©ho koÅ¡a.
+Bucket_MainTableSummary                 TÃ¡to tabuÄ¾ka obsahuje prehÄ¾ad klasifikaÄnÃ½ch koÅ¡ov.  KaÅ¾dÃ½ riadok zobrazuje nÃ¡zov koÅ¡a, celkovÃ½ poÄet slov v tomto koÅ¡i, aktuÃ¡lny poÄet individuÃ¡lnych slov v kaÅ¾dom koÅ¡i, Äi bude text subjektu sprÃ¡vy zmenenÃ½ ak bude sprÃ¡va klasifikovanÃ¡, Äi zaradiÅ¥ sprÃ¡vy v tomto koÅ¡i do karantÃ©ny a tabuÄ¾ku, kde sa dÃ¡ vybraÅ¥ farba ktoru sa bude zobrazovaÅ¥ vÅ¡etko na riadiacom panely, tÃ½kajÃºce sa tohto koÅ¡a.
+Bucket_StatisticsTableSummary           TÃ¡to tabuÄ¾ka ponÃºka tri Å¡tatistickÃ© prehÄ¾ady o vÃ½kone POPFile.  PrvÃ½ zobrazuje presnosÅ¥ klasifikÃ¡cie, druhÃ½ koÄ¾ko sprÃ¡v bolo klasifikovanÃ½ch a do ktorÃ½ch koÅ¡ov a tretÃ­ zobrazuje koÄ¾ko slov obsahuje ktorÃ½ kÃ´Å¡ a akÃ© je ich relatÃ­vne percentuÃ¡lne zastÃºpenie.
+Bucket_MaintenanceTableSummary          TÃ¡to tabuÄ¾ka obsahuje formulÃ¡re, ktorÃ© ti umoÅ¾nujÃº vytvoriÅ¥, zmazaÅ¥ alebo premenovaÅ¥ koÅ¡e a vyhÄ¾adaÅ¥ zastÃºpenie slova vo vÅ¡etkÃ½ch koÅ¡och a jeho relatÃ­vne zastÃºpenie.
+Bucket_AccuracyChartSummary             TÃ¡to tabuÄ¾ka graficky zobrazuje  presnosÅ¥ klasifikÃ¡cie sprÃ¡v.
+Bucket_BarChartSummary                  TÃ¡to tabuÄ¾ka graficky zobrazuje percentuÃ¡lne zaplnenie jednotlivÃ½ch koÅ¡ov.  Je pouÅ¾itÃ¡ zÃ¡roveÅˆ pre poÄet klasifikovanÃ½ch sprÃ¡v a celkovÃ½ poÄet slov.
+Bucket_LookupResultsSummary             TÃ¡to tabuÄ¾ka zobrazuje pravdepodobnosÅ¥ priradenÃº k jednotlivÃ½m slovÃ¡m v korpuse.  Pre kaÅ¾dÃ½ kÃ´Å¡ zobrazuje frekvenciu vÃ½skytu slova, pravdepodobnosÅ¥ s akou sa vyskytuje v koÅ¡i a celkovÃ½ vplyv slova na zaradenie sprÃ¡vy do koÅ¡a ak sa v nej danÃ© slovo vyskytuje.
+Bucket_WordListTableSummary             TÃ¡to tabuÄ¾ka zobrazuje zoznam vÅ¡etkÃ½ch slov pre kÃ´Å¡, slovÃ¡ sÃº zoradenÃ© podÄ¾a zaÄiatoÄnÃ½ch znakov po riadkoch.
+Magnet_MainTableSummary                 TÃ¡to tabuÄ¾ka zobrazuje zoznam magnetov, ktorÃ© sÃº pouÅ¾Ã­vanÃ© na automatickÃ© klasifikovanie sprÃ¡v podÄ¾a presnÃ½ch pravidiel.  KaÅ¾dÃ½ riadok zobrazuje ako je magnet definovanÃ½, pre ktorÃ½ kÃ´Å¡ slÃºÅ¾i a tlaÄidlo na zmazanie magnetu.
+Configuration_MainTableSummary          TÃ¡to tabuÄ¾ka obsahuje formulÃ¡re ktorÃ© ti umoÅ¾ÅˆujÃº konfigurovaÅ¥ POPFile.
+Configuration_InsertionTableSummary     TÃ¡to tabuÄ¾ka obsahuje tlaÄidlÃ¡, ktorÃ© urÄujÃº Äi sa majÃº alebo nemajÃº vykonaÅ¥ niektorÃ© zmeny v zÃ¡hlavÃ­ alebo texte subjektu sprÃ¡vy skÃ´r, ako sa posunie k poÅ¡tovÃ©mu klientovi.
+Security_MainTableSummary               TÃ¡to tabuÄ¾ka poskytuje niekoÄ¾ko nastavenÃ­, ktorÃ© ovplyvÅˆujÃº bezpeÄnosÅ¥ celkovej konfigurÃ¡cie POPFile, Äi sa mÃ¡ vykonÃ¡vaÅ¥ automatickÃ¡ kontrola existencie zmien programu a Äi sa mÃ¡ zasielaÅ¥ Å¡tatistika spracovania do centrÃ¡lnej databÃ¡zy autora programu.
+Advanced_MainTableSummary               TÃ¡to tabuÄ¾ka zobrazuje zoznam slov, ktorÃ© POPFile ignoruje pri klasifikovanÃ­ sprÃ¡v z dÃ´vodu ich relatÃ­vne ÄastÃ©ho vÃ½skytu vo vÅ¡eobecnÃ½ch sprÃ¡vach. SÃº zobrazenÃ© v riadkoch v zÃ¡vislosti od prvÃ©ho znaku.
 
 

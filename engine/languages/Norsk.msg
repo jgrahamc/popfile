@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+ï»¿# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -26,10 +26,10 @@ ManualLanguage                          no
 
 # Common words that are used on their own all over the interface
 Apply                                   Bruk
-On                                      På
+On                                      PÃ¥
 Off                                     Av
-TurnOn                                  Slå på
-TurnOff                                 Slå av
+TurnOn                                  SlÃ¥ pÃ¥
+TurnOff                                 SlÃ¥ av
 Add                                     Legg til
 Remove                                  Fjern
 Previous                                Forrige
@@ -40,29 +40,29 @@ Classification                          Klassifisering
 Reclassify                              Re-klassifisering
 Undo                                    Angre
 Close                                   Lukk
-Find                                    Søk
+Find                                    SÃ¸k
 Filter                                  Filtrer
 Yes                                     Ja
 No                                      Nei
 ChangeToYes                             Skift til Ja
 ChangeToNo                              Skift til Nei
-Bucket                                  Bøtte
+Bucket                                  BÃ¸tte
 Magnet                                  Magnet
 Delete                                  Slett
 Create                                  Opprett
 To                                      Til
 Total                                   Total
-Rename                                  Omdøp
+Rename                                  OmdÃ¸p
 Frequency                               Frekvens
 Probability                             Sannsynlighet
 Score                                   Resultat
-Lookup                                  Søk etter
+Lookup                                  SÃ¸k etter
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Kontrollsenter
 Header_Shutdown                         Lukk POPFile
 Header_History                          Logg
-Header_Buckets                          Bøtter
+Header_Buckets                          BÃ¸tter
 Header_Configuration                    Konfigurering
 Header_Advanced                         Avansert
 Header_Security                         Sikkerhet
@@ -72,36 +72,36 @@ Footer_HomePage                         POPFile Hjemmeside
 Footer_Manual                           Manual
 Footer_Forums                           Diskusjonsforum
 Footer_FeedMe                           Mat meg!
-Footer_RequestFeature                   Etterspør funksjoner
+Footer_RequestFeature                   EtterspÃ¸r funksjoner
 Footer_MailingList                      Mailingliste
 
-Configuration_Error1                    Skilletegnet skal være ett enkelt tegn
-Configuration_Error2                    Brukergrensesnittets port skal være et nummer mellom 1 og 65535
-Configuration_Error3                    POP3-porten skal være et nummer mellom 1 og 65535
-Configuration_Error4                    Sidens størrelse skal være mellom 1 og 1000
-Configuration_Error5                    Antall dager i loggen skal være et tall mellom 1 og 366
-Configuration_Error6                    TCP-tidsavbrudd skal være et tall mellom 10 og 1800
+Configuration_Error1                    Skilletegnet skal vÃ¦re ett enkelt tegn
+Configuration_Error2                    Brukergrensesnittets port skal vÃ¦re et nummer mellom 1 og 65535
+Configuration_Error3                    POP3-porten skal vÃ¦re et nummer mellom 1 og 65535
+Configuration_Error4                    Sidens stÃ¸rrelse skal vÃ¦re mellom 1 og 1000
+Configuration_Error5                    Antall dager i loggen skal vÃ¦re et tall mellom 1 og 366
+Configuration_Error6                    TCP-tidsavbrudd skal vÃ¦re et tall mellom 10 og 1800
 Configuration_POP3Port                  POP3-porten
-Configuration_POP3Update                Oppdaterte porten til %s; Denne endringen vil ikke tre i kraft før POPFile er startet på nytt
+Configuration_POP3Update                Oppdaterte porten til %s; Denne endringen vil ikke tre i kraft fÃ¸r POPFile er startet pÃ¥ nytt
 Configuration_Separator                 Skilletegn
 Configuration_SepUpdate                 Oppdaterte skilletegnet til %s
 Configuration_UI                        Brukergrensesnittets web-port
-Configuration_UIUpdate                  Oppdaterte Brukergrensesnittets web-port til %s; endringen vil ikke tre i kraft før POPFile startes på nytt
+Configuration_UIUpdate                  Oppdaterte Brukergrensesnittets web-port til %s; endringen vil ikke tre i kraft fÃ¸r POPFile startes pÃ¥ nytt
 Configuration_History                   Antall e-post pr. side
 Configuration_HistoryUpdate             Oppdaterte antall e-post pr. side til %s
-Configuration_Days                      Antall dager oppføringer i loggen skal beholdes
-Configuration_DaysUpdate                Oppdaterte antall dager oppføringer i loggen skal beholdes til %s
+Configuration_Days                      Antall dager oppfÃ¸ringer i loggen skal beholdes
+Configuration_DaysUpdate                Oppdaterte antall dager oppfÃ¸ringer i loggen skal beholdes til %s
 Configuration_UserInterface             Brukergrensesnittet
 Configuration_Skins                     Skins
 Configuration_SkinsChoose               Velg skin
-Configuration_Language                  Språk
-Configuration_LanguageChoose            Velg språk
+Configuration_Language                  SprÃ¥k
+Configuration_LanguageChoose            Velg sprÃ¥k
 Configuration_ListenPorts               POP3-porten
 Configuration_HistoryView               Logg-visning
 Configuration_TCPTimeout                TCP-forbindelsens tidsavbrudd
 Configuration_TCPTimeoutSecs            TCP-forbindelsens tidsavbrudd i sekunder
 Configuration_TCPTimeoutUpdate          Oppdaterte TCP-forbindelsens tidsavbrudd til %s
-Configuration_ClassificationInsertion   Klassifikasjonsmåter (innsetting)
+Configuration_ClassificationInsertion   KlassifikasjonsmÃ¥ter (innsetting)
 Configuration_SubjectLine               Emnelinje-innsetting
 Configuration_XTCInsertion              X-Text-Classification innsetting
 Configuration_XPLInsertion              X-POPFile-Link innsetting
@@ -125,13 +125,13 @@ Advanced_Message1                       Disse ordene blir ignorert fra all klass
 Advanced_AddWord                        Legg til ord
 Advanced_RemoveWord                     Fjern ord
 
-History_Filter                          &nbsp;(vis kun bøtten<font color="%s">%s</font>)
+History_Filter                          &nbsp;(vis kun bÃ¸tten<font color="%s">%s</font>)
 History_FilterBy                        Filter By
-History_Search                          &nbsp;(søk emne for %s)
+History_Search                          &nbsp;(sÃ¸k emne for %s)
 History_Title                           Siste meldinger
 History_Jump                            Hopp til melding
 History_ShowAll                         Vis alle
-History_ShouldBe                        Skulle være
+History_ShouldBe                        Skulle vÃ¦re
 History_NoFrom                          ingen Fra-linje
 History_NoSubject                       ingen Emne-linje
 History_ClassifyAs                      klassifisert som
@@ -140,8 +140,8 @@ History_ChangedTo                       Endret til <font color="%s">%s
 History_Already                         Re-klassifisert som <font color="%s">%s</font>
 History_RemoveAll                       Fjern alle
 History_RemovePage                      Fjern side
-History_Remove                          For å fjerne oppføringer i loggen, klikk
-History_SearchMessage                   Søk Emne
+History_Remove                          For Ã¥ fjerne oppfÃ¸ringer i loggen, klikk
+History_SearchMessage                   SÃ¸k Emne
 History_NoMessages                      Ingen meldinger
 
 Password_Title                          Passord
@@ -149,19 +149,19 @@ Password_Enter                          Skriv inn passord
 Password_Go                             OK!
 Password_Error1                         Feil passord
 
-Security_Error1                         Den sikre porten skal være et tall mellom 1 og 65535
+Security_Error1                         Den sikre porten skal vÃ¦re et tall mellom 1 og 65535
 Security_Stealth                        Stealth Mode/Server Operation
 Security_NoStealthMode                  Nei (Stealth Mode)
-Security_ExplainStats                   (Denne funksjonen sender en gang per dag de etterfølgene tre verdiene til et script hos wwwu.sethesource.com: bc (det totale antall bøtter du har) mc (det totale antall i meldinger som POPFile har klassifisert ) og ec (det totale antall klassifiseringsfeil). Disse blir lageret i en fil og jeg vil bruke disse data til å offentligjøre statistikk omkring hvordan folk bruker POPFile og hvor godt POPFile virker. Min web-server beholder denne log-filen omtrent 5 dager og blir så slettet; Jeg lagrer ingen forbindelse mellom statistikken og individuelle IP-adresser.)
-Security_ExplainUpdate                  (Denne funksjonen sender en gang per dag de  etterfølgene tre verdiene til et script hos wwwu.sethesource.com: ma (hovedversjonsnummeret på din installerte POPFile), mi (under-versjonsnummeret på din installerte POPFile) og bn (build nummer på din installerte POPFile). POPFile mottar et svar i form av et stykke grafikk som vises i toppen av siden, hvis en ny version er tilgjengelig. Min web-server tar vare på denne log-filen omtrent 5 dager og de blir så slettet; Jeg lagrer ingen forbindelse mellom statistikken og individuelle IP-adresser.)
+Security_ExplainStats                   (Denne funksjonen sender en gang per dag de etterfÃ¸lgene tre verdiene til et script hos wwwu.sethesource.com: bc (det totale antall bÃ¸tter du har) mc (det totale antall i meldinger som POPFile har klassifisert ) og ec (det totale antall klassifiseringsfeil). Disse blir lageret i en fil og jeg vil bruke disse data til Ã¥ offentligjÃ¸re statistikk omkring hvordan folk bruker POPFile og hvor godt POPFile virker. Min web-server beholder denne log-filen omtrent 5 dager og blir sÃ¥ slettet; Jeg lagrer ingen forbindelse mellom statistikken og individuelle IP-adresser.)
+Security_ExplainUpdate                  (Denne funksjonen sender en gang per dag de  etterfÃ¸lgene tre verdiene til et script hos wwwu.sethesource.com: ma (hovedversjonsnummeret pÃ¥ din installerte POPFile), mi (under-versjonsnummeret pÃ¥ din installerte POPFile) og bn (build nummer pÃ¥ din installerte POPFile). POPFile mottar et svar i form av et stykke grafikk som vises i toppen av siden, hvis en ny version er tilgjengelig. Min web-server tar vare pÃ¥ denne log-filen omtrent 5 dager og de blir sÃ¥ slettet; Jeg lagrer ingen forbindelse mellom statistikken og individuelle IP-adresser.)
 Security_PasswordTitle                  Brukergrensesnittets Passord
 Security_Password                       Passord
 Security_PasswordUpdate                 Oppdater passord til %s
 Security_AUTHTitle                      Godkjenning av sikkert passord
 Security_SecureServer                   Sikker Server
-Security_SecureServerUpdate             Opdaterte sikker server til %s; denne endringen vil ikke tre i kraft før omstart av POPFile
+Security_SecureServerUpdate             Opdaterte sikker server til %s; denne endringen vil ikke tre i kraft fÃ¸r omstart av POPFile
 Security_SecurePort                     Sikker port
-Security_SecurePortUpdate               Opdaterte porten til %s; denne endringen vil ikke tre i kraft før omstart av POPFile
+Security_SecurePortUpdate               Opdaterte porten til %s; denne endringen vil ikke tre i kraft fÃ¸r omstart av POPFile
 Security_POP3                           Godta POP3-tilkoblinger fra andre maskiner
 Security_UI                             Godta HTTP (Brukergrensesnitt) tilkoblinger fra andre maskiner
 Security_UpdateTitle                    Automatisk Oppdaterings-kontroll
@@ -169,60 +169,60 @@ Security_Update                         Kontroller daglig om det finnes oppdater
 Security_StatsTitle                     Statistikk-rapportering
 Security_Stats                          Send statistikk tilbake til John daglig
 
-Magnet_Error1                           Magneten '%s' finnes allrede i bøtten'%s' 
-Magnet_Error2                           Den nye magneten '%s' er i konflikt med magneten '%s' i bøtten '%s' og kan gi flertydige resultater. Den nye magneten ble ikke tilføyd.
-Magnet_Error3                           Opprettet den nye magneten '%s' i bøtten '%s'
-Magnet_CurrentMagnets                   Nåværende Magneter
-Magnet_Message1                         De følgende magnetene gjør at e-post alltid blir klassifisert til den spesifiserte bøtten.
+Magnet_Error1                           Magneten '%s' finnes allrede i bÃ¸tten'%s' 
+Magnet_Error2                           Den nye magneten '%s' er i konflikt med magneten '%s' i bÃ¸tten '%s' og kan gi flertydige resultater. Den nye magneten ble ikke tilfÃ¸yd.
+Magnet_Error3                           Opprettet den nye magneten '%s' i bÃ¸tten '%s'
+Magnet_CurrentMagnets                   NÃ¥vÃ¦rende Magneter
+Magnet_Message1                         De fÃ¸lgende magnetene gjÃ¸r at e-post alltid blir klassifisert til den spesifiserte bÃ¸tten.
 Magnet_CreateNew                        Opprett Ny Magnet
-Magnet_Explanation                      <b>Tre typer magneter er anbefalt: <ul><li>Fra adressen eller navn:</b> For eksempel: john@firma.dk for å matche en spesifikk adresse, <br />firma.dk for å matche alle som sender fra firma.dk, <br />John Doe for å matche en spesifikk person, John for å matche alle John'er</li><li><b>Til adresse eller navn:</b> Samme som en Fra: Magnet men bare for Til: Adressen i en e-post</li><li><b>Emne-ord:</b> For eksempel: hei for å matche alle meldinger med ordet hei i emnet</li></ul>
+Magnet_Explanation                      <b>Tre typer magneter er anbefalt: <ul><li>Fra adressen eller navn:</b> For eksempel: john@firma.dk for Ã¥ matche en spesifikk adresse, <br />firma.dk for Ã¥ matche alle som sender fra firma.dk, <br />John Doe for Ã¥ matche en spesifikk person, John for Ã¥ matche alle John'er</li><li><b>Til adresse eller navn:</b> Samme som en Fra: Magnet men bare for Til: Adressen i en e-post</li><li><b>Emne-ord:</b> For eksempel: hei for Ã¥ matche alle meldinger med ordet hei i emnet</li></ul>
 Magnet_MagnetType                       Magnettyper
 Magnet_Value                            Verdier
-Magnet_Always                           Tilhører alltid bøtten
+Magnet_Always                           TilhÃ¸rer alltid bÃ¸tten
 
-Bucket_Error1                           Bøttenes navn kan kun inneholde bokstavene a til z med små bokstaver, samt - og _
-Bucket_Error2                           Bøtten med navnet %s eksisterer allerede
-Bucket_Error3                           Opprett bøtten med navnet %s
+Bucket_Error1                           BÃ¸ttenes navn kan kun inneholde bokstavene a til z med smÃ¥ bokstaver, samt - og _
+Bucket_Error2                           BÃ¸tten med navnet %s eksisterer allerede
+Bucket_Error3                           Opprett bÃ¸tten med navnet %s
 Bucket_Error4                           Skriv venligst ikke et tomt ord
-Bucket_Error5                           Omdøp bøtten %s til %s
-Bucket_Error6                           Slett bøtten %s
+Bucket_Error5                           OmdÃ¸p bÃ¸tten %s til %s
+Bucket_Error6                           Slett bÃ¸tten %s
 Bucket_Title                            Oversikt
-Bucket_BucketName                       Bøttenes navn
+Bucket_BucketName                       BÃ¸ttenes navn
 Bucket_WordCount                        Ordtelling
 Bucket_WordCounts                       Ordfordeling
 Bucket_UniqueWords                      Unike ord
 Bucket_SubjectModification              Emne-modifisering
 Bucket_ChangeColor                      Skift farge
 Bucket_NotEnoughData                    Ikke nok data
-Bucket_ClassificationAccuracy           Klassifikasjons-nøyaktighet
+Bucket_ClassificationAccuracy           Klassifikasjons-nÃ¸yaktighet
 Bucket_EmailsClassified                 Antall e-post klassifisert
 Bucket_EmailsClassifiedUpper            Antall e-post klassifisert
 Bucket_ClassificationErrors             Klassifiseringsfeil
-Bucket_Accuracy                         Nøyaktighet
+Bucket_Accuracy                         NÃ¸yaktighet
 Bucket_ClassificationCount              Klassifiseringstelling
 Bucket_ResetStatistics                  Nullstill Statistikkene
 Bucket_LastReset                        Sist nullstilt
-Bucket_CurrentColor                     %s Nåværende farge er %s
+Bucket_CurrentColor                     %s NÃ¥vÃ¦rende farge er %s
 Bucket_SetColorTo                       Sett %s fargen til %s
 Bucket_Maintenance                      Vedlikehold
-Bucket_CreateBucket                     Oppret bøtten med navnet
-Bucket_DeleteBucket                     Slett bøtten med navnet
-Bucket_RenameBucket                     Omdøp bøtten med navnet
-Bucket_Lookup                           Søk etter
-Bucket_LookupMessage                    Søk etter ord i bøttene
-Bucket_LookupMessage2                   Søkeresultatet for
+Bucket_CreateBucket                     Oppret bÃ¸tten med navnet
+Bucket_DeleteBucket                     Slett bÃ¸tten med navnet
+Bucket_RenameBucket                     OmdÃ¸p bÃ¸tten med navnet
+Bucket_Lookup                           SÃ¸k etter
+Bucket_LookupMessage                    SÃ¸k etter ord i bÃ¸ttene
+Bucket_LookupMessage2                   SÃ¸keresultatet for
 Bucket_LookupMostLikely                 Det er mest sannsynlig at <b>%s</b> forekommer i <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> forekommer ikke i noen av bøttene
+Bucket_DoesNotAppear                    <p><b>%s</b> forekommer ikke i noen av bÃ¸ttene
 Bucket_DisabledGlobally                 Deaktivert globalt
 Bucket_To                               til
 Bucket_Quarantine                       Karantene
 
 SingleBucket_Title                      Detaljer for %s
-SingleBucket_WordCount                  Totalt antall ord i bøtten
+SingleBucket_WordCount                  Totalt antall ord i bÃ¸tten
 SingleBucket_TotalWordCount             Totalt antall ord
 SingleBucket_Percentage                 Prosentandelen av totalen
 SingleBucket_WordTable                  Ord tabell for %s
-SingleBucket_Message1                   Markerte (*) ord er blitt brukt til å klassifisere i denne POPFile-sesjonen. Trykk på hvilket som helst ord for å slå opp dens sannsynlighet for alle bøttene.
+SingleBucket_Message1                   Markerte (*) ord er blitt brukt til Ã¥ klassifisere i denne POPFile-sesjonen. Trykk pÃ¥ hvilket som helst ord for Ã¥ slÃ¥ opp dens sannsynlighet for alle bÃ¸ttene.
 SingleBucket_Unique                     %s unike
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.

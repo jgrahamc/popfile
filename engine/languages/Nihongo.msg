@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+﻿# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -33,56 +33,56 @@ MailingListLink                         JP:mailing_lists
 DonateLink                              JP:Donate
 
 # Common words that are used on their own all over the interface
-Account                                 POP3 ���������
-Apply                                   Ŭ��
-ApplyChanges                            �ѹ���Ŭ��
+Account                                 POP3 アカウント
+Apply                                   適用
+ApplyChanges                            変更を適用
 On                                      ON
 Off                                     OFF
-TurnOn                                  ON �ˤ���
-TurnOff                                 OFF �ˤ���
-Add                                     �ɲ�
-Remove                                  ���
-Previous                                ����
-Next                                    ����
-From                                    ���п�
-Subject                                 ��̾
+TurnOn                                  ON にする
+TurnOff                                 OFF にする
+Add                                     追加
+Remove                                  削除
+Previous                                前へ
+Next                                    次へ
+From                                    差出人
+Subject                                 件名
 Cc                                      Cc
-Classification                          ʬ��
-Reclassify                              ��ʬ��
-Probability                             ��Ψ
-Scores                                  ����
-QuickMagnets                            �����å��ޥ��ͥå�
-Undo                                    ���ľ��
-Close                                   �Ĥ���
-Find                                    ����
-Filter                                  �ե��륿��
-Yes                                     �Ϥ�
-No                                      ������
-ChangeToYes                             �֤Ϥ��פ��ѹ�
-ChangeToNo                              �֤������פ��ѹ�
-Bucket                                  �Х���
-Magnet                                  �ޥ��ͥå�
-Delete                                  ���
-Create                                  ����
-To                                      ����
-Total                                   ���
-Rename                                  ̾���ѹ�
-Frequency                               ����
-Probability                             ��Ψ
-Score                                   ����
-Lookup                                  ����
-Word                                    ñ��
-Count                                   �������
-Update                                  ����
-Refresh                                 �ǿ��ξ��֤˹���
-FAQ                                     FAQ �鿴�ԡ���ؼԸ�����Q&amp;A��
+Classification                          分類
+Reclassify                              再分類
+Probability                             確率
+Scores                                  得点
+QuickMagnets                            クイックマグネット
+Undo                                    やり直し
+Close                                   閉じる
+Find                                    検索
+Filter                                  フィルター
+Yes                                     はい
+No                                      いいえ
+ChangeToYes                             「はい」に変更
+ChangeToNo                              「いいえ」に変更
+Bucket                                  バケツ
+Magnet                                  マグネット
+Delete                                  削除
+Create                                  作成
+To                                      宛先
+Total                                   合計
+Rename                                  名前変更
+Frequency                               頻度
+Probability                             確率
+Score                                   得点
+Lookup                                  検査
+Word                                    単語
+Count                                   カウント
+Update                                  更新
+Refresh                                 最新の状態に更新
+FAQ                                     FAQ 初心者・初学者向けのQ&amp;A集
 ID                                      ID
-Date                                    ����
-Arrived                                 ��������
-Size                                    ������
-Go                                      ������
-Edit                                    �Խ�
-Logout                                  ����������
+Date                                    日時
+Arrived                                 受信日時
+Size                                    サイズ
+Go                                      ジャンプ
+Edit                                    編集
+Logout                                  ログアウト
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -102,362 +102,362 @@ Locale_Decimal                          .
 Locale_Date                             %a %R | %D %R
 
 # The header and footer that appear on every UI page
-Header_Title                            POPFile ����ȥ����륻�󥿡�
-Header_Shutdown                         POPFile �����
-Header_History                          ����
-Header_Buckets                          �Х���
-Header_Configuration                    ����
-Header_Advanced                         �ܺ�����
-Header_Security                         �������ƥ�
-Header_Administration                   ����
-Header_Magnets                          �ޥ��ͥå�
-Header_Users                            �桼����
+Header_Title                            POPFile コントロールセンター
+Header_Shutdown                         POPFile の停止
+Header_History                          履歴
+Header_Buckets                          バケツ
+Header_Configuration                    設定
+Header_Advanced                         詳細設定
+Header_Security                         セキュリティ
+Header_Administration                   管理
+Header_Magnets                          マグネット
+Header_Users                            ユーザー
 
-Footer_HomePage                         POPFile �ۡ���ڡ���
-Footer_Manual                           �ޥ˥奢��
-Footer_Forums                           �ե������
-Footer_FeedMe                           ����
-Footer_RequestFeature                   ��˾
-Footer_MailingList                      �᡼��󥰥ꥹ��
-Footer_Wiki                             �ɥ������
+Footer_HomePage                         POPFile ホームページ
+Footer_Manual                           マニュアル
+Footer_Forums                           フォーラム
+Footer_FeedMe                           寄付
+Footer_RequestFeature                   要望
+Footer_MailingList                      メーリングリスト
+Footer_Wiki                             ドキュメント
 
-Configuration_Error1                    ���ڤ�ʸ���� 1 ʸ�������ˤ��Ƥ���������
-Configuration_Error2                    �桼�������󥿡��ե������ѥݡ����ֹ�� 1 ���� 65535 �ޤǤˤ��Ƥ���������
-Configuration_Error3                    POP3/POP3S �ݡ����ֹ�� 1 ���� 65535 �ޤǤˤ��Ƥ���������
-Configuration_Error4                    1 �ڡ�����ɽ������᡼��ο��� 1 ���� 1000 �ޤǤˤ��Ƥ���������
-Configuration_Error5                    �����Ĥ������� 1 ���� 366 �ޤǤˤ��Ƥ���������
-Configuration_Error6                    TCP ���ͥ�����󥿥��ॢ���Ȥ��ÿ��� 10 ���� 1800 �ˤ��Ƥ���������
-Configuration_Error7                    XML RPC �ݡ����ֹ�� 1 ���� 65535 �ޤǤˤ��Ƥ���������
-Configuration_Error8                    SOCKS V �ץ������Υݡ����ֹ�� 1 ���� 65535 �ޤǤˤ��Ƥ���������
-Configuration_Error9                    �桼�������󥿡��ե������ѥݡ����ֹ�� POP3 �ݡ����ֹ��Ʊ��ˤ��뤳�ȤϤǤ��ޤ���
-Configuration_Error10                   POP3 �ݡ����ֹ��桼�������󥿡��ե������ѥݡ����ֹ��Ʊ��ˤ��뤳�ȤϤǤ��ޤ���
-Configuration_Error11                   ���å���󥳥ͥ�����󥿥��ॢ���Ȥ��ÿ��� 300 ���� 86400 �ˤ��Ƥ���������
-Configuration_POP3Port                  POP3 �ݡ����ֹ�
-Configuration_POP3Update                POP3 �ݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_POP3SPort                 POP3S �ݡ����ֹ�
-Configuration_POP3SUpdate               POP3S �ݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_XMLRPCUpdate              XML-RPC �ݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_XMLRPCPort                XML-RPC �ݡ����ֹ�
-Configuration_SMTPPort                  SMTP �ݡ����ֹ�
-Configuration_SMTPUpdate                SMTP �ݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_NNTPPort                  NNTP �ݡ����ֹ�
-Configuration_NNTPUpdate                NNTP �ݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_POPFork                   POP3 Ʊ����³�ε���
-Configuration_POP3SFork                 POP3S Ʊ����³�ε���
-Configuration_SMTPFork                  SMTP Ʊ����³�ε���
-Configuration_NNTPFork                  NNTP Ʊ����³�ε���
-Configuration_POPForkEnabled            POP3 �ץ������ؤ�Ʊ����³���ͭ���פ��ѹ����ޤ���
-Configuration_POP3SForkEnabled          POP3S (POP3 over SSL) �ץ������ؤ�Ʊ����³���ͭ���פ��ѹ����ޤ���
-Configuration_SMTPForkEnabled           SMTP �ץ������ؤ�Ʊ����³���ͭ���פ��ѹ����ޤ���
-Configuration_NNTPForkEnabled           NNTP �ץ������ؤ�Ʊ����³���ͭ���פ��ѹ����ޤ���
-Configuration_POPForkDisabled           POP3 �ץ������ؤ�Ʊ����³���̵���פ��ѹ����ޤ���
-Configuration_POP3SForkDisabled         POP3S (POP3 over SSL) �ץ������ؤ�Ʊ����³���̵���פ��ѹ����ޤ���
-Configuration_SMTPForkDisabled          SMTP �ץ������ؤ�Ʊ����³���̵���פ��ѹ����ޤ���
-Configuration_NNTPForkDisabled          NNTP �ץ������ؤ�Ʊ����³���̵���פ��ѹ����ޤ���
-Configuration_POP3Separator             POP3 �ۥ���̾���ݡ����ֹ桢�桼��̾�ζ��ڤ�ʸ��
-Configuration_NNTPSeparator             NNTP �ۥ���̾���ݡ����ֹ桢�桼��̾�ζ��ڤ�ʸ��
-Configuration_POP3SepUpdate             POP3 ���ڤ�ʸ���� ��%s�פ��ѹ����ޤ�����
-Configuration_NNTPSepUpdate             NNTP ���ڤ�ʸ���� ��%s�פ��ѹ����ޤ�����
-Configuration_UI                        �桼�������󥿡��ե������ѥݡ����ֹ�
-Configuration_UIUpdate                  �桼�������󥿡��ե������ѥݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_UIHTTPS                   UI �ؤ� SSL ��³����������
-Configuration_UIHTTPSEnabled            �桼�������󥿡��ե�����(UI) �ؤ� SSL ��³���ͭ���פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_UIHTTPSDisabled           �桼�������󥿡��ե�����(UI) �ؤ� SSL ��³���̵���פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_UIHTTPSPort               �桼�������󥿡��ե�������SSL���ѥݡ����ֹ�
-Configuration_UIUpdate                  �桼�������󥿡��ե������ѥݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_UIHTTPSPortUpdate         �桼�������󥿡��ե�������SSL���ѥݡ����ֹ�� ��%s�פ��ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Configuration_History                   1 �ڡ�����ɽ������᡼��ο�
-Configuration_HistoryUpdate             1 �ڡ�����ɽ������᡼��ο��� ��%s�פ��ѹ����ޤ�����
-Configuration_Days                      �����Ĥ�����
-Configuration_DaysUpdate                �����Ĥ������� ��%s�פ��ѹ����ޤ�����
-Configuration_UserInterface             �桼�������󥿡��ե�����
-Configuration_Skins                     ������
-Configuration_SkinsChoose               ����������򤷤Ƥ�������
-Configuration_Language                  ����
-Configuration_LanguageChoose            ��������򤷤Ƥ�������
-Configuration_ListenPorts               �⥸�塼��Υ��ץ����
-Configuration_HistoryView               ����
-Configuration_TCPTimeout                TCP ���ͥ�����󥿥��ॢ����
-Configuration_TCPTimeoutSecs            TCP ���ͥ�����󥿥��ॢ���Ȥ��ÿ�
-Configuration_TCPTimeoutUpdate          TCP ���ͥ�����󥿥��ॢ���Ȥ��ÿ��� ��%s�פ��ѹ����ޤ�����
-Configuration_SessionTimeout            ���å���󥿥��ॢ����
-Configuration_SessionTimeoutSecs        ���å���󥿥��ॢ���Ȥ��ÿ�
-Configuration_SessionTimeoutUpdate      ���å���󥿥��ॢ���Ȥ��ÿ��� ��%s�פ��ѹ����ޤ�����
-Configuration_ClassificationInsertion   �Żҥ᡼��ؤΥƥ�����������ǽ
-Configuration_SubjectLine               ��̾���ѹ�
-Configuration_XTCInsertion              X-Text-Classification<br>�إå���
-Configuration_XPLInsertion              X-POPFile-Link<br>�إå���
-Configuration_Logging                   ����
-Configuration_None                      �ʤ�
-Configuration_ToScreen                  ���󥽡���
-Configuration_ToFile                    �ե�����
-Configuration_ToScreenFile              ���󥽡���ȥե�����
-Configuration_LoggerOutput              ��������
-Configuration_GeneralSkins              ������
-Configuration_SmallSkins                ��������
-Configuration_TinySkins                 �Ǿ�������
-Configuration_CurrentLogFile            &lt;���ߤΥ����ե�����&gt;
-Configuration_SOCKSServer               SOCKS V �ץ����� ������
-Configuration_SOCKSPort                 SOCKS V �ץ����� �ݡ����ֹ�
-Configuration_SOCKSPortUpdate           SOCKS V �ץ������Υݡ����ֹ�� ��%s�פ��ѹ����ޤ�����
-Configuration_SOCKSServerUpdate         SOCKS V �ץ������Υ����Ф� ��%s�פ��ѹ����ޤ�����
-Configuration_Fields                    ���򥿥ֹ��ܤ��ɲ�
-Configuration_ChangePassword            �ѥ���ɤ��ѹ�
-Configuration_OldPassword               ��ѥ����
-Configuration_NewPassword               ���ѥ����
-Configuration_ConfirmPassword           ���ѥ���ɤγ�ǧ
-Configuration_Password_Mismatch         ���ѥ���ɤȿ��ѥ���ɤγ�ǧ��Ʊ��Ǥʤ��ƤϤʤ�ޤ���
-Configuration_Password_Bad              ���Ϥ��줿��ѥ���ɤ��ְ�äƤ��ޤ�
-Configuration_Password_Fail             �������ѥ���ɤ�����Ǥ��ޤ���Ǥ���
-Configuration_Set_Password              �������ѥ���ɤ����ꤵ��ޤ���
-Configuration_ConfigBar                 ����С�
-Configuration_Logger_Level0             ��
-Configuration_Logger_Level1             ��
-Configuration_Logger_Level2             ��
-Configuration_Logger_Level              ������٥�:
-Configuration_LoggerOutputUpdate        �������Ϥ� ��%s�� �����ꤷ�ޤ���
-Configuration_Logger_LevelUpdate        ������٥�� ��%s�� �����ꤷ�ޤ���
-Configuration_CurrentSessions           ����ͭ���ʥ桼�������å����
-Configuration_CurrentSessions_UserName  �桼����
-Configuration_CurrentSessions_LastUsed  �ǽ���������
-Configuration_CurrentSessions_IdleTime  �Ե�����
+Configuration_Error1                    区切り文字は 1 文字だけにしてください。
+Configuration_Error2                    ユーザーインターフェース用ポート番号は 1 から 65535 までにしてください。
+Configuration_Error3                    POP3/POP3S ポート番号は 1 から 65535 までにしてください。
+Configuration_Error4                    1 ページに表示するメールの数は 1 から 1000 までにしてください。
+Configuration_Error5                    履歴を残す日数は 1 から 366 までにしてください。
+Configuration_Error6                    TCP コネクションタイムアウトの秒数は 10 から 1800 にしてください。
+Configuration_Error7                    XML RPC ポート番号は 1 から 65535 までにしてください。
+Configuration_Error8                    SOCKS V プロキシのポート番号は 1 から 65535 までにしてください。
+Configuration_Error9                    ユーザーインターフェース用ポート番号を POP3 ポート番号と同一にすることはできません。
+Configuration_Error10                   POP3 ポート番号をユーザーインターフェース用ポート番号と同一にすることはできません。
+Configuration_Error11                   セッションコネクションタイムアウトの秒数は 300 から 86400 にしてください。
+Configuration_POP3Port                  POP3 ポート番号
+Configuration_POP3Update                POP3 ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_POP3SPort                 POP3S ポート番号
+Configuration_POP3SUpdate               POP3S ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_XMLRPCUpdate              XML-RPC ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_XMLRPCPort                XML-RPC ポート番号
+Configuration_SMTPPort                  SMTP ポート番号
+Configuration_SMTPUpdate                SMTP ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_NNTPPort                  NNTP ポート番号
+Configuration_NNTPUpdate                NNTP ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_POPFork                   POP3 同時接続の許可
+Configuration_POP3SFork                 POP3S 同時接続の許可
+Configuration_SMTPFork                  SMTP 同時接続の許可
+Configuration_NNTPFork                  NNTP 同時接続の許可
+Configuration_POPForkEnabled            POP3 プロキシへの同時接続を「有効」に変更しました
+Configuration_POP3SForkEnabled          POP3S (POP3 over SSL) プロキシへの同時接続を「有効」に変更しました
+Configuration_SMTPForkEnabled           SMTP プロキシへの同時接続を「有効」に変更しました
+Configuration_NNTPForkEnabled           NNTP プロキシへの同時接続を「有効」に変更しました
+Configuration_POPForkDisabled           POP3 プロキシへの同時接続を「無効」に変更しました
+Configuration_POP3SForkDisabled         POP3S (POP3 over SSL) プロキシへの同時接続を「無効」に変更しました
+Configuration_SMTPForkDisabled          SMTP プロキシへの同時接続を「無効」に変更しました
+Configuration_NNTPForkDisabled          NNTP プロキシへの同時接続を「無効」に変更しました
+Configuration_POP3Separator             POP3 ホスト名、ポート番号、ユーザ名の区切り文字
+Configuration_NNTPSeparator             NNTP ホスト名、ポート番号、ユーザ名の区切り文字
+Configuration_POP3SepUpdate             POP3 区切り文字を 「%s」に変更しました。
+Configuration_NNTPSepUpdate             NNTP 区切り文字を 「%s」に変更しました。
+Configuration_UI                        ユーザーインターフェース用ポート番号
+Configuration_UIUpdate                  ユーザーインターフェース用ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_UIHTTPS                   UI への SSL 接続を受け入れる
+Configuration_UIHTTPSEnabled            ユーザーインターフェース(UI) への SSL 接続を「有効」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_UIHTTPSDisabled           ユーザーインターフェース(UI) への SSL 接続を「無効」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_UIHTTPSPort               ユーザーインターフェース（SSL）用ポート番号
+Configuration_UIUpdate                  ユーザーインターフェース用ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_UIHTTPSPortUpdate         ユーザーインターフェース（SSL）用ポート番号を 「%s」に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_History                   1 ページに表示するメールの数
+Configuration_HistoryUpdate             1 ページに表示するメールの数を 「%s」に変更しました。
+Configuration_Days                      履歴を残す日数
+Configuration_DaysUpdate                履歴を残す日数を 「%s」に変更しました。
+Configuration_UserInterface             ユーザーインターフェース
+Configuration_Skins                     スキン
+Configuration_SkinsChoose               スキンを選択してください
+Configuration_Language                  言語
+Configuration_LanguageChoose            言語を選択してください
+Configuration_ListenPorts               モジュールのオプション
+Configuration_HistoryView               履歴
+Configuration_TCPTimeout                TCP コネクションタイムアウト
+Configuration_TCPTimeoutSecs            TCP コネクションタイムアウトの秒数
+Configuration_TCPTimeoutUpdate          TCP コネクションタイムアウトの秒数を 「%s」に変更しました。
+Configuration_SessionTimeout            セッションタイムアウト
+Configuration_SessionTimeoutSecs        セッションタイムアウトの秒数
+Configuration_SessionTimeoutUpdate      セッションタイムアウトの秒数を 「%s」に変更しました。
+Configuration_ClassificationInsertion   電子メールへのテキスト挿入機能
+Configuration_SubjectLine               件名の変更
+Configuration_XTCInsertion              X-Text-Classification<br>ヘッダー
+Configuration_XPLInsertion              X-POPFile-Link<br>ヘッダー
+Configuration_Logging                   ログ
+Configuration_None                      なし
+Configuration_ToScreen                  コンソール
+Configuration_ToFile                    ファイル
+Configuration_ToScreenFile              コンソールとファイル
+Configuration_LoggerOutput              ログ出力
+Configuration_GeneralSkins              スキン
+Configuration_SmallSkins                小スキン
+Configuration_TinySkins                 最小スキン
+Configuration_CurrentLogFile            &lt;現在のログファイル&gt;
+Configuration_SOCKSServer               SOCKS V プロキシ サーバ
+Configuration_SOCKSPort                 SOCKS V プロキシ ポート番号
+Configuration_SOCKSPortUpdate           SOCKS V プロキシのポート番号を 「%s」に変更しました。
+Configuration_SOCKSServerUpdate         SOCKS V プロキシのサーバを 「%s」に変更しました。
+Configuration_Fields                    履歴タブ項目を追加
+Configuration_ChangePassword            パスワードの変更
+Configuration_OldPassword               旧パスワード
+Configuration_NewPassword               新パスワード
+Configuration_ConfirmPassword           新パスワードの確認
+Configuration_Password_Mismatch         新パスワードと新パスワードの確認は同一でなくてはなりません
+Configuration_Password_Bad              入力された旧パスワードが間違っています
+Configuration_Password_Fail             新しいパスワードに設定できませんでした
+Configuration_Set_Password              新しいパスワードが設定されました
+Configuration_ConfigBar                 設定バー
+Configuration_Logger_Level0             低
+Configuration_Logger_Level1             中
+Configuration_Logger_Level2             高
+Configuration_Logger_Level              ログレベル:
+Configuration_LoggerOutputUpdate        ログ出力を 「%s」 に設定しました
+Configuration_Logger_LevelUpdate        ログレベルを 「%s」 に設定しました
+Configuration_CurrentSessions           現在有効なユーザーセッション
+Configuration_CurrentSessions_UserName  ユーザー
+Configuration_CurrentSessions_LastUsed  最終アクセス
+Configuration_CurrentSessions_IdleTime  待機時間
 
-Advanced_Error1                         ��%s�� �ϴ���̵�뤹��ñ��Υꥹ�Ȥ˴ޤޤ�Ƥ��ޤ���
-Advanced_Error2                         ̵�뤹��ñ���̵����ʸ�����Ȥ��Ƥ��ޤ����������Ϥ��Ʋ�������
-Advanced_Error3                         ��%s�� ��̵�뤹��ñ��Υꥹ�Ȥ��ɲä��ޤ�����
-Advanced_Error4                         ��%s�� ��̵�뤹��ñ��Υꥹ�Ȥ˴ޤޤ�Ƥ��ޤ���
-Advanced_Error5                         ��%s�� ��̵�뤹��ñ��Υꥹ�Ȥ��������ޤ�����
-Advanced_StopWords                      ̵�뤹��ñ��
-Advanced_Message1                       POPFile �ϰʲ������ˤ˻Ȥ���ñ���̵�뤷�ޤ���
-Advanced_AddWord                        ñ���ɲ�
-Advanced_RemoveWord                     ñ����
-Advanced_AllParameters                  POPFile ������Ū�ʥѥ�᡼����
-Advanced_AllParametersNotes             �ʲ��� POPFile ������Ū�ʥѥ�᡼���������ꥹ�ȤǤ���
-Advanced_Parameter                      �ѥ�᡼����
-Advanced_Value                          ��
-Advanced_Warning                        ���ɥХ󥹥ɡ��桼�����˸¤ꡢɬ�׻����ͤ��ѹ����ƹ����ܥ���򥯥�å����Ʋ��������Х�ǥ��ƥ������������˥����å��ϹԤ��ޤ���������ɽ������Ƥ�����ܤϽ�����꤫���ѹ�����Ƥ��ޤ������ץ����ˤĤ��Ƥξܤ�������ˤĤ��Ƥ� <a href="http://getpopfile.org/docs/JP:OptionReference">���ץ���󡦥�ե����</a> �򻲾Ȥ��Ƥ���������
-Advanced_ConfigFile                     ����ե�����:
-Advanced_SingleUserModeParameters       ���󥰥�桼�����⡼�ɤΥѥ�᡼����
-Advanced_SingleUserModeParametersNotes  �ʲ��ϥ��󥰥�桼�����⡼�ɤΥѥ�᡼���������ꥹ�ȤǤ���
+Advanced_Error1                         「%s」 は既に無視する単語のリストに含まれています。
+Advanced_Error2                         無視する単語に無効な文字が使われています。再度入力して下さい。
+Advanced_Error3                         「%s」 を無視する単語のリストに追加しました。
+Advanced_Error4                         「%s」 は無視する単語のリストに含まれていません。
+Advanced_Error5                         「%s」 を無視する単語のリストから削除しました。
+Advanced_StopWords                      無視する単語
+Advanced_Message1                       POPFile は以下の頻繁に使われる単語を無視します。
+Advanced_AddWord                        単語追加
+Advanced_RemoveWord                     単語削除
+Advanced_AllParameters                  POPFile の全体的なパラメーター
+Advanced_AllParametersNotes             以下は POPFile の全体的なパラメーターの全リストです。
+Advanced_Parameter                      パラメーター
+Advanced_Value                          値
+Advanced_Warning                        アドバンスド・ユーザーに限り、必要時、値を変更して更新ボタンをクリックして下さい。バリディティー（妥当性）チェックは行いません。太字で表示されている項目は初期設定から変更されています。オプションについての詳しい情報については <a href="http://getpopfile.org/docs/JP:OptionReference">オプション・リファレンス</a> を参照してください。
+Advanced_ConfigFile                     設定ファイル:
+Advanced_SingleUserModeParameters       シングルユーザーモードのパラメーター
+Advanced_SingleUserModeParametersNotes  以下はシングルユーザーモードのパラメーターの全リストです。
 
-Users_Create                            �������桼�����κ���
-Users_Rename                            �桼����̾���ѹ�
-Users_Remove                            ��¸�桼�����κ��
-Users_Edit                              �桼����������Խ�
-Users_Change_Password                   �桼�����ѥ���ɤ��ѹ�/�����
-Users_CopyFrom                          ����򥳥ԡ�����桼����
-Users_CopyMagnets                       �桼�����Υޥ��ͥåȤ򥳥ԡ�����
-Users_CopyCorpus                        �桼�����Υ����ѥ��򥳥ԡ�����(���ν����ˤ�Ĺ�����֤������뤫�⤷��ޤ���)
-Users_RenameUser                        ̾�����ѹ�����桼����
-Users_RenameUserNewName                 ������̾��
-Users_RenameNotes                       ���� : �桼������̾�����ѹ�����ȥѥ���ɤ����������ޤ�
-Users_RemoveUser                        �������桼����
-Users_CreateUser                        ��������桼����
-Users_EditUser                          �Խ�����桼����
-Users_ChangePasswordUser                �ѥ���ɤ��ѹ�����桼����
-Users_ResetPassword                     �ѥ���ɤ���������
-Users_Parameters                        �ѥ�᡼����
-Users_Created                           �桼���� ��%s�� ��������ޤ����ʽ���ѥ���ɤ� ��%s�ס�
-Users_Not_Created                       �桼���� ��%s�� ������Ǥ��ޤ���Ǥ���
-Users_Created_And_Cloned                �桼���� ��%s�� �� ��%s�� ������򥳥ԡ����ƺ������ޤ����ʽ���ѥ���ɤ� ��%s�ס�
-Users_Not_Created_Exists                �桼���� ��%s�� �Ϻ����Ǥ��ޤ���Ǥ��������Ǥ�¸�ߤ��Ƥ��ޤ�
-Users_Created_Not_Cloned                �桼���� ��%s�� ��������ޤ���������%s�� ������ϥ��ԡ��Ǥ��ޤ���Ǥ����ʽ���ѥ���ɤ� ��%s�ס�
-Users_Renamed                           �桼���� ��%s�� ��̾���� ��%s�� ���ѹ����ޤ����ʽ���ѥ���ɤ� ��%s�ס�
-Users_Rename_Failed_Exists              �桼���� ��%s�� ��̾���� ��%s�� ���ѹ��Ǥ��ޤ���Ǥ��������Ǥ�¸�ߤ��Ƥ��ޤ�
-Users_Rename_Failed                     �桼���� ��%s�� ��̾�����ѹ��Ǥ��ޤ���Ǥ�����
-Users_Removed                           �桼���� ��%s�� �������ޤ���
-Users_Removed_Failed                    �桼���� ��%s�� �����Ǥ��ޤ���Ǥ���
-Users_Removed_Failed_Admin              �桼���� ��%s�� �����Ǥ��ޤ���Ǥ�������˴����Ը��¤�̵���ˤ��Ƥ�������
-Users_Changed_Password                  �桼���� ��%s�� �Υѥ���ɤ��ѹ����ޤ���
-Users_Change_Password_Failed            �桼���� ��%s�� �Υѥ���ɤ��ѹ��Ǥ��ޤ���Ǥ���
-Users_Change_Password_Failed_Mismatch   �桼���� ��%s�� �Υѥ���ɤ��ѹ��Ǥ��ޤ���Ǥ����� ���ѥ���ɤȿ��ѥ���ɤγ�ǧ��Ʊ��Ǥʤ��ƤϤʤ�ޤ���
-Users_Reset_Password                    �桼���� ��%s�� �Υѥ���ɤ��������ޤ����ʿ���������ѥ���ɤ� ��%s�ס�
-Users_Reset_Password_Failed             �桼���� ��%s�� �Υѥ���ɤ�������Ǥ��ޤ���Ǥ���
-Users_SingleUserMode                    ���󥰥�桼�����⡼�ɡ�POPFile ���饷�å���
-Users_Accounts                          ��Ϣ�Ť���줿 POP3 ���������
-Users_AddAccount                        POP3 ��������Ȥ��ɲáʥۥ���̾:�桼����̾��
-Users_Bad_Account                       ���������������̾�ϡ֥ۥ���̾:�桼����̾�פη����Ǥʤ���Фʤ�ޤ���
-Users_Duplicate_Account                 ��������Ȥ��ɲäǤ��ޤ���Ǥ������̤Υ桼�����˴�Ϣ�Ť����Ƥ��ޤ�
-Users_Failed_Account                    ��������Ȥ��ɲäǤ��ޤ���Ǥ�����
-Users_SingleUserModeOn                  POPFile �ϡ֥��󥰥�桼�����⡼�ɡ�POPFile ���饷�å��ˡפ��ѹ�����ޤ�����POPFile ��Ƶ�ư���뤳�Ȥ򤪴��ᤷ�ޤ���
-Users_MultiUserModeOn                   POPFile �ϡ֥ޥ���桼�����⡼�ɡפ��ѹ�����ޤ�����POPFile ��Ƶ�ư���뤳�Ȥ򤪴��ᤷ�ޤ���
+Users_Create                            新しいユーザーの作成
+Users_Rename                            ユーザー名の変更
+Users_Remove                            既存ユーザーの削除
+Users_Edit                              ユーザー設定の編集
+Users_Change_Password                   ユーザーパスワードの変更/初期化
+Users_CopyFrom                          設定をコピーするユーザー
+Users_CopyMagnets                       ユーザーのマグネットをコピーする
+Users_CopyCorpus                        ユーザーのコーパスをコピーする(この処理には長い時間がかかるかもしれません)
+Users_RenameUser                        名前を変更するユーザー
+Users_RenameUserNewName                 新しい名前
+Users_RenameNotes                       注意 : ユーザーの名前を変更するとパスワードが初期化されます
+Users_RemoveUser                        削除するユーザー
+Users_CreateUser                        作成するユーザー
+Users_EditUser                          編集するユーザー
+Users_ChangePasswordUser                パスワードを変更するユーザー
+Users_ResetPassword                     パスワードを初期化する
+Users_Parameters                        パラメーター
+Users_Created                           ユーザー 「%s」 を作成しました（初期パスワードは 「%s」）
+Users_Not_Created                       ユーザー 「%s」 を作成できませんでした
+Users_Created_And_Cloned                ユーザー 「%s」 を 「%s」 の設定をコピーして作成しました（初期パスワードは 「%s」）
+Users_Not_Created_Exists                ユーザー 「%s」 は作成できませんでした。すでに存在しています
+Users_Created_Not_Cloned                ユーザー 「%s」 を作成しましたが、「%s」 の設定はコピーできませんでした（初期パスワードは 「%s」）
+Users_Renamed                           ユーザー 「%s」 の名前を 「%s」 に変更しました（初期パスワードは 「%s」）
+Users_Rename_Failed_Exists              ユーザー 「%s」 の名前を 「%s」 に変更できませんでした。すでに存在しています
+Users_Rename_Failed                     ユーザー 「%s」 の名前を変更できませんでした。
+Users_Removed                           ユーザー 「%s」 を削除しました
+Users_Removed_Failed                    ユーザー 「%s」 を削除できませんでした
+Users_Removed_Failed_Admin              ユーザー 「%s」 を削除できませんでした。先に管理者権限を無効にしてください
+Users_Changed_Password                  ユーザー 「%s」 のパスワードを変更しました
+Users_Change_Password_Failed            ユーザー 「%s」 のパスワードが変更できませんでした
+Users_Change_Password_Failed_Mismatch   ユーザー 「%s」 のパスワードが変更できませんでした。 新パスワードと新パスワードの確認は同一でなくてはなりません
+Users_Reset_Password                    ユーザー 「%s」 のパスワードを初期化しました（新しい初期パスワードは 「%s」）
+Users_Reset_Password_Failed             ユーザー 「%s」 のパスワードが初期化できませんでした
+Users_SingleUserMode                    シングルユーザーモード（POPFile クラシック）
+Users_Accounts                          関連づけられた POP3 アカウント
+Users_AddAccount                        POP3 アカウントの追加（ホスト名:ユーザー名）
+Users_Bad_Account                       新しいアカウント名は「ホスト名:ユーザー名」の形式でなければなりません
+Users_Duplicate_Account                 アカウントを追加できませんでした。別のユーザーに関連づけられています
+Users_Failed_Account                    アカウントを追加できませんでした。
+Users_SingleUserModeOn                  POPFile は「シングルユーザーモード（POPFile クラシック）」に変更されました。POPFile を再起動することをお勧めします。
+Users_MultiUserModeOn                   POPFile は「マルチユーザーモード」に変更されました。POPFile を再起動することをお勧めします。
 
-History_Filter                          &nbsp;(<font color="%s">%s </font>�Х��ĤΤߤ�ɽ��)
-History_FilterBy                        �ե��륿���
-History_Search                          &nbsp;(���п�/��̾ �򸡺�: %s)
-History_Title                           �Ƕ�Υ�å�����
-History_Jump                            ���Υ�å������˥�����
-History_ShowAll                         ����ɽ��
-History_ShouldBe                        ��ʬ����
-History_NoFrom                          ���пͤʤ�
-History_NoSubject                       ��̾�ʤ�
-History_ClassifyAs                      ʬ����
-History_MagnetUsed                      �ޥ��ͥåȻ���
-History_MagnetBecause                   <b>�ޥ��ͥåȻ���</b><p>��<font color="%s">%s</font>�� ��ʬ�व��ޤ�����(�ޥ��ͥå� ��%s�פΤ���)</p>
-History_ChangedTo                       �ѹ��� ��<font color="%s">%s</font>��
-History_Already                         ��<font color="%s">%s</font>�� ��ʬ�व��ޤ���
-History_RemoveAll                       ���ƺ��
-History_RemovePage                      ���Υڡ�������
-History_RemoveChecked                   �����å����줿��Τ���
-History_SearchMessage                   ���п�/��̾ �򸡺�
-History_NoMessages                      ��å������Ϥ���ޤ���
-History_NoMatchingMessages              ���˰��פ����å������Ϥ���ޤ���
-History_ShowMagnet                      �ޥ��ͥå�
-History_Negate_Search                   ���ˤ���ʤ���Τ򸡺�
-History_Magnet                          &nbsp;(�ޥ��ͥå�ʬ�व�줿��å������Τߤ�ɽ��)
-History_NoMagnet                        &nbsp;(�ޥ��ͥå�ʬ�व��ʤ��ä���å������Τߤ�ɽ��)
-History_ResetSearch                     �ꥻ�å�
-History_ChangedClass                    ���ߤΥ����ѥ��ˤ��ʬ��
-History_Purge                           �����˺��
-History_Increase                        ����
-History_Decrease                        ����
-History_Column_Characters               ����������
-History_Automatic                       ��ư
-History_Reclassified                    ��ʬ�व��ޤ���
+History_Filter                          &nbsp;(<font color="%s">%s </font>バケツのみを表示)
+History_FilterBy                        フィルタリング
+History_Search                          &nbsp;(差出人/件名 を検索: %s)
+History_Title                           最近のメッセージ
+History_Jump                            次のメッセージにジャンプ
+History_ShowAll                         全て表示
+History_ShouldBe                        再分類先
+History_NoFrom                          差出人なし
+History_NoSubject                       件名なし
+History_ClassifyAs                      分類先
+History_MagnetUsed                      マグネット使用
+History_MagnetBecause                   <b>マグネット使用</b><p>「<font color="%s">%s</font>」 に分類されました。(マグネット 「%s」のため)</p>
+History_ChangedTo                       変更先 「<font color="%s">%s</font>」
+History_Already                         「<font color="%s">%s</font>」 に分類されました
+History_RemoveAll                       全て削除
+History_RemovePage                      このページを削除
+History_RemoveChecked                   チェックされたものを削除
+History_SearchMessage                   差出人/件名 を検索
+History_NoMessages                      メッセージはありません
+History_NoMatchingMessages              条件に一致するメッセージはありません
+History_ShowMagnet                      マグネット
+History_Negate_Search                   条件にあわないものを検索
+History_Magnet                          &nbsp;(マグネット分類されたメッセージのみを表示)
+History_NoMagnet                        &nbsp;(マグネット分類されなかったメッセージのみを表示)
+History_ResetSearch                     リセット
+History_ChangedClass                    現在のコーパスによる分類
+History_Purge                           すぐに削除
+History_Increase                        広く
+History_Decrease                        狭く
+History_Column_Characters               履歴の列の幅
+History_Automatic                       自動
+History_Reclassified                    再分類されました
 History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
 
-Password_Title                          ��������
-Password_Password                       �ѥ����
-Password_Username                       �桼����̾
-Password_Go                             ��������
-Password_Error1                         �ѥ���ɤ��ְ�äƤ��ޤ�
-Password_Error2                         �桼����̾�ޤ��ϥѥ���ɤ��ְ�äƤ��ޤ�
-Password_SessionTimeout                 POPFile �Υ��å����ϻ����ڤ�ˤʤ�ޤ���
+Password_Title                          ログイン
+Password_Password                       パスワード
+Password_Username                       ユーザー名
+Password_Go                             ログイン
+Password_Error1                         パスワードが間違っています
+Password_Error2                         ユーザー名またはパスワードが間違っています
+Password_SessionTimeout                 POPFile のセッションは時間切れになりました
 
-Security_Error1                         ǧ�ڥݡ����ֹ�� 1 ���� 65535 �ޤǤˤ��Ƥ���������
-Security_Stealth                        ���ƥ륹�⡼��/�����С����ڥ졼�����
-Security_NoStealthMode                  ������ (���ƥ륹�⡼��)
-Security_StealthMode                    ���ƥ륹�⡼�� (��⡼�Ȥ������³��ػ�)
-Security_ServerMode                     �����С��⡼�� (��⡼�Ȥ������³�����)
-Security_ExplainStats                   (���Υ��ץ�����ͭ���ˤ���ȡ�POPFile ���������ʲ��λ��ĤΥǡ����� getpopfile.org ��Υ�����ץȤ�����ޤ���: bc (�Х��Ĥ�����)��mc (POPFile ��ʬ�ष����å�����������)��ec (ʬ�२�顼������)�������ϥե�����˵�Ͽ���졢POPFile ���ɤΤ褦�˻��Ѥ��졢�ɤ����٤θ��̤򤢤��Ƥ���Τ��򼨤����׾���Ȥ��Ƹ��������Ƥ��������ޤ���Web �����С��Ϥ����Υ����ե���������������¸�������ȡ�������ޤ��������������ͤ� IP ���ɥ쥹�ȴ�Ϣ�դ�����¸���뤳�ȤϤ��ä�������ޤ���)
-Security_ExplainUpdate                  (���Υ��ץ�����ͭ���ˤ���ȡ�POPFile ���������ʲ��λ��ĤΥǡ����� getpopfile.org ��Υ�����ץȤ�����ޤ���: ma (���󥹥ȡ��뤵��Ƥ��� POPFile �Υ᥸�㡼�С�������ֹ�)��mi (���󥹥ȡ��뤵��Ƥ��� POPFile �Υޥ��ʡ��С�������ֹ�)��bn (���󥹥ȡ��뤵��Ƥ��� POPFile �Υӥ���ֹ�)���������С�����󤬥�꡼�������ȡ�POPFile �Ϥ��ξ��������ƥڡ����ξ����˥���ե��å���ɽ�����Ƥ��Τ餻���ޤ���Web �����С��Ϥ����Υ����ե���������������¸�������ȡ�������ޤ��������ι��������å��˻��Ѥ����ǡ����� IP ���ɥ쥹�ȴ�Ϣ�դ�����¸���뤳�ȤϤ��ä�������ޤ���)
-Security_PasswordTitle                  �桼�������󥿡��ե������ѥ����
-Security_Password                       �ѥ����
-Security_PasswordUpdate                 �ѥ���ɤ� ��%s�פ��ѹ����ޤ���
-Security_AUTHTitle                      ��⡼�ȥ����С�
-Security_SecureServer                   ��⡼�� POP3 �����С� (SPA/AUTH �ޤ��� Ʃ��ץ�����)
-Security_SecureServerUpdate             ��⡼�� POP3 �����С��� ��%s�� ���ѹ����ޤ�����
-Security_SecurePort                     ��⡼�� POP3 �ݡ����ֹ� (SPA/AUTH �ޤ��� Ʃ��ץ�����)
-Security_SecurePortUpdate               ��⡼�� POP3 �ݡ����ֹ�� ��%s�� ���ѹ����ޤ�����
-Security_SecureServerUseSSL             SSL ����Ѥ���
-Security_SecureServerUseSSLOn           ��⡼�� POP3 �����С��Ȥ���³�� SSL ����Ѥ��ޤ�
-Security_SecureServerUseSSLOff          ��⡼�� POP3 �����С��Ȥ���³�� SSL ����Ѥ��ޤ���
-Security_SMTPServer                     SMTP �������󥵡��С�
-Security_SMTPServerUpdate               SMTP �������󥵡��С��� ��%s�� ���ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_SMTPPort                       SMTP ��������ݡ����ֹ�
-Security_SMTPPortUpdate                 SMTP ��������ݡ����ֹ�� ��%s�� ���ѹ����ޤ����������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_POP3                           ��⡼�ȥޥ��󤫤�� POP3 ��³��ǧ��� (POPFile �κƵ�ư��ɬ��)
-Security_POP3S                          ��⡼�ȥޥ��󤫤�� POP3S ��³��ǧ��� (POPFile �κƵ�ư��ɬ��)
-Security_SMTP                           ��⡼�ȥޥ��󤫤�� SMTP ��³��ǧ��� (POPFile �κƵ�ư��ɬ��)
-Security_NNTP                           ��⡼�ȥޥ��󤫤�� NNTP ��³��ǧ��� (POPFile �κƵ�ư��ɬ��)
-Security_UI                             ��⡼�ȥޥ��󤫤�� HTTP ��³(�桼�������󥿡��ե�����������)��ǧ��� (POPFile �κƵ�ư��ɬ��)
-Security_XMLRPC                         ��⡼�ȥޥ��󤫤�� XML-RPC ��³��ǧ��� (POPFile �κƵ�ư��ɬ��)
-Security_StealthModeUpdatePOP3          POPFile POP3 �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ݡפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_ServerModeUpdatePOP3           POPFile POP3 �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ġפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_StealthModeUpdatePOP3S         POPFile POP3S �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ݡפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_ServerModeUpdatePOP3S          POPFile POP3S �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ġפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_StealthModeUpdateSMTP          POPFile SMTP �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ݡפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_ServerModeUpdateSMTP           POPFile SMTP �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ġפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_StealthModeUpdateNNTP          POPFile NNTP �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ݡפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_ServerModeUpdateNNTP           POPFile NNTP �ץ����� ��¾�Υޥ��󤫤����³��ֵ��ġפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_StealthModeUpdateUI            POPFile UI (����ȥ����륻�󥿡�) ��¾�Υޥ��󤫤����³��ֵ��ݡפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_ServerModeUpdateUI             POPFile UI (����ȥ����륻�󥿡�) ��¾�Υޥ��󤫤����³��ֵ��ġפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_StealthModeUpdateXMLRPC        POPFile XML-RPC ���󥿡��ե����� ��¾�Υޥ��󤫤����³��ֵ��ݡפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_ServerModeUpdateXMLRPC         POPFile XML-RPC ���󥿡��ե����� ��¾�Υޥ��󤫤����³��ֵ��ġפ��ޤ��������ѹ��� POPFile ��Ƶ�ư����ޤ�ͭ���ˤʤ�ޤ���
-Security_UpdateTitle                    ������ư�����å�
-Security_Update                         POPFile ����������Ƥ��뤫�ɤ������������å�����
-Security_StatsTitle                     ���׾����ݡ���
-Security_Stats                          ���׾������������
-Security_UpdateOn                       POPFile ��������������Ƥ��뤫�ɤ���������å����ޤ���
-Security_UpdateOff                      POPFile �Ϲ�������Ƥ��뤫�ɤ����Υ����å��򤷤ޤ���
-Security_StatsOn                        POPFile ���������׾����ݡ��Ȥ�����ޤ�
-Security_StatsOff                       POPFile �����׾����ݡ��Ȥ�����ޤ���
+Security_Error1                         認証ポート番号は 1 から 65535 までにしてください。
+Security_Stealth                        ステルスモード/サーバーオペレーション
+Security_NoStealthMode                  いいえ (ステルスモード)
+Security_StealthMode                    ステルスモード (リモートからの接続を禁止)
+Security_ServerMode                     サーバーモード (リモートからの接続を許可)
+Security_ExplainStats                   (このオプションを有効にすると、POPFile は毎日一回以下の三つのデータを getpopfile.org 上のスクリプトに送ります。: bc (バケツの総数)、mc (POPFile が分類したメッセージの総数)、ec (分類エラーの総数)。これらはファイルに記録され、POPFile がどのように使用され、どの程度の効果をあげているのかを示す統計情報として公開させていただきます。Web サーバーはこれらのログファイルを約五日間保存したあと、削除します。これらの統計値を IP アドレスと関連付けて保存することはいっさいありません。)
+Security_ExplainUpdate                  (このオプションを有効にすると、POPFile は毎日一回以下の三つのデータを getpopfile.org 上のスクリプトに送ります。: ma (インストールされている POPFile のメジャーバージョン番号)、mi (インストールされている POPFile のマイナーバージョン番号)、bn (インストールされている POPFile のビルド番号)。新しいバージョンがリリースされると、POPFile はその情報を受けてページの上部にグラフィックを表示してお知らせします。Web サーバーはこれらのログファイルを約五日間保存したあと、削除します。これらの更新チェックに使用したデータを IP アドレスと関連付けて保存することはいっさいありません。)
+Security_PasswordTitle                  ユーザーインターフェースパスワード
+Security_Password                       パスワード
+Security_PasswordUpdate                 パスワードを 「%s」に変更しました
+Security_AUTHTitle                      リモートサーバー
+Security_SecureServer                   リモート POP3 サーバー (SPA/AUTH または 透過プロキシ)
+Security_SecureServerUpdate             リモート POP3 サーバーを 「%s」 に変更しました。
+Security_SecurePort                     リモート POP3 ポート番号 (SPA/AUTH または 透過プロキシ)
+Security_SecurePortUpdate               リモート POP3 ポート番号を 「%s」 に変更しました。
+Security_SecureServerUseSSL             SSL を使用する
+Security_SecureServerUseSSLOn           リモート POP3 サーバーとの接続に SSL を使用します
+Security_SecureServerUseSSLOff          リモート POP3 サーバーとの接続に SSL を使用しません
+Security_SMTPServer                     SMTP チェーンサーバー
+Security_SMTPServerUpdate               SMTP チェーンサーバーを 「%s」 に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Security_SMTPPort                       SMTP チェーンポート番号
+Security_SMTPPortUpdate                 SMTP チェーンポート番号を 「%s」 に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Security_POP3                           リモートマシンからの POP3 接続を認める (POPFile の再起動が必要)
+Security_POP3S                          リモートマシンからの POP3S 接続を認める (POPFile の再起動が必要)
+Security_SMTP                           リモートマシンからの SMTP 接続を認める (POPFile の再起動が必要)
+Security_NNTP                           リモートマシンからの NNTP 接続を認める (POPFile の再起動が必要)
+Security_UI                             リモートマシンからの HTTP 接続(ユーザーインターフェースの利用)を認める (POPFile の再起動が必要)
+Security_XMLRPC                         リモートマシンからの XML-RPC 接続を認める (POPFile の再起動が必要)
+Security_StealthModeUpdatePOP3          POPFile POP3 プロキシ は他のマシンからの接続を「拒否」します。この変更は POPFile を再起動するまで有効になりません。
+Security_ServerModeUpdatePOP3           POPFile POP3 プロキシ は他のマシンからの接続を「許可」します。この変更は POPFile を再起動するまで有効になりません。
+Security_StealthModeUpdatePOP3S         POPFile POP3S プロキシ は他のマシンからの接続を「拒否」します。この変更は POPFile を再起動するまで有効になりません。
+Security_ServerModeUpdatePOP3S          POPFile POP3S プロキシ は他のマシンからの接続を「許可」します。この変更は POPFile を再起動するまで有効になりません。
+Security_StealthModeUpdateSMTP          POPFile SMTP プロキシ は他のマシンからの接続を「拒否」します。この変更は POPFile を再起動するまで有効になりません。
+Security_ServerModeUpdateSMTP           POPFile SMTP プロキシ は他のマシンからの接続を「許可」します。この変更は POPFile を再起動するまで有効になりません。
+Security_StealthModeUpdateNNTP          POPFile NNTP プロキシ は他のマシンからの接続を「拒否」します。この変更は POPFile を再起動するまで有効になりません。
+Security_ServerModeUpdateNNTP           POPFile NNTP プロキシ は他のマシンからの接続を「許可」します。この変更は POPFile を再起動するまで有効になりません。
+Security_StealthModeUpdateUI            POPFile UI (コントロールセンター) は他のマシンからの接続を「拒否」します。この変更は POPFile を再起動するまで有効になりません。
+Security_ServerModeUpdateUI             POPFile UI (コントロールセンター) は他のマシンからの接続を「許可」します。この変更は POPFile を再起動するまで有効になりません。
+Security_StealthModeUpdateXMLRPC        POPFile XML-RPC インターフェース は他のマシンからの接続を「拒否」します。この変更は POPFile を再起動するまで有効になりません。
+Security_ServerModeUpdateXMLRPC         POPFile XML-RPC インターフェース は他のマシンからの接続を「許可」します。この変更は POPFile を再起動するまで有効になりません。
+Security_UpdateTitle                    更新自動チェック
+Security_Update                         POPFile が更新されているかどうか毎日チェックする
+Security_StatsTitle                     統計情報レポート
+Security_Stats                          統計情報を毎日送る
+Security_UpdateOn                       POPFile は毎日更新されているかどうかをチェックします。
+Security_UpdateOff                      POPFile は更新されているかどうかのチェックをしません
+Security_StatsOn                        POPFile は毎日統計情報レポートを送ります
+Security_StatsOff                       POPFile は統計情報レポートを送りません
 
-Magnet_Error1                           �ޥ��ͥå� ��%s�� �ˤϴ��˥Х��� ��%s�� �������ƤƤ��ޤ�
-Magnet_Error2                           �����ޥ��ͥå� ��%s�� �ϴ��ˤ���ޥ��ͥå� ��%s�� (�Х��� ��%s�� ��������Ƥ��Ƥ��ޤ�) �Ⱦ��ͤ��뤿�ᡢ�����������򤪤��ʤ����Ȥ��Ǥ��ޤ��󡣿����ޥ��ͥåȤ��ɲä���ޤ���Ǥ���
-Magnet_Error3                           �����ޥ��ͥå� ��%s�� �˥Х��� ��%s�� �������Ƥޤ���
-Magnet_RemovedMagnets                   �ޥ��ͥå� ��%s�� ��Х��� ��%s�� ���������ޤ���
-Magnet_CurrentMagnets                   ���ߤΥޥ��ͥå�
-Magnet_Message1                         ���Υޥ��ͥåȤˤ�ꡢ�᡼���������ΥХ��Ĥ�ʬ�ष�ޤ���
-Magnet_CreateNew                        �����ޥ��ͥåȺ���
-Magnet_Explanation                      <b>�ޥ��ͥåȤˤϻ��ĤΥ����פ�����ޤ�:</b> <ul><li><b>���пͤΥ��ɥ쥹�ޤ���̾��:</b> ��: john@company.com ������Υ��ɥ쥹�˥ޥå�����<br />company.com �� company.com ��°�������Ƥοͤ˥ޥå�����<br />John Doe ������οͤ˥ޥå�����John �� John �Ȥ���̾�������Ƥοͤ˥ޥå����ޤ���</li><li><b>����/Cc�Υ��ɥ쥹�ޤ���̾��:</b> ���пͤΥޥ��ͥåȤ�Ʊ�ͤǤ����᡼��ΰ���ޤ��� Cc ���оݤˤʤ�ޤ���</li> <li><b>��̾�˴ޤޤ��ñ��:</b> ��: hello �� hello ���̾�˴ޤ����ƤΥ�å������˥ޥå����ޤ���</li></ul>
-Magnet_MagnetType                       �ޥ��ͥåȥ�����
-Magnet_Value                            ��
-Magnet_Always                           ʬ����ΥХ���
-Magnet_Jump                             �ޥ��ͥåȥڡ����˥�����
-Magnet_Note                             �ޥ��ͥåȤ� POPFile �γؽ��ץ�������Х��ѥ����뤳�Ȥˤʤ뤿�ᡢ���Ť˻Ȥ��٤��Ǥ����ޥ��ͥåȤ���Ѥ��뤳�Ȥˤ�ꡢPOPFile ���⤤���٤�ã����ޤǤˤ��Ĺ�����֤������뤳�Ȥˤʤ�Ǥ��礦��<br /><br >�ޥ��ͥåȤˤĤ��Ƥξܺ٤�<a href="http://getpopfile.org/docs/jp:glossary:amagnet">POPFile �ɥ�����ơ������ץ���������</a>���ɤߤ���������
+Magnet_Error1                           マグネット 「%s」 には既にバケツ 「%s」 を割り当てています
+Magnet_Error2                           新規マグネット 「%s」 は既にあるマグネット 「%s」 (バケツ 「%s」 が割り当てられています) と衝突するため、正しい処理をおこなうことができません。新規マグネットは追加されませんでした
+Magnet_Error3                           新規マグネット 「%s」 にバケツ 「%s」 を割り当てました
+Magnet_RemovedMagnets                   マグネット 「%s」 をバケツ 「%s」 から削除しました
+Magnet_CurrentMagnets                   現在のマグネット
+Magnet_Message1                         次のマグネットにより、メールを常に特定のバケツに分類します。
+Magnet_CreateNew                        新規マグネット作成
+Magnet_Explanation                      <b>マグネットには三つのタイプがあります:</b> <ul><li><b>差出人のアドレスまたは名前:</b> 例: john@company.com は特定のアドレスにマッチし、<br />company.com は company.com に属する全ての人にマッチし、<br />John Doe は特定の人にマッチし、John は John という名前の全ての人にマッチします。</li><li><b>宛先/Ccのアドレスまたは名前:</b> 差出人のマグネットと同様ですがメールの宛先または Cc が対象になります。</li> <li><b>件名に含まれる単語:</b> 例: hello は hello を件名に含む全てのメッセージにマッチします。</li></ul>
+Magnet_MagnetType                       マグネットタイプ
+Magnet_Value                            値
+Magnet_Always                           分類先のバケツ
+Magnet_Jump                             マグネットページにジャンプ
+Magnet_Note                             マグネットは POPFile の学習プロセスをバイパスすることになるため、慎重に使うべきです。マグネットを使用することにより、POPFile が高い精度に達するまでにより長い時間がかかることになるでしょう。<br /><br >マグネットについての詳細は<a href="http://getpopfile.org/docs/jp:glossary:amagnet">POPFile ドキュメンテーションプロジェクト</a>をお読みください。
 
-Bucket_Error1                           �Х���̾�ˤϥ���ե��٥åȤξ�ʸ��(a ���� z �ޤ�)�� - (�ϥ��ե�)���ޤ��� _ (�������������)�����Ȥ��ޤ���
-Bucket_Error2                           �Х��� ��%s�פϴ��ˤ���ޤ���
-Bucket_Error3                           �Х��� ��%s�פ�������ޤ�����
-Bucket_Error4                           ���ڡ��������Ϥ��ʤ��Ǥ���������
-Bucket_Error5                           �Х��� ��%s�פ� ��%s�פ��ѹ����ޤ�����
-Bucket_Error6                           �Х��� ��%s�פ������ޤ�����
-Bucket_Title                            ���ޥ꡼
-Bucket_BucketName                       �Х���̾
-Bucket_WordCount                        ñ���
-Bucket_WordCounts                       ñ���
-Bucket_UniqueWords                      ��ͭñ���
-Bucket_SubjectModification              ��̾���ѹ�
-Bucket_ChangeColor                      �����ѹ�
-Bucket_NotEnoughData                    �ǡ����Խ�ʬ
-Bucket_ClassificationAccuracy           ʬ������
-Bucket_EmailsClassified                 ʬ�व�줿�᡼���
-Bucket_EmailsClassifiedUpper            ʬ�व�줿�᡼���
-Bucket_ClassificationErrors             ʬ�२�顼�ο�
-Bucket_Accuracy                         ����
-Bucket_ClassificationCount              ʬ���
-Bucket_ClassificationFP                 ������
-Bucket_ClassificationFN                 ��ƨ��
-Bucket_ResetStatistics                  �ꥻ�å�
-Bucket_LastReset                        �Ǹ�Υꥻ�å�
-Bucket_MessagesPerDay                   1 ��������Υ᡼���
-Bucket_CurrentColor                     ��%s�׸��ߤο��� ��%s��
-Bucket_SetColorTo                       ��%s�פο��� ��%s�פ�����
-Bucket_Maintenance                      ����
-Bucket_CreateBucket                     �Х��ĺ���
-Bucket_DeleteBucket                     �Х��ĺ��
-Bucket_RenameBucket                     �Х��Ĥ�̾���ѹ�
-Bucket_Lookup                           ����
-Bucket_LookupMessage                    �Х������ñ��򸡺�
-Bucket_LookupMessage2                   ������� : 
-Bucket_LookupMostLikely                 ��<b>%s</b>�� �� ��<font color="%s">%s</font>�� ��ˤ����ǽ�����礭���Ǥ���
-Bucket_DoesNotAppear                    <p>��<b>%s</b>�� �ϤɤΥХ��Ĥ���ˤ⤢��ޤ���
-Bucket_InIgnoredWords                   <b>%s</b> ��̵�뤹��ñ��˴ޤޤ�Ƥ��ޤ���POPFile �Ϥ���ñ���̵�뤷�ޤ���
-Bucket_DisabledGlobally                 ���� OFF
-Bucket_To                               ��
-Bucket_Quarantine                       ��Υ
+Bucket_Error1                           バケツ名にはアルファベットの小文字(a から z まで)か - (ハイフン)、または _ (アンダースコア)しか使えません。
+Bucket_Error2                           バケツ 「%s」は既にあります。
+Bucket_Error3                           バケツ 「%s」を作成しました。
+Bucket_Error4                           スペースは入力しないでください。
+Bucket_Error5                           バケツ 「%s」を 「%s」に変更しました。
+Bucket_Error6                           バケツ 「%s」を削除しました。
+Bucket_Title                            サマリー
+Bucket_BucketName                       バケツ名
+Bucket_WordCount                        単語数
+Bucket_WordCounts                       単語数
+Bucket_UniqueWords                      固有単語数
+Bucket_SubjectModification              件名の変更
+Bucket_ChangeColor                      色の変更
+Bucket_NotEnoughData                    データ不十分
+Bucket_ClassificationAccuracy           分類精度
+Bucket_EmailsClassified                 分類されたメール数
+Bucket_EmailsClassifiedUpper            分類されたメール数
+Bucket_ClassificationErrors             分類エラーの数
+Bucket_Accuracy                         精度
+Bucket_ClassificationCount              分類数
+Bucket_ClassificationFP                 誤検出
+Bucket_ClassificationFN                 見逃し
+Bucket_ResetStatistics                  リセット
+Bucket_LastReset                        最後のリセット
+Bucket_MessagesPerDay                   1 日あたりのメール数
+Bucket_CurrentColor                     「%s」現在の色は 「%s」
+Bucket_SetColorTo                       「%s」の色を 「%s」に設定
+Bucket_Maintenance                      管理
+Bucket_CreateBucket                     バケツ作成
+Bucket_DeleteBucket                     バケツ削除
+Bucket_RenameBucket                     バケツの名前変更
+Bucket_Lookup                           検査
+Bucket_LookupMessage                    バケツ内で単語を検査
+Bucket_LookupMessage2                   検査結果 : 
+Bucket_LookupMostLikely                 「<b>%s</b>」 は 「<font color="%s">%s</font>」 内にある可能性が大きいです。
+Bucket_DoesNotAppear                    <p>「<b>%s</b>」 はどのバケツの中にもありません。
+Bucket_InIgnoredWords                   <b>%s</b> は無視する単語に含まれています。POPFile はこの単語を無視します。
+Bucket_DisabledGlobally                 全て OFF
+Bucket_To                               を
+Bucket_Quarantine                       隔離
 
-SingleBucket_Title                      ��%s�פξܺ�
-SingleBucket_WordCount                  �Х�����ñ���
-SingleBucket_TotalWordCount             ��ñ���
-SingleBucket_Percentage                 �������Ф�����
-SingleBucket_WordTable                  ��%s�פ�ñ��ɽ
-SingleBucket_Message1                   �������ꥹ�� (*) ���դ���ñ��ϸ��ߤ� POPFile ���å�������ʬ��˻Ȥ��ޤ��������٤ƤΥХ��Ĥ��Ф����Ψ�򸡺�����ˤ�ñ��򥯥�å����Ʋ�������
-SingleBucket_Unique                     ��ͭñ��� %s
-SingleBucket_ClearBucket                ���Ƥ�ñ�����
+SingleBucket_Title                      「%s」の詳細
+SingleBucket_WordCount                  バケツ内単語数
+SingleBucket_TotalWordCount             総単語数
+SingleBucket_Percentage                 総数に対する割合
+SingleBucket_WordTable                  「%s」の単語表
+SingleBucket_Message1                   アスタリスク (*) が付いた単語は現在の POPFile セッション中の分類に使われました。すべてのバケツに対する確率を検査するには単語をクリックして下さい。
+SingleBucket_Unique                     固有単語数 %s
+SingleBucket_ClearBucket                全ての単語を削除
 
-Session_Title                           POPFile ���å����Ͻ�λ���ޤ�����
-Session_Error                           POPFile ���å����Ͻ�λ���ޤ���������ϡ�POPFile ��ư�����꽪λ�����Τˡ��֥饦�����򳫤����ޤޤˤ��Ƥ���ȵ������ǽ��������ޤ���POPFile �����³�����Ѥ���ˤϡ����ɽ������Ƥ����󥯤���ΰ�Ĥ򥯥�å����Ʋ�������
+Session_Title                           POPFile セッションは終了しました。
+Session_Error                           POPFile セッションは終了しました。これは、POPFile を起動したり終了したのに、ブラウザーを開いたままにしていると起こる可能性があります。POPFile を引き続き使用するには、上に表示されているリンクの内の一つをクリックして下さい。
 
-View_Title                              ���󥰥��å������ӥ塼
-View_ShowFrequencies                    ñ������٤�ɽ��
-View_ShowProbabilities                  ñ��γ�Ψ��ɽ��
-View_ShowScores                         ñ���������ɽ��
-View_WordMatrix                         ñ��ޥȥꥯ��
-View_WordProbabilities                  ��Ψ
-View_WordFrequencies                    ����
-View_WordScores                         ����
-View_Chart                              ʬ������
-View_DownloadMessage                    ��å�����������������
-View_MessageHeader                      ��å������إå���
-View_MessageBody                        ��å�������ʸ
+View_Title                              シングルメッセージビュー
+View_ShowFrequencies                    単語の頻度を表示
+View_ShowProbabilities                  単語の確率を表示
+View_ShowScores                         単語の得点を表示
+View_WordMatrix                         単語マトリクス
+View_WordProbabilities                  確率
+View_WordFrequencies                    頻度
+View_WordScores                         得点
+View_Chart                              分類決定図
+View_DownloadMessage                    メッセージをダウンロード
+View_MessageHeader                      メッセージヘッダー
+View_MessageBody                        メッセージ本文
 
-Windows_TrayIcon                        POPFile �Υ�������� Windows �����ƥ�ȥ쥤��ɽ������
-Windows_Console                         POPFile �Υ�å������򥳥󥽡��륦����ɥ��˽��Ϥ���
-Windows_NextTime                        �����ѹ��� POPFile �򼡲�ư����ޤ�ͭ���ˤʤ�ޤ���
+Windows_TrayIcon                        POPFile のアイコンを Windows システムトレイに表示する
+Windows_Console                         POPFile のメッセージをコンソールウィンドウに出力する
+Windows_NextTime                        この変更は POPFile を次回起動するまで有効になりません。
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
@@ -476,136 +476,136 @@ Security_MainTableSummary               This table provides sets of controls tha
 Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying email due to their relative frequency in email in general.  They are organized per row according to the first letter of the words.
 Users_AccountTableSummary               This table provides a list of POP3 accounts that are associated with the user being edited.
 
-Imap_Bucket2Folder                      �Х��� ��<b>%s</b>�� ��ʬ�व�줿�᡼��ΰ�ư��
-Imap_MapError                           ʣ���ΥХ��Ĥ�ҤȤĤΥե�������б��դ����뤳�ȤϤǤ��ޤ���
-Imap_MapUpdated                         �Х��� ��%s�� �� �ե���� ��%s�� ���б��դ��ޤ�����
-Imap_Server                             IMAP �����С� �ۥ���̾:
-Imap_ServerNameError                    �����С��Υۥ���̾�����Ϥ��Ƥ���������
-Imap_Port                               IMAP �����С� �ݡ����ֹ�:
-Imap_PortError                          �������ݡ����ֹ�����Ϥ��Ƥ���������
-Imap_Login                              IMAP ��������� �桼����̾:
-Imap_LoginError                         �桼����̾����������̾�����Ϥ��Ƥ���������
-Imap_Password                           IMAP ��������ȤΥѥ����:
-Imap_PasswordError                      �����Ф��Ф���ѥ���ɤ����Ϥ��Ƥ���������
-Imap_ConnectionDetailsUpdated           IMAP ����³���꤬��������ޤ��������ϥե�����ꥹ�Ȥ򹹿����Ƥ���������
-Imap_Expunge                            �ƻ�ե���������ư���줿��å������������롣
-Imap_Interval                           �����δֳ֡��á�:
-Imap_IntervalError                      �����ֳ֤� 10 �ä��� 3600 �äδ֤����Ϥ��Ƥ���������
-Imap_OptionsUpdated                     IMAP �Υ��ץ���������˹�������ޤ�����
-Imap_RefreshFolders                     �ե�����ꥹ�Ȥι���
-Imap_Now                                �¹�
-Imap_UpdateError1                       ��������Ǥ��ޤ��󡣥桼����̾�ȥѥ���ɤ��ǧ���Ƥ���������
-Imap_UpdateError2                       �����С�����³�Ǥ��ޤ��󡣥ۥ���̾�ȥݡ����ֹ���ǧ����ȤȤ�ˡ����󥿡��ͥåȤ���³����Ƥ��뤫�ɤ������ǧ���Ƥ���������
-Imap_UpdateError3                       �����С�����³���뤿��ξ����������ꤷ�Ƥ���������
-Imap_UpdateOK                           �����С�����᡼��ܥå������ե�����Υꥹ�Ȥ��ɤ߹��ߤ��������ޤ�����
-Imap_NoConnectionMessage                �����Ф���³���뤿��ξ����������ꤷ�Ƥ�����������������ȡ������¿���Υ��ץ��������Ǥ���褦�ˤʤ�ޤ���
-Imap_WatchMore                          �ƻ�ե�����ꥹ�Ȥ˥ե�������ɲ�
-Imap_WatchedFolderAdded                 �ƻ�ե�����ꥹ�Ȥι��ܤ�ҤȤ����䤷�ޤ������ƻ뤷�����ե����������Ǥ���������
-Imap_WatchedFolder                      �ƻ�ե���� 
-Imap_WatchedFoldersUpdated              �ƻ�ե�����Υꥹ�Ȥ򹹿����ޤ���
-Imap_WatchedFolderRemoved               �ƻ�ե�����Υꥹ�Ȥ���ե���� '%' �������ޤ���
-Imap_DoingTraining                      IMAP �⥸�塼��Ϥ��줫���å��������������֤���ؽ���Ϥ��Ȥ����Ǥ����ؽ��������ޤǤδ� POPFile �� UI ��ȿ�����ʤ��ʤ�ޤ������������֤��礭���� IMAP �����ФȤ���³®�٤ˤ���ޤ��������ν����ˤϤ��Ф餯������ޤ���
-Imap_DoTraining                         ��¸�Υ᡼�륢�������֤���ؽ����ޤ���
-Imap_Use_SSL                            SSL ����Ѥ���
+Imap_Bucket2Folder                      バケツ 「<b>%s</b>」 に分類されたメールの移動先
+Imap_MapError                           複数のバケツをひとつのフォルダに対応付けすることはできません。
+Imap_MapUpdated                         バケツ 「%s」 を フォルダ 「%s」 に対応付けました。
+Imap_Server                             IMAP サーバー ホスト名:
+Imap_ServerNameError                    サーバーのホスト名を入力してください。
+Imap_Port                               IMAP サーバー ポート番号:
+Imap_PortError                          正しいポート番号を入力してください。
+Imap_Login                              IMAP アカウント ユーザー名:
+Imap_LoginError                         ユーザー名／ログイン名を入力してください。
+Imap_Password                           IMAP アカウントのパスワード:
+Imap_PasswordError                      サーバに対するパスワードを入力してください。
+Imap_ConnectionDetailsUpdated           IMAP の接続設定が更新されました。次はフォルダリストを更新してください。
+Imap_Expunge                            監視フォルダから移動されたメッセージを削除する。
+Imap_Interval                           更新の間隔（秒）:
+Imap_IntervalError                      更新間隔は 10 秒から 3600 秒の間で入力してください。
+Imap_OptionsUpdated                     IMAP のオプションは正常に更新されました。
+Imap_RefreshFolders                     フォルダリストの更新
+Imap_Now                                実行
+Imap_UpdateError1                       ログインできません。ユーザー名とパスワードを確認してください。
+Imap_UpdateError2                       サーバーに接続できません。ホスト名とポート番号を確認するとともに、インターネットに接続されているかどうかを確認してください。
+Imap_UpdateError3                       サーバーに接続するための情報を先に設定してください。
+Imap_UpdateOK                           サーバーからメールボックス／フォルダのリストの読み込みに成功しました。
+Imap_NoConnectionMessage                サーバに接続するための情報を先に設定してください。そうすると、さらに多くのオプションが設定できるようになります。
+Imap_WatchMore                          監視フォルダリストにフォルダを追加
+Imap_WatchedFolderAdded                 監視フォルダリストの項目をひとつ増やしました。監視したいフォルダを選んでください。
+Imap_WatchedFolder                      監視フォルダ 
+Imap_WatchedFoldersUpdated              監視フォルダのリストを更新しました
+Imap_WatchedFolderRemoved               監視フォルダのリストからフォルダ '%' を削除しました
+Imap_DoingTraining                      IMAP モジュールはこれからメッセージアーカイブから学習を始めるところです。学習が終わるまでの間 POPFile の UI は反応しなくなります。アーカイブの大きさや IMAP サーバとの接続速度にもよりますが、この処理にはしばらくかかります。
+Imap_DoTraining                         既存のメールアーカイブから学習します。
+Imap_Use_SSL                            SSL を使用する
 
-Shutdown_Message                        POPFile �Ͻ�λ���ޤ�����
+Shutdown_Message                        POPFile は終了しました。
 
-Help_Training                           POPFile �򤳤줫��Ȥ��Ϥ���硢�������٤Υȥ졼�˥󥰤�ɬ�פȤʤ�ޤ�������ϡ�POPFile �ϤɤΥ᡼�뤬ɬ�פʥ᡼��ǤɤΥ᡼�뤬���פʥ᡼�뤫�ˤĤ��Ƥʤˤ��Τ�ʤ�����Ǥ����ȥ졼�˥󥰤Ϥ��줾��ΥХ��ĤˤĤ��ƹԤ�ɬ�פ�����ʺ���Ǥ⣱�ĤΥХ��ĤˤĤ��ơ����İʾ�Υ�å��������ʬ�ह��ˡ�POPFile ��ʬ���ְ㤨����å��������������Х��Ĥ˺�ʬ�ह�뤳�Ȥˤ�äƥȥ졼�˥󥰤��뤳�Ȥ��Ǥ��ޤ����ޤ���POPFile ���Ԥä�ʬ��ˤ��碌�ƥե�����˰�ư����ʤɡ��᡼�륯�饤����Ȥ����ꤹ��ɬ�פ�����ޤ����᡼�륯�饤����Ȥ�����ˤĤ��Ƥϡ�<a href="http://getpopfile.org/docs/JP:FAQ:EmailSorting">POPFile �ɥ�����ơ������ץ���������</a>�򻲾Ȥ��Ƥ���������
-Help_Bucket_Setup                       POPFile �Ǥϡ���Ȥ�Ȥ��� unclassified �Ȥ�������Ū�ʥХ��İʳ��ˡ�����Ǥ⣲�ĤΥХ��Ĥ��������ɬ�פ�����ޤ���POPFile ����ħ�ϡ��ʥ᡼��� spam �Ȥ���ʳ���ʬ�ह��Ȥ��������ǤϤʤ��ˤ����ĤǤ�Х��Ĥ�������������˥᡼���ʬ�ह�뤳�Ȥ��Ǥ��뤳�ȤǤ�����ñ������Ǥϡ�"spam"��"personal"��"work" �Ȥ��ä��Х��Ĥ����ꤹ�뤳�Ȥˤʤ�Ǥ��礦��
-Help_No_More                            ���󤫤�ɽ�����ʤ���
+Help_Training                           POPFile をこれから使い始める場合、ある程度のトレーニングが必要となります。それは、POPFile はどのメールが必要なメールでどのメールが不要なメールかについてなにも知らないからです。トレーニングはそれぞれのバケツについて行う必要があり（最低でも１つのバケツについて、１つ以上のメッセージを再分類する）、POPFile が分類を間違えたメッセージを正しいバケツに再分類することによってトレーニングすることができます。また、POPFile が行った分類にあわせてフォルダに移動するなど、メールクライアントを設定する必要があります。メールクライアントの設定については、<a href="http://getpopfile.org/docs/JP:FAQ:EmailSorting">POPFile ドキュメンテーションプロジェクト</a>を参照してください。
+Help_Bucket_Setup                       POPFile では、もともとある unclassified という仮想的なバケツ以外に、最低でも２つのバケツを作成する必要があります。POPFile の特徴は、（メールを spam とそれ以外に分類するというだけではなく）いくつでもバケツを作成し、それらにメールを分類することができることです。簡単な設定では、"spam"、"personal"、"work" といったバケツを設定することになるでしょう。
+Help_No_More                            次回から表示しない。
 
 # Tooltips used in title attribute of parts of the UI
-tip_Menu_History                        POPFile �����������᡼����ǧ������ʬ�ष�ޤ�
-tip_Menu_Buckets                        �Х��Ĥ���������ꡢʬ������׾�����ǧ���ޤ�
-tip_Menu_Magnets                        �٥�������ե��륿�����ƥ��Х��ѥ�����ñ��ʥե��륿��������ޤ�
-tip_Menu_Admin                          ���ץ����������ѹ����ޤ�
-tip_Menu_Users                          �桼������������ޤ�
-tip_Menu_Advanced                       ���٤�������ѹ����ޤ�
+tip_Menu_History                        POPFile が処理したメールを確認し、再分類します
+tip_Menu_Buckets                        バケツを管理したり、分類の統計情報を確認します
+tip_Menu_Magnets                        ベイジアンフィルタシステムをバイパスする単純なフィルタを管理します
+tip_Menu_Admin                          オプション設定を変更します
+tip_Menu_Users                          ユーザーを管理します
+tip_Menu_Advanced                       高度な設定を変更します
 
-tip_History_RecentNum                   ���ߤθ������ե��륿�˰��פ����å������ο�
-tip_History_Reclassify                  ʬ����Х��Ĥν�����Ԥ��ޤ�
-tip_History_Search                      ���пͤΥ��ɥ쥹���̾�����פ����Τ�õ���ޤ�
-tip_History_Filter                      ���򤵤줿�Х��ĤΤ�Τ�����ɽ�����ޤ�
-tip_History_SearchNegate                �����ȥե��륿�ξ���ȿž���ޤ�
-tip_History_SearchSubmit                �����ȥե��륿��¹Ԥ��ޤ�
-tip_History_SearchReset                 �����ȥե��륿�򥯥ꥢ���ޤ�
-tip_History_RemoveAll                   ���٤ƤΥ�å������ʸ����ȥե��륿�˰��פ����Ρˤ����򤫤������ޤ�
-tip_History_RemoveChecked               ���򤵤줿��å����������򤫤������ޤ�
-tip_History_RemovePage                  ���Υڡ�����ɽ������Ƥ����å����������򤫤������ޤ�
-tip_History_RemoveColumn                ��������ޤ�
-tip_History_MoveLeft                    ���ذ�ư���ޤ�
-tip_History_MoveRight                   ���ذ�ư���ޤ�
-tip_History_Sort                        ��������¤��ؤ��ޤ�
+tip_History_RecentNum                   現在の検索、フィルタに一致するメッセージの数
+tip_History_Reclassify                  分類先バケツの修正を行います
+tip_History_Search                      差出人のアドレスや件名が一致するものを探します
+tip_History_Filter                      選択されたバケツのものだけを表示します
+tip_History_SearchNegate                検索とフィルタの条件を反転します
+tip_History_SearchSubmit                検索とフィルタを実行します
+tip_History_SearchReset                 検索とフィルタをクリアします
+tip_History_RemoveAll                   すべてのメッセージ（検索とフィルタに一致するもの）を履歴から削除します
+tip_History_RemoveChecked               選択されたメッセージを履歴から削除します
+tip_History_RemovePage                  このページに表示されているメッセージを履歴から削除します
+tip_History_RemoveColumn                列を削除します
+tip_History_MoveLeft                    左へ移動します
+tip_History_MoveRight                   右へ移動します
+tip_History_Sort                        この列で並び替えます
 
-tip_Bucket_BucketName                   �Х��Ĥξܺ٤��ǧ���ޤ�
-tip_Bucket_Unique                       ���줾��ΥХ��Ĥθ�ͭñ���
-tip_Bucket_SubjectMod                   ��̾�κǽ�˥Х��Ĥ�̾�����ɲä��ޤ�
-tip_Bucket_XTCHeader                    POPFile ��ʬ���̤˴�Ť��إå����ɲä��ޤ������Υإå��ϤۤȤ�ɤΥ᡼�륯�饤����Ȥ��ե��륿�����ѤǤ��ޤ�
-tip_Bucket_XPLHeader                    ��å������ؤΥ�󥯤�ޤ�إå����ɲä��ޤ������Υإå��ˤ�ꤹ���˥�å��������ʬ�ह�뤳�Ȥ��Ǥ��ޤ���
-tip_Bucket_Quarantine                   ����Ū�˴����ʥ᡼����Υ����ź�եե�����ˤ��ޤ�
-tip_Bucket_Color                        ���줾��ΥХ��Ĥο������򤷤ޤ�
-tip_Bucket_Lookup                       ����ñ��ˤĤ��Ƥ��줾��ΥХ��Ĥ˴ޤޤ���Ψ�����٤�Ĵ�٤ޤ�
-tip_Bucket_Accuracy                     ����Ū��ʬ������
-tip_Bucket_Classified                   �Х��Ĥ����׾��������
-tip_Bucket_WordCount                    ���줾��ΥХ��Ĥ�¸�ߤ���ñ��������ȳ��
-tip_Bucket_Create                       �������Х��Ĥ�������ޤ�
-tip_Bucket_Delete                       �Х��ĤȤ��ΥХ��Ĥؤγؽ����Ƥ������ޤ�
-tip_Bucket_Rename                       �Х��Ĥ�̾�����ѹ����ޤ�
-tip_Bucket_FalsePos                     ���äƤ��ΥХ��Ĥ�ʬ�व�줿��å�����
-tip_Bucket_FalseNeg                     ���äƤ��ΥХ��Ĥ�ʬ�व��ʤ��ä���å�����
-tip_Bucket_ResetStats                   ʬ�����٤����׾�����������ޤ�
+tip_Bucket_BucketName                   バケツの詳細を確認します
+tip_Bucket_Unique                       それぞれのバケツの固有単語数
+tip_Bucket_SubjectMod                   件名の最初にバケツの名前を追加します
+tip_Bucket_XTCHeader                    POPFile の分類結果に基づくヘッダを追加します。このヘッダはほとんどのメールクライアントがフィルタに利用できます
+tip_Bucket_XPLHeader                    メッセージへのリンクを含むヘッダを追加します。このヘッダによりすぐにメッセージを再分類することができます。
+tip_Bucket_Quarantine                   潜在的に危険なメールを隔離し、添付ファイルにします
+tip_Bucket_Color                        それぞれのバケツの色を選択します
+tip_Bucket_Lookup                       ある単語についてそれぞれのバケツに含まれる確率と頻度を調べます
+tip_Bucket_Accuracy                     総合的な分類精度
+tip_Bucket_Classified                   バケツの統計情報と精度
+tip_Bucket_WordCount                    それぞれのバケツに存在する単語の総数と割合
+tip_Bucket_Create                       新しいバケツを作成します
+tip_Bucket_Delete                       バケツとこのバケツへの学習内容を削除します
+tip_Bucket_Rename                       バケツの名前を変更します
+tip_Bucket_FalsePos                     誤ってこのバケツに分類されたメッセージ
+tip_Bucket_FalseNeg                     誤ってこのバケツに分類されなかったメッセージ
+tip_Bucket_ResetStats                   分類精度の統計情報を初期化します
 
-tip_Magnet_Type                         ���פ����å������إå�
-tip_Magnet_Value                        ���פ���ƥ����Ȥޤ��ϥ��ɥ쥹
-tip_Magnet_Bucket                       ���פ�����å��������ư����Х���
+tip_Magnet_Type                         一致するメッセージヘッダ
+tip_Magnet_Value                        一致するテキストまたはアドレス
+tip_Magnet_Bucket                       一致したメッセージを移動するバケツ
 
-tip_Config_Skin                         POPFile �θ����ܤ��ѹ����ޤ�
-tip_Config_Language                     ���󥿡��ե������θ�����ѹ����ޤ�
-tip_Config_HistoryColumns               ��å����������ɽ������������ɲä��ޤ�
-tip_Config_PageSize                     1 �ڡ�����ɽ�������å������ο�
-tip_Config_Days                         ����˥�å�������Ĥ�����
-tip_Config_Purge                        �Ť���å������򤹤��˺�����ޤ�
-tip_Config_HistoryWidth                 ������������Ĵ�����ޤ�
-tip_Config_ColumnIncrease               ������򹭤����ޤ�
-tip_Config_ColumnDecrease               ������򶹤����ޤ�
-tip_Config_ColumnAuto                   ��������������ޤ�
-tip_Config_HideBar                      ����С��򱣤��ޤ�
-tip_Config_ShowBar                      ����С���ɽ�����ޤ�
-tip_Config_Password                     POPFile ����ȥ����륻�󥿡��˥����������뤿��Υѥ���ɤ��ѹ����ޤ�
+tip_Config_Skin                         POPFile の見た目を変更します
+tip_Config_Language                     インターフェースの言語を変更します
+tip_Config_HistoryColumns               メッセージ履歴に表示したい列を追加します
+tip_Config_PageSize                     1 ページに表示するメッセージの数
+tip_Config_Days                         履歴にメッセージを残す日数
+tip_Config_Purge                        古いメッセージをすぐに削除します
+tip_Config_HistoryWidth                 履歴の列の幅を調整します
+tip_Config_ColumnIncrease               列の幅を広くします
+tip_Config_ColumnDecrease               列の幅を狭くします
+tip_Config_ColumnAuto                   列の幅を初期化します
+tip_Config_HideBar                      設定バーを隠します
+tip_Config_ShowBar                      設定バーを表示します
+tip_Config_Password                     POPFile コントロールセンターにアクセスするためのパスワードを変更します
 
-tip_Admin_AcceptRemoteHTTP              ¾�Υޥ��󤫤�� UI �ؤΥ�����������Ĥ��ޤ�
-tip_Admin_AcceptRemotePOP3              ¾�Υޥ��󤫤�� POP3 �᡼��Υ���������ɤ���Ĥ��ޤ�
-tip_Admin_Password                      POPFile �ؤΥ������������¤��뤿��˥ѥ���ɤ����ꤷ�ޤ�
+tip_Admin_AcceptRemoteHTTP              他のマシンからの UI へのアクセスを許可します
+tip_Admin_AcceptRemotePOP3              他のマシンからの POP3 メールのダウンロードを許可します
+tip_Admin_Password                      POPFile へのアクセスを制限するためにパスワードを設定します
 tip_Admin_UpdateCheck                   0.22 text should be put back
 tip_Admin_ReportStats                   0.22 text should be put back
 
-tip_Users_Remove                        POPFile �Υ桼�����������ޤ�
-tip_Users_Rename                        �桼������̾�����ѹ����ޤ�
-tip_Users_Change_Password               �桼�����Υѥ���ɤ��ѹ����ޤ�
+tip_Users_Remove                        POPFile のユーザーを削除します
+tip_Users_Rename                        ユーザーの名前を変更します
+tip_Users_Change_Password               ユーザーのパスワードを変更します
 
-tip_Accounts_Remove                     �桼�����Υ�������Ȥ������ޤ�
+tip_Accounts_Remove                     ユーザーのアカウントを削除します
 
-tip_Footer_HomePage                     POPFile �ۡ���ڡ�������³���ޤ�
-tip_Footer_Manual                       ���ꥸ�ʥ�� POPFile �Υɥ�����ȡʾ����Ť���
-tip_Footer_Wiki                         POPFile �ɥ�����ȡ�Wiki��
-tip_Footer_FAQ                          POPFile �ˤĤ��ƤΤ褯�������Ȳ�����FAQ��
-tip_Footer_Version                      POPFile �ΥС�������ֹ�
-tip_Footer_Login                        ���Υ桼�������Ǹ�˥���������������
-tip_Footer_RFE                          POPFile ��������뤿��Υ����ǥ�������ޤ����� �⤷����ж����Ƥ���������
-tip_Footer_MailingList                  POFile �ˤĤ��Ƥ��ѹ��ˤĤ����Τꤿ���Ǥ����� �⤷�Τꤿ�������Ͽ���Ƥ���������
-tip_Footer_FeedMe                       POPFile �򵤤����äƤ��������ޤ������� �������äƤ����������顢���褯���뤿��˴��դ򤪴ꤤ���ޤ���
+tip_Footer_HomePage                     POPFile ホームページに接続します
+tip_Footer_Manual                       オリジナルの POPFile のドキュメント（少し古い）
+tip_Footer_Wiki                         POPFile ドキュメント（Wiki）
+tip_Footer_FAQ                          POPFile についてのよくある質問と回答（FAQ）
+tip_Footer_Version                      POPFile のバージョン番号
+tip_Footer_Login                        このユーザーが最後にアクセスした日時
+tip_Footer_RFE                          POPFile を改善するためのアイデアがありますか？ もしあれば教えてください。
+tip_Footer_MailingList                  POFile についての変更について知りたいですか？ もし知りたければ登録してください。
+tip_Footer_FeedMe                       POPFile を気に入っていただけましたか？ 気に入っていただいたら、よりよくするために寄付をお願いします。
 
 # Jim's Bucket Stats stuff
-Words                                   ñ��
-Percent                                 �ѡ������
-Header_ConfigurationShort               ����
-Footer_HomePage_short                   �ۡ���ڡ���
-Footer_QuickStart                       �����å���������
-Footer_WikiShort                        �ɥ������
-Bucket_BreakEmailsClassifiedUpper       ʬ�व�줿<br>��å�����
-Bucket_ClassificationErrorsUpper        ʬ��ߥ�
-Bucket_BreakClassificationFP            ������
-Bucket_BreakClassificationFN            ��ƨ��
-Bucket_HitRate                          ����Ψ
-Bucket_StrikeRate                       ����Ψ
+Words                                   単語
+Percent                                 パーセント
+Header_ConfigurationShort               設定
+Footer_HomePage_short                   ホームページ
+Footer_QuickStart                       クイックスタート
+Footer_WikiShort                        ドキュメント
+Bucket_BreakEmailsClassifiedUpper       分類された<br>メッセージ
+Bucket_ClassificationErrorsUpper        分類ミス
+Bucket_BreakClassificationFP            誤検出
+Bucket_BreakClassificationFN            見逃し
+Bucket_HitRate                          成功率
+Bucket_StrikeRate                       失敗率
 

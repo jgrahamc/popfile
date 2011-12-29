@@ -2404,7 +2404,7 @@ sub classify
                     my @magnet_data;
                     foreach my $magnet ( @{$qm{$type}} ) {
                         my %row_magnet;
-                        $row_magnet{View_QuickMagnets_Magnet} = $magnet;
+                        $row_magnet{View_QuickMagnets_Magnet} = Encode::encode_utf8( $magnet );
                         push ( @magnet_data, \%row_magnet );
                     }
                     $row_data{View_QuickMagnets_Loop_Magnets} = \@magnet_data;
@@ -2520,7 +2520,7 @@ sub classify
                     my $wordcolor = $self->get_bucket_color( $session, $self->get_top_bucket__( $userid, $id, $matrix, \@ranking ) );
                     my $count = $self->{parser__}->{words__}{$$idmap{$id}};
 
-                    $row_data{View_Score_Word} = $$idmap{$id};
+                    $row_data{View_Score_Word} = Encode::encode_utf8( $$idmap{$id} );
                     $row_data{View_Score_Word_Color} = $wordcolor;
                     $row_data{View_Score_Word_Count} = $count;
 
@@ -2617,7 +2617,7 @@ sub classify
 
                     my %row_data;
 
-                    $row_data{View_Chart_Word_1} = $word_1;
+                    $row_data{View_Chart_Word_1} = Encode::encode_utf8( $word_1 );
                     if ( $width_1 > 0 ) {
                         $row_data{View_If_Bar_1} = 1;
                         $row_data{View_Width_1}  = $width_1;
@@ -2628,7 +2628,7 @@ sub classify
                         $row_data{View_If_Bar_1} = 0;
                     }
 
-                    $row_data{View_Chart_Word_2} = $word_2;
+                    $row_data{View_Chart_Word_2} = Encode::encode_utf8( $word_2 );
                     if ( $width_2 > 0 ) {
                         $row_data{View_If_Bar_2} = 1;
                         $row_data{View_Width_2}  = $width_2;

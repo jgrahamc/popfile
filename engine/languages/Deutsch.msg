@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+ï»¿# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -33,14 +33,14 @@ ManualLanguage                          de
 # Common words that are used on their own all over the interface
 Account									Konto
 Apply                                   Anwenden
-ApplyChanges                            Änderungen übernehmen
+ApplyChanges                            Ã„nderungen Ã¼bernehmen
 On                                      Ein
 Off                                     Aus
 TurnOn                                  Einschalten
 TurnOff                                 Ausschalten
-Add                                     Hinzufügen
+Add                                     HinzufÃ¼gen
 Remove                                  Entfernen
-Previous                                Zurück
+Previous                                ZurÃ¼ck
 Next                                    Weiter
 From                                    Absender
 Subject                                 Betreff
@@ -51,33 +51,33 @@ Probability                             Wahrscheinlichkeit
 Scores                                  Auswertung
 QuickMagnets                            Sofort-Magnete
 Undo                                    widerrufen
-Close                                   Schließen
+Close                                   SchlieÃŸen
 Find                                    Suchen
 Filter                                  Filtern
 Yes                                     Ja
 No                                      Nein
-ChangeToYes                             Ändern in Ja
-ChangeToNo                              Ändern in Nein
+ChangeToYes                             Ã„ndern in Ja
+ChangeToNo                              Ã„ndern in Nein
 Bucket                                  Kategorie
 Magnet                                  Magnet
-Delete                                  Löschen
+Delete                                  LÃ¶schen
 Create                                  Erstellen
-To                                      Empfänger
+To                                      EmpfÃ¤nger
 Total                                   Insgesamt
 Rename                                  Umbenennen
-Frequency                               Häufigkeit
+Frequency                               HÃ¤ufigkeit
 Probability                             Wahrscheinlichkeit
 Score                                   Bewertung
 Lookup                                  Nachschlagen
 Word                                    Wort
 Count                                   Anzahl
-Update                                  Ändern
+Update                                  Ã„ndern
 Refresh                                 Aktualisieren
 FAQ                                     FAQ
 ID                                      ID
 Date                                    Datum
 Arrived                                 Eingang
-Size                                    Größe
+Size                                    GrÃ¶ÃŸe
 Go                                      Los
 Edit                                    Bearbeiten
 Logout                                  Abmelden
@@ -117,24 +117,24 @@ Footer_Forums                           Foren
 Footer_FeedMe                           Spenden
 Footer_RequestFeature                   Verbesserung vorschlagen
 Footer_MailingList                      Mailing Liste
-Footer_Wiki                             Zusätzliche Dokumentation
+Footer_Wiki                             ZusÃ¤tzliche Dokumentation
 
-Configuration_Error1                    Das Trennzeichen muß ein einzelnes Zeichen sein.
-Configuration_Error2                    Der Port für das Kontrollzentrum muß zwischen 1 und 65535 liegen.
-Configuration_Error3                    Der POP3 Port muß zwischen 1 und 65535 liegen.
-Configuration_Error4                    Die Seitengröße muß zwischen 1 und 1000 liegen.
-Configuration_Error5                    Die Anzahl der Tage im Verlauf muß zwischen 1 und 366 liegen.
-Configuration_Error6                    Der TCP Timeout muß zwischen 10 und 1800 liegen.
-Configuration_Error7                    Der XML-RPC Port muß zwischen 1 und 65535 liegen.
-Configuration_Error8                    Der SOCKS V Proxy Port muß zwischen 1 und 65535 liegen.
+Configuration_Error1                    Das Trennzeichen muÃŸ ein einzelnes Zeichen sein.
+Configuration_Error2                    Der Port fÃ¼r das Kontrollzentrum muÃŸ zwischen 1 und 65535 liegen.
+Configuration_Error3                    Der POP3 Port muÃŸ zwischen 1 und 65535 liegen.
+Configuration_Error4                    Die SeitengrÃ¶ÃŸe muÃŸ zwischen 1 und 1000 liegen.
+Configuration_Error5                    Die Anzahl der Tage im Verlauf muÃŸ zwischen 1 und 366 liegen.
+Configuration_Error6                    Der TCP Timeout muÃŸ zwischen 10 und 1800 liegen.
+Configuration_Error7                    Der XML-RPC Port muÃŸ zwischen 1 und 65535 liegen.
+Configuration_Error8                    Der SOCKS V Proxy Port muÃŸ zwischen 1 und 65535 liegen.
 Configuration_POP3Port                  POP3 Port
-Configuration_POP3Update                Neuer POP3 Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
-Configuration_XMLRPCUpdate              Neuer XML-RPC Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_POP3Update                Neuer POP3 Port: %s - Diese Ã„nderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_XMLRPCUpdate              Neuer XML-RPC Port: %s - Diese Ã„nderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_XMLRPCPort                XML-RPC Port
 Configuration_SMTPPort                  SMTP Port
-Configuration_SMTPUpdate                Neuer SMTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_SMTPUpdate                Neuer SMTP Port: %s - Diese Ã„nderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_NNTPPort                  NNTP Port
-Configuration_NNTPUpdate                Neuer NNTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_NNTPUpdate                Neuer NNTP Port: %s - Diese Ã„nderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_POPFork                   Simultane POP3-Verbindungen erlauben
 Configuration_SMTPFork                  Simultane SMTP-Verbindungen erlauben
 Configuration_NNTPFork                  Simultane NNTP-Verbindungen erlauben
@@ -142,26 +142,26 @@ Configuration_POP3Separator             POP3 Server:Port:Benutzer Trennzeichen
 Configuration_NNTPSeparator             NNTP Server:Port:Benutzer Trennzeichen
 Configuration_POP3SepUpdate             Neues POP3 Trennzeichen: %s
 Configuration_NNTPSepUpdate             Neues NNTP Trennzeichen: %s
-Configuration_UI                        Web Port für Kontrollzentrum
-Configuration_UIUpdate                  Neuer Web Port für Kontrollzentrum: %s - Dieser Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_UI                        Web Port fÃ¼r Kontrollzentrum
+Configuration_UIUpdate                  Neuer Web Port fÃ¼r Kontrollzentrum: %s - Dieser Ã„nderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_History                   Anzahl Nachrichten pro Seite
 Configuration_HistoryUpdate             Neue Anzahl Nachrichten pro Seite: %s
 Configuration_Days                      Nachrichten x Tage im Verlauf speichern
 Configuration_DaysUpdate                Nachrichten werden nun %s Tage im Verlauf gespeichert
-Configuration_UserInterface             Benutzeroberfläche
+Configuration_UserInterface             BenutzeroberflÃ¤che
 Configuration_Skins                     Skins
-Configuration_SkinsChoose               Skin auswählen
+Configuration_SkinsChoose               Skin auswÃ¤hlen
 Configuration_Language                  Sprache
-Configuration_LanguageChoose            Sprache auswählen
+Configuration_LanguageChoose            Sprache auswÃ¤hlen
 Configuration_ListenPorts               Moduleinstellungen
 Configuration_HistoryView               Verlaufsansicht
 Configuration_TCPTimeout                Verbindungstimeout
 Configuration_TCPTimeoutSecs            Verbindungstimeout in Sekunden
 Configuration_TCPTimeoutUpdate          Neuer Verbidungstimeout: %s
 Configuration_ClassificationInsertion   Einstufung anzeigen
-Configuration_SubjectLine               Betreff-Zeile ändern
-Configuration_XTCInsertion              X-Text-Classification einfügen
-Configuration_XPLInsertion              X-POPFile-Link einfügen
+Configuration_SubjectLine               Betreff-Zeile Ã¤ndern
+Configuration_XTCInsertion              X-Text-Classification einfÃ¼gen
+Configuration_XPLInsertion              X-POPFile-Link einfÃ¼gen
 Configuration_Logging                   Protokollierung
 Configuration_None                      Keine Ausgabe
 Configuration_ToScreen                  Auf den Bildschirm
@@ -174,8 +174,8 @@ Configuration_TinySkins                 sehr kleine Skins
 Configuration_CurrentLogFile            &lt;aktuelle Protokolldatei&gt;
 Configuration_SOCKSServer               SOCKS V Proxy Host
 Configuration_SOCKSPort                 SOCKS V Proxy Port
-Configuration_SOCKSPortUpdate           SOCKS V Proxy Port geändert auf %s
-Configuration_SOCKSServerUpdate         SOCKS V Proxy Host geändert auf %s
+Configuration_SOCKSPortUpdate           SOCKS V Proxy Port geÃ¤ndert auf %s
+Configuration_SOCKSServerUpdate         SOCKS V Proxy Host geÃ¤ndert auf %s
 Configuration_Fields                    Spalten im Verlauf
 Configuration_ChangePassword            Passwort &auml;ndern
 Configuration_OldPassword               Alt
@@ -197,27 +197,27 @@ Configuration_CurrentSessions_UserName  Benutzer
 Configuration_CurrentSessions_LastUsed  Letzter Zugriff
 Configuration_CurrentSessions_IdleTime  Keine Aktivit&auml;t seit
 
-Advanced_Error1                         '%s' ist bereits in der Liste der ignorierten Wörter
-Advanced_Error2                         Ignorierte Wörtern können nur alphanumerische, ., _, -, oder @ Zeichen enthalten
-Advanced_Error3                         '%s' zu den ignorierten Wörtern hinzugefügt
-Advanced_Error4                         '%s' ist nicht in der Liste der ignorierten Wörter
-Advanced_Error5                         '%s' von der Liste der ignorierten Wörter entfernt
-Advanced_StopWords                      Ignorierte Wörter
-Advanced_Message1                       POPFile ignoriert die folgenden, häufig verwendeten Wörter:
-Advanced_AddWord                        Wort hinzufügen
-Advanced_RemoveWord                     Wort löschen
+Advanced_Error1                         '%s' ist bereits in der Liste der ignorierten WÃ¶rter
+Advanced_Error2                         Ignorierte WÃ¶rtern kÃ¶nnen nur alphanumerische, ., _, -, oder @ Zeichen enthalten
+Advanced_Error3                         '%s' zu den ignorierten WÃ¶rtern hinzugefÃ¼gt
+Advanced_Error4                         '%s' ist nicht in der Liste der ignorierten WÃ¶rter
+Advanced_Error5                         '%s' von der Liste der ignorierten WÃ¶rter entfernt
+Advanced_StopWords                      Ignorierte WÃ¶rter
+Advanced_Message1                       POPFile ignoriert die folgenden, hÃ¤ufig verwendeten WÃ¶rter:
+Advanced_AddWord                        Wort hinzufÃ¼gen
+Advanced_RemoveWord                     Wort lÃ¶schen
 Advanced_AllParameters                  POPFile Konfigurationsparameter
 Advanced_AllParametersNotes             Dies ist eine vollst&auml;ndige Liste aller globalen POPFile Parameter
 Advanced_Parameter                      Parameter
 Advanced_Value                          Wert
-Advanced_Warning                        Dies ist eine komplette Liste aller Parameter Ihrer POPFile Konfiguration. Nur für fortgeschrittene Anwender: Sie können jeden Wert ändern und durch einen Klick auf "Ändern" bestätigen. Eingaben werden nicht auf Gültigkeit überprüft! Mehr Informationen finden Sie in der <a href="http://getpopfile.org/docs/OptionReference">online Dokumentation</a>.
+Advanced_Warning                        Dies ist eine komplette Liste aller Parameter Ihrer POPFile Konfiguration. Nur fÃ¼r fortgeschrittene Anwender: Sie kÃ¶nnen jeden Wert Ã¤ndern und durch einen Klick auf "Ã„ndern" bestÃ¤tigen. Eingaben werden nicht auf GÃ¼ltigkeit Ã¼berprÃ¼ft! Mehr Informationen finden Sie in der <a href="http://getpopfile.org/docs/OptionReference">online Dokumentation</a>.
 Advanced_ConfigFile                     Konfigurationsdatei:
 Advanced_SingleUserModeParameters       Parameter f&uuml;r den Einzelbenutzer-Modus
 Advanced_SingleUserModeParametersNotes  Dies ist eine vollst&auml;ndige Liste aller Parameter f&uuml;r den Einzelbenutzer-Modus.
 
 Users_Create                            Neuen Benutzer anlegen
 Users_Rename                            Bestehenden Benutzer umbenennen
-Users_Remove                            Bestehenden Benutzer löschen
+Users_Remove                            Bestehenden Benutzer lÃ¶schen
 Users_Edit                              Benutzereinstellungen bearbeiten
 Users_Change_Password                   Change/Initialize User's Password
 Users_CopyFrom                          Einstellungen &uuml;bernehmen von Benutzer
@@ -229,31 +229,31 @@ Users_RenameNotes                       Hinweis: Umbenennen des Benutzers wird d
 Users_RemoveUser                        Benutzer l&ouml;schen
 Users_CreateUser                        Anlegen des neuen Bentuzers
 Users_EditUser                          Benutzer bearbeiten
-Users_ChangePasswordUser                Passwort für Benutzer ändern
+Users_ChangePasswordUser                Passwort fÃ¼r Benutzer Ã¤ndern
 Users_ResetPassword                     Passwort initialisieren
 Users_Parameters                        Parameter
 Users_Created                           Benutzer '%s' wurde angelegt
 Users_Not_Created                       Benutzer '%s' konnte nicht angelegt werden
 Users_Created_And_Cloned                Benutzer '%s' wurde als Klon von '%s' angelegt
 Users_Not_Created_Exists                Benutzer '%s' existiert bereits
-Users_Created_Not_Cloned                Benutzer '%s' wurde angelegt, aber Übernahme der Einstellungen von '%s' schlug fehl
+Users_Created_Not_Cloned                Benutzer '%s' wurde angelegt, aber Ãœbernahme der Einstellungen von '%s' schlug fehl
 Users_Renamed                           Bentuzer '%s' wurde in '%s' umbenannt (initiales Passwort '%s')
 Users_Rename_Failed_Exists              Bentuzer '%s' konnte nicht in '%s' umbenannt werde: Benutzer existiert bereits
 Users_Rename_Failed                     Benutzer '%s' konnte nicht umbenannt werden
-Users_Removed                           Benutzer '%s' wurde gelöscht
+Users_Removed                           Benutzer '%s' wurde gelÃ¶scht
 Users_Removed_Failed                    Benutzer '%s' konnte nicht entfernt werden
 Users_Removed_Failed_Admin              Benutzer '%s' konnte nicht entfernt werden: zuerst die Administrationsrechte entfernen
-Users_Changed_Password                  Passwort von Benutzer '%s' wurde geändert
-Users_Change_Password_Failed            Passwort von Benutzer '%s' konnte nicht geändert werden
-Users_Change_Password_Failed_Mismatch   Passwort von Benutzer '%s' konnte nicht geändert werden: Das neue Passwort muss in beiden Eingabefeldern übereinstimmen
+Users_Changed_Password                  Passwort von Benutzer '%s' wurde geÃ¤ndert
+Users_Change_Password_Failed            Passwort von Benutzer '%s' konnte nicht geÃ¤ndert werden
+Users_Change_Password_Failed_Mismatch   Passwort von Benutzer '%s' konnte nicht geÃ¤ndert werden: Das neue Passwort muss in beiden Eingabefeldern Ã¼bereinstimmen
 Users_Reset_Password                    Passwort von Benutzer '%s' wurde initialisiert (initiales Passwort '%s')
 Users_Reset_Password_Failed             Passwort von Benutzer '%s' konnte nicht initialisiert werden
 Users_SingleUserMode                    Einzelbenutzer-Modus (POPFile Classic)
-Users_Accounts                          Zugehöriges POP3-Konto
-Users_AddAccount                        POP3-Konto hinzufügen (host:benutzer)
+Users_Accounts                          ZugehÃ¶riges POP3-Konto
+Users_AddAccount                        POP3-Konto hinzufÃ¼gen (host:benutzer)
 Users_Bad_Account                       Der Name des neuen Kontos muss in der Form 'Host:Benutzer' eingegeben werden
-Users_Duplicate_Account                 Konto konnte nicht hinzugefügt werden, weil es einem anderen Benutzer zugeordnet ist
-Users_Failed_Account                    Konto konnte nicht hinzugefügt werden
+Users_Duplicate_Account                 Konto konnte nicht hinzugefÃ¼gt werden, weil es einem anderen Benutzer zugeordnet ist
+Users_Failed_Account                    Konto konnte nicht hinzugefÃ¼gt werden
 
 History_Filter                          &nbsp;(zeige nur Kategorie <font color="%s">%s</font>)
 History_FilterBy                        Filtern nach
@@ -270,24 +270,24 @@ History_MoveLeft                        nach links bewegen
 History_MoveRight                       nach rechts bewegen
 History_MagnetUsed                      Magnet benutzt
 History_MagnetBecause                   <b>Magnet benutzt</b><p>Eingestuft als <font color="%s">%s</font> durch Magnet %s </p>
-History_ChangedTo                       Geändert: <font color="%s">%s</font>
+History_ChangedTo                       GeÃ¤ndert: <font color="%s">%s</font>
 History_Already                         Neu eingestuft als <font color="%s">%s</font>
 History_RemoveAll                       Alle entfernen
 History_RemovePage                      Diese Seite entfernen
-History_RemoveChecked                   Ausgewählte Einträge löschen
-History_Remove                          Um Einträge im Verlauf zu löschen, klicken Sie auf
+History_RemoveChecked                   AusgewÃ¤hlte EintrÃ¤ge lÃ¶schen
+History_Remove                          Um EintrÃ¤ge im Verlauf zu lÃ¶schen, klicken Sie auf
 History_SearchMessage                   Nach Absender/Betreff suchen
 History_NoMessages                      keine Nachrichten
 History_ShowMagnet                      magnetisiert
 History_Negate_Search                   Filter invertieren
 History_Magnet                          &nbsp;(zeige nur durch Magnet eingestufte Nachrichten)
 History_NoMagnet                        &nbsp;(zeige nicht durch Magnet eingestufte Nachrichten)
-History_ResetSearch                     Zurücksetzen
-History_ChangedClass                    Würde jetzt eingestuft als
-History_Purge                           Jetzt löschen
-History_Increase                        größer
+History_ResetSearch                     ZurÃ¼cksetzen
+History_ChangedClass                    WÃ¼rde jetzt eingestuft als
+History_Purge                           Jetzt lÃ¶schen
+History_Increase                        grÃ¶ÃŸer
 History_Decrease                        kleiner
-History_Column_Characters               Größe der Spalten für From, To, Cc und Subject
+History_Column_Characters               GrÃ¶ÃŸe der Spalten fÃ¼r From, To, Cc und Subject
 History_Automatic                       automatisch
 History_Reclassified                    Neu eingestuft
 History_Size_Bytes                      %d&nbsp;B
@@ -295,66 +295,66 @@ History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
 History_Click_To_Sort                   Anklicken um nach dem Inhalt dieser Spalte zu sortieren
 
-Password_Title                          Paßwort
-Password_Password                       Paßwort
+Password_Title                          PaÃŸwort
+Password_Password                       PaÃŸwort
 Password_Username                       Benutzer
 Password_Go                             Anmelden
-Password_Error1                         Falsches Paßwort
+Password_Error1                         Falsches PaÃŸwort
 
-Security_Error1                         Der Port muß zwischen 1 und 65535 liegen.
+Security_Error1                         Der Port muÃŸ zwischen 1 und 65535 liegen.
 Security_Stealth                        Stealth Modus/Serverbetrieb
 Security_NoStealthMode                  Nein (Stealth Modus)
 Security_StealthMode                    (Stealth Modus)
-Security_ExplainStats                   (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: bc (Anzahl von Ihnen eingerichteter Kategorien), mc (Anzahl von POPFile eingestufter Nachrichten) und ec (Anzahl der Einstufungsfehler). Diese werden in einer Datei gespeichert und benutzt, um öffentliche Statistiken darüber zu erstellen, wie POPFile genutzt wird und wie gut es dabei funktioniert. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
-Security_ExplainUpdate                  (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: ma (die Hauptversionsnummer der POPFile-Installation), mi (die Nebenversionsnummer der POPFile-Installation) und bn (die build-Nummer der POPFile-Installation). POPFile erhält die Antwort in Form einer Grafik, die am Kopf einer Seite erscheint, wenn eine neue Version verfügbar ist. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
-Security_PasswordTitle                  Paßwort für Benutzeroberfläche
-Security_Password                       Paßwort
-Security_PasswordUpdate                 Passwort geändert
+Security_ExplainStats                   (Wenn Sie diese Funktion einschalten, sendet POPFile tÃ¤glich die drei folgenden Werte an ein Skript auf www.usethesource.com: bc (Anzahl von Ihnen eingerichteter Kategorien), mc (Anzahl von POPFile eingestufter Nachrichten) und ec (Anzahl der Einstufungsfehler). Diese werden in einer Datei gespeichert und benutzt, um Ã¶ffentliche Statistiken darÃ¼ber zu erstellen, wie POPFile genutzt wird und wie gut es dabei funktioniert. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelÃ¶scht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
+Security_ExplainUpdate                  (Wenn Sie diese Funktion einschalten, sendet POPFile tÃ¤glich die drei folgenden Werte an ein Skript auf www.usethesource.com: ma (die Hauptversionsnummer der POPFile-Installation), mi (die Nebenversionsnummer der POPFile-Installation) und bn (die build-Nummer der POPFile-Installation). POPFile erhÃ¤lt die Antwort in Form einer Grafik, die am Kopf einer Seite erscheint, wenn eine neue Version verfÃ¼gbar ist. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelÃ¶scht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
+Security_PasswordTitle                  PaÃŸwort fÃ¼r BenutzeroberflÃ¤che
+Security_Password                       PaÃŸwort
+Security_PasswordUpdate                 Passwort geÃ¤ndert
 Security_AUTHTitle                      externe Server
 Security_SecureServer                   POP3 Server (SPA/AUTH oder transparenter Proxy)
 Security_SecureServerUpdate             Neuer externer POP3 Server: %s
 Security_SecurePort                     POP3 Port (SPA/AUTH oder transparenter Proxy)
 Security_SecurePortUpdate               Neuer POP3 Port %s
 Security_SMTPServer                     externer SMTP Server
-Security_SMTPServerUpdate               Neuer externer SMTP Server: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Security_SMTPServerUpdate               Neuer externer SMTP Server: %s - Diese Ã„nderung wird erst nach einem Neustart von POPFile wirksam.
 Security_SMTPPort                       externer SMTP port
-Security_SMTPPortUpdate                 Neuer externer SMTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Security_SMTPPortUpdate                 Neuer externer SMTP Port: %s - Diese Ã„nderung wird erst nach einem Neustart von POPFile wirksam.
 Security_POP3                           POP3 Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
 Security_SMTP                           SMTP Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFILE)
 Security_NNTP                           NNTP Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
-Security_UI                             HTTP (Benutzeroberfläche) Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
+Security_UI                             HTTP (BenutzeroberflÃ¤che) Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
 Security_XMLRPC                         XML-RPC Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
-Security_UpdateTitle                    Automatisch auf Updates prüfen
-Security_Update                         Täglich nach POPFile Updates suchen
+Security_UpdateTitle                    Automatisch auf Updates prÃ¼fen
+Security_Update                         TÃ¤glich nach POPFile Updates suchen
 Security_StatsTitle                     Statistik Report
-Security_Stats                          Täglich Statistiken senden
+Security_Stats                          TÃ¤glich Statistiken senden
 
 Magnet_Error1                           Magnet '%s' existiert bereits in Kategorie '%s'
-Magnet_Error2                           Neuer Magnet '%s' kollidiert mit Magnet '%s' in Kategorie '%s' und könnte unklare Ergebnisse verursachen. Magnet wurde nicht unzugefügt.
+Magnet_Error2                           Neuer Magnet '%s' kollidiert mit Magnet '%s' in Kategorie '%s' und kÃ¶nnte unklare Ergebnisse verursachen. Magnet wurde nicht unzugefÃ¼gt.
 Magnet_Error3                           Erstelle neuen Magnet '%s' in Kategorie '%s'
 Magnet_CurrentMagnets                   Aktuelle Magnete
 Magnet_Message1                         Die folgenden Magnete ordnen neue Post zwingend in eine angegebene Kategorie ein.
 Magnet_CreateNew                        Neuen Magnet erstellen
-Magnet_Explanation                      <b>Diese Arten von Magneten sind verfügbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br />firma.de, um jeden zu erfassen, der von firma.de sendet, <br />Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaßt jeden Hans</li><li><b>Empfänger/CC-Adresse oder -Name:</b> Wie beim Absender-Magnet nur für die Empfänger/CC-Adresse der Nachricht.</li><li><b>Wörter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</li></ul>
+Magnet_Explanation                      <b>Diese Arten von Magneten sind verfÃ¼gbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br />firma.de, um jeden zu erfassen, der von firma.de sendet, <br />Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaÃŸt jeden Hans</li><li><b>EmpfÃ¤nger/CC-Adresse oder -Name:</b> Wie beim Absender-Magnet nur fÃ¼r die EmpfÃ¤nger/CC-Adresse der Nachricht.</li><li><b>WÃ¶rter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</li></ul>
 Magnet_MagnetType                       Typ des Magnets
 Magnet_Value                            Wert
 Magnet_Always                           Immer dieser Kategorie zuordnen
 Magnet_Jump                             Gehe zu Magnet Seite
 
-Bucket_Error1                           Kategorienamen können nur Kleinbuchstaben von a bis z, Ziffern von 0 bis 9, - oder _ enthalten
+Bucket_Error1                           Kategorienamen kÃ¶nnen nur Kleinbuchstaben von a bis z, Ziffern von 0 bis 9, - oder _ enthalten
 Bucket_Error2                           Kategoriename %s existiert bereits
 Bucket_Error3                           Kategorie %s erstellt
 Bucket_Error4                           Bitte geben Sie ein nicht-leeres Wort ein
 Bucket_Error5                           Kategorie %s in %s umbenannt
-Bucket_Error6                           Kategorie %s gelöscht
+Bucket_Error6                           Kategorie %s gelÃ¶scht
 Bucket_Title                            Kategorien konfigurieren
 Bucket_BucketName                       Name der Kategorie
 Bucket_WordCount                        Wortanzahl
 Bucket_WordCounts                       Wortanzahl
-Bucket_UniqueWords                      verschiedene Wörter
-Bucket_SubjectModification              Betreffzeile ändern
-Bucket_ChangeColor                      Farbe ändern
-Bucket_NotEnoughData                    Nicht genügend Daten
+Bucket_UniqueWords                      verschiedene WÃ¶rter
+Bucket_SubjectModification              Betreffzeile Ã¤ndern
+Bucket_ChangeColor                      Farbe Ã¤ndern
+Bucket_NotEnoughData                    Nicht genÃ¼gend Daten
 Bucket_ClassificationAccuracy           Genauigkeit
 Bucket_EmailsClassified                 Nachrichten klassifiziert
 Bucket_EmailsClassifiedUpper            Nachrichten klassifiziert
@@ -363,101 +363,101 @@ Bucket_Accuracy                         Genauigkeit
 Bucket_ClassificationCount              Anzahl Einstufungen
 Bucket_ClassificationFP                 falsch positiv
 Bucket_ClassificationFN                 falsch negativ
-Bucket_ResetStatistics                  Statistiken zurücksetzen
-Bucket_LastReset                        Läuft seit
+Bucket_ResetStatistics                  Statistiken zurÃ¼cksetzen
+Bucket_LastReset                        LÃ¤uft seit
 Bucket_MessagesPerDay                   Nachrichten pro Tag:
 Bucket_CurrentColor                     Derzeitige Farbe von %s ist %s
 Bucket_SetColorTo                       Setze Farbe von %s auf %s
 Bucket_Maintenance                      Verwaltung
 Bucket_CreateBucket                     Erstelle Kategorie
-Bucket_DeleteBucket                     Lösche Kategorie
+Bucket_DeleteBucket                     LÃ¶sche Kategorie
 Bucket_RenameBucket                     Benenne Kategorie um
 Bucket_Lookup                           Nachschlagen
 Bucket_LookupMessage                    Wort in Kategorie nachschlagen
-Bucket_LookupMessage2                   Ergebnis für
+Bucket_LookupMessage2                   Ergebnis fÃ¼r
 Bucket_LookupMostLikely                 <b>%s</b> erscheint am wahrscheinlichsten in <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> erscheint in keiner Kategorie
 Bucket_DisabledGlobally                 Global deaktiviert
 Bucket_To                               in
-Bucket_Quarantine                       Nachricht in Quarantäne
+Bucket_Quarantine                       Nachricht in QuarantÃ¤ne
 
-SingleBucket_Title                      Details für %s
+SingleBucket_Title                      Details fÃ¼r %s
 SingleBucket_WordCount                  Anzahl Worte in dieser Kategorie
 SingleBucket_TotalWordCount             Anzahl Worte insgesamt
 SingleBucket_Percentage                 Anteil an der Gesamtzahl
-SingleBucket_WordTable                  Worttabelle für %s
-SingleBucket_Message1                   Klicken Sie auf einen Buchstaben, um eine Liste der Wörter aufzurufen, die mit diesem beginnen. Klicken Sie auf ein beliebiges Wort, um die Wahrscheinlichkeit seines Erscheinens für alle Kategorien anzusehen.
+SingleBucket_WordTable                  Worttabelle fÃ¼r %s
+SingleBucket_Message1                   Klicken Sie auf einen Buchstaben, um eine Liste der WÃ¶rter aufzurufen, die mit diesem beginnen. Klicken Sie auf ein beliebiges Wort, um die Wahrscheinlichkeit seines Erscheinens fÃ¼r alle Kategorien anzusehen.
 SingleBucket_Unique                     %s verschiedene
-SingleBucket_ClearBucket                Alle Wörter entfernen
+SingleBucket_ClearBucket                Alle WÃ¶rter entfernen
 
 Session_Title                           POPFile Sitzung abgelaufen
-Session_Error                           Ihre POPFile-Sitzung ist abgelaufen. Dies könnte dadurch verursacht worden sein, daß Sie POPFile neu gestartet haben, das Kontrollzentrum aber noch im Browser geöffnet war. Bitte klicken Sie auf einen der oben angezeigten Verweise, um mit der Benutzung von POPFile weitermachen zu können.
+Session_Error                           Ihre POPFile-Sitzung ist abgelaufen. Dies kÃ¶nnte dadurch verursacht worden sein, daÃŸ Sie POPFile neu gestartet haben, das Kontrollzentrum aber noch im Browser geÃ¶ffnet war. Bitte klicken Sie auf einen der oben angezeigten Verweise, um mit der Benutzung von POPFile weitermachen zu kÃ¶nnen.
 
 View_Title                              Nachrichtenansicht
-View_ShowFrequencies                    Zeige Häufigkeit des Auftretens
+View_ShowFrequencies                    Zeige HÃ¤ufigkeit des Auftretens
 View_ShowProbabilities                  Zeige Wahrscheinlichkeit des Auftretens
 View_ShowScores                         Zeige Bewertung des Wortes
 View_WordMatrix                         Wort Matrix
 View_WordProbabilities                  zeige Wahrscheinlichkeit des Auftretens
-View_WordFrequencies                    zeige Häufigkeit des Auftretens
+View_WordFrequencies                    zeige HÃ¤ufigkeit des Auftretens
 View_WordScores                         zeige Bewertung des Wortes
 View_Chart                              Entscheidungs-Diagramm
 View_DownloadMessage                    Nachricht herunterladen
 
 Windows_TrayIcon                        POPFile-Symbol neben der Uhr anzeigen?
-Windows_Console                         POPFile in einem Konsolenfenster ausführen?
-Windows_NextTime                        Diese Änderung wird erst beim nächsten Start von POPFile wirksam.
+Windows_Console                         POPFile in einem Konsolenfenster ausfÃ¼hren?
+Windows_NextTime                        Diese Ã„nderung wird erst beim nÃ¤chsten Start von POPFile wirksam.
 
-Header_MenuSummary                      Diese Tabelle ist das Navigationsmenü, das Zugang zu den einzelnen Bereichen des Kontrollzentrums bietet.
-History_MainTableSummary                Diese Tabelle zeigt Absender und Betreff der letzten empfangenen Nachrichten an und ermöglicht es, diese durchzusehen und zu reklassifizieren. Ein Klick auf den Betreff zeigt die vollständige Nachricht an sowie Details, warum diese so und nicht anders klassifiziert wurde. Die Spalte "Sollte sein" ermöglicht es, anzugeben, in welche Kategorie die Nachricht gehört bzw. entsprechende Änderungen rückgängig zu machen. Die Spalte "Delete" ermöglicht es, einzelne Nachrichten aus dem Verlauf zu löschen, falls Sie diese nicht mehr benötigen.
-History_OpenMessageSummary              Diese Tabelle enthält den kompletten Text einer Nachricht. Die Wörter sind entsprechend der Kategorie eingefärbt, in die sie am wahrscheinlichsten passen.
-Bucket_MainTableSummary                 Diese Tabelle bietet einen Überblick über die einzelnen Kategorien. Jede Reihe zeigt Name, Gesamtzahl der Wörter und die Anzahl verschiedener Wörter pro Kategorie an, ob die Betreff-Zeile der Nachricht bei der Klassifizierung geändert wird, ob die Nachrichten dieser Kategorie in Quarantäne gestellt werden sollen, sowie eine Tabelle zur Auswahl einer Farbe, in der alle zu dieser Kategorie gehörenden Elemente im Kontrollzentrum dargestellt werden sollen.
-Bucket_StatisticsTableSummary           Diese Tabelle zeigt drei verschiedene Statistiken bezüglich POPFiles Gesamtleistung an. Die erste: Wie fehlerfrei ist die Einordnung in die entsprechenden Kategorien? Die zweite: Wie viele Nachrichten wurden analysiert und wie wurden sie eingeordnet? Die dritte: Wie viele Wörter gehören zu jeder Kategorie und wie hoch ist der Prozentsatz zur Gesamtzahl?
-Bucket_MaintenanceTableSummary          Diese Tabelle enthält Formulare zum Erstellen, Löschen und Umbenennen von Kategorien und um die relative Wahrscheinlichkeit der Wörter in jeder einzelnen Kategorie nachzuschlagen.
+Header_MenuSummary                      Diese Tabelle ist das NavigationsmenÃ¼, das Zugang zu den einzelnen Bereichen des Kontrollzentrums bietet.
+History_MainTableSummary                Diese Tabelle zeigt Absender und Betreff der letzten empfangenen Nachrichten an und ermÃ¶glicht es, diese durchzusehen und zu reklassifizieren. Ein Klick auf den Betreff zeigt die vollstÃ¤ndige Nachricht an sowie Details, warum diese so und nicht anders klassifiziert wurde. Die Spalte "Sollte sein" ermÃ¶glicht es, anzugeben, in welche Kategorie die Nachricht gehÃ¶rt bzw. entsprechende Ã„nderungen rÃ¼ckgÃ¤ngig zu machen. Die Spalte "Delete" ermÃ¶glicht es, einzelne Nachrichten aus dem Verlauf zu lÃ¶schen, falls Sie diese nicht mehr benÃ¶tigen.
+History_OpenMessageSummary              Diese Tabelle enthÃ¤lt den kompletten Text einer Nachricht. Die WÃ¶rter sind entsprechend der Kategorie eingefÃ¤rbt, in die sie am wahrscheinlichsten passen.
+Bucket_MainTableSummary                 Diese Tabelle bietet einen Ãœberblick Ã¼ber die einzelnen Kategorien. Jede Reihe zeigt Name, Gesamtzahl der WÃ¶rter und die Anzahl verschiedener WÃ¶rter pro Kategorie an, ob die Betreff-Zeile der Nachricht bei der Klassifizierung geÃ¤ndert wird, ob die Nachrichten dieser Kategorie in QuarantÃ¤ne gestellt werden sollen, sowie eine Tabelle zur Auswahl einer Farbe, in der alle zu dieser Kategorie gehÃ¶renden Elemente im Kontrollzentrum dargestellt werden sollen.
+Bucket_StatisticsTableSummary           Diese Tabelle zeigt drei verschiedene Statistiken bezÃ¼glich POPFiles Gesamtleistung an. Die erste: Wie fehlerfrei ist die Einordnung in die entsprechenden Kategorien? Die zweite: Wie viele Nachrichten wurden analysiert und wie wurden sie eingeordnet? Die dritte: Wie viele WÃ¶rter gehÃ¶ren zu jeder Kategorie und wie hoch ist der Prozentsatz zur Gesamtzahl?
+Bucket_MaintenanceTableSummary          Diese Tabelle enthÃ¤lt Formulare zum Erstellen, LÃ¶schen und Umbenennen von Kategorien und um die relative Wahrscheinlichkeit der WÃ¶rter in jeder einzelnen Kategorie nachzuschlagen.
 Bucket_AccuracyChartSummary             Diese Tabelle stellt die Genauigkeit der Nachrichten-Sortierung grafisch dar.
-Bucket_BarChartSummary                  Diese Tabelle stellt einen Prozentanteil grafisch dar. Sie wird sowohl für die Anzahl der eingestuften Nachrichten als auch für die Gesamtzahl der Wörter genutzt.
-Bucket_LookupResultsSummary             Diese Tabelle stellt die Wahrscheinlichkeiten bezüglich jedes angegebenen Wortes dar. Für jede Kategorie wird folgendes angezeigt: Die Häufigkeit, mit der das Wort auftritt, die Wahrscheinlichkeit, daß es in dieser Kategorie auftritt und die Auswirkungen auf die Punktzahl der Kategorie insgesamt, falls das Wort in einer Nachricht auftaucht.
-Bucket_WordListTableSummary             Diese Tabelle bietet eine Liste aller Wörter einer bestimmten Kategorie - reihenweise sortiert nach dem ersten Buchstaben.
-Magnet_MainTableSummary                 Diese Tabelle zeigt eine Liste der Magnete an, die dazu benutzt werden, um Nachrichten automatisch nach festen Kriterien zu sortieren. Jede Reihe zeigt an, wie der Magnet definiert ist, in welche Kategorie er einsortiert und eine Schaltfläche, um den Magnet zu löschen.
-Configuration_MainTableSummary          Diese Tabelle enthält einige Formulare zur Konfiguration von POPFile.
-Configuration_InsertionTableSummary     Diese Tabelle enthält Schaltflächen zur Konfiguration, ob bestimmte Änderungen an Kopfzeilen oder Betreff der Nachricht gemacht werden sollen, bevor diese an das entsprechende Programm weitergegeben wird.
-Security_MainTableSummary               Diese Tabelle bietet Einstellungsmöglichkeiten, die die Sicherheit von POPFile insgesamt betreffen, ob es automatisch auf neue Versionen prüfen soll oder ob Statistiken über die Leistung von POPFile an eine zentrale Datenbank zwecks der Erstellung von Gesamtstatistiken geschickt werden sollen.
-Advanced_MainTableSummary               Diese Tabelle enthält eine Liste von Wörtern, die POPFile ignoriert, wenn es eine Nachricht analysiert. Dies betrifft Wörter, die besonders häufig in Nachrichten auftauchen. Diese sind reihenweise alphabetisch nach dem ersten Buchstaben sortiert.
+Bucket_BarChartSummary                  Diese Tabelle stellt einen Prozentanteil grafisch dar. Sie wird sowohl fÃ¼r die Anzahl der eingestuften Nachrichten als auch fÃ¼r die Gesamtzahl der WÃ¶rter genutzt.
+Bucket_LookupResultsSummary             Diese Tabelle stellt die Wahrscheinlichkeiten bezÃ¼glich jedes angegebenen Wortes dar. FÃ¼r jede Kategorie wird folgendes angezeigt: Die HÃ¤ufigkeit, mit der das Wort auftritt, die Wahrscheinlichkeit, daÃŸ es in dieser Kategorie auftritt und die Auswirkungen auf die Punktzahl der Kategorie insgesamt, falls das Wort in einer Nachricht auftaucht.
+Bucket_WordListTableSummary             Diese Tabelle bietet eine Liste aller WÃ¶rter einer bestimmten Kategorie - reihenweise sortiert nach dem ersten Buchstaben.
+Magnet_MainTableSummary                 Diese Tabelle zeigt eine Liste der Magnete an, die dazu benutzt werden, um Nachrichten automatisch nach festen Kriterien zu sortieren. Jede Reihe zeigt an, wie der Magnet definiert ist, in welche Kategorie er einsortiert und eine SchaltflÃ¤che, um den Magnet zu lÃ¶schen.
+Configuration_MainTableSummary          Diese Tabelle enthÃ¤lt einige Formulare zur Konfiguration von POPFile.
+Configuration_InsertionTableSummary     Diese Tabelle enthÃ¤lt SchaltflÃ¤chen zur Konfiguration, ob bestimmte Ã„nderungen an Kopfzeilen oder Betreff der Nachricht gemacht werden sollen, bevor diese an das entsprechende Programm weitergegeben wird.
+Security_MainTableSummary               Diese Tabelle bietet EinstellungsmÃ¶glichkeiten, die die Sicherheit von POPFile insgesamt betreffen, ob es automatisch auf neue Versionen prÃ¼fen soll oder ob Statistiken Ã¼ber die Leistung von POPFile an eine zentrale Datenbank zwecks der Erstellung von Gesamtstatistiken geschickt werden sollen.
+Advanced_MainTableSummary               Diese Tabelle enthÃ¤lt eine Liste von WÃ¶rtern, die POPFile ignoriert, wenn es eine Nachricht analysiert. Dies betrifft WÃ¶rter, die besonders hÃ¤ufig in Nachrichten auftauchen. Diese sind reihenweise alphabetisch nach dem ersten Buchstaben sortiert.
 
 Imap_Bucket2Folder                      Mail der Kategorie '<b>%s</b>' kommt in den Ordner
-Imap_MapError                           Sie können nicht mehr als eine Kategorie einem einzelnen Ordner zuordnen!
+Imap_MapError                           Sie kÃ¶nnen nicht mehr als eine Kategorie einem einzelnen Ordner zuordnen!
 Imap_MapUpdated                         Kategorie '%s' wurde Ordner '%s' zugeordnet.
 Imap_Server                             IMAP Server Hostname:
 Imap_ServerNameError                    Bitte geben Sie den Namen des Servers ein!
 Imap_Port                               IMAP Server Port:
-Imap_PortError                          Bitte geben Sie eine gültige Portnummer ein!
+Imap_PortError                          Bitte geben Sie eine gÃ¼ltige Portnummer ein!
 Imap_Login                              IMAP Benutzername (Login):
-Imap_LoginError                         Bitte geben Sie einen gültigen Benuternamen ein!
-Imap_Password                           Password für IMAP Konto:
+Imap_LoginError                         Bitte geben Sie einen gÃ¼ltigen Benuternamen ein!
+Imap_Password                           Password fÃ¼r IMAP Konto:
 Imap_PasswordError                      Bitte geben Sie ein Passwort an!
 Imap_ConnectionDetailsUpdated           Die IMAP Verbindungsdetails wurden aktualisiert. Bitte laden Sie jetzt die Liste der Ordner neu.
-Imap_Expunge                            Gelöschte Nachrichten aus den überwachten Ordnern endgültig löschen.
+Imap_Expunge                            GelÃ¶schte Nachrichten aus den Ã¼berwachten Ordnern endgÃ¼ltig lÃ¶schen.
 Imap_Interval                           Update Intervall in Sekunden:
 Imap_IntervalError                      Bitte geben Sie ein Intervall zwischen 10 und 3600 Sekunden ein.
 Imap_OptionsUpdated                     Die IMAP Optionen wurden erfolgreicht aktualisiert.
 Imap_RefreshFolders                     Ordnerliste neu laden:
 Imap_Now                                jetzt!
-Imap_UpdateError1                       Login war nicht erfolgreich. Bitte überprüfen Sie Ihren Benutzernamen und das Passwort.
-Imap_UpdateError2                       Verbindung zum Server fehlgeschlagen! Bitte überprüfen Sie den Namen des Servers, den Port und stellen Sie sicher, dass Sie Zugang zum Internet haben.
+Imap_UpdateError1                       Login war nicht erfolgreich. Bitte Ã¼berprÃ¼fen Sie Ihren Benutzernamen und das Passwort.
+Imap_UpdateError2                       Verbindung zum Server fehlgeschlagen! Bitte Ã¼berprÃ¼fen Sie den Namen des Servers, den Port und stellen Sie sicher, dass Sie Zugang zum Internet haben.
 Imap_UpdateError3                       Bitte konfigurieren Sie erst die Verbindung zum Server.
 Imap_UpdateOK                           Die Ordnerliste wurde erfolgreich geladen.
-Imap_NoConnectionMessage                Bitte konfigurieren Sie erst die Verbindung zum Server. Nachdem Sie das getan haben, werden Sie an dieser Stelle mehr Konfigurationsmöglichkeiten finden.
-Imap_WatchMore                          : einen weiteren zu überwachenden Ordner
-Imap_WatchedFolderAdded                 Ein Ordner wurde hinzugefügt. Bitte wählen Sie jetzt den gewünschten Ordner.
-Imap_WatchedFolder                      Überwachter Ordner Nr.
-Imap_WatchedFoldersUpdated              Liste der überwachten Ordner wurde aktualisiert.
-Imap_WatchedFolderRemoved               Ordner '%s' wurde aus der Liste der überwachten Ordner entfernt
-Imap_DoingTraining                      Das IMAP Module wird das Training jetzt anhand Ihrer archivierten Nachrichten starten. Je nach der Größe des Archivs und der Geschwindigkeit der Verbindung zum Server, kann diese einige Zeit dauern, während der die Benutzeroberfläche nicht reagieren wird.
+Imap_NoConnectionMessage                Bitte konfigurieren Sie erst die Verbindung zum Server. Nachdem Sie das getan haben, werden Sie an dieser Stelle mehr KonfigurationsmÃ¶glichkeiten finden.
+Imap_WatchMore                          : einen weiteren zu Ã¼berwachenden Ordner
+Imap_WatchedFolderAdded                 Ein Ordner wurde hinzugefÃ¼gt. Bitte wÃ¤hlen Sie jetzt den gewÃ¼nschten Ordner.
+Imap_WatchedFolder                      Ãœberwachter Ordner Nr.
+Imap_WatchedFoldersUpdated              Liste der Ã¼berwachten Ordner wurde aktualisiert.
+Imap_WatchedFolderRemoved               Ordner '%s' wurde aus der Liste der Ã¼berwachten Ordner entfernt
+Imap_DoingTraining                      Das IMAP Module wird das Training jetzt anhand Ihrer archivierten Nachrichten starten. Je nach der GrÃ¶ÃŸe des Archivs und der Geschwindigkeit der Verbindung zum Server, kann diese einige Zeit dauern, wÃ¤hrend der die BenutzeroberflÃ¤che nicht reagieren wird.
 Imap_DoTraining                         Training anhand archivierter Mail.
 Imap_Use_SSL							Use SSL
 
 Shutdown_Message                        POPFile wurde beendet
 
-Help_Training                           POPFile weiss zunächst einmal nichts über Ihre Nachrichten und muss deshalb erst trainiert werden. Für jede Kategorie muss mindestens eine Nachricht neu eingestuft worden sein, damit POPFile selber eine Einstufung vornehmen kann. Außerdem müssen Sie Ihr Mail-Programm so konfigurieren, dass es aufgrund der POPFile-Einstufung Ihre Emails filtert. Informationen über die Konfiguration verschiedener Mail-Programme finden Sie (auf English) im <a href="http://getpopfile.org/docs/faq:EmailSorting">POPFile Documentation Project</a>.
-Help_Bucket_Setup                       POPFile braucht mindestens zwei Kategorien zusätzlich zu der "unclassified" Pseudo-Kategorie. POPFile zeichnet sich durch die Fähigkeit aus, Emails in eine unbgrenzte Zahl von Kategorien einsortieren zu können. Eine einfache Konfiguration könnte zum Beispiel die Kategorien "spam", "beruflich" und "privat" enthalten.
+Help_Training                           POPFile weiss zunÃ¤chst einmal nichts Ã¼ber Ihre Nachrichten und muss deshalb erst trainiert werden. FÃ¼r jede Kategorie muss mindestens eine Nachricht neu eingestuft worden sein, damit POPFile selber eine Einstufung vornehmen kann. AuÃŸerdem mÃ¼ssen Sie Ihr Mail-Programm so konfigurieren, dass es aufgrund der POPFile-Einstufung Ihre Emails filtert. Informationen Ã¼ber die Konfiguration verschiedener Mail-Programme finden Sie (auf English) im <a href="http://getpopfile.org/docs/faq:EmailSorting">POPFile Documentation Project</a>.
+Help_Bucket_Setup                       POPFile braucht mindestens zwei Kategorien zusÃ¤tzlich zu der "unclassified" Pseudo-Kategorie. POPFile zeichnet sich durch die FÃ¤higkeit aus, Emails in eine unbgrenzte Zahl von Kategorien einsortieren zu kÃ¶nnen. Eine einfache Konfiguration kÃ¶nnte zum Beispiel die Kategorien "spam", "beruflich" und "privat" enthalten.
 Help_No_More                            Diesen Hinweis nicht mehr zeigen

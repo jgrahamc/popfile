@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+О╩©# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -16,14 +16,14 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-# При переводе на русский язык всплыли самые разные ошибки и недочёты
-# самого веб-интерфейса -- слишком многое намертво зашито в код.
-# Если я и дальше буду пользоваться POPFile, я постараюсь найти время
-# отделить интерфейс от кода, и адаптировать интерфейс к русскому
-# языку.
+# п÷я─п╦ п©п╣я─п╣п╡п╬п╢п╣ п╫п╟ я─я┐я│я│п╨п╦п╧ я▐п╥я▀п╨ п╡я│п©п╩я▀п╩п╦ я│п╟п╪я▀п╣ я─п╟п╥п╫я▀п╣ п╬я┬п╦п╠п╨п╦ п╦ п╫п╣п╢п╬я┤я▒я┌я▀
+# я│п╟п╪п╬пЁп╬ п╡п╣п╠-п╦п╫я┌п╣я─я└п╣п╧я│п╟ -- я│п╩п╦я┬п╨п╬п╪ п╪п╫п╬пЁп╬п╣ п╫п╟п╪п╣я─я┌п╡п╬ п╥п╟я┬п╦я┌п╬ п╡ п╨п╬п╢.
+# п∙я│п╩п╦ я▐ п╦ п╢п╟п╩я▄я┬п╣ п╠я┐п╢я┐ п©п╬п╩я▄п╥п╬п╡п╟я┌я▄я│я▐ POPFile, я▐ п©п╬я│я┌п╟я─п╟я▌я│я▄ п╫п╟п╧я┌п╦ п╡я─п╣п╪я▐
+# п╬я┌п╢п╣п╩п╦я┌я▄ п╦п╫я┌п╣я─я└п╣п╧я│ п╬я┌ п╨п╬п╢п╟, п╦ п╟п╢п╟п©я┌п╦я─п╬п╡п╟я┌я▄ п╦п╫я┌п╣я─я└п╣п╧я│ п╨ я─я┐я│я│п╨п╬п╪я┐
+# я▐п╥я▀п╨я┐.
 #
-# Предложения и замечания с благодарностью принимаются по электронной
-# почте: alexander saltanov <asdgray.at.yandex.ru>
+# п÷я─п╣п╢п╩п╬п╤п╣п╫п╦я▐ п╦ п╥п╟п╪п╣я┤п╟п╫п╦я▐ я│ п╠п╩п╟пЁп╬п╢п╟я─п╫п╬я│я┌я▄я▌ п©я─п╦п╫п╦п╪п╟я▌я┌я│я▐ п©п╬ я█п╩п╣п╨я┌я─п╬п╫п╫п╬п╧
+# п©п╬я┤я┌п╣: alexander saltanov <asdgray.at.yandex.ru>
 
 # Identify the language and character set used for the interface
 LanguageCode                            ru
@@ -34,210 +34,210 @@ LanguageDirection                       ltr
 ManualLanguage                          en
 
 # Common words that are used on their own all over the interface
-Apply                                   Запомнить
-On                                      Вкл.
-Off                                     Выкл.
-TurnOn                                  Включить
-TurnOff                                 Выключить
-Add                                     Добавить
-Remove                                  Удалить
-Previous                                Предыдущий
-Next                                    Следующий
-From                                    Отправитель
-Subject                                 Тема
-Classification                          Классификация
-Reclassify                              Переклассифицировать
-Undo                                    Отменить
-Close                                   Закрыть
-Find                                    Найти
-Filter                                  Выбрать
-Yes                                     Да
-No                                      Нет
-ChangeToYes                             Изменить на &laquo;Да&raquo;
-ChangeToNo                              Изменить на &laquo;Нет&raquo;
-Bucket                                  Ведро
-Magnet                                  Магнит
-Delete                                  Удалить
-Create                                  Создать
-To                                      Получатель
-Total                                   Всего
-Rename                                  Переименовать
-Frequency                               Частота
-Probability                             Вероятность
-Score                                   Счёт
-Lookup                                  Искать
+Apply                                   п≈п╟п©п╬п╪п╫п╦я┌я▄
+On                                      п▓п╨п╩.
+Off                                     п▓я▀п╨п╩.
+TurnOn                                  п▓п╨п╩я▌я┤п╦я┌я▄
+TurnOff                                 п▓я▀п╨п╩я▌я┤п╦я┌я▄
+Add                                     п■п╬п╠п╟п╡п╦я┌я▄
+Remove                                  пёп╢п╟п╩п╦я┌я▄
+Previous                                п÷я─п╣п╢я▀п╢я┐я┴п╦п╧
+Next                                    п║п╩п╣п╢я┐я▌я┴п╦п╧
+From                                    п·я┌п©я─п╟п╡п╦я┌п╣п╩я▄
+Subject                                 п╒п╣п╪п╟
+Classification                          п п╩п╟я│я│п╦я└п╦п╨п╟я├п╦я▐
+Reclassify                              п÷п╣я─п╣п╨п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟я┌я▄
+Undo                                    п·я┌п╪п╣п╫п╦я┌я▄
+Close                                   п≈п╟п╨я─я▀я┌я▄
+Find                                    п²п╟п╧я┌п╦
+Filter                                  п▓я▀п╠я─п╟я┌я▄
+Yes                                     п■п╟
+No                                      п²п╣я┌
+ChangeToYes                             п≤п╥п╪п╣п╫п╦я┌я▄ п╫п╟ &laquo;п■п╟&raquo;
+ChangeToNo                              п≤п╥п╪п╣п╫п╦я┌я▄ п╫п╟ &laquo;п²п╣я┌&raquo;
+Bucket                                  п▓п╣п╢я─п╬
+Magnet                                  п°п╟пЁп╫п╦я┌
+Delete                                  пёп╢п╟п╩п╦я┌я▄
+Create                                  п║п╬п╥п╢п╟я┌я▄
+To                                      п÷п╬п╩я┐я┤п╟я┌п╣п╩я▄
+Total                                   п▓я│п╣пЁп╬
+Rename                                  п÷п╣я─п╣п╦п╪п╣п╫п╬п╡п╟я┌я▄
+Frequency                               п╖п╟я│я┌п╬я┌п╟
+Probability                             п▓п╣я─п╬я▐я┌п╫п╬я│я┌я▄
+Score                                   п║я┤я▒я┌
+Lookup                                  п≤я│п╨п╟я┌я▄
 
 # The header and footer that appear on every UI page
-Header_Title                            Центр управления POPFile
-Header_Shutdown                         Выключить POPFile
-Header_History                          История
-Header_Buckets                          Вёдра
-Header_Configuration                    Настройка
-Header_Advanced                         Стоп-слова
-Header_Security                         Безопасность
-Header_Magnets                          Магниты
+Header_Title                            п╕п╣п╫я┌я─ я┐п©я─п╟п╡п╩п╣п╫п╦я▐ POPFile
+Header_Shutdown                         п▓я▀п╨п╩я▌я┤п╦я┌я▄ POPFile
+Header_History                          п≤я│я┌п╬я─п╦я▐
+Header_Buckets                          п▓я▒п╢я─п╟
+Header_Configuration                    п²п╟я│я┌я─п╬п╧п╨п╟
+Header_Advanced                         п║я┌п╬п©-я│п╩п╬п╡п╟
+Header_Security                         п▒п╣п╥п╬п©п╟я│п╫п╬я│я┌я▄
+Header_Magnets                          п°п╟пЁп╫п╦я┌я▀
 
-Footer_HomePage                         Страничка POPFile в Интернете
-Footer_Manual                           Руководство пользователя
-Footer_Forums                           Форумы
-Footer_FeedMe                           Накормите автора!
-Footer_RequestFeature                   Нужна новая функция?
-Footer_MailingList                      Список рассылки
+Footer_HomePage                         п║я┌я─п╟п╫п╦я┤п╨п╟ POPFile п╡ п≤п╫я┌п╣я─п╫п╣я┌п╣
+Footer_Manual                           п═я┐п╨п╬п╡п╬п╢я│я┌п╡п╬ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐
+Footer_Forums                           п╓п╬я─я┐п╪я▀
+Footer_FeedMe                           п²п╟п╨п╬я─п╪п╦я┌п╣ п╟п╡я┌п╬я─п╟!
+Footer_RequestFeature                   п²я┐п╤п╫п╟ п╫п╬п╡п╟я▐ я└я┐п╫п╨я├п╦я▐?
+Footer_MailingList                      п║п©п╦я│п╬п╨ я─п╟я│я│я▀п╩п╨п╦
 
-Configuration_Error1                    Разделитель должен быть <stong>одним</strong> символом
-Configuration_Error2                    Номер порта для web-интерфейса должен быть числом от 1 до 65535
-Configuration_Error3                    Номер порта POP3 должен быть числом от 1 до 65535
-Configuration_Error4                    Размер страницы должен быть числом от 1 до 1000
-Configuration_Error5                    Число дней истории должно быть числом от 1 до 366
-Configuration_Error6                    Значение таймаута TCP должно быть числом от 10 до 1800
-Configuration_POP3Port                  Слушать POP3 порт
-Configuration_POP3Update                Номер порта изменён на %s; изменения вступят в силу после перезапуска POPFile
-Configuration_Separator                 Разделитель
-Configuration_SepUpdate                 Разделитель изменён на %s
-Configuration_UI                        Порт веб-интерфейса
-Configuration_UIUpdate                  Номер порта веб-интерфейса изменён на %s; изменения вступят в силу после перезапуска POPFile
-Configuration_History                   Сколько писем показывать на одной странице
-Configuration_HistoryUpdate             Теперь на странице будет показываться %s писем
-Configuration_Days                      Сколько дней хранить историю
-Configuration_DaysUpdate                Теперь история будет храниться %s дней
-Configuration_UserInterface             Веб-интерфейс
-Configuration_Skins                     Оформление
-Configuration_SkinsChoose               Выбрать вариант оформления
-Configuration_Language                  Язык
-Configuration_LanguageChoose            Выбрать язык
-Configuration_ListenPorts               POP3 порт
-Configuration_HistoryView               История
-Configuration_TCPTimeout                Таймаут TCP-соединения
-Configuration_TCPTimeoutSecs            Таймаут TCP-соединения в секундах
-Configuration_TCPTimeoutUpdate          Таймаут изменён на %s секунд
-Configuration_ClassificationInsertion   Куда записывать классификатор
-Configuration_SubjectLine               Записывать классификатор в тему письма
-Configuration_XTCInsertion              Добавлять поле X-Text-Classification в заголовок
-Configuration_XPLInsertion              Добавлять поле X-POPFile-Link в заголовок
-Configuration_Logging                   Логи
-Configuration_None                      Никуда
-Configuration_ToScreen                  На экран
-Configuration_ToFile                    В файл
-Configuration_ToScreenFile              На экран и в файл
-Configuration_LoggerOutput              Куда выводить лог
+Configuration_Error1                    п═п╟п╥п╢п╣п╩п╦я┌п╣п╩я▄ п╢п╬п╩п╤п╣п╫ п╠я▀я┌я▄ <stong>п╬п╢п╫п╦п╪</strong> я│п╦п╪п╡п╬п╩п╬п╪
+Configuration_Error2                    п²п╬п╪п╣я─ п©п╬я─я┌п╟ п╢п╩я▐ web-п╦п╫я┌п╣я─я└п╣п╧я│п╟ п╢п╬п╩п╤п╣п╫ п╠я▀я┌я▄ я┤п╦я│п╩п╬п╪ п╬я┌ 1 п╢п╬ 65535
+Configuration_Error3                    п²п╬п╪п╣я─ п©п╬я─я┌п╟ POP3 п╢п╬п╩п╤п╣п╫ п╠я▀я┌я▄ я┤п╦я│п╩п╬п╪ п╬я┌ 1 п╢п╬ 65535
+Configuration_Error4                    п═п╟п╥п╪п╣я─ я│я┌я─п╟п╫п╦я├я▀ п╢п╬п╩п╤п╣п╫ п╠я▀я┌я▄ я┤п╦я│п╩п╬п╪ п╬я┌ 1 п╢п╬ 1000
+Configuration_Error5                    п╖п╦я│п╩п╬ п╢п╫п╣п╧ п╦я│я┌п╬я─п╦п╦ п╢п╬п╩п╤п╫п╬ п╠я▀я┌я▄ я┤п╦я│п╩п╬п╪ п╬я┌ 1 п╢п╬ 366
+Configuration_Error6                    п≈п╫п╟я┤п╣п╫п╦п╣ я┌п╟п╧п╪п╟я┐я┌п╟ TCP п╢п╬п╩п╤п╫п╬ п╠я▀я┌я▄ я┤п╦я│п╩п╬п╪ п╬я┌ 10 п╢п╬ 1800
+Configuration_POP3Port                  п║п╩я┐я┬п╟я┌я▄ POP3 п©п╬я─я┌
+Configuration_POP3Update                п²п╬п╪п╣я─ п©п╬я─я┌п╟ п╦п╥п╪п╣п╫я▒п╫ п╫п╟ %s; п╦п╥п╪п╣п╫п╣п╫п╦я▐ п╡я│я┌я┐п©я▐я┌ п╡ я│п╦п╩я┐ п©п╬я│п╩п╣ п©п╣я─п╣п╥п╟п©я┐я│п╨п╟ POPFile
+Configuration_Separator                 п═п╟п╥п╢п╣п╩п╦я┌п╣п╩я▄
+Configuration_SepUpdate                 п═п╟п╥п╢п╣п╩п╦я┌п╣п╩я▄ п╦п╥п╪п╣п╫я▒п╫ п╫п╟ %s
+Configuration_UI                        п÷п╬я─я┌ п╡п╣п╠-п╦п╫я┌п╣я─я└п╣п╧я│п╟
+Configuration_UIUpdate                  п²п╬п╪п╣я─ п©п╬я─я┌п╟ п╡п╣п╠-п╦п╫я┌п╣я─я└п╣п╧я│п╟ п╦п╥п╪п╣п╫я▒п╫ п╫п╟ %s; п╦п╥п╪п╣п╫п╣п╫п╦я▐ п╡я│я┌я┐п©я▐я┌ п╡ я│п╦п╩я┐ п©п╬я│п╩п╣ п©п╣я─п╣п╥п╟п©я┐я│п╨п╟ POPFile
+Configuration_History                   п║п╨п╬п╩я▄п╨п╬ п©п╦я│п╣п╪ п©п╬п╨п╟п╥я▀п╡п╟я┌я▄ п╫п╟ п╬п╢п╫п╬п╧ я│я┌я─п╟п╫п╦я├п╣
+Configuration_HistoryUpdate             п╒п╣п©п╣я─я▄ п╫п╟ я│я┌я─п╟п╫п╦я├п╣ п╠я┐п╢п╣я┌ п©п╬п╨п╟п╥я▀п╡п╟я┌я▄я│я▐ %s п©п╦я│п╣п╪
+Configuration_Days                      п║п╨п╬п╩я▄п╨п╬ п╢п╫п╣п╧ я┘я─п╟п╫п╦я┌я▄ п╦я│я┌п╬я─п╦я▌
+Configuration_DaysUpdate                п╒п╣п©п╣я─я▄ п╦я│я┌п╬я─п╦я▐ п╠я┐п╢п╣я┌ я┘я─п╟п╫п╦я┌я▄я│я▐ %s п╢п╫п╣п╧
+Configuration_UserInterface             п▓п╣п╠-п╦п╫я┌п╣я─я└п╣п╧я│
+Configuration_Skins                     п·я└п╬я─п╪п╩п╣п╫п╦п╣
+Configuration_SkinsChoose               п▓я▀п╠я─п╟я┌я▄ п╡п╟я─п╦п╟п╫я┌ п╬я└п╬я─п╪п╩п╣п╫п╦я▐
+Configuration_Language                  п╞п╥я▀п╨
+Configuration_LanguageChoose            п▓я▀п╠я─п╟я┌я▄ я▐п╥я▀п╨
+Configuration_ListenPorts               POP3 п©п╬я─я┌
+Configuration_HistoryView               п≤я│я┌п╬я─п╦я▐
+Configuration_TCPTimeout                п╒п╟п╧п╪п╟я┐я┌ TCP-я│п╬п╣п╢п╦п╫п╣п╫п╦я▐
+Configuration_TCPTimeoutSecs            п╒п╟п╧п╪п╟я┐я┌ TCP-я│п╬п╣п╢п╦п╫п╣п╫п╦я▐ п╡ я│п╣п╨я┐п╫п╢п╟я┘
+Configuration_TCPTimeoutUpdate          п╒п╟п╧п╪п╟я┐я┌ п╦п╥п╪п╣п╫я▒п╫ п╫п╟ %s я│п╣п╨я┐п╫п╢
+Configuration_ClassificationInsertion   п я┐п╢п╟ п╥п╟п©п╦я│я▀п╡п╟я┌я▄ п╨п╩п╟я│я│п╦я└п╦п╨п╟я┌п╬я─
+Configuration_SubjectLine               п≈п╟п©п╦я│я▀п╡п╟я┌я▄ п╨п╩п╟я│я│п╦я└п╦п╨п╟я┌п╬я─ п╡ я┌п╣п╪я┐ п©п╦я│я▄п╪п╟
+Configuration_XTCInsertion              п■п╬п╠п╟п╡п╩я▐я┌я▄ п©п╬п╩п╣ X-Text-Classification п╡ п╥п╟пЁп╬п╩п╬п╡п╬п╨
+Configuration_XPLInsertion              п■п╬п╠п╟п╡п╩я▐я┌я▄ п©п╬п╩п╣ X-POPFile-Link п╡ п╥п╟пЁп╬п╩п╬п╡п╬п╨
+Configuration_Logging                   п⌡п╬пЁп╦
+Configuration_None                      п²п╦п╨я┐п╢п╟
+Configuration_ToScreen                  п²п╟ я█п╨я─п╟п╫
+Configuration_ToFile                    п▓ я└п╟п╧п╩
+Configuration_ToScreenFile              п²п╟ я█п╨я─п╟п╫ п╦ п╡ я└п╟п╧п╩
+Configuration_LoggerOutput              п я┐п╢п╟ п╡я▀п╡п╬п╢п╦я┌я▄ п╩п╬пЁ
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
 
-Advanced_Error1                         '%s' уже есть в списке стоп-слов
-Advanced_Error2                         Стоп-слово может содержать буквы, цифры, и символы ., _, -, @
-Advanced_Error3                         Слово '%s' добавлено в список стоп-слов
-Advanced_Error4                         '%s' нет в списке стоп-слов
-Advanced_Error5                         Слово '%s' удалено из списка стоп-слов
-Advanced_StopWords                      Стоп-слова
-Advanced_Message1                       Эти слова игнорируются при классификации писем, поскольку встречаются очень часто.
-Advanced_AddWord                        Добавить слово
-Advanced_RemoveWord                     Удалить слово
+Advanced_Error1                         '%s' я┐п╤п╣ п╣я│я┌я▄ п╡ я│п©п╦я│п╨п╣ я│я┌п╬п©-я│п╩п╬п╡
+Advanced_Error2                         п║я┌п╬п©-я│п╩п╬п╡п╬ п╪п╬п╤п╣я┌ я│п╬п╢п╣я─п╤п╟я┌я▄ п╠я┐п╨п╡я▀, я├п╦я└я─я▀, п╦ я│п╦п╪п╡п╬п╩я▀ ., _, -, @
+Advanced_Error3                         п║п╩п╬п╡п╬ '%s' п╢п╬п╠п╟п╡п╩п╣п╫п╬ п╡ я│п©п╦я│п╬п╨ я│я┌п╬п©-я│п╩п╬п╡
+Advanced_Error4                         '%s' п╫п╣я┌ п╡ я│п©п╦я│п╨п╣ я│я┌п╬п©-я│п╩п╬п╡
+Advanced_Error5                         п║п╩п╬п╡п╬ '%s' я┐п╢п╟п╩п╣п╫п╬ п╦п╥ я│п©п╦я│п╨п╟ я│я┌п╬п©-я│п╩п╬п╡
+Advanced_StopWords                      п║я┌п╬п©-я│п╩п╬п╡п╟
+Advanced_Message1                       п╜я┌п╦ я│п╩п╬п╡п╟ п╦пЁп╫п╬я─п╦я─я┐я▌я┌я│я▐ п©я─п╦ п╨п╩п╟я│я│п╦я└п╦п╨п╟я├п╦п╦ п©п╦я│п╣п╪, п©п╬я│п╨п╬п╩я▄п╨я┐ п╡я│я┌я─п╣я┤п╟я▌я┌я│я▐ п╬я┤п╣п╫я▄ я┤п╟я│я┌п╬.
+Advanced_AddWord                        п■п╬п╠п╟п╡п╦я┌я▄ я│п╩п╬п╡п╬
+Advanced_RemoveWord                     пёп╢п╟п╩п╦я┌я▄ я│п╩п╬п╡п╬
 
-History_Filter                          &nbsp;(лежащие в ведре <font color="%s">%s</font>)
+History_Filter                          &nbsp;(п╩п╣п╤п╟я┴п╦п╣ п╡ п╡п╣п╢я─п╣ <font color="%s">%s</font>)
 History_FilterBy                        Filter By
-History_Search                          &nbsp;(найденные по теме &laquo;i<em>%s</em>&raquo;)
-History_Title                           Последние обработанные письма
-History_Jump                            Перейти к письму
-History_ShowAll                         Показывать всё
-History_ShouldBe                        Должно быть в&nbsp;
-History_NoFrom                          не задан отправитель
-History_NoSubject                       не задана тема
-History_ClassifyAs                      Классифицировать как
-History_MagnetUsed                      Использовался магнит
-History_ChangedTo                       Изменено на <font color="%s">%s
-History_Already                         Уже переклассифицировано как <font color="%s">%s</font>
-History_RemoveAll                       Удалить всю историю
-History_RemovePage                      Удалить эту страницу
-History_Remove                          Чтобы удалить записи из истории нажмите
-History_SearchMessage                   Искать в поле <em>Тема</em>
-History_NoMessages                      Нет писем
-History_ShowMagnet                      Только примагниченные
-History_Magnet                          &nbsp;(среди классифицированных с помощью магнитов)
+History_Search                          &nbsp;(п╫п╟п╧п╢п╣п╫п╫я▀п╣ п©п╬ я┌п╣п╪п╣ &laquo;i<em>%s</em>&raquo;)
+History_Title                           п÷п╬я│п╩п╣п╢п╫п╦п╣ п╬п╠я─п╟п╠п╬я┌п╟п╫п╫я▀п╣ п©п╦я│я▄п╪п╟
+History_Jump                            п÷п╣я─п╣п╧я┌п╦ п╨ п©п╦я│я▄п╪я┐
+History_ShowAll                         п÷п╬п╨п╟п╥я▀п╡п╟я┌я▄ п╡я│я▒
+History_ShouldBe                        п■п╬п╩п╤п╫п╬ п╠я▀я┌я▄ п╡&nbsp;
+History_NoFrom                          п╫п╣ п╥п╟п╢п╟п╫ п╬я┌п©я─п╟п╡п╦я┌п╣п╩я▄
+History_NoSubject                       п╫п╣ п╥п╟п╢п╟п╫п╟ я┌п╣п╪п╟
+History_ClassifyAs                      п п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟я┌я▄ п╨п╟п╨
+History_MagnetUsed                      п≤я│п©п╬п╩я▄п╥п╬п╡п╟п╩я│я▐ п╪п╟пЁп╫п╦я┌
+History_ChangedTo                       п≤п╥п╪п╣п╫п╣п╫п╬ п╫п╟ <font color="%s">%s
+History_Already                         пёп╤п╣ п©п╣я─п╣п╨п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟п╫п╬ п╨п╟п╨ <font color="%s">%s</font>
+History_RemoveAll                       пёп╢п╟п╩п╦я┌я▄ п╡я│я▌ п╦я│я┌п╬я─п╦я▌
+History_RemovePage                      пёп╢п╟п╩п╦я┌я▄ я█я┌я┐ я│я┌я─п╟п╫п╦я├я┐
+History_Remove                          п╖я┌п╬п╠я▀ я┐п╢п╟п╩п╦я┌я▄ п╥п╟п©п╦я│п╦ п╦п╥ п╦я│я┌п╬я─п╦п╦ п╫п╟п╤п╪п╦я┌п╣
+History_SearchMessage                   п≤я│п╨п╟я┌я▄ п╡ п©п╬п╩п╣ <em>п╒п╣п╪п╟</em>
+History_NoMessages                      п²п╣я┌ п©п╦я│п╣п╪
+History_ShowMagnet                      п╒п╬п╩я▄п╨п╬ п©я─п╦п╪п╟пЁп╫п╦я┤п╣п╫п╫я▀п╣
+History_Magnet                          &nbsp;(я│я─п╣п╢п╦ п╨п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟п╫п╫я▀я┘ я│ п©п╬п╪п╬я┴я▄я▌ п╪п╟пЁп╫п╦я┌п╬п╡)
  
-Password_Title                          Пароль
-Password_Enter                          Скажите пароль
-Password_Go                             Войти
-Password_Error1                         Пароль оказался неправильным
+Password_Title                          п÷п╟я─п╬п╩я▄
+Password_Enter                          п║п╨п╟п╤п╦я┌п╣ п©п╟я─п╬п╩я▄
+Password_Go                             п▓п╬п╧я┌п╦
+Password_Error1                         п÷п╟я─п╬п╩я▄ п╬п╨п╟п╥п╟п╩я│я▐ п╫п╣п©я─п╟п╡п╦п╩я▄п╫я▀п╪
 
-Security_Error1                         Номер безопасного порта должен быть числом от 1 до 65535
-Security_Stealth                        Режим невидимости/Настройка сервера
-Security_NoStealthMode                  Нет (режим невидимости)
-Security_ExplainStats                   (Если включено, POPFile раз в день будет отправлять скрипту на www.usethesource.com три числа: bc (число ваших вёдер), mc (сколько писем было классифицировано с помощью POPFile) и ec (число ошибок классификации). Эти значения сохранятся в файле и автор будет использовать их для опубликования статистических данных о том, как используется POPFile и насколько хорошо он работает. Веб-сервер автора хранит логи в течение 5 дней, после чего они удаляются, автор не занимается сопоставлением статистики и IP-адресов пользователей.)
-Security_ExplainUpdate                  (Если включено, POPFile раз в день будет отправлять скрипту на www.usethesource.com три числа: ma (старший номер версии установленного POPFile), mi (младший номер версии) и bn (номер сборки). POPFile получит ответ от сервера в виде картинки, которая появится вверху страницы, если доступна новая версия. Веб-сервер автора хранит логи в течение 5 дней, после чего они удаляются, автор не занимается сопоставлением запросов об обновлении и IP-адресов пользователей.)
-Security_PasswordTitle                  Пароль для веб-интерфейса
-Security_Password                       Пароль
-Security_PasswordUpdate                 Пароль изменён на '%s'
+Security_Error1                         п²п╬п╪п╣я─ п╠п╣п╥п╬п©п╟я│п╫п╬пЁп╬ п©п╬я─я┌п╟ п╢п╬п╩п╤п╣п╫ п╠я▀я┌я▄ я┤п╦я│п╩п╬п╪ п╬я┌ 1 п╢п╬ 65535
+Security_Stealth                        п═п╣п╤п╦п╪ п╫п╣п╡п╦п╢п╦п╪п╬я│я┌п╦/п²п╟я│я┌я─п╬п╧п╨п╟ я│п╣я─п╡п╣я─п╟
+Security_NoStealthMode                  п²п╣я┌ (я─п╣п╤п╦п╪ п╫п╣п╡п╦п╢п╦п╪п╬я│я┌п╦)
+Security_ExplainStats                   (п∙я│п╩п╦ п╡п╨п╩я▌я┤п╣п╫п╬, POPFile я─п╟п╥ п╡ п╢п╣п╫я▄ п╠я┐п╢п╣я┌ п╬я┌п©я─п╟п╡п╩я▐я┌я▄ я│п╨я─п╦п©я┌я┐ п╫п╟ www.usethesource.com я┌я─п╦ я┤п╦я│п╩п╟: bc (я┤п╦я│п╩п╬ п╡п╟я┬п╦я┘ п╡я▒п╢п╣я─), mc (я│п╨п╬п╩я▄п╨п╬ п©п╦я│п╣п╪ п╠я▀п╩п╬ п╨п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟п╫п╬ я│ п©п╬п╪п╬я┴я▄я▌ POPFile) п╦ ec (я┤п╦я│п╩п╬ п╬я┬п╦п╠п╬п╨ п╨п╩п╟я│я│п╦я└п╦п╨п╟я├п╦п╦). п╜я┌п╦ п╥п╫п╟я┤п╣п╫п╦я▐ я│п╬я┘я─п╟п╫я▐я┌я│я▐ п╡ я└п╟п╧п╩п╣ п╦ п╟п╡я┌п╬я─ п╠я┐п╢п╣я┌ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╦я┘ п╢п╩я▐ п╬п©я┐п╠п╩п╦п╨п╬п╡п╟п╫п╦я▐ я│я┌п╟я┌п╦я│я┌п╦я┤п╣я│п╨п╦я┘ п╢п╟п╫п╫я▀я┘ п╬ я┌п╬п╪, п╨п╟п╨ п╦я│п©п╬п╩я▄п╥я┐п╣я┌я│я▐ POPFile п╦ п╫п╟я│п╨п╬п╩я▄п╨п╬ я┘п╬я─п╬я┬п╬ п╬п╫ я─п╟п╠п╬я┌п╟п╣я┌. п▓п╣п╠-я│п╣я─п╡п╣я─ п╟п╡я┌п╬я─п╟ я┘я─п╟п╫п╦я┌ п╩п╬пЁп╦ п╡ я┌п╣я┤п╣п╫п╦п╣ 5 п╢п╫п╣п╧, п©п╬я│п╩п╣ я┤п╣пЁп╬ п╬п╫п╦ я┐п╢п╟п╩я▐я▌я┌я│я▐, п╟п╡я┌п╬я─ п╫п╣ п╥п╟п╫п╦п╪п╟п╣я┌я│я▐ я│п╬п©п╬я│я┌п╟п╡п╩п╣п╫п╦п╣п╪ я│я┌п╟я┌п╦я│я┌п╦п╨п╦ п╦ IP-п╟п╢я─п╣я│п╬п╡ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩п╣п╧.)
+Security_ExplainUpdate                  (п∙я│п╩п╦ п╡п╨п╩я▌я┤п╣п╫п╬, POPFile я─п╟п╥ п╡ п╢п╣п╫я▄ п╠я┐п╢п╣я┌ п╬я┌п©я─п╟п╡п╩я▐я┌я▄ я│п╨я─п╦п©я┌я┐ п╫п╟ www.usethesource.com я┌я─п╦ я┤п╦я│п╩п╟: ma (я│я┌п╟я─я┬п╦п╧ п╫п╬п╪п╣я─ п╡п╣я─я│п╦п╦ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╫п╬пЁп╬ POPFile), mi (п╪п╩п╟п╢я┬п╦п╧ п╫п╬п╪п╣я─ п╡п╣я─я│п╦п╦) п╦ bn (п╫п╬п╪п╣я─ я│п╠п╬я─п╨п╦). POPFile п©п╬п╩я┐я┤п╦я┌ п╬я┌п╡п╣я┌ п╬я┌ я│п╣я─п╡п╣я─п╟ п╡ п╡п╦п╢п╣ п╨п╟я─я┌п╦п╫п╨п╦, п╨п╬я┌п╬я─п╟я▐ п©п╬я▐п╡п╦я┌я│я▐ п╡п╡п╣я─я┘я┐ я│я┌я─п╟п╫п╦я├я▀, п╣я│п╩п╦ п╢п╬я│я┌я┐п©п╫п╟ п╫п╬п╡п╟я▐ п╡п╣я─я│п╦я▐. п▓п╣п╠-я│п╣я─п╡п╣я─ п╟п╡я┌п╬я─п╟ я┘я─п╟п╫п╦я┌ п╩п╬пЁп╦ п╡ я┌п╣я┤п╣п╫п╦п╣ 5 п╢п╫п╣п╧, п©п╬я│п╩п╣ я┤п╣пЁп╬ п╬п╫п╦ я┐п╢п╟п╩я▐я▌я┌я│я▐, п╟п╡я┌п╬я─ п╫п╣ п╥п╟п╫п╦п╪п╟п╣я┌я│я▐ я│п╬п©п╬я│я┌п╟п╡п╩п╣п╫п╦п╣п╪ п╥п╟п©я─п╬я│п╬п╡ п╬п╠ п╬п╠п╫п╬п╡п╩п╣п╫п╦п╦ п╦ IP-п╟п╢я─п╣я│п╬п╡ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩п╣п╧.)
+Security_PasswordTitle                  п÷п╟я─п╬п╩я▄ п╢п╩я▐ п╡п╣п╠-п╦п╫я┌п╣я─я└п╣п╧я│п╟
+Security_Password                       п÷п╟я─п╬п╩я▄
+Security_PasswordUpdate                 п÷п╟я─п╬п╩я▄ п╦п╥п╪п╣п╫я▒п╫ п╫п╟ '%s'
 Security_AUTHTitle                      Secure Password Authentication/AUTH
-Security_SecureServer                   Безопасный сервер
-Security_SecureServerUpdate             Безопасным теперь считается сервер '%s'. Изменение вступит в силу только после перезапуска POPFile
-Security_SecurePort                     Безопасный порт
-Security_SecurePortUpdate               Безопасным теперь считается порт %s. Изменение вступит в силу только после перезапуска POPFile
-Security_POP3                           Разрешать POP3-соединения с удалёнными машинами
-Security_UI                             Разрешать HTTP-соединения (веб-интерфейс) с удалёнными машинами
-Security_UpdateTitle                    Автоматическое обновление
-Security_Update                         Ежедневно проверять, не обновился ли POPFile
-Security_StatsTitle                     Статистические отчёты
-Security_Stats                          Ежедневно отправлять статистику Джону
+Security_SecureServer                   п▒п╣п╥п╬п©п╟я│п╫я▀п╧ я│п╣я─п╡п╣я─
+Security_SecureServerUpdate             п▒п╣п╥п╬п©п╟я│п╫я▀п╪ я┌п╣п©п╣я─я▄ я│я┤п╦я┌п╟п╣я┌я│я▐ я│п╣я─п╡п╣я─ '%s'. п≤п╥п╪п╣п╫п╣п╫п╦п╣ п╡я│я┌я┐п©п╦я┌ п╡ я│п╦п╩я┐ я┌п╬п╩я▄п╨п╬ п©п╬я│п╩п╣ п©п╣я─п╣п╥п╟п©я┐я│п╨п╟ POPFile
+Security_SecurePort                     п▒п╣п╥п╬п©п╟я│п╫я▀п╧ п©п╬я─я┌
+Security_SecurePortUpdate               п▒п╣п╥п╬п©п╟я│п╫я▀п╪ я┌п╣п©п╣я─я▄ я│я┤п╦я┌п╟п╣я┌я│я▐ п©п╬я─я┌ %s. п≤п╥п╪п╣п╫п╣п╫п╦п╣ п╡я│я┌я┐п©п╦я┌ п╡ я│п╦п╩я┐ я┌п╬п╩я▄п╨п╬ п©п╬я│п╩п╣ п©п╣я─п╣п╥п╟п©я┐я│п╨п╟ POPFile
+Security_POP3                           п═п╟п╥я─п╣я┬п╟я┌я▄ POP3-я│п╬п╣п╢п╦п╫п╣п╫п╦я▐ я│ я┐п╢п╟п╩я▒п╫п╫я▀п╪п╦ п╪п╟я┬п╦п╫п╟п╪п╦
+Security_UI                             п═п╟п╥я─п╣я┬п╟я┌я▄ HTTP-я│п╬п╣п╢п╦п╫п╣п╫п╦я▐ (п╡п╣п╠-п╦п╫я┌п╣я─я└п╣п╧я│) я│ я┐п╢п╟п╩я▒п╫п╫я▀п╪п╦ п╪п╟я┬п╦п╫п╟п╪п╦
+Security_UpdateTitle                    п░п╡я┌п╬п╪п╟я┌п╦я┤п╣я│п╨п╬п╣ п╬п╠п╫п╬п╡п╩п╣п╫п╦п╣
+Security_Update                         п∙п╤п╣п╢п╫п╣п╡п╫п╬ п©я─п╬п╡п╣я─я▐я┌я▄, п╫п╣ п╬п╠п╫п╬п╡п╦п╩я│я▐ п╩п╦ POPFile
+Security_StatsTitle                     п║я┌п╟я┌п╦я│я┌п╦я┤п╣я│п╨п╦п╣ п╬я┌я┤я▒я┌я▀
+Security_Stats                          п∙п╤п╣п╢п╫п╣п╡п╫п╬ п╬я┌п©я─п╟п╡п╩я▐я┌я▄ я│я┌п╟я┌п╦я│я┌п╦п╨я┐ п■п╤п╬п╫я┐
 
-Magnet_Error1                           Магнит '%s' уже существует в ведре '%s'
-Magnet_Error2                           Новый магнит '%s' совпадает с магнитом '%s' в ведре '%s' и может спровоцировать двусмысленные результаты. Новый магнит не был добавлен.
-Magnet_Error3                           Создан новый магнит '%s' в ведре '%s'
-Magnet_CurrentMagnets                   Существующие магниты
-Magnet_Message1                         Магниты позволяют складывать все подходящие к ним сообщения в указанные ведра.
-Magnet_CreateNew                        Создать новый магнит
-Magnet_Explanation                      <b>Существует три типа магнитов:</b><ul><li><b>Адрес или имя отправителя:</b> например, &quot;john@company.com&quot; сработает для писем, пришедших с указанного адреса, <br />&quot;company.com&quot; сработает для любых писем, пришедших из company.com, <br />&quot;John Doe&quot; сработает если в поле &quot;Отправитель&quot; присутствует указанное имя, в то время как, &quot;John&quot; сработает для любых Джонов, написавших вам письмо</li><li> <b>Адрес или имя получателя:</b> работает как предыдущий, только оперирует полем &quot;Получатель&quot;</li><li> <b>Слова в теме письма:</b> например, &quot;hello&quot; сработает на всех письмах с этим приветствием в теме</li></ul>
-Magnet_MagnetType                       Тип магнита
-Magnet_Value                            Значение
-Magnet_Always                           Всегда складывать в ведро
+Magnet_Error1                           п°п╟пЁп╫п╦я┌ '%s' я┐п╤п╣ я│я┐я┴п╣я│я┌п╡я┐п╣я┌ п╡ п╡п╣п╢я─п╣ '%s'
+Magnet_Error2                           п²п╬п╡я▀п╧ п╪п╟пЁп╫п╦я┌ '%s' я│п╬п╡п©п╟п╢п╟п╣я┌ я│ п╪п╟пЁп╫п╦я┌п╬п╪ '%s' п╡ п╡п╣п╢я─п╣ '%s' п╦ п╪п╬п╤п╣я┌ я│п©я─п╬п╡п╬я├п╦я─п╬п╡п╟я┌я▄ п╢п╡я┐я│п╪я▀я│п╩п╣п╫п╫я▀п╣ я─п╣п╥я┐п╩я▄я┌п╟я┌я▀. п²п╬п╡я▀п╧ п╪п╟пЁп╫п╦я┌ п╫п╣ п╠я▀п╩ п╢п╬п╠п╟п╡п╩п╣п╫.
+Magnet_Error3                           п║п╬п╥п╢п╟п╫ п╫п╬п╡я▀п╧ п╪п╟пЁп╫п╦я┌ '%s' п╡ п╡п╣п╢я─п╣ '%s'
+Magnet_CurrentMagnets                   п║я┐я┴п╣я│я┌п╡я┐я▌я┴п╦п╣ п╪п╟пЁп╫п╦я┌я▀
+Magnet_Message1                         п°п╟пЁп╫п╦я┌я▀ п©п╬п╥п╡п╬п╩я▐я▌я┌ я│п╨п╩п╟п╢я▀п╡п╟я┌я▄ п╡я│п╣ п©п╬п╢я┘п╬п╢я▐я┴п╦п╣ п╨ п╫п╦п╪ я│п╬п╬п╠я┴п╣п╫п╦я▐ п╡ я┐п╨п╟п╥п╟п╫п╫я▀п╣ п╡п╣п╢я─п╟.
+Magnet_CreateNew                        п║п╬п╥п╢п╟я┌я▄ п╫п╬п╡я▀п╧ п╪п╟пЁп╫п╦я┌
+Magnet_Explanation                      <b>п║я┐я┴п╣я│я┌п╡я┐п╣я┌ я┌я─п╦ я┌п╦п©п╟ п╪п╟пЁп╫п╦я┌п╬п╡:</b><ul><li><b>п░п╢я─п╣я│ п╦п╩п╦ п╦п╪я▐ п╬я┌п©я─п╟п╡п╦я┌п╣п╩я▐:</b> п╫п╟п©я─п╦п╪п╣я─, &quot;john@company.com&quot; я│я─п╟п╠п╬я┌п╟п╣я┌ п╢п╩я▐ п©п╦я│п╣п╪, п©я─п╦я┬п╣п╢я┬п╦я┘ я│ я┐п╨п╟п╥п╟п╫п╫п╬пЁп╬ п╟п╢я─п╣я│п╟, <br />&quot;company.com&quot; я│я─п╟п╠п╬я┌п╟п╣я┌ п╢п╩я▐ п╩я▌п╠я▀я┘ п©п╦я│п╣п╪, п©я─п╦я┬п╣п╢я┬п╦я┘ п╦п╥ company.com, <br />&quot;John Doe&quot; я│я─п╟п╠п╬я┌п╟п╣я┌ п╣я│п╩п╦ п╡ п©п╬п╩п╣ &quot;п·я┌п©я─п╟п╡п╦я┌п╣п╩я▄&quot; п©я─п╦я│я┐я┌я│я┌п╡я┐п╣я┌ я┐п╨п╟п╥п╟п╫п╫п╬п╣ п╦п╪я▐, п╡ я┌п╬ п╡я─п╣п╪я▐ п╨п╟п╨, &quot;John&quot; я│я─п╟п╠п╬я┌п╟п╣я┌ п╢п╩я▐ п╩я▌п╠я▀я┘ п■п╤п╬п╫п╬п╡, п╫п╟п©п╦я│п╟п╡я┬п╦я┘ п╡п╟п╪ п©п╦я│я▄п╪п╬</li><li> <b>п░п╢я─п╣я│ п╦п╩п╦ п╦п╪я▐ п©п╬п╩я┐я┤п╟я┌п╣п╩я▐:</b> я─п╟п╠п╬я┌п╟п╣я┌ п╨п╟п╨ п©я─п╣п╢я▀п╢я┐я┴п╦п╧, я┌п╬п╩я▄п╨п╬ п╬п©п╣я─п╦я─я┐п╣я┌ п©п╬п╩п╣п╪ &quot;п÷п╬п╩я┐я┤п╟я┌п╣п╩я▄&quot;</li><li> <b>п║п╩п╬п╡п╟ п╡ я┌п╣п╪п╣ п©п╦я│я▄п╪п╟:</b> п╫п╟п©я─п╦п╪п╣я─, &quot;hello&quot; я│я─п╟п╠п╬я┌п╟п╣я┌ п╫п╟ п╡я│п╣я┘ п©п╦я│я▄п╪п╟я┘ я│ я█я┌п╦п╪ п©я─п╦п╡п╣я┌я│я┌п╡п╦п╣п╪ п╡ я┌п╣п╪п╣</li></ul>
+Magnet_MagnetType                       п╒п╦п© п╪п╟пЁп╫п╦я┌п╟
+Magnet_Value                            п≈п╫п╟я┤п╣п╫п╦п╣
+Magnet_Always                           п▓я│п╣пЁп╢п╟ я│п╨п╩п╟п╢я▀п╡п╟я┌я▄ п╡ п╡п╣п╢я─п╬
 
-Bucket_Error1                           Название ведра может состоять из строчныхлатинских букв от 'a' до 'z' и знаков - и _
-Bucket_Error2                           Ведро '%s' уже существует
-Bucket_Error3                           Создано ведро '%s'
+Bucket_Error1                           п²п╟п╥п╡п╟п╫п╦п╣ п╡п╣п╢я─п╟ п╪п╬п╤п╣я┌ я│п╬я│я┌п╬я▐я┌я▄ п╦п╥ я│я┌я─п╬я┤п╫я▀я┘п╩п╟я┌п╦п╫я│п╨п╦я┘ п╠я┐п╨п╡ п╬я┌ 'a' п╢п╬ 'z' п╦ п╥п╫п╟п╨п╬п╡ - п╦ _
+Bucket_Error2                           п▓п╣п╢я─п╬ '%s' я┐п╤п╣ я│я┐я┴п╣я│я┌п╡я┐п╣я┌
+Bucket_Error3                           п║п╬п╥п╢п╟п╫п╬ п╡п╣п╢я─п╬ '%s'
 Bucket_Error4                           Please enter a non-blank word
-Bucket_Error5                           Ведро '%s' переименовано в '%s'
-Bucket_Error6                           Удалено ведро '%s'
-Bucket_Title                            Отчёт
-Bucket_BucketName                       Название ведра
-Bucket_WordCount                        Количество слов
-Bucket_WordCounts                       Слова
-Bucket_UniqueWords                      Уникальных слов
-Bucket_SubjectModification              Изменение темы письма
-Bucket_ChangeColor                      Изменить цвет
-Bucket_NotEnoughData                    Недостаточно данных
-Bucket_ClassificationAccuracy           Точность классификации
-Bucket_EmailsClassified                 Классифицированные письма
-Bucket_EmailsClassifiedUpper            Классифицированные письма
-Bucket_ClassificationErrors             Ошибки классификации
-Bucket_Accuracy                         Точность
-Bucket_ClassificationCount              Классифицировано
-Bucket_ResetStatistics                  Сброс статистики
-Bucket_LastReset                        Последний сброс был
-Bucket_CurrentColor                     %s текущий цвет&nbsp;&mdash; %s
-Bucket_SetColorTo                       Установить %s цвет в %s
-Bucket_Maintenance                      Управление
-Bucket_CreateBucket                     Создать ведро
-Bucket_DeleteBucket                     Удалить ведро
-Bucket_RenameBucket                     Переименовать ведро
-Bucket_Lookup                           Поиск
-Bucket_LookupMessage                    Искать слово в вёдрах
-Bucket_LookupMessage2                   Результаты поиска
-Bucket_LookupMostLikely                 <b>%s</b> чаще всего встречается в <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> не встречается ни в одном из вёдер
-Bucket_DisabledGlobally                 Выключено глобально
-Bucket_To                               в
-Bucket_Quarantine                       Карантин
+Bucket_Error5                           п▓п╣п╢я─п╬ '%s' п©п╣я─п╣п╦п╪п╣п╫п╬п╡п╟п╫п╬ п╡ '%s'
+Bucket_Error6                           пёп╢п╟п╩п╣п╫п╬ п╡п╣п╢я─п╬ '%s'
+Bucket_Title                            п·я┌я┤я▒я┌
+Bucket_BucketName                       п²п╟п╥п╡п╟п╫п╦п╣ п╡п╣п╢я─п╟
+Bucket_WordCount                        п п╬п╩п╦я┤п╣я│я┌п╡п╬ я│п╩п╬п╡
+Bucket_WordCounts                       п║п╩п╬п╡п╟
+Bucket_UniqueWords                      пёп╫п╦п╨п╟п╩я▄п╫я▀я┘ я│п╩п╬п╡
+Bucket_SubjectModification              п≤п╥п╪п╣п╫п╣п╫п╦п╣ я┌п╣п╪я▀ п©п╦я│я▄п╪п╟
+Bucket_ChangeColor                      п≤п╥п╪п╣п╫п╦я┌я▄ я├п╡п╣я┌
+Bucket_NotEnoughData                    п²п╣п╢п╬я│я┌п╟я┌п╬я┤п╫п╬ п╢п╟п╫п╫я▀я┘
+Bucket_ClassificationAccuracy           п╒п╬я┤п╫п╬я│я┌я▄ п╨п╩п╟я│я│п╦я└п╦п╨п╟я├п╦п╦
+Bucket_EmailsClassified                 п п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟п╫п╫я▀п╣ п©п╦я│я▄п╪п╟
+Bucket_EmailsClassifiedUpper            п п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟п╫п╫я▀п╣ п©п╦я│я▄п╪п╟
+Bucket_ClassificationErrors             п·я┬п╦п╠п╨п╦ п╨п╩п╟я│я│п╦я└п╦п╨п╟я├п╦п╦
+Bucket_Accuracy                         п╒п╬я┤п╫п╬я│я┌я▄
+Bucket_ClassificationCount              п п╩п╟я│я│п╦я└п╦я├п╦я─п╬п╡п╟п╫п╬
+Bucket_ResetStatistics                  п║п╠я─п╬я│ я│я┌п╟я┌п╦я│я┌п╦п╨п╦
+Bucket_LastReset                        п÷п╬я│п╩п╣п╢п╫п╦п╧ я│п╠я─п╬я│ п╠я▀п╩
+Bucket_CurrentColor                     %s я┌п╣п╨я┐я┴п╦п╧ я├п╡п╣я┌&nbsp;&mdash; %s
+Bucket_SetColorTo                       пёя│я┌п╟п╫п╬п╡п╦я┌я▄ %s я├п╡п╣я┌ п╡ %s
+Bucket_Maintenance                      пёп©я─п╟п╡п╩п╣п╫п╦п╣
+Bucket_CreateBucket                     п║п╬п╥п╢п╟я┌я▄ п╡п╣п╢я─п╬
+Bucket_DeleteBucket                     пёп╢п╟п╩п╦я┌я▄ п╡п╣п╢я─п╬
+Bucket_RenameBucket                     п÷п╣я─п╣п╦п╪п╣п╫п╬п╡п╟я┌я▄ п╡п╣п╢я─п╬
+Bucket_Lookup                           п÷п╬п╦я│п╨
+Bucket_LookupMessage                    п≤я│п╨п╟я┌я▄ я│п╩п╬п╡п╬ п╡ п╡я▒п╢я─п╟я┘
+Bucket_LookupMessage2                   п═п╣п╥я┐п╩я▄я┌п╟я┌я▀ п©п╬п╦я│п╨п╟
+Bucket_LookupMostLikely                 <b>%s</b> я┤п╟я┴п╣ п╡я│п╣пЁп╬ п╡я│я┌я─п╣я┤п╟п╣я┌я│я▐ п╡ <font color="%s">%s</font>
+Bucket_DoesNotAppear                    <p><b>%s</b> п╫п╣ п╡я│я┌я─п╣я┤п╟п╣я┌я│я▐ п╫п╦ п╡ п╬п╢п╫п╬п╪ п╦п╥ п╡я▒п╢п╣я─
+Bucket_DisabledGlobally                 п▓я▀п╨п╩я▌я┤п╣п╫п╬ пЁп╩п╬п╠п╟п╩я▄п╫п╬
+Bucket_To                               п╡
+Bucket_Quarantine                       п п╟я─п╟п╫я┌п╦п╫
 
-SingleBucket_Title                      Подробнее о %s
-SingleBucket_WordCount                  Слов в ведре
-SingleBucket_TotalWordCount             Слов вообще
-SingleBucket_Percentage                 Процентов от всего
-SingleBucket_WordTable                  Таблица слов для %s
-SingleBucket_Message1                   Слова со звёздочкой (*) были использованы при классификации в этой сессии POPFile. Щёлкните мышкой на любом слове, и вы увидите его вероятность для всех вёдер.
-SingleBucket_Unique                     %s уникально
+SingleBucket_Title                      п÷п╬п╢я─п╬п╠п╫п╣п╣ п╬ %s
+SingleBucket_WordCount                  п║п╩п╬п╡ п╡ п╡п╣п╢я─п╣
+SingleBucket_TotalWordCount             п║п╩п╬п╡ п╡п╬п╬п╠я┴п╣
+SingleBucket_Percentage                 п÷я─п╬я├п╣п╫я┌п╬п╡ п╬я┌ п╡я│п╣пЁп╬
+SingleBucket_WordTable                  п╒п╟п╠п╩п╦я├п╟ я│п╩п╬п╡ п╢п╩я▐ %s
+SingleBucket_Message1                   п║п╩п╬п╡п╟ я│п╬ п╥п╡я▒п╥п╢п╬я┤п╨п╬п╧ (*) п╠я▀п╩п╦ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫я▀ п©я─п╦ п╨п╩п╟я│я│п╦я└п╦п╨п╟я├п╦п╦ п╡ я█я┌п╬п╧ я│п╣я│я│п╦п╦ POPFile. п╘я▒п╩п╨п╫п╦я┌п╣ п╪я▀я┬п╨п╬п╧ п╫п╟ п╩я▌п╠п╬п╪ я│п╩п╬п╡п╣, п╦ п╡я▀ я┐п╡п╦п╢п╦я┌п╣ п╣пЁп╬ п╡п╣я─п╬я▐я┌п╫п╬я│я┌я▄ п╢п╩я▐ п╡я│п╣я┘ п╡я▒п╢п╣я─.
+SingleBucket_Unique                     %s я┐п╫п╦п╨п╟п╩я▄п╫п╬
 
-Session_Title                           Сессия POPFile устарела
-Session_Error                           Ваша сессия POPFile устарела. Обычно такое случается, если если остановить и снова запустит POPFile, а в броузере оставить открытым &laquo;Центр управления&raquo;. Пожалуйста, щёлкните по любой ссылке сверху, чтобы продолжить работу с POPFile.
+Session_Title                           п║п╣я│я│п╦я▐ POPFile я┐я│я┌п╟я─п╣п╩п╟
+Session_Error                           п▓п╟я┬п╟ я│п╣я│я│п╦я▐ POPFile я┐я│я┌п╟я─п╣п╩п╟. п·п╠я▀я┤п╫п╬ я┌п╟п╨п╬п╣ я│п╩я┐я┤п╟п╣я┌я│я▐, п╣я│п╩п╦ п╣я│п╩п╦ п╬я│я┌п╟п╫п╬п╡п╦я┌я▄ п╦ я│п╫п╬п╡п╟ п╥п╟п©я┐я│я┌п╦я┌ POPFile, п╟ п╡ п╠я─п╬я┐п╥п╣я─п╣ п╬я│я┌п╟п╡п╦я┌я▄ п╬я┌п╨я─я▀я┌я▀п╪ &laquo;п╕п╣п╫я┌я─ я┐п©я─п╟п╡п╩п╣п╫п╦я▐&raquo;. п÷п╬п╤п╟п╩я┐п╧я│я┌п╟, я┴я▒п╩п╨п╫п╦я┌п╣ п©п╬ п╩я▌п╠п╬п╧ я│я│я▀п╩п╨п╣ я│п╡п╣я─я┘я┐, я┤я┌п╬п╠я▀ п©я─п╬п╢п╬п╩п╤п╦я┌я▄ я─п╟п╠п╬я┌я┐ я│ POPFile.
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.

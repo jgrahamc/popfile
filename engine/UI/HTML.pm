@@ -37,6 +37,7 @@ use Digest::MD5 qw( md5_hex );
 use HTML::Template;
 use Date::Format;
 use Date::Parse;
+use Encode;
 
 # Needed for cookie handling
 
@@ -729,7 +730,7 @@ sub url_handler__
         my $text = $self->shutdown_page__( $session );
 
         my $http_header = $self->build_http_header_(       # PROFILE BLOCK START
-            200, "text/html; charset=$charset", 0,
+            200, "text/html; charset=UTF-8", 0,
             "Set-Cookie: popfile=$eol", length( $text ) ); # PROFILE BLOCK STOP
 
         if ( $client->connected ) {
@@ -953,7 +954,7 @@ sub http_ok
     my $cookie = $self->set_cookie__( $session, $client );
 
     my $http_header = $self->build_http_header_(                           # PROFILE BLOCK START
-        200, "text/html; charset=$charset", 0, $cookie, length( $text ) ); # PROFILE BLOCK STOP
+        200, "text/html; charset=UTF-8", 0, $cookie, length( $text ) ); # PROFILE BLOCK STOP
 
     if ( $client->connected ) {
         my $data = $http_header . $text;
@@ -2063,7 +2064,7 @@ sub advanced_page
 
     if ( defined($self->{form_}{newword}) ) {
         my $result = $self->classifier_()->add_stopword( $session, # PROFILE BLOCK START
-                         $self->{form_}{newword} );                # PROFILE BLOCK STOP
+            Encode::decode_utf8( $self->{form_}{newword} ) );      # PROFILE BLOCK STOP
         if ( $result == 0 ) {
             $self->error_message__( $templ, $self->language($session)->{Advanced_Error2} );
         } else {
@@ -2076,7 +2077,7 @@ sub advanced_page
 
     if ( defined($self->{form_}{word}) ) {
         my $result = $self->classifier_()->remove_stopword( $session,   # PROFILE BLOCK START
-                         $self->{form_}{word} );                        # PROFILE BLOCK STOP
+            Encode::decode_utf8( $self->{form_}{word} ) );              # PROFILE BLOCK STOP
         if ( $result == 0 ) {
             $self->error_message__( $templ, $self->language($session)->{Advanced_Error2} );
         } else {
@@ -2118,7 +2119,7 @@ sub advanced_page
 
         if ( $c ne $last ) {
             my %row_data;
-            $row_data{Advanced_Words} = $commas;
+            $row_data{Advanced_Words} = Encode::encode_utf8( $commas );
             $commas = '';
 
             if ( $groupCounter == $groupSize ) {
@@ -2126,7 +2127,7 @@ sub advanced_page
             } else {
                 $row_data{Advanced_Row_Class} = 'advancedAlphabet';
             }
-            $row_data{Advanced_Character} = $last;
+            $row_data{Advanced_Character} = Encode::encode_utf8( $last );
 
             if ( $groupCounter == $groupSize ) {
                 $row_data{Advanced_Word_Class} = 'advancedWordsGroupSpacing';
@@ -2162,7 +2163,6 @@ sub advanced_page
 
         # Converts configuration file path to LanguageCharset
 
-        require Encode;
         require File::Glob::Windows;
 
         Encode::from_to( $config_file,                                   # PROFILE BLOCK START
@@ -2563,7 +2563,7 @@ sub bucket_page
         my @letter_data;
         for my $i ($self->classifier_()->get_bucket_word_prefixes( $session, $bucket )) {
             my %row_data;
-            $row_data{Bucket_Letter} = $i;
+            $row_data{Bucket_Letter} = Encode::encode_utf8( $i );
             $row_data{Bucket_Bucket} = $bucket;
             if ( defined( $self->{form_}{showletter} ) && ( $i eq $self->{form_}{showletter} ) ) {
                 $row_data{Bucket_If_Show_Letter} = 1;
@@ -2597,7 +2597,7 @@ sub bucket_page
                     my %cell_data;
                     my $word = shift @words;
 
-                    $cell_data{'Bucket_Word'}       = $word;
+                    $cell_data{'Bucket_Word'}       = Encode::encode_utf8( $word );
                     $cell_data{'Bucket_Word_Count'} = $word_count{$word};
 
                     push @cols, \%cell_data;
@@ -3582,91 +3582,92 @@ sub history_page
 
                 my %addresses = ( 'from' => 1, 'to' => 2 , 'cc' => 3 );
 
-                 if ( defined( $addresses{$header} ) ) {
-                     $col_data{History_Cell_Title} =$$row[$addresses{$header}];
-                     $col_data{History_Cell_Value} = # PROFILE BLOCK START
-                         $self->shorten__( $col_data{History_Cell_Title},
-                                           $length,
-                                           $language_for_user
-                                           );        # PROFILE BLOCK STOP
-                     push ( @column_data, \%col_data );
-                     next;
-                 }
+                if ( defined( $addresses{$header} ) ) {
+                    $col_data{History_Cell_Title} =                        # PROFILE BLOCK START
+                        Encode::encode_utf8( $$row[$addresses{$header}] ); # PROFILE BLOCK STOP
+                    $col_data{History_Cell_Value} =  # PROFILE BLOCK START
+                        Encode::encode_utf8(
+                            $self->shorten__( $$row[$addresses{$header}],
+                                              $length,
+                                              $language_for_user
+                                            ) );     # PROFILE BLOCK STOP
+                    push ( @column_data, \%col_data );
+                    next;
+                }
 
-                 if ( $header eq 'subject' ) {
-                     $col_data{History_If_Subject_Column} = 1;
+                if ( $header eq 'subject' ) {
+                    $col_data{History_If_Subject_Column} = 1;
 
-                     if ( $language_for_user eq 'Nihongo' ) {
-                         # Remove wrong characters as UTF-8.
-                         for my $i (1..4) {
+                    if ( $language_for_user eq 'Nihongo' ) {
+                        # Remove wrong characters as UTF-8.
+                        for my $i (1..4) {
                             my $result = '';
                             while ( $$row[$i] =~ /((?:[\p{InNihongo}\p{InWideAscii}]|$ascii){1,300})/og ) {
                                 $result .= $1;
                             }
-                            $$row[$i] = $result;
-                         }
-                     }
+                        }
+                    }
 
-                     $col_data{History_Cell_Title}    = $$row[4];
-                     $col_data{History_Cell_Value} =                                # PROFILE BLOCK START
-                         $self->shorten__( $$row[4], $length, $language_for_user ); # PROFILE BLOCK STOP
-                     $col_data{History_Mail_File}     = $$row[0];
-                     $col_data{History_Fields}        =   # PROFILE BLOCK START
-                         $self->print_form_fields_(0,1,
-                           ('start_message','filter','search',
-                            'sort','negate' ) );          # PROFILE BLOCK STOP
-                     push ( @column_data, \%col_data );
-                     next;
-                 }
+                    $col_data{History_Cell_Title}    = Encode::encode_utf8( $$row[4] );
+                    $col_data{History_Cell_Value}    = Encode::encode_utf8(          # PROFILE BLOCK START
+                        $self->shorten__( $$row[4], $length, $language_for_user ) ); # PROFILE BLOCK STOP
+                    $col_data{History_Mail_File}     = $$row[0];
+                    $col_data{History_Fields}        =   # PROFILE BLOCK START
+                        $self->print_form_fields_(0,1,
+                            ('start_message','filter','search',
+                             'sort','negate' ) );          # PROFILE BLOCK STOP
+                    push ( @column_data, \%col_data );
+                    next;
+                }
 
-                 if ( $header eq 'size' ) {
-                     my $size = $$row[12];
-                     my $v = '?';
-                     if ( defined $size ) {
-                         if ( $size >= 1024 * 1024 ) {
-                             $v = sprintf $self->language($session)->{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
-                         }
-                         elsif ( $size >= 1024 ) {
-                             $v = sprintf $self->language($session)->{History_Size_KiloBytes}, $size / 1024;
-                         }
-                         else {
-                             $v = sprintf $self->language($session)->{History_Size_Bytes}, $size;
-                         }
-                     }
+                if ( $header eq 'size' ) {
+                    my $size = $$row[12];
+                    my $v = '?';
+                    if ( defined $size ) {
+                        if ( $size >= 1024 * 1024 ) {
+                            $v = sprintf $self->language($session)->{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
+                        }
+                        elsif ( $size >= 1024 ) {
+                            $v = sprintf $self->language($session)->{History_Size_KiloBytes}, $size / 1024;
+                        }
+                        else {
+                            $v = sprintf $self->language($session)->{History_Size_Bytes}, $size;
+                        }
+                    }
 
-                     # Replace any &nbsp; entities from the language
-                     # files with the corresponding character
-                     # (\xa0). Otherwise HTML::Template would escape
-                     # the & with &amp;
+                    # Replace any &nbsp; entities from the language
+                    # files with the corresponding character
+                    # (\xa0). Otherwise HTML::Template would escape
+                    # the & with &amp;
 
-                     $v =~ s/&nbsp;/\xA0/g;
+                    $v =~ s/&nbsp;/\xA0/g;
 
-                     $col_data{History_Cell_Value} = $v;
-                     $col_data{History_Cell_Title} =    # PROFILE BLOCK START
-                         $col_data{History_Cell_Value}; # PROFILE BLOCK STOP
-                     push ( @column_data, \%col_data );
-                     next;
-                 }
+                    $col_data{History_Cell_Value} = $v;
+                    $col_data{History_Cell_Title} =    # PROFILE BLOCK START
+                        $col_data{History_Cell_Value}; # PROFILE BLOCK STOP
+                    push ( @column_data, \%col_data );
+                    next;
+                }
 
-                 if ( $header eq 'bucket' ) {
-                     $col_data{History_If_Bucket_Column} = 1;
-                     my $bucket = $col_data{History_Bucket} = $$row[8];
-                     if ( $$row[11] ne '' ) {
+                if ( $header eq 'bucket' ) {
+                    $col_data{History_If_Bucket_Column} = 1;
+                    my $bucket = $col_data{History_Bucket} = $$row[8];
+                    if ( $$row[11] ne '' ) {
                         $col_data{History_If_Magnetized} = 1;
                         my ( $header, $value ) =                                                      # PROFILE BLOCK START
                             $self->classifier_()->get_magnet_header_and_value( $session, $$row[13] ); # PROFILE BLOCK STOP
                         $col_data{History_Magnet}        =                       # PROFILE BLOCK START
                             $self->language($session)->{$header} . ':' . $value; # PROFILE BLOCK STOP
-                     }
-                     $col_data{History_If_Not_Pseudo} =        # PROFILE BLOCK START
-                         !$self->classifier_()->is_pseudo_bucket(
-                                          $session, $bucket ); # PROFILE BLOCK STOP
-                     $col_data{History_Bucket_Color}  =    # PROFILE BLOCK START
-                         $self->classifier_()->get_bucket_parameter(
-                             $session, $bucket, 'color' ); # PROFILE BLOCK STOP
-                     push ( @column_data, \%col_data );
-                     next;
-                 }
+                    }
+                    $col_data{History_If_Not_Pseudo} =       # PROFILE BLOCK START
+                        !$self->classifier_()->is_pseudo_bucket(
+                                        $session, $bucket ); # PROFILE BLOCK STOP
+                    $col_data{History_Bucket_Color}  =    # PROFILE BLOCK START
+                        $self->classifier_()->get_bucket_parameter(
+                            $session, $bucket, 'color' ); # PROFILE BLOCK STOP
+                    push ( @column_data, \%col_data );
+                    next;
+                }
             }
 
             $row_data{History_Loop_Loop_Cells} = \@column_data;
@@ -3803,11 +3804,11 @@ sub view_page
     $templ->param( 'View_Field_Sort'       => $self->{form_}{sort}   );
     $templ->param( 'View_Field_Filter'     => $self->{form_}{filter} );
 
-    $templ->param( 'View_From'             => $from );
-    $templ->param( 'View_To'               => $to );
-    $templ->param( 'View_Cc'               => $cc );
+    $templ->param( 'View_From'             => Encode::encode_utf8( $from ) );
+    $templ->param( 'View_To'               => Encode::encode_utf8( $to   ) );
+    $templ->param( 'View_Cc'               => Encode::encode_utf8( $cc   ) );
     $templ->param( 'View_Date'             => $self->pretty_date__( $date, 1, $session ) );
-    $templ->param( 'View_Subject'          => $subject );
+    $templ->param( 'View_Subject'          => Encode::encode_utf8( $subject ) );
     $templ->param( 'View_Bucket'           => $bucket );
     $templ->param( 'View_Bucket_Color'     => $color );
 
@@ -3872,9 +3873,10 @@ sub view_page
         $self->classifier_()->wordscores( 0 );
 
         if ( -f $mail_file ) {
-            $templ->param( 'View_Message' =>                     # PROFILE BLOCK START
-                $self->classifier_()->fast_get_html_colored_message(
-                    $session, $mail_file, \%matrix, \%idmap ) ); # PROFILE BLOCK STOP
+            $templ->param( 'View_Message' =>                           # PROFILE BLOCK START
+                Encode::encode_utf8(
+                    $self->classifier_()->fast_get_html_colored_message(
+                        $session, $mail_file, \%matrix, \%idmap ) ) ); # PROFILE BLOCK STOP
         }
 
         # We want to insert a link to change the output format at the
@@ -4303,7 +4305,7 @@ sub load_language
 {
     my ( $self, $lang, $session, $test_language ) = @_;
 
-    if ( open LANG, '<' . $self->get_root_path_( "languages/$lang.msg" ) ) {
+    if ( open LANG, '<', $self->get_root_path_( "languages/$lang.msg" ) ) {
         while ( <LANG> ) {
             next if ( /[ \t]*#/ );
 

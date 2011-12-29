@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2011 John Graham-Cumming
+ο»Ώ# Copyright (c) 2001-2011 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -25,245 +25,245 @@ LanguageDirection                       ltr
 ManualLanguage                          en
 
 # Common words that are used on their own all over the interface
-Apply                                   Εφαρμογή
-On                                     Ενεργό
-Off                                     Ανενεργό
-TurnOn                             Ενεργοποίηση
-TurnOff                             Απενεργοποίη
-Add                                     Προσθήκη
-Remove                                  Απαλοιφή
-Previous                                Προηγούμενο
-Next                                    Επόμενο
-From                                    Αποστολέας
-Subject                                 Θέμα
-Cc                                      Κοιν. 
-Classification                          Ταξινόμηση
-Reclassify                              Επαναταξινόμηση
-Probability                             Πιθανότητα
-Scores                                  Βαθμόλογίες
-QuickMagnets                            Γρήγοροι Μαγνήτες
+Apply                                   Ξ•Ο†Ξ±ΟΞΌΞΏΞ³Ξ®
+On                                     Ξ•Ξ½ΞµΟΞ³Ο
+Off                                     Ξ‘Ξ½ΞµΞ½ΞµΟΞ³Ο
+TurnOn                             Ξ•Ξ½ΞµΟΞ³ΞΏΟ€ΞΏΞ―Ξ·ΟƒΞ·
+TurnOff                             Ξ‘Ο€ΞµΞ½ΞµΟΞ³ΞΏΟ€ΞΏΞ―Ξ·
+Add                                     Ξ ΟΞΏΟƒΞΈΞ®ΞΊΞ·
+Remove                                  Ξ‘Ο€Ξ±Ξ»ΞΏΞΉΟ†Ξ®
+Previous                                Ξ ΟΞΏΞ·Ξ³ΞΏΟΞΌΞµΞ½ΞΏ
+Next                                    Ξ•Ο€ΟΞΌΞµΞ½ΞΏ
+From                                    Ξ‘Ο€ΞΏΟƒΟ„ΞΏΞ»Ξ­Ξ±Ο‚
+Subject                                 ΞΞ­ΞΌΞ±
+Cc                                      ΞΞΏΞΉΞ½. 
+Classification                          Ξ¤Ξ±ΞΎΞΉΞ½ΟΞΌΞ·ΟƒΞ·
+Reclassify                              Ξ•Ο€Ξ±Ξ½Ξ±Ο„Ξ±ΞΎΞΉΞ½ΟΞΌΞ·ΟƒΞ·
+Probability                             Ξ ΞΉΞΈΞ±Ξ½ΟΟ„Ξ·Ο„Ξ±
+Scores                                  Ξ’Ξ±ΞΈΞΌΟΞ»ΞΏΞ³Ξ―ΞµΟ‚
+QuickMagnets                            Ξ“ΟΞ®Ξ³ΞΏΟΞΏΞΉ ΞΞ±Ξ³Ξ½Ξ®Ο„ΞµΟ‚
 Undo                                    Undo
-Close                                   Κλείσιμο
-Find                                    Εύρεση
-Filter                                  Φίλτρο
-Yes                                     Ναί
-No                                      Οχι
-ChangeToYes                             Αλλαγή σε Ναί
-ChangeToNo                              Αλλαγή σε Όχι
-Bucket                                  Αρχείο
-Magnet                                  Μαγνήτης
-Delete                                  Διαγραφή
-Create                                  Δημιουργία
-To                                      Πρός
-Total                                   Σύνολο
-Rename                                  Μετονομασία
-Frequency                               Συχνότητα
-Probability                             Πιθανότητα
-Score                                   Βαθμός
-Lookup                                  Εύρευση
-Word                                    Λέξη
-Count                             Εμφανίσεις
-Update                                  Ενημέρωση
-Refresh                                 Φρεσκάρισμα
+Close                                   ΞΞ»ΞµΞ―ΟƒΞΉΞΌΞΏ
+Find                                    Ξ•ΟΟΞµΟƒΞ·
+Filter                                  Ξ¦Ξ―Ξ»Ο„ΟΞΏ
+Yes                                     ΞΞ±Ξ―
+No                                      ΞΟ‡ΞΉ
+ChangeToYes                             Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® ΟƒΞµ ΞΞ±Ξ―
+ChangeToNo                              Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® ΟƒΞµ ΞΟ‡ΞΉ
+Bucket                                  Ξ‘ΟΟ‡ΞµΞ―ΞΏ
+Magnet                                  ΞΞ±Ξ³Ξ½Ξ®Ο„Ξ·Ο‚
+Delete                                  Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ®
+Create                                  Ξ”Ξ·ΞΌΞΉΞΏΟ…ΟΞ³Ξ―Ξ±
+To                                      Ξ ΟΟΟ‚
+Total                                   Ξ£ΟΞ½ΞΏΞ»ΞΏ
+Rename                                  ΞΞµΟ„ΞΏΞ½ΞΏΞΌΞ±ΟƒΞ―Ξ±
+Frequency                               Ξ£Ο…Ο‡Ξ½ΟΟ„Ξ·Ο„Ξ±
+Probability                             Ξ ΞΉΞΈΞ±Ξ½ΟΟ„Ξ·Ο„Ξ±
+Score                                   Ξ’Ξ±ΞΈΞΌΟΟ‚
+Lookup                                  Ξ•ΟΟΞµΟ…ΟƒΞ·
+Word                                    Ξ›Ξ­ΞΎΞ·
+Count                             Ξ•ΞΌΟ†Ξ±Ξ½Ξ―ΟƒΞµΞΉΟ‚
+Update                                  Ξ•Ξ½Ξ·ΞΌΞ­ΟΟ‰ΟƒΞ·
+Refresh                                 Ξ¦ΟΞµΟƒΞΊΞ¬ΟΞΉΟƒΞΌΞ±
 
 # The header and footer that appear on every UI page
-Header_Title                            Κεντρο Ελέγχου POPFile
-Header_Shutdown                         Κλείσιμο POPFile
-Header_History                          Ιστορικό
-Header_Buckets                          Αρχεία
-Header_Configuration                    Επιλογές
-Header_Advanced                         Προχωρημένες Επιλογές
-Header_Security                         Ασφάλεια
-Header_Magnets                          Μαγνήτες
+Header_Title                            ΞΞµΞ½Ο„ΟΞΏ Ξ•Ξ»Ξ­Ξ³Ο‡ΞΏΟ… POPFile
+Header_Shutdown                         ΞΞ»ΞµΞ―ΟƒΞΉΞΌΞΏ POPFile
+Header_History                          Ξ™ΟƒΟ„ΞΏΟΞΉΞΊΟ
+Header_Buckets                          Ξ‘ΟΟ‡ΞµΞ―Ξ±
+Header_Configuration                    Ξ•Ο€ΞΉΞ»ΞΏΞ³Ξ­Ο‚
+Header_Advanced                         Ξ ΟΞΏΟ‡Ο‰ΟΞ·ΞΌΞ­Ξ½ΞµΟ‚ Ξ•Ο€ΞΉΞ»ΞΏΞ³Ξ­Ο‚
+Header_Security                         Ξ‘ΟƒΟ†Ξ¬Ξ»ΞµΞΉΞ±
+Header_Magnets                          ΞΞ±Ξ³Ξ½Ξ®Ο„ΞµΟ‚
 
-Footer_HomePage                     Ιστοσελίδα POPFile
-Footer_Manual                          Εγχειρίδιο
-Footer_Forums                          Συζυτήσεις
-Footer_FeedMe                         Συνεισφορά
-Footer_RequestFeature           Ζητήστε Βελτιώσεις
-Footer_MailingList                   Ενημερωτικά mail
+Footer_HomePage                     Ξ™ΟƒΟ„ΞΏΟƒΞµΞ»Ξ―Ξ΄Ξ± POPFile
+Footer_Manual                          Ξ•Ξ³Ο‡ΞµΞΉΟΞ―Ξ΄ΞΉΞΏ
+Footer_Forums                          Ξ£Ο…Ξ¶Ο…Ο„Ξ®ΟƒΞµΞΉΟ‚
+Footer_FeedMe                         Ξ£Ο…Ξ½ΞµΞΉΟƒΟ†ΞΏΟΞ¬
+Footer_RequestFeature           Ξ–Ξ·Ο„Ξ®ΟƒΟ„Ξµ Ξ’ΞµΞ»Ο„ΞΉΟΟƒΞµΞΉΟ‚
+Footer_MailingList                   Ξ•Ξ½Ξ·ΞΌΞµΟΟ‰Ο„ΞΉΞΊΞ¬ mail
 
-Configuration_Error1                    Ο διαχωριστικός χαρακτήρας πρέπει να είναι μόνο ένας. 
-Configuration_Error2                    Το  user interface port πρέπει να είναι μεταξύ 1 και 65535
-Configuration_Error3                    Το POP3 listen port πρέπει να είναι μεταξύ 1 και 65535
-Configuration_Error4                    Το μέγεθος σελίδας πρέπει να είναι μεταξύ 1 και 1000
-Configuration_Error5                    Ο αριθμός ημερών για τήρηση ιστορικού πρέπει να είναι μεταξύ 1 και 366
-Configuration_Error6                    Η παράμετρος TCP timeout πρέπει να είναι μεταξύ 10 και 1800
-Configuration_Error7                    Η παράμετρος XML RPC listen port πρέπει να είναι μεταξύ 1 και 65535
+Configuration_Error1                    Ξ Ξ΄ΞΉΞ±Ο‡Ο‰ΟΞΉΟƒΟ„ΞΉΞΊΟΟ‚ Ο‡Ξ±ΟΞ±ΞΊΟ„Ξ®ΟΞ±Ο‚ Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ ΞΌΟΞ½ΞΏ Ξ­Ξ½Ξ±Ο‚. 
+Configuration_Error2                    Ξ¤ΞΏ  user interface port Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ ΞΌΞµΟ„Ξ±ΞΎΟ 1 ΞΊΞ±ΞΉ 65535
+Configuration_Error3                    Ξ¤ΞΏ POP3 listen port Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ ΞΌΞµΟ„Ξ±ΞΎΟ 1 ΞΊΞ±ΞΉ 65535
+Configuration_Error4                    Ξ¤ΞΏ ΞΌΞ­Ξ³ΞµΞΈΞΏΟ‚ ΟƒΞµΞ»Ξ―Ξ΄Ξ±Ο‚ Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ ΞΌΞµΟ„Ξ±ΞΎΟ 1 ΞΊΞ±ΞΉ 1000
+Configuration_Error5                    Ξ Ξ±ΟΞΉΞΈΞΌΟΟ‚ Ξ·ΞΌΞµΟΟΞ½ Ξ³ΞΉΞ± Ο„Ξ®ΟΞ·ΟƒΞ· ΞΉΟƒΟ„ΞΏΟΞΉΞΊΞΏΟ Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ ΞΌΞµΟ„Ξ±ΞΎΟ 1 ΞΊΞ±ΞΉ 366
+Configuration_Error6                    Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ TCP timeout Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ ΞΌΞµΟ„Ξ±ΞΎΟ 10 ΞΊΞ±ΞΉ 1800
+Configuration_Error7                    Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ XML RPC listen port Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ ΞΌΞµΟ„Ξ±ΞΎΟ 1 ΞΊΞ±ΞΉ 65535
 Configuration_POP3Port                  POP3 listen port
-Configuration_POP3Update                Η παράμετρος POP3 port άλλαξε σε %s; Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
-Configuration_XMLRPCUpdate              Η παράμετρος XML-RPC port άλλαξε σε %s;  Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
+Configuration_POP3Update                Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ POP3 port Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s; ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
+Configuration_XMLRPCUpdate              Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ XML-RPC port Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s;  ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
 Configuration_XMLRPCPort                XML-RPC listen port
 Configuration_SMTPPort                  SMTP listen port
-Configuration_SMTPUpdate                Η παράμετρος SMTP port άλλαξε σε %s;  Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
+Configuration_SMTPUpdate                Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ SMTP port Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s;  ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
 Configuration_NNTPPort                  NNTP listen port
-Configuration_NNTPUpdate                Η παράμετρος NNTP port άλλαξε σε %s;  Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
-Configuration_POP3Separator             POP3 host:port:χαρακτήρας διαχωρισμού
-Configuration_NNTPSeparator             NNTP host:port:Χαρακτήρας διαχωρισμού
-Configuration_POP3SepUpdate             Αλλαγή χαρακτήρα διαχωρισμού POP3 σε %s
-Configuration_NNTPSepUpdate             Αλλαγή χαρακτήρα διαχωρισμού NNTP σε %s
-Configuration_UI                        Web port επιφάνειας ελέγχου
+Configuration_NNTPUpdate                Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ NNTP port Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s;  ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
+Configuration_POP3Separator             POP3 host:port:Ο‡Ξ±ΟΞ±ΞΊΟ„Ξ®ΟΞ±Ο‚ Ξ΄ΞΉΞ±Ο‡Ο‰ΟΞΉΟƒΞΌΞΏΟ
+Configuration_NNTPSeparator             NNTP host:port:Ξ§Ξ±ΟΞ±ΞΊΟ„Ξ®ΟΞ±Ο‚ Ξ΄ΞΉΞ±Ο‡Ο‰ΟΞΉΟƒΞΌΞΏΟ
+Configuration_POP3SepUpdate             Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® Ο‡Ξ±ΟΞ±ΞΊΟ„Ξ®ΟΞ± Ξ΄ΞΉΞ±Ο‡Ο‰ΟΞΉΟƒΞΌΞΏΟ POP3 ΟƒΞµ %s
+Configuration_NNTPSepUpdate             Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® Ο‡Ξ±ΟΞ±ΞΊΟ„Ξ®ΟΞ± Ξ΄ΞΉΞ±Ο‡Ο‰ΟΞΉΟƒΞΌΞΏΟ NNTP ΟƒΞµ %s
+Configuration_UI                        Web port ΞµΟ€ΞΉΟ†Ξ¬Ξ½ΞµΞΉΞ±Ο‚ ΞµΞ»Ξ­Ξ³Ο‡ΞΏΟ…
 Configuration_UIUpdate                  Updated user interface web port to %s; this change will not take affect until you restart POPFile
-Configuration_History                   Αριθμός μυνημάτων ανά Σελίδα
-Configuration_HistoryUpdate             Αλλαγή αριθμού μυνημάτων ανά σελίδα σε %s
-Configuration_Days                      Αρθιμός ημερών που κρατούνται σε ιστορικό
-Configuration_DaysUpdate                Αλλαγή αρθιμού ημερών που κρατούνται σε ιστορικό σε %s
-Configuration_UserInterface             Επιφάνεια Ελέγχου
-Configuration_Skins                     Εμφάνιση
-Configuration_SkinsChoose               Επιλογή εμφάνισης
-Configuration_Language                  Γλώσσα
-Configuration_LanguageChoose            Επιλογή Γλώσσας
-Configuration_ListenPorts               Επιλογές επικοινωνίας
-Configuration_HistoryView               Ιστορικό
+Configuration_History                   Ξ‘ΟΞΉΞΈΞΌΟΟ‚ ΞΌΟ…Ξ½Ξ·ΞΌΞ¬Ο„Ο‰Ξ½ Ξ±Ξ½Ξ¬ Ξ£ΞµΞ»Ξ―Ξ΄Ξ±
+Configuration_HistoryUpdate             Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® Ξ±ΟΞΉΞΈΞΌΞΏΟ ΞΌΟ…Ξ½Ξ·ΞΌΞ¬Ο„Ο‰Ξ½ Ξ±Ξ½Ξ¬ ΟƒΞµΞ»Ξ―Ξ΄Ξ± ΟƒΞµ %s
+Configuration_Days                      Ξ‘ΟΞΈΞΉΞΌΟΟ‚ Ξ·ΞΌΞµΟΟΞ½ Ο€ΞΏΟ… ΞΊΟΞ±Ο„ΞΏΟΞ½Ο„Ξ±ΞΉ ΟƒΞµ ΞΉΟƒΟ„ΞΏΟΞΉΞΊΟ
+Configuration_DaysUpdate                Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® Ξ±ΟΞΈΞΉΞΌΞΏΟ Ξ·ΞΌΞµΟΟΞ½ Ο€ΞΏΟ… ΞΊΟΞ±Ο„ΞΏΟΞ½Ο„Ξ±ΞΉ ΟƒΞµ ΞΉΟƒΟ„ΞΏΟΞΉΞΊΟ ΟƒΞµ %s
+Configuration_UserInterface             Ξ•Ο€ΞΉΟ†Ξ¬Ξ½ΞµΞΉΞ± Ξ•Ξ»Ξ­Ξ³Ο‡ΞΏΟ…
+Configuration_Skins                     Ξ•ΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ·
+Configuration_SkinsChoose               Ξ•Ο€ΞΉΞ»ΞΏΞ³Ξ® ΞµΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ·Ο‚
+Configuration_Language                  Ξ“Ξ»ΟΟƒΟƒΞ±
+Configuration_LanguageChoose            Ξ•Ο€ΞΉΞ»ΞΏΞ³Ξ® Ξ“Ξ»ΟΟƒΟƒΞ±Ο‚
+Configuration_ListenPorts               Ξ•Ο€ΞΉΞ»ΞΏΞ³Ξ­Ο‚ ΞµΟ€ΞΉΞΊΞΏΞΉΞ½Ο‰Ξ½Ξ―Ξ±Ο‚
+Configuration_HistoryView               Ξ™ΟƒΟ„ΞΏΟΞΉΞΊΟ
 Configuration_TCPTimeout                Connection Timeout
-Configuration_TCPTimeoutSecs            Connection timeout σε δευτερόλεπτα
-Configuration_TCPTimeoutUpdate          Αλλαγή  connection timeout σε %s
-Configuration_ClassificationInsertion   Εισαγωγή Κειμένου σε μυνήματα
-Configuration_SubjectLine               Αλλαγή Θέματος Μυνημάτων
+Configuration_TCPTimeoutSecs            Connection timeout ΟƒΞµ Ξ΄ΞµΟ…Ο„ΞµΟΟΞ»ΞµΟ€Ο„Ξ±
+Configuration_TCPTimeoutUpdate          Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ®  connection timeout ΟƒΞµ %s
+Configuration_ClassificationInsertion   Ξ•ΞΉΟƒΞ±Ξ³Ο‰Ξ³Ξ® ΞΞµΞΉΞΌΞ­Ξ½ΞΏΟ… ΟƒΞµ ΞΌΟ…Ξ½Ξ®ΞΌΞ±Ο„Ξ±
+Configuration_SubjectLine               Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® ΞΞ­ΞΌΞ±Ο„ΞΏΟ‚ ΞΟ…Ξ½Ξ·ΞΌΞ¬Ο„Ο‰Ξ½
 Configuration_XTCInsertion              X-Text-Classification Header
 Configuration_XPLInsertion              X-POPFile-Link Header
-Configuration_Logging                   Ημερολόγιο Ενεργειών
-Configuration_None                      Κανένα
-Configuration_ToScreen                  Στην Οθόνη
-Configuration_ToFile                    Σε Αρχείο
-Configuration_ToScreenFile              Στην Οθόνη και σε αρχείο
-Configuration_LoggerOutput              Εμφάνιση Ημερολογίου Ενεργειών
-Configuration_GeneralSkins              Εμφανίσεις
-Configuration_SmallSkins                 Μικρές Εμφανίσεις
-Configuration_TinySkins                 Πιο Μικρές Εμφανίσεις
+Configuration_Logging                   Ξ—ΞΌΞµΟΞΏΞ»ΟΞ³ΞΉΞΏ Ξ•Ξ½ΞµΟΞ³ΞµΞΉΟΞ½
+Configuration_None                      ΞΞ±Ξ½Ξ­Ξ½Ξ±
+Configuration_ToScreen                  Ξ£Ο„Ξ·Ξ½ ΞΞΈΟΞ½Ξ·
+Configuration_ToFile                    Ξ£Ξµ Ξ‘ΟΟ‡ΞµΞ―ΞΏ
+Configuration_ToScreenFile              Ξ£Ο„Ξ·Ξ½ ΞΞΈΟΞ½Ξ· ΞΊΞ±ΞΉ ΟƒΞµ Ξ±ΟΟ‡ΞµΞ―ΞΏ
+Configuration_LoggerOutput              Ξ•ΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ· Ξ—ΞΌΞµΟΞΏΞ»ΞΏΞ³Ξ―ΞΏΟ… Ξ•Ξ½ΞµΟΞ³ΞµΞΉΟΞ½
+Configuration_GeneralSkins              Ξ•ΞΌΟ†Ξ±Ξ½Ξ―ΟƒΞµΞΉΟ‚
+Configuration_SmallSkins                 ΞΞΉΞΊΟΞ­Ο‚ Ξ•ΞΌΟ†Ξ±Ξ½Ξ―ΟƒΞµΞΉΟ‚
+Configuration_TinySkins                 Ξ ΞΉΞΏ ΞΞΉΞΊΟΞ­Ο‚ Ξ•ΞΌΟ†Ξ±Ξ½Ξ―ΟƒΞµΞΉΟ‚
 Configuration_CurrentLogFile            &lt;current log file&gt;
 
-Advanced_Error1                         '%s' είναι ήδη στις εξαιρούμενες λέξεις
-Advanced_Error2                         Οι εξαιρούμενες λέξεις μπορούν να συμπεριλαμβάνουν μόνο αλφανουμερικές λέξεις , ., _, -, η @ χαρακτήρες
-Advanced_Error3                         '%s' προστέθηκε στις εξαιρούμενες λέξεις
-Advanced_Error4                         '%s' δεν ανήκει στις εξαιρούμενες λέξεις
-Advanced_Error5                         '%s' αφαιρέθηκε από τις εξαιρούμενες λέξεις
-Advanced_StopWords                      Λέξεις που εξαιρούνται 
-Advanced_Message1                       Το POPFile εξαιρεί τις ακόλουθες συχνά εμφανιζόμενες λέξεις :
-Advanced_AddWord                        Προσθήκη Λέξης
-Advanced_RemoveWord                     Αφαίρεση Λέξης
+Advanced_Error1                         '%s' ΞµΞ―Ξ½Ξ±ΞΉ Ξ®Ξ΄Ξ· ΟƒΟ„ΞΉΟ‚ ΞµΞΎΞ±ΞΉΟΞΏΟΞΌΞµΞ½ΞµΟ‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚
+Advanced_Error2                         ΞΞΉ ΞµΞΎΞ±ΞΉΟΞΏΟΞΌΞµΞ½ΞµΟ‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚ ΞΌΟ€ΞΏΟΞΏΟΞ½ Ξ½Ξ± ΟƒΟ…ΞΌΟ€ΞµΟΞΉΞ»Ξ±ΞΌΞ²Ξ¬Ξ½ΞΏΟ…Ξ½ ΞΌΟΞ½ΞΏ Ξ±Ξ»Ο†Ξ±Ξ½ΞΏΟ…ΞΌΞµΟΞΉΞΊΞ­Ο‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚ , ., _, -, Ξ· @ Ο‡Ξ±ΟΞ±ΞΊΟ„Ξ®ΟΞµΟ‚
+Advanced_Error3                         '%s' Ο€ΟΞΏΟƒΟ„Ξ­ΞΈΞ·ΞΊΞµ ΟƒΟ„ΞΉΟ‚ ΞµΞΎΞ±ΞΉΟΞΏΟΞΌΞµΞ½ΞµΟ‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚
+Advanced_Error4                         '%s' Ξ΄ΞµΞ½ Ξ±Ξ½Ξ®ΞΊΞµΞΉ ΟƒΟ„ΞΉΟ‚ ΞµΞΎΞ±ΞΉΟΞΏΟΞΌΞµΞ½ΞµΟ‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚
+Advanced_Error5                         '%s' Ξ±Ο†Ξ±ΞΉΟΞ­ΞΈΞ·ΞΊΞµ Ξ±Ο€Ο Ο„ΞΉΟ‚ ΞµΞΎΞ±ΞΉΟΞΏΟΞΌΞµΞ½ΞµΟ‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚
+Advanced_StopWords                      Ξ›Ξ­ΞΎΞµΞΉΟ‚ Ο€ΞΏΟ… ΞµΞΎΞ±ΞΉΟΞΏΟΞ½Ο„Ξ±ΞΉ 
+Advanced_Message1                       Ξ¤ΞΏ POPFile ΞµΞΎΞ±ΞΉΟΞµΞ― Ο„ΞΉΟ‚ Ξ±ΞΊΟΞ»ΞΏΟ…ΞΈΞµΟ‚ ΟƒΟ…Ο‡Ξ½Ξ¬ ΞµΞΌΟ†Ξ±Ξ½ΞΉΞ¶ΟΞΌΞµΞ½ΞµΟ‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚ :
+Advanced_AddWord                        Ξ ΟΞΏΟƒΞΈΞ®ΞΊΞ· Ξ›Ξ­ΞΎΞ·Ο‚
+Advanced_RemoveWord                     Ξ‘Ο†Ξ±Ξ―ΟΞµΟƒΞ· Ξ›Ξ­ΞΎΞ·Ο‚
 
-History_Filter                          &nbsp;(εμφανίζεται μόνον αρχείο <font color="%s">%s</font>)
-History_FilterBy                        Φιλτράρισμα με χρήση
-History_Search                          &nbsp;(αναζήτηση για Αποστολέα/Θέμα %s)
-History_Title                           Προσφατα Μυνήματα
-History_Jump                            Μυνήματα από
-History_ShowAll                         Εμφάνιση όλων
-History_ShouldBe                        Να ταξιμομηθεί ώς
-History_NoFrom                          Δεν έχει αποστολέα
-History_NoSubject                       Δεν υπάρχει θέμα
-History_ClassifyAs                      Να ταξινομηθεί σαν
-History_MagnetUsed                      Μαγνήτης σε χρήση
-History_MagnetBecause                   <b>Μαγνήτης σε χρήση</b><p>Εχει ταξινομηθεί σε <font color="%s">%s</font> λόγω μαγνήτη %s </p>
-History_ChangedTo                       Αλλαξε σε <font color="%s">%s
-History_Already                         Εχει ήδη επαναταξινομηθεί σε <font color="%s">%s</font>
-History_RemoveAll                       Διαγραφή Ολων
-History_RemovePage                     Διαγραφή Σελίδας
-History_Remove                          Για να διαγράψετε στοιχεία του ιστορικού πατήστε
-History_SearchMessage                   Αναξήτηση Αποστολέα/Θέμα
-History_NoMessages                      Δεν υπάρχουν Μηνύματα
-History_ShowMagnet                      μαγνητισμένο
-History_ShowNoMagnet                    μη μαγνητισμένο
-History_Magnet                          &nbsp;(εμφάνιση μόνο μαγνητισμένων μυνημάτων)
-History_NoMagnet                        &nbsp;(εμφάνιση μόνο μή μαγνητισμένων μυνημάτων)
-History_ResetSearch                     Επαναφορά
+History_Filter                          &nbsp;(ΞµΞΌΟ†Ξ±Ξ½Ξ―Ξ¶ΞµΟ„Ξ±ΞΉ ΞΌΟΞ½ΞΏΞ½ Ξ±ΟΟ‡ΞµΞ―ΞΏ <font color="%s">%s</font>)
+History_FilterBy                        Ξ¦ΞΉΞ»Ο„ΟΞ¬ΟΞΉΟƒΞΌΞ± ΞΌΞµ Ο‡ΟΞ®ΟƒΞ·
+History_Search                          &nbsp;(Ξ±Ξ½Ξ±Ξ¶Ξ®Ο„Ξ·ΟƒΞ· Ξ³ΞΉΞ± Ξ‘Ο€ΞΏΟƒΟ„ΞΏΞ»Ξ­Ξ±/ΞΞ­ΞΌΞ± %s)
+History_Title                           Ξ ΟΞΏΟƒΟ†Ξ±Ο„Ξ± ΞΟ…Ξ½Ξ®ΞΌΞ±Ο„Ξ±
+History_Jump                            ΞΟ…Ξ½Ξ®ΞΌΞ±Ο„Ξ± Ξ±Ο€Ο
+History_ShowAll                         Ξ•ΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ· ΟΞ»Ο‰Ξ½
+History_ShouldBe                        ΞΞ± Ο„Ξ±ΞΎΞΉΞΌΞΏΞΌΞ·ΞΈΞµΞ― ΟΟ‚
+History_NoFrom                          Ξ”ΞµΞ½ Ξ­Ο‡ΞµΞΉ Ξ±Ο€ΞΏΟƒΟ„ΞΏΞ»Ξ­Ξ±
+History_NoSubject                       Ξ”ΞµΞ½ Ο…Ο€Ξ¬ΟΟ‡ΞµΞΉ ΞΈΞ­ΞΌΞ±
+History_ClassifyAs                      ΞΞ± Ο„Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ·ΞΈΞµΞ― ΟƒΞ±Ξ½
+History_MagnetUsed                      ΞΞ±Ξ³Ξ½Ξ®Ο„Ξ·Ο‚ ΟƒΞµ Ο‡ΟΞ®ΟƒΞ·
+History_MagnetBecause                   <b>ΞΞ±Ξ³Ξ½Ξ®Ο„Ξ·Ο‚ ΟƒΞµ Ο‡ΟΞ®ΟƒΞ·</b><p>Ξ•Ο‡ΞµΞΉ Ο„Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ·ΞΈΞµΞ― ΟƒΞµ <font color="%s">%s</font> Ξ»ΟΞ³Ο‰ ΞΌΞ±Ξ³Ξ½Ξ®Ο„Ξ· %s </p>
+History_ChangedTo                       Ξ‘Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ <font color="%s">%s
+History_Already                         Ξ•Ο‡ΞµΞΉ Ξ®Ξ΄Ξ· ΞµΟ€Ξ±Ξ½Ξ±Ο„Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ·ΞΈΞµΞ― ΟƒΞµ <font color="%s">%s</font>
+History_RemoveAll                       Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ® ΞΞ»Ο‰Ξ½
+History_RemovePage                     Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ® Ξ£ΞµΞ»Ξ―Ξ΄Ξ±Ο‚
+History_Remove                          Ξ“ΞΉΞ± Ξ½Ξ± Ξ΄ΞΉΞ±Ξ³ΟΞ¬ΟΞµΟ„Ξµ ΟƒΟ„ΞΏΞΉΟ‡ΞµΞ―Ξ± Ο„ΞΏΟ… ΞΉΟƒΟ„ΞΏΟΞΉΞΊΞΏΟ Ο€Ξ±Ο„Ξ®ΟƒΟ„Ξµ
+History_SearchMessage                   Ξ‘Ξ½Ξ±ΞΎΞ®Ο„Ξ·ΟƒΞ· Ξ‘Ο€ΞΏΟƒΟ„ΞΏΞ»Ξ­Ξ±/ΞΞ­ΞΌΞ±
+History_NoMessages                      Ξ”ΞµΞ½ Ο…Ο€Ξ¬ΟΟ‡ΞΏΟ…Ξ½ ΞΞ·Ξ½ΟΞΌΞ±Ο„Ξ±
+History_ShowMagnet                      ΞΌΞ±Ξ³Ξ½Ξ·Ο„ΞΉΟƒΞΌΞ­Ξ½ΞΏ
+History_ShowNoMagnet                    ΞΌΞ· ΞΌΞ±Ξ³Ξ½Ξ·Ο„ΞΉΟƒΞΌΞ­Ξ½ΞΏ
+History_Magnet                          &nbsp;(ΞµΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ· ΞΌΟΞ½ΞΏ ΞΌΞ±Ξ³Ξ½Ξ·Ο„ΞΉΟƒΞΌΞ­Ξ½Ο‰Ξ½ ΞΌΟ…Ξ½Ξ·ΞΌΞ¬Ο„Ο‰Ξ½)
+History_NoMagnet                        &nbsp;(ΞµΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ· ΞΌΟΞ½ΞΏ ΞΌΞ® ΞΌΞ±Ξ³Ξ½Ξ·Ο„ΞΉΟƒΞΌΞ­Ξ½Ο‰Ξ½ ΞΌΟ…Ξ½Ξ·ΞΌΞ¬Ο„Ο‰Ξ½)
+History_ResetSearch                     Ξ•Ο€Ξ±Ξ½Ξ±Ο†ΞΏΟΞ¬
 
-Password_Title                          Σύνθημα
-Password_Enter                          Γράψτε σύνθημα
-Password_Go                             Προχωρήστε!
-Password_Error1                         Λάθος σύνθημα
+Password_Title                          Ξ£ΟΞ½ΞΈΞ·ΞΌΞ±
+Password_Enter                          Ξ“ΟΞ¬ΟΟ„Ξµ ΟƒΟΞ½ΞΈΞ·ΞΌΞ±
+Password_Go                             Ξ ΟΞΏΟ‡Ο‰ΟΞ®ΟƒΟ„Ξµ!
+Password_Error1                         Ξ›Ξ¬ΞΈΞΏΟ‚ ΟƒΟΞ½ΞΈΞ·ΞΌΞ±
 
-Security_Error1                         Το  port πρέπει να είναι ένας αριθμός μεταξύ 1 και 65535
-Security_Stealth                        Λειτουργία Απόκρυψής/Λειτουργία Server
-Security_NoStealthMode                  Οχι ( Λειτουργία Απόκρυψης )
-Security_ExplainStats                   (Με αυτή την επιλογή ενεργή το POPFile στέλνει κάθε ημέρα τις ακόλουθες τρείς παραμέτρους σε ένα πρόγραμμα στο www.usethesource.com: bc (σύνολο αρχείων που χρησιμοποιούνται ), mc (σύνολο ταξινομημένων μυνημάτων) and ec (σύνολο λαθών ταξινόμησης).  Αυτά αρχειοθετούνται και χρησιμοποιούνται για να συνταχθούν στατιστικές για το πώς οι χρήστες χρησιμοποιούν το POPFile αλλά και πόσο αποτελεσματικά αυτό δουλεύειs.  Τα αρχεία σβήνονται με την παρέλευση πενθημέρου; Δεν γίνονται συσχετισμοί μεταξύ των στατιστικών και των μεμονομένων διευθύνσεων IP.)
-Security_ExplainUpdate                  (Με αυτή την επιλογή ενεργή το POPFile στέλνει κάθε ημέρα τις ακόλουθες τρείς παραμέτρους σε ένα πρόγραμμα στο www.usethesource.com:: ma (τον κύριο αριθμό έκδοσης του εν χρήση POPFile), mi (τον δευτερεύοντα αριθμό έκδοσης του εν χρήση POPFile) και bn (τον  αριθμό έκδοσης του εν χρήση POPFile).  Το POPFile λαμβάνει μία απάντηση με την μορφή γραφικού που εμφανίζεται στην άνω μεριά της σελίδας, και σας ειδοποιεί ότι υπάρχει νέα ενημερωμένη έκδοση.  Τα αρχεία σβήνονται με την παρέλευση πενθημέρου; Δεν γίνονται συσχετισμοί μεταξύ των στατιστικών και των μεμονομένων διευθύνσεων IP.)
-Security_PasswordTitle                  Σύνθημα Επιφάνειας Χρήσης
-Security_Password                       Σύνθημα
-Security_PasswordUpdate                 Το σύνθημα άλλαξε σε  %s
+Security_Error1                         Ξ¤ΞΏ  port Ο€ΟΞ­Ο€ΞµΞΉ Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ Ξ­Ξ½Ξ±Ο‚ Ξ±ΟΞΉΞΈΞΌΟΟ‚ ΞΌΞµΟ„Ξ±ΞΎΟ 1 ΞΊΞ±ΞΉ 65535
+Security_Stealth                        Ξ›ΞµΞΉΟ„ΞΏΟ…ΟΞ³Ξ―Ξ± Ξ‘Ο€ΟΞΊΟΟ…ΟΞ®Ο‚/Ξ›ΞµΞΉΟ„ΞΏΟ…ΟΞ³Ξ―Ξ± Server
+Security_NoStealthMode                  ΞΟ‡ΞΉ ( Ξ›ΞµΞΉΟ„ΞΏΟ…ΟΞ³Ξ―Ξ± Ξ‘Ο€ΟΞΊΟΟ…ΟΞ·Ο‚ )
+Security_ExplainStats                   (ΞΞµ Ξ±Ο…Ο„Ξ® Ο„Ξ·Ξ½ ΞµΟ€ΞΉΞ»ΞΏΞ³Ξ® ΞµΞ½ΞµΟΞ³Ξ® Ο„ΞΏ POPFile ΟƒΟ„Ξ­Ξ»Ξ½ΞµΞΉ ΞΊΞ¬ΞΈΞµ Ξ·ΞΌΞ­ΟΞ± Ο„ΞΉΟ‚ Ξ±ΞΊΟΞ»ΞΏΟ…ΞΈΞµΟ‚ Ο„ΟΞµΞ―Ο‚ Ο€Ξ±ΟΞ±ΞΌΞ­Ο„ΟΞΏΟ…Ο‚ ΟƒΞµ Ξ­Ξ½Ξ± Ο€ΟΟΞ³ΟΞ±ΞΌΞΌΞ± ΟƒΟ„ΞΏ www.usethesource.com: bc (ΟƒΟΞ½ΞΏΞ»ΞΏ Ξ±ΟΟ‡ΞµΞ―Ο‰Ξ½ Ο€ΞΏΟ… Ο‡ΟΞ·ΟƒΞΉΞΌΞΏΟ€ΞΏΞΉΞΏΟΞ½Ο„Ξ±ΞΉ ), mc (ΟƒΟΞ½ΞΏΞ»ΞΏ Ο„Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ·ΞΌΞ­Ξ½Ο‰Ξ½ ΞΌΟ…Ξ½Ξ·ΞΌΞ¬Ο„Ο‰Ξ½) and ec (ΟƒΟΞ½ΞΏΞ»ΞΏ Ξ»Ξ±ΞΈΟΞ½ Ο„Ξ±ΞΎΞΉΞ½ΟΞΌΞ·ΟƒΞ·Ο‚).  Ξ‘Ο…Ο„Ξ¬ Ξ±ΟΟ‡ΞµΞΉΞΏΞΈΞµΟ„ΞΏΟΞ½Ο„Ξ±ΞΉ ΞΊΞ±ΞΉ Ο‡ΟΞ·ΟƒΞΉΞΌΞΏΟ€ΞΏΞΉΞΏΟΞ½Ο„Ξ±ΞΉ Ξ³ΞΉΞ± Ξ½Ξ± ΟƒΟ…Ξ½Ο„Ξ±Ο‡ΞΈΞΏΟΞ½ ΟƒΟ„Ξ±Ο„ΞΉΟƒΟ„ΞΉΞΊΞ­Ο‚ Ξ³ΞΉΞ± Ο„ΞΏ Ο€ΟΟ‚ ΞΏΞΉ Ο‡ΟΞ®ΟƒΟ„ΞµΟ‚ Ο‡ΟΞ·ΟƒΞΉΞΌΞΏΟ€ΞΏΞΉΞΏΟΞ½ Ο„ΞΏ POPFile Ξ±Ξ»Ξ»Ξ¬ ΞΊΞ±ΞΉ Ο€ΟΟƒΞΏ Ξ±Ο€ΞΏΟ„ΞµΞ»ΞµΟƒΞΌΞ±Ο„ΞΉΞΊΞ¬ Ξ±Ο…Ο„Ο Ξ΄ΞΏΟ…Ξ»ΞµΟΞµΞΉs.  Ξ¤Ξ± Ξ±ΟΟ‡ΞµΞ―Ξ± ΟƒΞ²Ξ®Ξ½ΞΏΞ½Ο„Ξ±ΞΉ ΞΌΞµ Ο„Ξ·Ξ½ Ο€Ξ±ΟΞ­Ξ»ΞµΟ…ΟƒΞ· Ο€ΞµΞ½ΞΈΞ·ΞΌΞ­ΟΞΏΟ…; Ξ”ΞµΞ½ Ξ³Ξ―Ξ½ΞΏΞ½Ο„Ξ±ΞΉ ΟƒΟ…ΟƒΟ‡ΞµΟ„ΞΉΟƒΞΌΞΏΞ― ΞΌΞµΟ„Ξ±ΞΎΟ Ο„Ο‰Ξ½ ΟƒΟ„Ξ±Ο„ΞΉΟƒΟ„ΞΉΞΊΟΞ½ ΞΊΞ±ΞΉ Ο„Ο‰Ξ½ ΞΌΞµΞΌΞΏΞ½ΞΏΞΌΞ­Ξ½Ο‰Ξ½ Ξ΄ΞΉΞµΟ…ΞΈΟΞ½ΟƒΞµΟ‰Ξ½ IP.)
+Security_ExplainUpdate                  (ΞΞµ Ξ±Ο…Ο„Ξ® Ο„Ξ·Ξ½ ΞµΟ€ΞΉΞ»ΞΏΞ³Ξ® ΞµΞ½ΞµΟΞ³Ξ® Ο„ΞΏ POPFile ΟƒΟ„Ξ­Ξ»Ξ½ΞµΞΉ ΞΊΞ¬ΞΈΞµ Ξ·ΞΌΞ­ΟΞ± Ο„ΞΉΟ‚ Ξ±ΞΊΟΞ»ΞΏΟ…ΞΈΞµΟ‚ Ο„ΟΞµΞ―Ο‚ Ο€Ξ±ΟΞ±ΞΌΞ­Ο„ΟΞΏΟ…Ο‚ ΟƒΞµ Ξ­Ξ½Ξ± Ο€ΟΟΞ³ΟΞ±ΞΌΞΌΞ± ΟƒΟ„ΞΏ www.usethesource.com:: ma (Ο„ΞΏΞ½ ΞΊΟΟΞΉΞΏ Ξ±ΟΞΉΞΈΞΌΟ Ξ­ΞΊΞ΄ΞΏΟƒΞ·Ο‚ Ο„ΞΏΟ… ΞµΞ½ Ο‡ΟΞ®ΟƒΞ· POPFile), mi (Ο„ΞΏΞ½ Ξ΄ΞµΟ…Ο„ΞµΟΞµΟΞΏΞ½Ο„Ξ± Ξ±ΟΞΉΞΈΞΌΟ Ξ­ΞΊΞ΄ΞΏΟƒΞ·Ο‚ Ο„ΞΏΟ… ΞµΞ½ Ο‡ΟΞ®ΟƒΞ· POPFile) ΞΊΞ±ΞΉ bn (Ο„ΞΏΞ½  Ξ±ΟΞΉΞΈΞΌΟ Ξ­ΞΊΞ΄ΞΏΟƒΞ·Ο‚ Ο„ΞΏΟ… ΞµΞ½ Ο‡ΟΞ®ΟƒΞ· POPFile).  Ξ¤ΞΏ POPFile Ξ»Ξ±ΞΌΞ²Ξ¬Ξ½ΞµΞΉ ΞΌΞ―Ξ± Ξ±Ο€Ξ¬Ξ½Ο„Ξ·ΟƒΞ· ΞΌΞµ Ο„Ξ·Ξ½ ΞΌΞΏΟΟ†Ξ® Ξ³ΟΞ±Ο†ΞΉΞΊΞΏΟ Ο€ΞΏΟ… ΞµΞΌΟ†Ξ±Ξ½Ξ―Ξ¶ΞµΟ„Ξ±ΞΉ ΟƒΟ„Ξ·Ξ½ Ξ¬Ξ½Ο‰ ΞΌΞµΟΞΉΞ¬ Ο„Ξ·Ο‚ ΟƒΞµΞ»Ξ―Ξ΄Ξ±Ο‚, ΞΊΞ±ΞΉ ΟƒΞ±Ο‚ ΞµΞΉΞ΄ΞΏΟ€ΞΏΞΉΞµΞ― ΟΟ„ΞΉ Ο…Ο€Ξ¬ΟΟ‡ΞµΞΉ Ξ½Ξ­Ξ± ΞµΞ½Ξ·ΞΌΞµΟΟ‰ΞΌΞ­Ξ½Ξ· Ξ­ΞΊΞ΄ΞΏΟƒΞ·.  Ξ¤Ξ± Ξ±ΟΟ‡ΞµΞ―Ξ± ΟƒΞ²Ξ®Ξ½ΞΏΞ½Ο„Ξ±ΞΉ ΞΌΞµ Ο„Ξ·Ξ½ Ο€Ξ±ΟΞ­Ξ»ΞµΟ…ΟƒΞ· Ο€ΞµΞ½ΞΈΞ·ΞΌΞ­ΟΞΏΟ…; Ξ”ΞµΞ½ Ξ³Ξ―Ξ½ΞΏΞ½Ο„Ξ±ΞΉ ΟƒΟ…ΟƒΟ‡ΞµΟ„ΞΉΟƒΞΌΞΏΞ― ΞΌΞµΟ„Ξ±ΞΎΟ Ο„Ο‰Ξ½ ΟƒΟ„Ξ±Ο„ΞΉΟƒΟ„ΞΉΞΊΟΞ½ ΞΊΞ±ΞΉ Ο„Ο‰Ξ½ ΞΌΞµΞΌΞΏΞ½ΞΏΞΌΞ­Ξ½Ο‰Ξ½ Ξ΄ΞΉΞµΟ…ΞΈΟΞ½ΟƒΞµΟ‰Ξ½ IP.)
+Security_PasswordTitle                  Ξ£ΟΞ½ΞΈΞ·ΞΌΞ± Ξ•Ο€ΞΉΟ†Ξ¬Ξ½ΞµΞΉΞ±Ο‚ Ξ§ΟΞ®ΟƒΞ·Ο‚
+Security_Password                       Ξ£ΟΞ½ΞΈΞ·ΞΌΞ±
+Security_PasswordUpdate                 Ξ¤ΞΏ ΟƒΟΞ½ΞΈΞ·ΞΌΞ± Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ  %s
 Security_AUTHTitle                      Remote Servers
 Security_SecureServer                   POP3 SPA/AUTH server
-Security_SecureServerUpdate             Η παράμετρος POP3 SPA/AUTH secure server άλλαξε σε %s; Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
+Security_SecureServerUpdate             Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ POP3 SPA/AUTH secure server Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s; ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
 Security_SecurePort                     POP3 SPA/AUTH port
-Security_SecurePortUpdate               Η παράμετρος POP3 SPA/AUTH port  άλλαξε σε %s; Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
+Security_SecurePortUpdate               Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ POP3 SPA/AUTH port  Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s; ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
 Security_SMTPServer                     SMTP chain server
-Security_SMTPServerUpdate               Η παράμετρος SMTP chain server άλλαξε σε %s; Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
+Security_SMTPServerUpdate               Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ SMTP chain server Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s; ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
 Security_SMTPPort                       SMTP chain port
-Security_SMTPPortUpdate                 Η παράμετρος SMTP chain port άλλαξε σε %s; Οι αλλαγές θα γίνουν ενεργές στην επόμενη εκκίνηση του POPFile
-Security_POP3                           Να γίνονται αποδεκτές συνδέσεις POP3 από Η/Υ στο δίκτυο (χρειάζεται επανεκκίνηση του POPFile )
-Security_SMTP                           Να γίνονται αποδεκτές συνδέσεις SMTP από Η/Υ στο δίκτυο (χρειάζεται επανεκκίνηση του POPFile )
-Security_NNTP                           Να γίνονται αποδεκτές συνδέσεις NNTP από Η/Υ στο δίκτυο (χρειάζεται επανεκκίνηση του POPFile )
-Security_UI                             Να γίνονται αποδεκτές συνδέσεις HTTP από Η/Υ στο δίκτυο (χρειάζεται επανεκκίνηση του POPFile )
-Security_XMLRPC                         Να γίνονται αποδεκτές συνδέσεις XML-RPC από Η/Υ στο δίκτυο (χρειάζεται επανεκκίνηση του POPFile )
-Security_UpdateTitle                    Αυτόματος Ελεγχος για Ενημερωμένες Εκδόσεις
-Security_Update                         Καθημερινός έλεγχος για Ενημερωμένες Εκδόσεις του  POPFile
-Security_StatsTitle                     Αποστολή Στατιστικών
-Security_Stats                          Καθημερινή Αποστολή Στατιστικών
+Security_SMTPPortUpdate                 Ξ— Ο€Ξ±ΟΞ¬ΞΌΞµΟ„ΟΞΏΟ‚ SMTP chain port Ξ¬Ξ»Ξ»Ξ±ΞΎΞµ ΟƒΞµ %s; ΞΞΉ Ξ±Ξ»Ξ»Ξ±Ξ³Ξ­Ο‚ ΞΈΞ± Ξ³Ξ―Ξ½ΞΏΟ…Ξ½ ΞµΞ½ΞµΟΞ³Ξ­Ο‚ ΟƒΟ„Ξ·Ξ½ ΞµΟ€ΟΞΌΞµΞ½Ξ· ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile
+Security_POP3                           ΞΞ± Ξ³Ξ―Ξ½ΞΏΞ½Ο„Ξ±ΞΉ Ξ±Ο€ΞΏΞ΄ΞµΞΊΟ„Ξ­Ο‚ ΟƒΟ…Ξ½Ξ΄Ξ­ΟƒΞµΞΉΟ‚ POP3 Ξ±Ο€Ο Ξ—/Ξ¥ ΟƒΟ„ΞΏ Ξ΄Ξ―ΞΊΟ„Ο…ΞΏ (Ο‡ΟΞµΞΉΞ¬Ξ¶ΞµΟ„Ξ±ΞΉ ΞµΟ€Ξ±Ξ½ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile )
+Security_SMTP                           ΞΞ± Ξ³Ξ―Ξ½ΞΏΞ½Ο„Ξ±ΞΉ Ξ±Ο€ΞΏΞ΄ΞµΞΊΟ„Ξ­Ο‚ ΟƒΟ…Ξ½Ξ΄Ξ­ΟƒΞµΞΉΟ‚ SMTP Ξ±Ο€Ο Ξ—/Ξ¥ ΟƒΟ„ΞΏ Ξ΄Ξ―ΞΊΟ„Ο…ΞΏ (Ο‡ΟΞµΞΉΞ¬Ξ¶ΞµΟ„Ξ±ΞΉ ΞµΟ€Ξ±Ξ½ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile )
+Security_NNTP                           ΞΞ± Ξ³Ξ―Ξ½ΞΏΞ½Ο„Ξ±ΞΉ Ξ±Ο€ΞΏΞ΄ΞµΞΊΟ„Ξ­Ο‚ ΟƒΟ…Ξ½Ξ΄Ξ­ΟƒΞµΞΉΟ‚ NNTP Ξ±Ο€Ο Ξ—/Ξ¥ ΟƒΟ„ΞΏ Ξ΄Ξ―ΞΊΟ„Ο…ΞΏ (Ο‡ΟΞµΞΉΞ¬Ξ¶ΞµΟ„Ξ±ΞΉ ΞµΟ€Ξ±Ξ½ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile )
+Security_UI                             ΞΞ± Ξ³Ξ―Ξ½ΞΏΞ½Ο„Ξ±ΞΉ Ξ±Ο€ΞΏΞ΄ΞµΞΊΟ„Ξ­Ο‚ ΟƒΟ…Ξ½Ξ΄Ξ­ΟƒΞµΞΉΟ‚ HTTP Ξ±Ο€Ο Ξ—/Ξ¥ ΟƒΟ„ΞΏ Ξ΄Ξ―ΞΊΟ„Ο…ΞΏ (Ο‡ΟΞµΞΉΞ¬Ξ¶ΞµΟ„Ξ±ΞΉ ΞµΟ€Ξ±Ξ½ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile )
+Security_XMLRPC                         ΞΞ± Ξ³Ξ―Ξ½ΞΏΞ½Ο„Ξ±ΞΉ Ξ±Ο€ΞΏΞ΄ΞµΞΊΟ„Ξ­Ο‚ ΟƒΟ…Ξ½Ξ΄Ξ­ΟƒΞµΞΉΟ‚ XML-RPC Ξ±Ο€Ο Ξ—/Ξ¥ ΟƒΟ„ΞΏ Ξ΄Ξ―ΞΊΟ„Ο…ΞΏ (Ο‡ΟΞµΞΉΞ¬Ξ¶ΞµΟ„Ξ±ΞΉ ΞµΟ€Ξ±Ξ½ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ· Ο„ΞΏΟ… POPFile )
+Security_UpdateTitle                    Ξ‘Ο…Ο„ΟΞΌΞ±Ο„ΞΏΟ‚ Ξ•Ξ»ΞµΞ³Ο‡ΞΏΟ‚ Ξ³ΞΉΞ± Ξ•Ξ½Ξ·ΞΌΞµΟΟ‰ΞΌΞ­Ξ½ΞµΟ‚ Ξ•ΞΊΞ΄ΟΟƒΞµΞΉΟ‚
+Security_Update                         ΞΞ±ΞΈΞ·ΞΌΞµΟΞΉΞ½ΟΟ‚ Ξ­Ξ»ΞµΞ³Ο‡ΞΏΟ‚ Ξ³ΞΉΞ± Ξ•Ξ½Ξ·ΞΌΞµΟΟ‰ΞΌΞ­Ξ½ΞµΟ‚ Ξ•ΞΊΞ΄ΟΟƒΞµΞΉΟ‚ Ο„ΞΏΟ…  POPFile
+Security_StatsTitle                     Ξ‘Ο€ΞΏΟƒΟ„ΞΏΞ»Ξ® Ξ£Ο„Ξ±Ο„ΞΉΟƒΟ„ΞΉΞΊΟΞ½
+Security_Stats                          ΞΞ±ΞΈΞ·ΞΌΞµΟΞΉΞ½Ξ® Ξ‘Ο€ΞΏΟƒΟ„ΞΏΞ»Ξ® Ξ£Ο„Ξ±Ο„ΞΉΟƒΟ„ΞΉΞΊΟΞ½
 
-Magnet_Error1                           Ο Μαγνήτης '%s' υπάρχει ήδη στο αρχείο '%s'
-Magnet_Error2                           Ο νέος Μαγνήτης '%s' είναι σε αντίφαση με τον ήδη υπάρχοντα '%s' στο αρχείο '%s' και αυτό θα οδηγούσε σε λανθασμένες ταξινομήσεις.  Ο νέος μαγνήτης δεν προσετέθει..
-Magnet_Error3                           Δημιουργία νέου μαγνήτη '%s' στο αρχείο '%s'
-Magnet_CurrentMagnets                   Υπάρχοντες Μαγνήτες
-Magnet_Message1                         Οι ακόλουθοι μαγνήτες πάντα ταξινομούν τα μυνήματα σας στο προκαθορισμένο αρχείο :.
-Magnet_CreateNew                        Δημιουργία νέου μαγνήτη
-Magnet_Explanation                      <b>Αυτοί οι τύποι μαγνήτη είναι διαθέσιμοι:</b> <ul><li><b>Από Διυυθυνση η Ονομα:</b> Π.χ.: john@company.com για συγκεκριμένη διευθυνσηs, <br />company.com για όλες τις διευθύνσεις που καταλήγουν σε company.com, <br />John Doe για συγκεκριμένο όνομα, John για όλους με πρώτο όνομα John</li><li><b>Προς/Κοιν. διεύθυνση η όνομα:</b> ¨Οπως για Αποστολέα αλλα αφορά τα πεδία Πρός/ Κοιν.:</li> <li><b>Θέμα :</b> Π.χ.: hello για να μαγνητισθούν όλα τα μυνήματα που περιέχουν την λέξη hello στο θέμα</li></ul>
-Magnet_MagnetType                      Τύποι Μαγνητών
-Magnet_Value                            Αξία
-Magnet_Always                           Παντα ταξινομείται στο αρχείο
-Magnet_Jump                             Μαγνήτες από 
+Magnet_Error1                           Ξ ΞΞ±Ξ³Ξ½Ξ®Ο„Ξ·Ο‚ '%s' Ο…Ο€Ξ¬ΟΟ‡ΞµΞΉ Ξ®Ξ΄Ξ· ΟƒΟ„ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ '%s'
+Magnet_Error2                           Ξ Ξ½Ξ­ΞΏΟ‚ ΞΞ±Ξ³Ξ½Ξ®Ο„Ξ·Ο‚ '%s' ΞµΞ―Ξ½Ξ±ΞΉ ΟƒΞµ Ξ±Ξ½Ο„Ξ―Ο†Ξ±ΟƒΞ· ΞΌΞµ Ο„ΞΏΞ½ Ξ®Ξ΄Ξ· Ο…Ο€Ξ¬ΟΟ‡ΞΏΞ½Ο„Ξ± '%s' ΟƒΟ„ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ '%s' ΞΊΞ±ΞΉ Ξ±Ο…Ο„Ο ΞΈΞ± ΞΏΞ΄Ξ·Ξ³ΞΏΟΟƒΞµ ΟƒΞµ Ξ»Ξ±Ξ½ΞΈΞ±ΟƒΞΌΞ­Ξ½ΞµΟ‚ Ο„Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ®ΟƒΞµΞΉΟ‚.  Ξ Ξ½Ξ­ΞΏΟ‚ ΞΌΞ±Ξ³Ξ½Ξ®Ο„Ξ·Ο‚ Ξ΄ΞµΞ½ Ο€ΟΞΏΟƒΞµΟ„Ξ­ΞΈΞµΞΉ..
+Magnet_Error3                           Ξ”Ξ·ΞΌΞΉΞΏΟ…ΟΞ³Ξ―Ξ± Ξ½Ξ­ΞΏΟ… ΞΌΞ±Ξ³Ξ½Ξ®Ο„Ξ· '%s' ΟƒΟ„ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ '%s'
+Magnet_CurrentMagnets                   Ξ¥Ο€Ξ¬ΟΟ‡ΞΏΞ½Ο„ΞµΟ‚ ΞΞ±Ξ³Ξ½Ξ®Ο„ΞµΟ‚
+Magnet_Message1                         ΞΞΉ Ξ±ΞΊΟΞ»ΞΏΟ…ΞΈΞΏΞΉ ΞΌΞ±Ξ³Ξ½Ξ®Ο„ΞµΟ‚ Ο€Ξ¬Ξ½Ο„Ξ± Ο„Ξ±ΞΎΞΉΞ½ΞΏΞΌΞΏΟΞ½ Ο„Ξ± ΞΌΟ…Ξ½Ξ®ΞΌΞ±Ο„Ξ± ΟƒΞ±Ο‚ ΟƒΟ„ΞΏ Ο€ΟΞΏΞΊΞ±ΞΈΞΏΟΞΉΟƒΞΌΞ­Ξ½ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ :.
+Magnet_CreateNew                        Ξ”Ξ·ΞΌΞΉΞΏΟ…ΟΞ³Ξ―Ξ± Ξ½Ξ­ΞΏΟ… ΞΌΞ±Ξ³Ξ½Ξ®Ο„Ξ·
+Magnet_Explanation                      <b>Ξ‘Ο…Ο„ΞΏΞ― ΞΏΞΉ Ο„ΟΟ€ΞΏΞΉ ΞΌΞ±Ξ³Ξ½Ξ®Ο„Ξ· ΞµΞ―Ξ½Ξ±ΞΉ Ξ΄ΞΉΞ±ΞΈΞ­ΟƒΞΉΞΌΞΏΞΉ:</b> <ul><li><b>Ξ‘Ο€Ο Ξ”ΞΉΟ…Ο…ΞΈΟ…Ξ½ΟƒΞ· Ξ· ΞΞ½ΞΏΞΌΞ±:</b> Ξ .Ο‡.: john@company.com Ξ³ΞΉΞ± ΟƒΟ…Ξ³ΞΊΞµΞΊΟΞΉΞΌΞ­Ξ½Ξ· Ξ΄ΞΉΞµΟ…ΞΈΟ…Ξ½ΟƒΞ·s, <br />company.com Ξ³ΞΉΞ± ΟΞ»ΞµΟ‚ Ο„ΞΉΟ‚ Ξ΄ΞΉΞµΟ…ΞΈΟΞ½ΟƒΞµΞΉΟ‚ Ο€ΞΏΟ… ΞΊΞ±Ο„Ξ±Ξ»Ξ®Ξ³ΞΏΟ…Ξ½ ΟƒΞµ company.com, <br />John Doe Ξ³ΞΉΞ± ΟƒΟ…Ξ³ΞΊΞµΞΊΟΞΉΞΌΞ­Ξ½ΞΏ ΟΞ½ΞΏΞΌΞ±, John Ξ³ΞΉΞ± ΟΞ»ΞΏΟ…Ο‚ ΞΌΞµ Ο€ΟΟΟ„ΞΏ ΟΞ½ΞΏΞΌΞ± John</li><li><b>Ξ ΟΞΏΟ‚/ΞΞΏΞΉΞ½. Ξ΄ΞΉΞµΟΞΈΟ…Ξ½ΟƒΞ· Ξ· ΟΞ½ΞΏΞΌΞ±:</b> Β¨ΞΟ€Ο‰Ο‚ Ξ³ΞΉΞ± Ξ‘Ο€ΞΏΟƒΟ„ΞΏΞ»Ξ­Ξ± Ξ±Ξ»Ξ»Ξ± Ξ±Ο†ΞΏΟΞ¬ Ο„Ξ± Ο€ΞµΞ΄Ξ―Ξ± Ξ ΟΟΟ‚/ ΞΞΏΞΉΞ½.:</li> <li><b>ΞΞ­ΞΌΞ± :</b> Ξ .Ο‡.: hello Ξ³ΞΉΞ± Ξ½Ξ± ΞΌΞ±Ξ³Ξ½Ξ·Ο„ΞΉΟƒΞΈΞΏΟΞ½ ΟΞ»Ξ± Ο„Ξ± ΞΌΟ…Ξ½Ξ®ΞΌΞ±Ο„Ξ± Ο€ΞΏΟ… Ο€ΞµΟΞΉΞ­Ο‡ΞΏΟ…Ξ½ Ο„Ξ·Ξ½ Ξ»Ξ­ΞΎΞ· hello ΟƒΟ„ΞΏ ΞΈΞ­ΞΌΞ±</li></ul>
+Magnet_MagnetType                      Ξ¤ΟΟ€ΞΏΞΉ ΞΞ±Ξ³Ξ½Ξ·Ο„ΟΞ½
+Magnet_Value                            Ξ‘ΞΎΞ―Ξ±
+Magnet_Always                           Ξ Ξ±Ξ½Ο„Ξ± Ο„Ξ±ΞΎΞΉΞ½ΞΏΞΌΞµΞ―Ο„Ξ±ΞΉ ΟƒΟ„ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ
+Magnet_Jump                             ΞΞ±Ξ³Ξ½Ξ®Ο„ΞµΟ‚ Ξ±Ο€Ο 
 
-Bucket_Error1                           Τα ονόματα των αρχείων μπορούν να περιέχουν μόνο τα πεζά αγγλικά γράμματα  a έως z, τους αριθμούς 0 εως 9,  και τους χαρακτήρες  - και _
-Bucket_Error2                           Αρχείο  %s υπάρχει ήδη
-Bucket_Error3                           Δημιουργήθηκε αρχείο με όνομα %s
-Bucket_Error4                           Παρακαλούμε εισάγετε μι όχι κενή λέξη
-Bucket_Error5                           Το αρχείο %s μετονομάστηκε σε %s
-Bucket_Error6                           Διαγράφθηκε το αρχείο %s
-Bucket_Title                            Περίληψη
-Bucket_BucketName                       Αρχείο
-Bucket_WordCount                        Πλήθος Λέξεων
-Bucket_WordCounts                       Στατιστικά Λέξεων
-Bucket_UniqueWords                      Μοναδικές Λέξεις
-Bucket_SubjectModification              Αλλαγή Θέματος Μυνημάτων
-Bucket_ChangeColor                      Αλλαγή Χρώματος
-Bucket_NotEnoughData                    Ανεπαρκή Δεδομένα
-Bucket_ClassificationAccuracy           Ακρίβεια Ταξινόμησης
-Bucket_EmailsClassified                 Ταξινομημένα μυνήματα
-Bucket_EmailsClassifiedUpper            Ταξινομημένα Μυνήματα
-Bucket_ClassificationErrors             Σφάλματα Ταξινόμησης
-Bucket_Accuracy                         Ακρίβεια Ταξινόμησης
-Bucket_ClassificationCount              Αριθμ. Ταξινομήσεων
-Bucket_ClassificationFP                 Ψευδή Θετικά
-Bucket_ClassificationFN                 Ψευδή Αρνητικά
-Bucket_ResetStatistics                  Μηδενισμός Στατιστικών
-Bucket_LastReset                        Τελευταίος Μηδενισμός
-Bucket_CurrentColor                     τρέχων χρώμα %s  είναι %s
-Bucket_SetColorTo                       Ορισμός χρώματος  %s σε %s
-Bucket_Maintenance                      Συντήρηση Αρχείων
-Bucket_CreateBucket                     Δημιουργία αρχείου με όνομα
-Bucket_DeleteBucket                     Διαγραφή αρχείου με όνομα
-Bucket_RenameBucket                     Μετονομασία αρχείου με όνομα
-Bucket_Lookup                           Εύρεση
-Bucket_LookupMessage                    Εύρευση λέξεως σε αρχεία
-Bucket_LookupMessage2                   Αποτελέσματα εύρεσης λέξεως 
-Bucket_LookupMostLikely                 <b>%s</b> είναι πιο πιθανό να ανήκει στο <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> δεν ανήκει σε κανένα από τα αρχεία
-Bucket_DisabledGlobally                 Γενικώς Απενεργοποιημένο 
-Bucket_To                               σε
-Bucket_Quarantine                       Καραντίνα
+Bucket_Error1                           Ξ¤Ξ± ΞΏΞ½ΟΞΌΞ±Ο„Ξ± Ο„Ο‰Ξ½ Ξ±ΟΟ‡ΞµΞ―Ο‰Ξ½ ΞΌΟ€ΞΏΟΞΏΟΞ½ Ξ½Ξ± Ο€ΞµΟΞΉΞ­Ο‡ΞΏΟ…Ξ½ ΞΌΟΞ½ΞΏ Ο„Ξ± Ο€ΞµΞ¶Ξ¬ Ξ±Ξ³Ξ³Ξ»ΞΉΞΊΞ¬ Ξ³ΟΞ¬ΞΌΞΌΞ±Ο„Ξ±  a Ξ­Ο‰Ο‚ z, Ο„ΞΏΟ…Ο‚ Ξ±ΟΞΉΞΈΞΌΞΏΟΟ‚ 0 ΞµΟ‰Ο‚ 9,  ΞΊΞ±ΞΉ Ο„ΞΏΟ…Ο‚ Ο‡Ξ±ΟΞ±ΞΊΟ„Ξ®ΟΞµΟ‚  - ΞΊΞ±ΞΉ _
+Bucket_Error2                           Ξ‘ΟΟ‡ΞµΞ―ΞΏ  %s Ο…Ο€Ξ¬ΟΟ‡ΞµΞΉ Ξ®Ξ΄Ξ·
+Bucket_Error3                           Ξ”Ξ·ΞΌΞΉΞΏΟ…ΟΞ³Ξ®ΞΈΞ·ΞΊΞµ Ξ±ΟΟ‡ΞµΞ―ΞΏ ΞΌΞµ ΟΞ½ΞΏΞΌΞ± %s
+Bucket_Error4                           Ξ Ξ±ΟΞ±ΞΊΞ±Ξ»ΞΏΟΞΌΞµ ΞµΞΉΟƒΞ¬Ξ³ΞµΟ„Ξµ ΞΌΞΉ ΟΟ‡ΞΉ ΞΊΞµΞ½Ξ® Ξ»Ξ­ΞΎΞ·
+Bucket_Error5                           Ξ¤ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ %s ΞΌΞµΟ„ΞΏΞ½ΞΏΞΌΞ¬ΟƒΟ„Ξ·ΞΊΞµ ΟƒΞµ %s
+Bucket_Error6                           Ξ”ΞΉΞ±Ξ³ΟΞ¬Ο†ΞΈΞ·ΞΊΞµ Ο„ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ %s
+Bucket_Title                            Ξ ΞµΟΞ―Ξ»Ξ·ΟΞ·
+Bucket_BucketName                       Ξ‘ΟΟ‡ΞµΞ―ΞΏ
+Bucket_WordCount                        Ξ Ξ»Ξ®ΞΈΞΏΟ‚ Ξ›Ξ­ΞΎΞµΟ‰Ξ½
+Bucket_WordCounts                       Ξ£Ο„Ξ±Ο„ΞΉΟƒΟ„ΞΉΞΊΞ¬ Ξ›Ξ­ΞΎΞµΟ‰Ξ½
+Bucket_UniqueWords                      ΞΞΏΞ½Ξ±Ξ΄ΞΉΞΊΞ­Ο‚ Ξ›Ξ­ΞΎΞµΞΉΟ‚
+Bucket_SubjectModification              Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® ΞΞ­ΞΌΞ±Ο„ΞΏΟ‚ ΞΟ…Ξ½Ξ·ΞΌΞ¬Ο„Ο‰Ξ½
+Bucket_ChangeColor                      Ξ‘Ξ»Ξ»Ξ±Ξ³Ξ® Ξ§ΟΟΞΌΞ±Ο„ΞΏΟ‚
+Bucket_NotEnoughData                    Ξ‘Ξ½ΞµΟ€Ξ±ΟΞΊΞ® Ξ”ΞµΞ΄ΞΏΞΌΞ­Ξ½Ξ±
+Bucket_ClassificationAccuracy           Ξ‘ΞΊΟΞ―Ξ²ΞµΞΉΞ± Ξ¤Ξ±ΞΎΞΉΞ½ΟΞΌΞ·ΟƒΞ·Ο‚
+Bucket_EmailsClassified                 Ξ¤Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ·ΞΌΞ­Ξ½Ξ± ΞΌΟ…Ξ½Ξ®ΞΌΞ±Ο„Ξ±
+Bucket_EmailsClassifiedUpper            Ξ¤Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ·ΞΌΞ­Ξ½Ξ± ΞΟ…Ξ½Ξ®ΞΌΞ±Ο„Ξ±
+Bucket_ClassificationErrors             Ξ£Ο†Ξ¬Ξ»ΞΌΞ±Ο„Ξ± Ξ¤Ξ±ΞΎΞΉΞ½ΟΞΌΞ·ΟƒΞ·Ο‚
+Bucket_Accuracy                         Ξ‘ΞΊΟΞ―Ξ²ΞµΞΉΞ± Ξ¤Ξ±ΞΎΞΉΞ½ΟΞΌΞ·ΟƒΞ·Ο‚
+Bucket_ClassificationCount              Ξ‘ΟΞΉΞΈΞΌ. Ξ¤Ξ±ΞΎΞΉΞ½ΞΏΞΌΞ®ΟƒΞµΟ‰Ξ½
+Bucket_ClassificationFP                 Ξ¨ΞµΟ…Ξ΄Ξ® ΞΞµΟ„ΞΉΞΊΞ¬
+Bucket_ClassificationFN                 Ξ¨ΞµΟ…Ξ΄Ξ® Ξ‘ΟΞ½Ξ·Ο„ΞΉΞΊΞ¬
+Bucket_ResetStatistics                  ΞΞ·Ξ΄ΞµΞ½ΞΉΟƒΞΌΟΟ‚ Ξ£Ο„Ξ±Ο„ΞΉΟƒΟ„ΞΉΞΊΟΞ½
+Bucket_LastReset                        Ξ¤ΞµΞ»ΞµΟ…Ο„Ξ±Ξ―ΞΏΟ‚ ΞΞ·Ξ΄ΞµΞ½ΞΉΟƒΞΌΟΟ‚
+Bucket_CurrentColor                     Ο„ΟΞ­Ο‡Ο‰Ξ½ Ο‡ΟΟΞΌΞ± %s  ΞµΞ―Ξ½Ξ±ΞΉ %s
+Bucket_SetColorTo                       ΞΟΞΉΟƒΞΌΟΟ‚ Ο‡ΟΟΞΌΞ±Ο„ΞΏΟ‚  %s ΟƒΞµ %s
+Bucket_Maintenance                      Ξ£Ο…Ξ½Ο„Ξ®ΟΞ·ΟƒΞ· Ξ‘ΟΟ‡ΞµΞ―Ο‰Ξ½
+Bucket_CreateBucket                     Ξ”Ξ·ΞΌΞΉΞΏΟ…ΟΞ³Ξ―Ξ± Ξ±ΟΟ‡ΞµΞ―ΞΏΟ… ΞΌΞµ ΟΞ½ΞΏΞΌΞ±
+Bucket_DeleteBucket                     Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ® Ξ±ΟΟ‡ΞµΞ―ΞΏΟ… ΞΌΞµ ΟΞ½ΞΏΞΌΞ±
+Bucket_RenameBucket                     ΞΞµΟ„ΞΏΞ½ΞΏΞΌΞ±ΟƒΞ―Ξ± Ξ±ΟΟ‡ΞµΞ―ΞΏΟ… ΞΌΞµ ΟΞ½ΞΏΞΌΞ±
+Bucket_Lookup                           Ξ•ΟΟΞµΟƒΞ·
+Bucket_LookupMessage                    Ξ•ΟΟΞµΟ…ΟƒΞ· Ξ»Ξ­ΞΎΞµΟ‰Ο‚ ΟƒΞµ Ξ±ΟΟ‡ΞµΞ―Ξ±
+Bucket_LookupMessage2                   Ξ‘Ο€ΞΏΟ„ΞµΞ»Ξ­ΟƒΞΌΞ±Ο„Ξ± ΞµΟΟΞµΟƒΞ·Ο‚ Ξ»Ξ­ΞΎΞµΟ‰Ο‚ 
+Bucket_LookupMostLikely                 <b>%s</b> ΞµΞ―Ξ½Ξ±ΞΉ Ο€ΞΉΞΏ Ο€ΞΉΞΈΞ±Ξ½Ο Ξ½Ξ± Ξ±Ξ½Ξ®ΞΊΞµΞΉ ΟƒΟ„ΞΏ <font color="%s">%s</font>
+Bucket_DoesNotAppear                    <p><b>%s</b> Ξ΄ΞµΞ½ Ξ±Ξ½Ξ®ΞΊΞµΞΉ ΟƒΞµ ΞΊΞ±Ξ½Ξ­Ξ½Ξ± Ξ±Ο€Ο Ο„Ξ± Ξ±ΟΟ‡ΞµΞ―Ξ±
+Bucket_DisabledGlobally                 Ξ“ΞµΞ½ΞΉΞΊΟΟ‚ Ξ‘Ο€ΞµΞ½ΞµΟΞ³ΞΏΟ€ΞΏΞΉΞ·ΞΌΞ­Ξ½ΞΏ 
+Bucket_To                               ΟƒΞµ
+Bucket_Quarantine                       ΞΞ±ΟΞ±Ξ½Ο„Ξ―Ξ½Ξ±
 
-SingleBucket_Title                      Λεπτομέρειες του αρχείου %s
-SingleBucket_WordCount                  Αριθμός λέξεων αρχείου
-SingleBucket_TotalWordCount             Συνολικές εμφανίσεις λέξεων
-SingleBucket_Percentage                 Ποσοστό επί συνόλου
-SingleBucket_WordTable                  Πίνακας λέξεων για %s
-SingleBucket_Message1                   Κάντε κλίκ πάνω σε ένα γράμμα για να δείτε τις λέξεις που αρχίζουν από αυτό.  Κάντε κλίκ σε μία λέξη για να δείτε τις πιθανότητες να ανήκει σε οποιοδήποτε αρχείο..
-SingleBucket_Unique                     %s μοναδικές
-SingleBucket_ClearBucket                Διαγραφή όλων των λέξεων
+SingleBucket_Title                      Ξ›ΞµΟ€Ο„ΞΏΞΌΞ­ΟΞµΞΉΞµΟ‚ Ο„ΞΏΟ… Ξ±ΟΟ‡ΞµΞ―ΞΏΟ… %s
+SingleBucket_WordCount                  Ξ‘ΟΞΉΞΈΞΌΟΟ‚ Ξ»Ξ­ΞΎΞµΟ‰Ξ½ Ξ±ΟΟ‡ΞµΞ―ΞΏΟ…
+SingleBucket_TotalWordCount             Ξ£Ο…Ξ½ΞΏΞ»ΞΉΞΊΞ­Ο‚ ΞµΞΌΟ†Ξ±Ξ½Ξ―ΟƒΞµΞΉΟ‚ Ξ»Ξ­ΞΎΞµΟ‰Ξ½
+SingleBucket_Percentage                 Ξ ΞΏΟƒΞΏΟƒΟ„Ο ΞµΟ€Ξ― ΟƒΟ…Ξ½ΟΞ»ΞΏΟ…
+SingleBucket_WordTable                  Ξ Ξ―Ξ½Ξ±ΞΊΞ±Ο‚ Ξ»Ξ­ΞΎΞµΟ‰Ξ½ Ξ³ΞΉΞ± %s
+SingleBucket_Message1                   ΞΞ¬Ξ½Ο„Ξµ ΞΊΞ»Ξ―ΞΊ Ο€Ξ¬Ξ½Ο‰ ΟƒΞµ Ξ­Ξ½Ξ± Ξ³ΟΞ¬ΞΌΞΌΞ± Ξ³ΞΉΞ± Ξ½Ξ± Ξ΄ΞµΞ―Ο„Ξµ Ο„ΞΉΟ‚ Ξ»Ξ­ΞΎΞµΞΉΟ‚ Ο€ΞΏΟ… Ξ±ΟΟ‡Ξ―Ξ¶ΞΏΟ…Ξ½ Ξ±Ο€Ο Ξ±Ο…Ο„Ο.  ΞΞ¬Ξ½Ο„Ξµ ΞΊΞ»Ξ―ΞΊ ΟƒΞµ ΞΌΞ―Ξ± Ξ»Ξ­ΞΎΞ· Ξ³ΞΉΞ± Ξ½Ξ± Ξ΄ΞµΞ―Ο„Ξµ Ο„ΞΉΟ‚ Ο€ΞΉΞΈΞ±Ξ½ΟΟ„Ξ·Ο„ΞµΟ‚ Ξ½Ξ± Ξ±Ξ½Ξ®ΞΊΞµΞΉ ΟƒΞµ ΞΏΟ€ΞΏΞΉΞΏΞ΄Ξ®Ο€ΞΏΟ„Ξµ Ξ±ΟΟ‡ΞµΞ―ΞΏ..
+SingleBucket_Unique                     %s ΞΌΞΏΞ½Ξ±Ξ΄ΞΉΞΊΞ­Ο‚
+SingleBucket_ClearBucket                Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ® ΟΞ»Ο‰Ξ½ Ο„Ο‰Ξ½ Ξ»Ξ­ΞΎΞµΟ‰Ξ½
 
-Session_Title                           Η συνεδρία του POPFile έχει λήξει
-Session_Error                           Η παρούσα συνεδρία POPFile έχει λήξει.  Αυτό μποεί να είναι αποτέλεσμα της επανεκκίνησης του POPFile ενόσω το πρόγραμμα εμφάνισης ιστοσελίδων σας παρέμεινε ανοικτό.  Παρακαλούμε κάντε κλίκ σε κάποια από τις άνωθι συνδέσεις για να αποκαταστήσετε την επικοινωνία με το POPFile.
+Session_Title                           Ξ— ΟƒΟ…Ξ½ΞµΞ΄ΟΞ―Ξ± Ο„ΞΏΟ… POPFile Ξ­Ο‡ΞµΞΉ Ξ»Ξ®ΞΎΞµΞΉ
+Session_Error                           Ξ— Ο€Ξ±ΟΞΏΟΟƒΞ± ΟƒΟ…Ξ½ΞµΞ΄ΟΞ―Ξ± POPFile Ξ­Ο‡ΞµΞΉ Ξ»Ξ®ΞΎΞµΞΉ.  Ξ‘Ο…Ο„Ο ΞΌΟ€ΞΏΞµΞ― Ξ½Ξ± ΞµΞ―Ξ½Ξ±ΞΉ Ξ±Ο€ΞΏΟ„Ξ­Ξ»ΞµΟƒΞΌΞ± Ο„Ξ·Ο‚ ΞµΟ€Ξ±Ξ½ΞµΞΊΞΊΞ―Ξ½Ξ·ΟƒΞ·Ο‚ Ο„ΞΏΟ… POPFile ΞµΞ½ΟΟƒΟ‰ Ο„ΞΏ Ο€ΟΟΞ³ΟΞ±ΞΌΞΌΞ± ΞµΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ·Ο‚ ΞΉΟƒΟ„ΞΏΟƒΞµΞ»Ξ―Ξ΄Ο‰Ξ½ ΟƒΞ±Ο‚ Ο€Ξ±ΟΞ­ΞΌΞµΞΉΞ½Ξµ Ξ±Ξ½ΞΏΞΉΞΊΟ„Ο.  Ξ Ξ±ΟΞ±ΞΊΞ±Ξ»ΞΏΟΞΌΞµ ΞΊΞ¬Ξ½Ο„Ξµ ΞΊΞ»Ξ―ΞΊ ΟƒΞµ ΞΊΞ¬Ο€ΞΏΞΉΞ± Ξ±Ο€Ο Ο„ΞΉΟ‚ Ξ¬Ξ½Ο‰ΞΈΞΉ ΟƒΟ…Ξ½Ξ΄Ξ­ΟƒΞµΞΉΟ‚ Ξ³ΞΉΞ± Ξ½Ξ± Ξ±Ο€ΞΏΞΊΞ±Ο„Ξ±ΟƒΟ„Ξ®ΟƒΞµΟ„Ξµ Ο„Ξ·Ξ½ ΞµΟ€ΞΉΞΊΞΏΞΉΞ½Ο‰Ξ½Ξ―Ξ± ΞΌΞµ Ο„ΞΏ POPFile.
 
-View_Title                              Εμφάνιση Μεμονομένου Μυνήματος
+View_Title                              Ξ•ΞΌΟ†Ξ¬Ξ½ΞΉΟƒΞ· ΞΞµΞΌΞΏΞ½ΞΏΞΌΞ­Ξ½ΞΏΟ… ΞΟ…Ξ½Ξ®ΞΌΞ±Ο„ΞΏΟ‚
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
