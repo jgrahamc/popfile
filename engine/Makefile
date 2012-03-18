@@ -7,7 +7,7 @@
 
 include vars.mak
 
-.PHONY: test package windows core manual skins coverage macosx rc
+.PHONY: test package windows core languages skins coverage macosx rc
 
 error:
 	@echo Must specify one of coverage, test, package or windows
@@ -66,38 +66,37 @@ eachtest:
 
 macosx: ; @$(MAKE) -C ../macosx
 
-# Builds the tray application using PerlTray
+# Builds the 6 popfile*.exe Windows applications
 
-winexe: popfile.exe popfileb.exe popfilef.exe popfileib.exe popfileif.exe trayicon.ico ../windows/POPFileIcon/popfile.ico popfile-service.exe
+winexe: popfile.exe popfileb.exe popfilef.exe popfileib.exe popfileif.exe ../windows/POPFileIcon/popfile.ico popfile-service.exe
 
-COMMON_EXE_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --icon trayicon.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2006 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
+COMMON_EXE_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) $(POPFILE_BUILD_YEAR) John Graham-Cumming" --info LegalTrademarks="POPFile is a registered trademark of John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
 ifeq ($(EXE_DEBUG),1)
 COMMON_EXE_OPTIONS += --debug
 endif
 
-TRAY_OPTIONS = $(COMMON_EXE_OPTIONS)
+# Builds the 5 basic Windows applications using PerlApp
 
-popfile.exe: popfile-windows.pl
-	perlapp --gui $(TRAY_OPTIONS)
+popfile.exe: popfile-windows.pl $(POPFILE_VERSION_FILE)
+	perlapp --gui $(COMMON_EXE_OPTIONS)
 
-popfileif.exe: popfile-tray.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
-	perltray --nogui $(TRAY_OPTIONS)
+popfileif.exe: popfile-tray2.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
+	perlapp $(COMMON_EXE_OPTIONS)
 
-popfileib.exe: popfile-tray.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
-	perltray $(TRAY_OPTIONS)
+popfileib.exe: popfile-tray2.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
+	perlapp --gui $(COMMON_EXE_OPTIONS)
 
 popfilef.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
-	perlapp $(TRAY_OPTIONS)
+	perlapp $(COMMON_EXE_OPTIONS)
 
 popfileb.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
-	perlapp --gui $(TRAY_OPTIONS)
-
+	perlapp --gui $(COMMON_EXE_OPTIONS)
 
 # Builds a Windows service version of POPFile using PerlSvc
 
-SVC_OPTIONS = $(COMMON_EXE_OPTIONS) --lib c:/cygwin/home/Administrator/engine
+SVC_OPTIONS = $(COMMON_EXE_OPTIONS) --lib $(ABSOLUTE_ENGINE_PATH)
 
-popfile-service.exe: popfile-service.pl
+popfile-service.exe: popfile-service.pl $(POPFILE_VERSION_FILE)
 	perlsvc $(SVC_OPTIONS)
 
 # windows builds the Windows installer
@@ -108,15 +107,15 @@ windows: winexe; @$(MAKE) -C ../windows
 
 LANGUAGES := $(wildcard languages/*.msg)
 
-BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
+BUILD_ZIP=7z a -tzip $(POPFILE_ZIP) $^
 xplat: $(POPFILE_ZIP)
-$(POPFILE_ZIP): core manual skins POPFile/popfile_version
+$(POPFILE_ZIP): core languages skins POPFile/popfile_version
 
-core: popfile.pl otto.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm Services/IMAP/*.pm UI/*.pm v$(POPFILE_VERSION).change license stopwords favicon.ico $(POPFILE_VERSION_FILE) Classifier/popfile.sql popfile.pck
+core: popfile.pl bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm  Services/IMAP/*.pm UI/*.pm v$(POPFILE_VERSION).change v$(POPFILE_VERSION).change.nihongo license stopwords favicon.ico $(POPFILE_VERSION_FILE) Classifier/popfile.sql popfile.pck
 	rm -f $(POPFILE_ZIP)
 	$(BUILD_ZIP)
 
-manual: manual/*.gif manual/en/*.html languages/*.msg
+languages: languages/*.msg
 	$(BUILD_ZIP)
 
 .PHONY: skins_css skins_gif skins_thtml
