@@ -16,7 +16,6 @@ from:ezenshtein 1
 from:home.se 1
 from:phrekiesomeone@home.se 1
 from:robert 1
-gif 5
 header:Content-ID 5
 header:Content-Transfer-Encoding 6
 header:Content-Type 8
@@ -34,6 +33,13 @@ html:td 5
 mail.nex.net.au 1
 medical 5
 mimeextension:gif 5
+mimeimageheight:210 2
+mimeimageheight:33 1
+mimeimageheight:47 1
+mimeimageheight:59 1
+mimeimagewidth:227 1
+mimeimagewidth:396 1
+mimeimagewidth:623 3
 mimename:1 1
 mimename:2 1
 mimename:3 1
@@ -52,14 +58,3 @@ subject:information 1
 to:.com 1
 to:myrealbox.com 1
 to:sirkaisomeone@myrealbox.com 1
-exscz 1
-gxhxx 1
-hgl 1
-kii 1
-nji 1
-nkm 1
-pht 1
-wfv 1
-wzl 1
-yii 1
-yvp 1

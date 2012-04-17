@@ -25,6 +25,7 @@ REQUIRED	0.0.0	IO::Socket
 REQUIRED	0.0.0	IO::Socket::INET
 OPTIONAL-SSL Connection Support	0.0.0	IO::Socket::SSL
 OPTIONAL-Socks Proxy Support	0.0.0	IO::Socket::Socks
+REQUIRED	0.0.0	Image::Info
 REQUIRED	0.0.0	MIME::Base64
 REQUIRED	0.0.0	MIME::QuotedPrint
 OPTIONAL-Japanese Language Support	0.0.0	MeCab

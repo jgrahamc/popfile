@@ -35,6 +35,8 @@ use HTML::Tagset;
 use Encode;
 use Encode::Guess;
 
+use Image::Info;
+
 # Korean characters definition
 
 my $ksc5601_sym   = '(?:[\xA1-\xAC][\xA1-\xFE])';
@@ -2146,6 +2148,37 @@ sub clear_out_base64
 
         $decoded = decode_base64( $self->{base64__} );
 
+        # Treat image files
+
+        if ( $self->{content_type__} =~ /^image\//i ) {
+
+            my $info = Image::Info::image_info( \$decoded );
+
+            if ( $info->{error} ) {
+                print "Can't parse image info: ", $info->{error}, "\n" if $self->{debug__};
+            } else {
+                # Update pseudoword for image files
+
+                if ( $self->{content_type__} !~ /^\Q$info->{file_media_type}\E$/i ) {
+                    $self->update_pseudoword( 'mimemediatype', $info->{file_media_type} );
+                }
+                $self->update_pseudoword( 'mimeimagewidth', $info->{width}, 0, $info->{width} );
+                $self->update_pseudoword( 'mimeimageheight', $info->{height}, 0, $info->{height} );
+
+                my $comment = '';
+
+                if ( $info->{Comment} ) {
+                    if ( ref $info->{Comment} eq 'ARRAY' ) {
+                        $comment = join "\n", @{$info->{Comment}};
+                    } else {
+                        $comment = $info->{Comment};
+                    }
+                }
+
+                $decoded = $comment;
+            }
+        }
+
         if ( $self->{lang__} eq 'Nihongo' ) {
             $decoded = convert_encoding(                        # PROFILE BLOCK START
                 $decoded, $self->{charset__}, 'utf-8', '7bit-jis',
@@ -2160,13 +2193,13 @@ sub clear_out_base64
                 @{ $encoding_candidates{ $self->{lang__} } } );
         }
 
-		eval {
-        	$self->parse_html( $decoded, 1 );
-		};
-		if ( $@ ) {
-    		print "Decode error: $@" if $self->{debug__};
-		    return '';
-		}
+        eval {
+            $self->parse_html( $decoded, 1 );
+        };
+        if ( $@ ) {
+            print "Decode error: $@" if $self->{debug__};
+            return '';
+        }
         print "Decoded: " . $decoded . "\n" if $self->{debug__};
 
         if ( $self->{color__} ne '' ) {
