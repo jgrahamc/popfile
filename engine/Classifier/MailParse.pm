@@ -679,10 +679,10 @@ sub add_line
                     # HTML entities confilict with DBCS and EUC-JP
                     # chars. Replace entities with blanks.
 
-                    if ( $self->{lang__} =~ /^(Korean|Nihongo)$/ ) {
+                    if ( $self->{lang__} =~ /^Korean$/ ) {
                         $to = ' ';
                     } else {
-                        $to = chr( $to );
+                        $to = Encode::decode( 'iso-8859-1', chr( $to ) );
                     }
                     $line         =~ s/$from/$to/g;
                     $self->{ut__} =~ s/$from/$to/g;
