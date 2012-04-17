@@ -10,8 +10,8 @@ REQUIRED	0.0.0	Date::Format
 REQUIRED	0.0.0	Date::Parse
 REQUIRED	0.0.0	Digest::MD5
 REQUIRED	0.0.0	Digest::SHA
-OPTIONAL-Japanese Language Support	0.0.0	Encode
-OPTIONAL-Japanese Language Support	0.0.0	Encode::Guess
+REQUIRED	0.0.0	Encode
+REQUIRED	0.0.0	Encode::Guess
 REQUIRED	0.0.0	Fcntl
 REQUIRED	0.0.0	File::Copy
 OPTIONAL-Japanese Language Support (Windows only)	0.0.0	File::Glob::Windows
@@ -31,4 +31,5 @@ OPTIONAL-Japanese Language Support	0.0.0	MeCab
 REQUIRED	0.0.0	POSIX
 REQUIRED	0.0.0	Sys::Hostname
 OPTIONAL-Japanese Language Support	0.0.0	Text::Kakasi
+REQUIRED	0.0.0	Unicode::Collate
 OPTIONAL-XML-RPC Server Support	0.0.0	XMLRPC::Transport::HTTP

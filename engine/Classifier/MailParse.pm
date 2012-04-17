@@ -32,6 +32,9 @@ use MIME::QuotedPrint;
 
 use HTML::Tagset;
 
+use Encode;
+use Encode::Guess;
+
 # Korean characters definition
 
 my $ksc5601_sym   = '(?:[\xA1-\xAC][\xA1-\xFE])';
@@ -2958,9 +2961,6 @@ sub convert_encoding
 
     # If the string contains only ascii characters, do nothing.
     return $string if ( $string =~ /^[\r\n\t\x20-\x7E]*$/ );
-
-    require Encode;
-    require Encode::Guess;
 
     # First, guess the encoding.
 

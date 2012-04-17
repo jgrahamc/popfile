@@ -41,6 +41,7 @@ use Digest::MD5 qw( md5_hex );
 use Digest::SHA qw( sha256_hex );
 use MIME::Base64;
 use Unicode::Collate;
+use Encode;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -2949,7 +2950,6 @@ sub classify_and_modify
            my ( $orig_from, $orig_to, $orig_subject ) = ( $self->{parser__}->get_header('from'), $self->{parser__}->get_header('to'), $self->{parser__}->get_header('subject') );
            my ( $encoded_from, $encoded_to ) = ( $orig_from, $orig_to );
            if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
-               require Encode;
 
                $orig_from    = Encode::encode( 'iso-2022-jp', $orig_from    );
                $orig_to      = Encode::encode( 'iso-2022-jp', $orig_to      );
@@ -2986,8 +2986,6 @@ sub classify_and_modify
 
            my $first20 = $self->{parser__}->first20();
            if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
-               require Encode;
-
                 $first20 = Encode::encode( 'iso-2022-jp', $first20 );
            }
 

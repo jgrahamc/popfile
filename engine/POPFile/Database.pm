@@ -33,6 +33,7 @@ use warnings;
 use locale;
 use DBI;
 use File::Copy;
+use Encode;
 
 #----------------------------------------------------------------------------
 # new
@@ -391,7 +392,6 @@ sub db_connect_helper__
             # SQLite 3.2.6 or later.
 
             require File::Glob::Windows;
-            require Encode;
 
             my $code_page = File::Glob::Windows::getCodePage();
 
